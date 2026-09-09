@@ -1,6 +1,7 @@
 # Requisitos — Panelada
 
 > Fase 1.1 — Elicitação. Meta renegociada com a dupla: 15–18 RF e 8–10 RNF (briefing original: 10–15 RF e 5–8 RNF). Resultado: 18 RF ativos e 10 RNF. RF16 foi descartado e preservado aqui para rastreabilidade (IDs nunca são renumerados).
+> v1.1 (09/09/2026): correções da validação (Fase 1.4) aplicadas em RF02, RNF02 e RNF07 — ver `ata-revisao.md`.
 
 ## Visão do produto (v1.0, aprovada)
 
@@ -21,7 +22,7 @@
 | ID | Requisito | Origem |
 |---|---|---|
 | RF01 | O sistema deve sugerir pratos com base no perfil do usuário (preferências, restrições e histórico de preparos) | M, D1, D2 |
-| RF02 | O sistema deve permitir aprovar ou descartar rapidamente cada prato sugerido | D2, M |
+| RF02 | O sistema deve permitir aprovar ou descartar cada prato sugerido com um único toque (alinhado à US02 e ao RNF04) | D2, M |
 | RF03 | O sistema deve permitir registrar os ingredientes disponíveis em casa e sugerir pratos compatíveis, indicando os ingredientes faltantes | M, R, D1 |
 | RF04 | O sistema deve permitir planejar refeições da semana ou quinzena, associando cada prato a uma data de preparo | M, C |
 | RF05 | O sistema deve gerar uma lista de compras consolidada a partir dos pratos planejados, com data de compra | M, D1, BM-SideChef |
@@ -45,12 +46,12 @@
 | ID | Requisito | Origem |
 |---|---|---|
 | RNF01 | O sistema deve ser um aplicativo mobile | Decisão da dupla |
-| RNF02 | O sistema deve levar o usuário do primeiro acesso à primeira sugestão de prato em até 2 minutos, sem cadastro extenso | D1, D2, M, C, BM-Yummly (anti-req.) |
+| RNF02 | O sistema deve levar o usuário do primeiro acesso à primeira sugestão de prato em até 2 minutos, com no máximo 3 campos obrigatórios antes do primeiro uso | D1, D2, M, C, BM-Yummly (anti-req.) |
 | RNF03 | O sistema deve responder a uma solicitação de sugestão de pratos em até 2,5 segundos | Derivado (decisão rápida, D2) |
 | RNF04 | O sistema deve permitir iniciar qualquer fluxo principal (sugestões, planejamento, registro de avaliação) em até 2 toques a partir da tela inicial | C, D1, D2 |
 | RNF05 | O sistema deve permitir consultar offline as receitas já planejadas ou em preparo | C (cozinha/bancada) |
 | RNF06 | O sistema deve tratar dados de restrições alimentares como dados sensíveis, com consentimento explícito, conforme a LGPD | C, D2 |
-| RNF07 | O sistema deve permitir configurar frequência e tipos de notificação, sem envio excessivo | D2, BM-Duolingo (anti-req.) |
+| RNF07 | O sistema deve permitir configurar frequência e tipos de notificação, com limite padrão de 1 notificação por evento (compra ou preparo) e no máximo 2 por dia | D2, BM-Duolingo (anti-req.) |
 | RNF08 | O sistema deve exibir a atribuição da fonte pública de cada receita importada | Stakeholder externo |
 | RNF09 | O sistema não deve punir o usuário por inatividade (sem perda de pontos, sequências ou progresso) | BM-Duolingo (anti-req.) |
 | RNF10 | O registro de avaliação deve ter apenas a nota como campo obrigatório; relato e alterações são opcionais | R, walkthrough da dupla |
