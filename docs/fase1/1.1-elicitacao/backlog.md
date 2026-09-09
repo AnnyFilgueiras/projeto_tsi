@@ -1,6 +1,7 @@
 # Backlog de Histórias de Usuário — Panelada
 
 > Fase 1.1 — Elicitação. 18 histórias (US01–US18), com rastreabilidade US → RF e priorização MoSCoW final aprovada pela dupla. Meta do briefing (12–20 US) atendida.
+> v1.1 (09/09/2026): critérios de aceite corrigidos na validação (Fase 1.4) — US01, US02, US06, US08, US09, US12, US18, US11, US16; ver `ata-revisao.md`.
 
 ## Priorização MoSCoW (visão geral)
 
@@ -23,9 +24,11 @@ para decidir rápido o que cozinhar sem cair na rolagem infinita.
 Origem: RF01 | Prioridade: Must
 Critérios de aceite:
 - Dado que meu perfil tem preferências e restrições cadastradas, quando abro as
-  sugestões, então vejo apenas pratos compatíveis com elas.
+  sugestões, então nenhum prato incompatível com minhas restrições é
+  apresentado (RN08) e os pratos exibidos respeitam minhas preferências
+  culinárias declaradas (RN10).
 - Dado que já preparei um prato, quando recebo sugestões, então ele não é
-  apresentado como novidade.
+  apresentado novamente nas sugestões (RN10).
 ```
 
 ```
@@ -36,7 +39,7 @@ Critérios de aceite:
 - Dado que estou vendo uma sugestão, quando a descarto, então a próxima
   sugestão aparece e a descartada não retorna naquela sessão.
 - Dado que aprovei uma sugestão, quando a aprovo, então ela fica marcada como
-  "escolhida" e disponível para o planejamento.
+  candidata e disponível para o planejamento.
 ```
 
 ```
@@ -67,8 +70,8 @@ US06 — Como Marina, quero montar o plano de refeições da semana ou da quinze
 associando cada prato a uma data de preparo, para organizar minha rotina.
 Origem: RF04 | Prioridade: Must
 Critérios de aceite:
-- Dado que tenho pratos marcados como "escolhidos", quando monto o plano,
-  então consigo associar cada prato a uma data de preparo.
+- Dado que tenho pratos candidatos, quando monto o plano, então consigo
+  associar cada prato a uma data de preparo.
 - Dado que escolhi o período (semana ou quinzena), quando visualizo o plano,
   então vejo os pratos organizados por data.
 - Dado que um prato já tem data, quando o reagendo, então a nova data
@@ -93,8 +96,8 @@ Origem: RF06 | Prioridade: Must
 Critérios de aceite:
 - Dado que defini uma data de compra, quando ela chega, então recebo uma
   notificação com a lista de compras.
-- Dado que defini uma data de preparo, quando ela se aproxima, então recebo
-  um lembrete indicando o prato do dia.
+- Dado que defini uma data de preparo, quando ela chega, então recebo um
+  lembrete indicando o prato do dia (RN13).
 - Dado que desativei os lembretes nas configurações, quando uma data chega,
   então nenhuma notificação é enviada.
 ```
@@ -105,7 +108,8 @@ perfil e ser alertada sobre alérgenos, para cozinhar com segurança.
 Origem: RF07 | Prioridade: Must
 Critérios de aceite:
 - Dado que cadastrei uma restrição (ex.: diabetes), quando recebo sugestões,
-  então pratos incompatíveis são filtrados ou claramente sinalizados.
+  então pratos incompatíveis não aparecem nas sugestões; na busca e na
+  visualização, são claramente sinalizados (RN08).
 - Dado que uma receita contém um alérgeno comum (ex.: glúten, lactose,
   amendoim), quando a visualizo, então o alerta de alérgeno é exibido.
 ```
@@ -131,8 +135,8 @@ Critérios de aceite:
   nota é obrigatória; relato e alterações são opcionais (RNF10).
 - Dado que tenho avaliações, quando acesso o histórico, então vejo cada
   preparo com data, nota e alterações.
-- Dado que repeti um prato, quando o registro novamente, então o histórico
-  guarda os dois preparos separadamente.
+- Dado que repeti um prato, quando o registro é feito novamente, então o
+  histórico guarda os dois preparos separadamente.
 ```
 
 ```
@@ -152,10 +156,10 @@ receitas com todos os atributos, para que o app tenha conteúdo confiável.
 Origem: RF18 | Prioridade: Must
 Critérios de aceite:
 - Dado que importo uma receita de plataforma pública, quando a cadastro,
-  então registro fonte, ingredientes, utensílios, dificuldade, tempo e
-  alérgenos (RNF08).
-- Dado que uma receita faz parte de uma cadeia, quando a cadastro, então
-  indico qual é o prato base.
+  então registro fonte, ingredientes, utensílios, dificuldade, tempo, passo a
+  passo e alérgenos (RNF08).
+- Dado que um prato faz parte de uma cadeia como evolução, quando o cadastro,
+  então indico exatamente um prato base (RN18).
 ```
 
 ## Should
@@ -190,7 +194,7 @@ Origem: RF19 | Prioridade: Should
 Critérios de aceite:
 - Dado que cadastrei meus utensílios (ex.: fogão e micro-ondas, sem forno),
   quando recebo sugestões, então pratos que exigem utensílios ausentes vêm
-  sinalizados ou são filtrados.
+  sinalizados (RN10).
 - Dado que abro uma receita, quando vejo os detalhes, então a lista de
   utensílios aparece junto da lista de ingredientes.
 - Dado que um prato exige utensílio que não tenho, quando o visualizo,
@@ -202,7 +206,7 @@ US16 — Como Cleusa, quero receber badges ao atingir marcos, para ter orgulho
 da minha trajetória na cozinha.
 Origem: RF15 | Prioridade: Should
 Critérios de aceite:
-- Dado que concluí pratos de 10 países distintos, quando o décimo é
+- Dado que concluí pratos de 10 culinárias distintas, quando o décimo é
   registrado, então recebo o badge correspondente.
 - Dado que abro meu perfil, quando vejo os badges, então vejo os conquistados
   e os critérios dos ainda não obtidos.
