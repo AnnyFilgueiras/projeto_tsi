@@ -18,8 +18,8 @@ Repositório do trabalho da disciplina **Tópicos em Sistemas de Informação** 
 |---|---|---|
 | 1.1 Elicitação | Léxico, personas, RF/RNF, backlog MoSCoW | ✅ Concluída |
 | 1.2 Análise | Modelo conceitual (UML/Mermaid), casos de uso, regras de negócio | ✅ Concluída |
-| 1.3 Documentação | Este repositório + documento de requisitos consolidado | 🚧 Em andamento |
-| 1.4 Validação | Checklist de qualidade, matriz de rastreabilidade, ata de revisão | ⬜ A fazer |
+| 1.3 Documentação | Este repositório + documento de requisitos consolidado | ✅ Concluída |
+| 1.4 Validação | Checklist de qualidade, matriz de rastreabilidade, ata de revisão | 🚧 Em andamento |
 
 ## Documentação da Fase 1
 
