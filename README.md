@@ -1,4 +1,4 @@
-# Panelada 🍳 — Culinária internacional gamificada
+# Panelada: Culinária internacional gamificada
 
 Aplicativo mobile que transforma o ato de cozinhar em uma experiência divertida e recompensadora: sugere pratos internacionais conforme o perfil do usuário, organiza a rotina de refeições (escolha do prato, data de compra e data de preparo) e celebra cada receita concluída como uma conquista — coleção por culinária ("Pokédex de pratos"), cadeias de evolução e badges.
 
@@ -8,8 +8,8 @@ Aplicativo mobile que transforma o ato de cozinhar em uma experiência divertida
 
 Repositório do trabalho da disciplina **Tópicos em Sistemas de Informação** (Ciência da Computação), cujo tema é o uso de **IA generativa aplicada ao ciclo de vida de desenvolvimento de software**. Cada fase do processo é conduzida com IA generativa como copiloto, e os artefatos são consolidados neste repositório, fase a fase.
 
-- **Dupla:** Anny Filgueiras ([@AnnyFilgueiras](https://github.com/AnnyFilgueiras)) e [PREENCHER: nome e @usuario do segundo membro]
-- **Professor(a):** [PREENCHER: nome do professor]
+- **Dupla:** Anny Filgueiras ([@AnnyFilgueiras](https://github.com/AnnyFilgueiras)) e Gabryel Souza ([@gabryelsouzz](https://github.com/gabryelsouzz))
+- **Professor(a):** Patrick Henrique
 - **Fase atual:** Fase 1 — Engenharia de Requisitos
 
 ## Status da Fase 1
