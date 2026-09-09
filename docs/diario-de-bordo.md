@@ -58,6 +58,8 @@
   2. PNG/SVG dos diagramas ficam em `/assets` (briefing 1.3), revisando o registrado em `modelo-conceitual.md` ("fora do repositório-fonte") — divergência sinalizada conforme a convenção 7 do Guia Geral.
   3. Campo Status do Projects renomeado para `Backlog | Em refinamento | Validado` (o template padrão usava "A fazer"); todas as issues em `Backlog` até a 1.4.
   4. Issues criadas no repositório (não como drafts soltos no Projects), para carregar labels e milestone — drafts já criados foram [PREENCHER: convertidos em issues / substituídos].
-- **Iterações relevantes:** [PREENCHER pela dupla: ex. erros de sintaxe Mermaid ao renderizar, links quebrados encontrados no teste em aba anônima, ajustes de nomes de pastas].
+- **Iterações relevantes:**
+  1. A IA gerou o script de automação com um comando inexistente (`gh milestone create`); a dupla detectou o erro na execução e a correção foi feita com `gh api` +   aplicação de metadados via `gh issue edit` (v2 do script).
+  2. Acesso anônimo aos links do GitHub falhou para a IA no início da conversa — reforçou a obrigatoriedade do teste em aba anônima pela dupla (que passou).
 - **Divisão de tarefas:** [PREENCHER: quem executou estrutura/docs (git) e quem executou issues/Projects (web ou gh)].
 - **Pendências para a próxima conversa (1.4 — Validação):** checklist de qualidade dos requisitos; matriz de rastreabilidade formal; ata de revisão; backlog validado v1.0; mover issues no quadro (Backlog → Em refinamento → Validado) conforme a revisão. Nenhuma re-elicitação foi feita durante a migração; eventuais lacunas percebidas devem ser registradas aqui e tratadas na 1.4: [PREENCHER ou escrever "nenhuma"].
