@@ -63,3 +63,38 @@
   2. Acesso anônimo aos links do GitHub falhou para a IA no início da conversa — reforçou a obrigatoriedade do teste em aba anônima pela dupla (que passou).
 - **Divisão de tarefas:** [PREENCHER: quem executou estrutura/docs (git) e quem executou issues/Projects (web ou gh)].
 - **Pendências para a próxima conversa (1.4 — Validação):** checklist de qualidade dos requisitos; matriz de rastreabilidade formal; ata de revisão; backlog validado v1.0; mover issues no quadro (Backlog → Em refinamento → Validado) conforme a revisão. Nenhuma re-elicitação foi feita durante a migração; eventuais lacunas percebidas devem ser registradas aqui e tratadas na 1.4: [PREENCHER ou escrever "nenhuma"].
+
+## [09/09/2026] — Conversa 1.4 (Validação de requisitos)
+
+- **Papel da IA:** revisor/engenheiro de QA — inspetor independente ("terceiro
+  revisor"), gerador de casos de teste e avaliador externo simulado.
+- **Técnicas aplicadas:** inspeção item a item com checklist de 8 critérios de
+  qualidade; caça às palavras-armadilha ("rápido", "adequado", "intuitivo",
+  "etc." e variantes); derivação de casos de teste no formato Given/When/Then;
+  matriz de rastreabilidade com verificação bidirecional; walkthrough simulado
+  com perguntas de avaliador externo.
+- **Prompts-chave usados:** briefing da 1.4 com papel e roteiro da seção 4;
+  confirmação de pré-condições (checklist da 1.3 fechado, repositório público);
+  rodadas de aprovação da dupla para cada correção proposta; pergunta da dupla
+  sobre terminologia ("candidata" × "escolhida").
+- **Artefatos produzidos:** checklist.md (46 itens inspecionados),
+  casos-de-teste.md (27 CTs), matriz-rastreabilidade.md, ata-revisao.md.
+- **Decisões tomadas:** 14 correções aprovadas (3 críticas + 11 menores);
+  "candidata" confirmado como termo canônico e "escolhido" rejeitado como termo
+  formal (estado já coberto por ItemDeRotina "planejado"); ranking e pontuação
+  tratados como N/A na validação v1 (Won't e Could documentados).
+- **Iterações relevantes:**
+  1. Inspeção encontrou 3 falhas críticas em US Must (US01-c1, US08-c2,
+     US09-c1) — todas ambiguidades/não testabilidades invisíveis para quem
+     escreveu; correções com antes/depois aprovadas pela dupla.
+  2. Caça às palavras-armadilha zerou "adequado/intuitivo/etc." e converteu
+     termos vagos em métricas (RNF07 ganhou limite de 2 notificações/dia).
+  3. Divergência detectada: o briefing 1.4 pedia validação de ranking e
+     pontuação, decididos como Won't/Could na 1.1 — briefing desatualizado,
+     verificações marcadas como N/A com registro.
+  4. Acesso direto ao GitHub falhou; walkthrough feito sobre o README
+     adicionado ao espaço — encontrou status desatualizado da 1.3.
+- **Pendências para a conversa do slide:** aplicar as correções e commitar os
+  artefatos da 1.4; mover issues para `Validado`; fechar milestone e criar a
+  tag `backlog-validado-v1.0`; registrar a revisão humana cruzada da dupla;
+  merge da branch project-design.
