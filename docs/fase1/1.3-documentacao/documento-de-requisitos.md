@@ -1,4 +1,4 @@
-# Documento de Requisitos — Panelada (v1.0)
+****# Documento de Requisitos — Panelada (v1.0)
 
 > **Fase 1.3 — Documentação.** Este documento consolida, em texto único, os artefatos produzidos na elicitação (1.1) e na análise (1.2), **sem alteração de conteúdo** — cada seção aponta para o arquivo modular correspondente, que é a fonte de verdade.
 > Identificadores estáveis (Guia Geral, seção 6): `RF##`, `RNF##`, `US##`, `UC##`, `RN##` — nunca renumerados.
@@ -68,7 +68,7 @@ Fonte modular: [lexico.md](../1.1-elicitacao/lexico.md)
 | ID | Requisito | Origem |
 |---|---|---|
 | RF01 | O sistema deve sugerir pratos com base no perfil do usuário (preferências, restrições e histórico de preparos) | M, D1, D2 |
-| RF02 | O sistema deve permitir aprovar ou descartar rapidamente cada prato sugerido | D2, M |
+| RF02 | O sistema deve permitir aprovar ou descartar cada prato sugerido com um único toque  | D2, M |
 | RF03 | O sistema deve permitir registrar os ingredientes disponíveis em casa e sugerir pratos compatíveis, indicando os ingredientes faltantes | M, R, D1 |
 | RF04 | O sistema deve permitir planejar refeições da semana ou quinzena, associando cada prato a uma data de preparo | M, C |
 | RF05 | O sistema deve gerar uma lista de compras consolidada a partir dos pratos planejados, com data de compra | M, D1, BM-SideChef |
@@ -92,12 +92,12 @@ Fonte modular: [lexico.md](../1.1-elicitacao/lexico.md)
 | ID | Requisito | Origem |
 |---|---|---|
 | RNF01 | O sistema deve ser um aplicativo mobile | Decisão da dupla |
-| RNF02 | O sistema deve levar o usuário do primeiro acesso à primeira sugestão de prato em até 2 minutos, sem cadastro extenso | D1, D2, M, C, BM-Yummly (anti-req.) |
+| RNF02 | O sistema deve levar o usuário do primeiro acesso à primeira sugestão de prato em até 2 minutos, com no máximo 3 campos obrigatórios antes do primeiro uso | D1, D2, M, C, BM-Yummly (anti-req.) |
 | RNF03 | O sistema deve responder a uma solicitação de sugestão de pratos em até 2,5 segundos | Derivado (decisão rápida, D2) |
 | RNF04 | O sistema deve permitir iniciar qualquer fluxo principal (sugestões, planejamento, registro de avaliação) em até 2 toques a partir da tela inicial | C, D1, D2 |
 | RNF05 | O sistema deve permitir consultar offline as receitas já planejadas ou em preparo | C (cozinha/bancada) |
 | RNF06 | O sistema deve tratar dados de restrições alimentares como dados sensíveis, com consentimento explícito, conforme a LGPD | C, D2 |
-| RNF07 | O sistema deve permitir configurar frequência e tipos de notificação, sem envio excessivo | D2, BM-Duolingo (anti-req.) |
+| RNF07 | O sistema deve permitir cconfigurar frequência e tipos de notificação, com limite padrão de 1 notificação por evento | D2, BM-Duolingo (anti-req.) |
 | RNF08 | O sistema deve exibir a atribuição da fonte pública de cada receita importada | Stakeholder externo |
 | RNF09 | O sistema não deve punir o usuário por inatividade (sem perda de pontos, sequências ou progresso) | BM-Duolingo (anti-req.) |
 | RNF10 | O registro de avaliação deve ter apenas a nota como campo obrigatório; relato e alterações são opcionais | R, walkthrough da dupla |
@@ -131,13 +131,13 @@ Decisões de priorização: a identidade de gamificação é coleção (Must) �
 
 #### US01 — Receber sugestões de pratos alinhadas ao perfil (Must · RF01)
 Como Marina, quero receber sugestões de pratos alinhadas ao meu perfil, para decidir rápido o que cozinhar sem cair na rolagem infinita.
-- Dado que meu perfil tem preferências e restrições cadastradas, quando abro as sugestões, então vejo apenas pratos compatíveis com elas.
-- Dado que já preparei um prato, quando recebo sugestões, então ele não é apresentado como novidade.
+- Dado que meu perfil tem preferências e restrições cadastradas, quando abro as sugestões, então nenhum prato incompatível com minhas restrições é apresentado (RN08) e os pratos exibidos respeitam minhas preferências culinárias declaradas
+- Dado que já preparei um prato, quando recebo sugestões, então ele não é apresentado novamente nas sugestões.
 
 #### US02 — Aprovar ou descartar sugestões com um toque (Must · RF02)
 Como Marina, quero aprovar ou descartar cada sugestão com um toque, para montar minha lista de candidatos sem fricção.
 - Dado que estou vendo uma sugestão, quando a descarto, então a próxima sugestão aparece e a descartada não retorna naquela sessão.
-- Dado que aprovei uma sugestão, quando a aprovo, então ela fica marcada como "escolhida" e disponível para o planejamento.
+- Dado que aprovei uma sugestão, quando a aprovo, então ela fica marcada como candidata e disponível para o planejamento.
 
 #### US03 — Informar os ingredientes disponíveis em casa (Must · RF03)
 Como Rafael, quero informar os ingredientes que tenho em casa, para descobrir o que dá para cozinhar na hora.
@@ -151,7 +151,7 @@ Como Cleusa, quero ver a receita com foto, tempo, dificuldade, ingredientes e pa
 
 #### US06 — Montar plano de refeições da semana ou quinzena (Must · RF04)
 Como Marina, quero montar o plano de refeições da semana ou da quinzena associando cada prato a uma data de preparo, para organizar minha rotina.
-- Dado que tenho pratos marcados como "escolhidos", quando monto o plano, então consigo associar cada prato a uma data de preparo.
+- Dado que tenho pratos candidatos, quando monto o plano, então consigo associar cada prato a uma data de preparo.
 - Dado que escolhi o período (semana ou quinzena), quando visualizo o plano, então vejo os pratos organizados por data.
 - Dado que um prato já tem data, quando o reagendo, então a nova data substitui a anterior.
 
@@ -163,12 +163,12 @@ Como Marina, quero que o app gere a lista de compras consolidada do meu plano, c
 #### US08 — Receber lembretes de compra e preparo (Must · RF06)
 Como Cleusa, quero receber lembretes nas datas de compra e de preparo, para não esquecer o que planejei.
 - Dado que defini uma data de compra, quando ela chega, então recebo uma notificação com a lista de compras.
-- Dado que defini uma data de preparo, quando ela se aproxima, então recebo um lembrete indicando o prato do dia.
+- Dado que defini uma data de preparo, quando ela chega, então recebo um lembrete indicando o prato do dia (RN13).
 - Dado que desativei os lembretes nas configurações, quando uma data chega, então nenhuma notificação é enviada.
 
 #### US09 — Cadastrar restrições alimentares e receber alertas (Must · RF07)
 Como Cleusa, quero cadastrar as restrições alimentares da família no perfil e ser alertada sobre alérgenos, para cozinhar com segurança.
-- Dado que cadastrei uma restrição (ex.: diabetes), quando recebo sugestões, então pratos incompatíveis são filtrados ou claramente sinalizados.
+- Dado que cadastrei uma restrição (ex.: diabetes), quando recebo sugestões, então pratos incompatíveis não aparecem nas sugestões; na busca e na visualização, são claramente sinalizados (RN08).
 - Dado que uma receita contém um alérgeno comum (ex.: glúten, lactose, amendoim), quando a visualizo, então o alerta de alérgeno é exibido.
 
 #### US10 — Ver substituições sugeridas para ingredientes (Must · RF08)
@@ -180,7 +180,7 @@ Como Cleusa, quero ver substituições sugeridas para ingredientes que não tenh
 Como Cleusa, quero registrar nota, relato e alterações de cada prato que fiz, mantendo meu histórico, para ter meu caderno digital de receitas.
 - Dado que concluí um prato, quando registro a avaliação, então apenas a nota é obrigatória; relato e alterações são opcionais (RNF10).
 - Dado que tenho avaliações, quando acesso o histórico, então vejo cada preparo com data, nota e alterações.
-- Dado que repeti um prato, quando o registro novamente, então o histórico guarda os dois preparos separadamente.
+- Dado que repeti um prato, quando o registro é feito novamente, então o histórico guarda os dois preparos separadamente.
 
 #### US14 — Ver coleção de pratos por país/culinária com progresso (Must · RF13)
 Como Rafael, quero ver minha coleção de pratos por país/culinária com o progresso, para saber o que falta completar.
@@ -189,8 +189,8 @@ Como Rafael, quero ver minha coleção de pratos por país/culinária com o prog
 
 #### US18 — Importar e manter catálogo de receitas (Must · RF18)
 Como curador de conteúdo, quero importar e manter o catálogo de receitas com todos os atributos, para que o app tenha conteúdo confiável.
-- Dado que importo uma receita de plataforma pública, quando a cadastro, então registro fonte, ingredientes, utensílios, dificuldade, tempo e alérgenos (RNF08).
-- Dado que uma receita faz parte de uma cadeia, quando a cadastro, então indico qual é o prato base.
+- Dado que importo uma receita de plataforma pública, quando a cadastro, então registro fonte, ingredientes, utensílios, dificuldade, tempo, passo a passo e alérgenos (RNF08).
+- Dado que um prato faz parte de uma cadeia como evolução, quando o cadastro, então indico exatamente um prato base (RN18).
 
 ### Should
 
@@ -206,13 +206,13 @@ Como Cleusa, quero buscar receitas por nome, país, ingrediente ou tempo de prep
 
 #### US11 — Ver utensílios exigidos e filtrar por utensílios disponíveis (Should · RF19)
 Como Rafael, quero ver os utensílios que cada receita exige e que as sugestões respeitem o que tenho na cozinha, para não começar um prato que não consigo terminar.
-- Dado que cadastrei meus utensílios (ex.: fogão e micro-ondas, sem forno), quando recebo sugestões, então pratos que exigem utensílios ausentes vêm sinalizados ou são filtrados.
+- Dado que cadastrei meus utensílios (ex.: fogão e micro-ondas, sem forno), quando recebo sugestões, então pratos que exigem utensílios ausentes vêm sinalizados (RN10).
 - Dado que abro uma receita, quando vejo os detalhes, então a lista de utensílios aparece junto da lista de ingredientes.
 - Dado que um prato exige utensílio que não tenho, quando o visualizo, então o sistema indica qual utensílio falta antes do preparo.
 
 #### US16 — Receber badges ao atingir marcos (Should · RF15)
 Como Cleusa, quero receber badges ao atingir marcos, para ter orgulho da minha trajetória na cozinha.
-- Dado que concluí pratos de 10 países distintos, quando o décimo é registrado, então recebo o badge correspondente.
+- Dado que concluí pratos de 10 culinárias distintas, quando o décimo é registrado, então recebo o badge correspondente.
 - Dado que abro meu perfil, quando vejo os badges, então vejo os conquistados e os critérios dos ainda não obtidos.
 
 ### Could
