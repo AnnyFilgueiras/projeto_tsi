@@ -51,18 +51,17 @@
 
 - **Papel da IA:** redatora técnica, acumulando arquitetura da informação (estrutura do repositório e do documento consolidado), geração de conteúdo (README, issues, documento consolidado) e instrução de execução (passo a passo git/GitHub).
 - **Técnicas aplicadas:** arquitetura da informação com links relativos; consolidação documental sem re-elicitação (migração fiel); geração em lote de issues no formato padrão do briefing; automação com GitHub CLI (`gh`); verificação de navegabilidade em aba anônima.
-- **Prompts-chave usados:** prompt de abertura do briefing 1.3 (papel + roteiro da seção 4); validação do uso do GitHub Projects (coluna "A fazer" × Kanban do briefing); [PREENCHER: 1–2 prompts da dupla durante a execução].
+- **Prompts-chave usados:** prompt de abertura do briefing 1.3 (papel + roteiro da seção 4); validação do uso do GitHub Projects (coluna "A fazer" × Kanban do briefing);
 - **Artefatos produzidos:** repositório estruturado em `/docs/fase1/...`; `documento-de-requisitos.md` consolidado (9 seções); `README.md` como índice navegável; 6 labels + milestone "Fase 1 — Engenharia de Requisitos" + 18 issues (US01–US18); quadro Projects com as colunas `Backlog | Em refinamento | Validado`.
 - **Decisões tomadas:**
-  1. [PREENCHER: estratégia de branch escolhida — consolidar na `main` ou manter `project-design` com PR].
+  1. Primeira fase direto na `main`.
   2. PNG/SVG dos diagramas ficam em `/assets` (briefing 1.3), revisando o registrado em `modelo-conceitual.md` ("fora do repositório-fonte") — divergência sinalizada conforme a convenção 7 do Guia Geral.
   3. Campo Status do Projects renomeado para `Backlog | Em refinamento | Validado` (o template padrão usava "A fazer"); todas as issues em `Backlog` até a 1.4.
-  4. Issues criadas no repositório (não como drafts soltos no Projects), para carregar labels e milestone — drafts já criados foram [PREENCHER: convertidos em issues / substituídos].
+  4. Issues criadas no repositório (não como drafts soltos no Projects), para carregar labels e milestone
 - **Iterações relevantes:**
   1. A IA gerou o script de automação com um comando inexistente (`gh milestone create`); a dupla detectou o erro na execução e a correção foi feita com `gh api` +   aplicação de metadados via `gh issue edit` (v2 do script).
   2. Acesso anônimo aos links do GitHub falhou para a IA no início da conversa — reforçou a obrigatoriedade do teste em aba anônima pela dupla (que passou).
-- **Divisão de tarefas:** [PREENCHER: quem executou estrutura/docs (git) e quem executou issues/Projects (web ou gh)].
-- **Pendências para a próxima conversa (1.4 — Validação):** checklist de qualidade dos requisitos; matriz de rastreabilidade formal; ata de revisão; backlog validado v1.0; mover issues no quadro (Backlog → Em refinamento → Validado) conforme a revisão. Nenhuma re-elicitação foi feita durante a migração; eventuais lacunas percebidas devem ser registradas aqui e tratadas na 1.4: [PREENCHER ou escrever "nenhuma"].
+- **Pendências para a próxima conversa (1.4 — Validação):** checklist de qualidade dos requisitos; matriz de rastreabilidade formal; ata de revisão; backlog validado v1.0; mover issues no quadro (Backlog → Em refinamento → Validado) conforme a revisão. Nenhuma re-elicitação foi feita durante a migração; eventuais lacunas percebidas devem ser registradas aqui e tratadas na 1.4: Nenhuma
 
 ## [09/09/2026] — Conversa 1.4 (Validação de requisitos)
 
@@ -94,7 +93,4 @@
      verificações marcadas como N/A com registro.
   4. Acesso direto ao GitHub falhou; walkthrough feito sobre o README
      adicionado ao espaço — encontrou status desatualizado da 1.3.
-- **Pendências para a conversa do slide:** aplicar as correções e commitar os
-  artefatos da 1.4; mover issues para `Validado`; fechar milestone e criar a
-  tag `backlog-validado-v1.0`; registrar a revisão humana cruzada da dupla;
-  merge da branch project-design.
+
