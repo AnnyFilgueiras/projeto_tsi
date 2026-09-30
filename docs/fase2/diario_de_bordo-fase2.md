@@ -43,7 +43,7 @@
 - Merge de `project-design` na `main` feito.
 - Milestone "Fase 1 — Engenharia de Requisitos" fechado.
 - Pendências de processo da Fase 1 resolvidas.
-- Tag `backlog-validado-v1.0`: [CONFIRMAR: criada em DD/MM / ainda a criar].
+- Tag `backlog-validado-v1.0`: criada em 30/09
 
 ### Restrições herdadas da Fase 1 (não são pendências)
 - Ranking = Won't; pontuação = Could (RN19 futura; D13b só vale se a
@@ -65,11 +65,7 @@
    lição: confirmar o estado do repositório antes de listar pendências.
 
 ### Divergências registradas (briefing/professor × artefatos)
-- Nenhuma até o momento. [CONFIRMAR: o material do professor da Fase 2
-  pede algo que contradiga decisões da Fase 1?]
-
-### Divisão de tarefas
-- [CONFIRMAR: quem conduz a 2.1 e quem revisa os artefatos.]
+- Nenhuma até o momento.
 
 ### Riscos aceitos
 - Nenhum nesta conversa.
