@@ -1,4 +1,4 @@
-# Briefing da Fase 2 — Projeto Arquitetural (Panelada) — v1.0
+# Briefing da Fase 2 — Projeto Arquitetural (Panelada) — v1.1
 
 > Documento-mestre da Fase 2. Deve ser anexado em TODA conversa de sub-etapa
 > (2.1 a 2.9), junto com o `diario-de-bordo-fase2.md`. Ele dá o mapa da fase
@@ -97,10 +97,6 @@ Anexe só o que a coluna da etapa marca como N ou A.
   cliente, com a coleção versionada no repositório.
 - **Rastreabilidade:** todo atributo cita US/RN/RNF; toda decisão cita
   atributo; todo componente cita US/UC.
-- **Nomes de domínio:** os do léxico e do modelo conceitual da Fase 1.
-- **Diário:** toda conversa termina com entrada no `diario-de-bordo-fase2.md`
-  (campos da Fase 1 mais "Artefatos alterados (retroalimentação)",
-  "Riscos aceitos" e "Divisão de tarefas").
 - **Ferramentas:** apenas gratuitas, ou de pagamento único baixo, quando
   justificado em ADR.
 - **Diário:** toda conversa termina com entrada no `diario-de-bordo-fase2.md`
@@ -153,4 +149,4 @@ A dupla revisa o briefing antes de usá-lo.
 | Versão | Data | Mudança | Motivo |
 |---|---|---|---|
 | v1.0 | [CONFIRMAR: 05/10/2026] | Criação | Conversa 2.0 |
-| v1.0 | [CONFIRMAR: 05/10/2026] | Remoção do campo Divisão de tarefas | Remoção do campo Divisão de tarefas |
+| v1.1 | [CONFIRMAR: 05/10/2026] | Remoção do campo Divisão de tarefas | Remoção do campo Divisão de tarefas |
