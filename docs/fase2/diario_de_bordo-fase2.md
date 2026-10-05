@@ -73,3 +73,66 @@
 ### Pendências para a próxima conversa (2.1)
 - Na 2.1, conferir a definição de "prato concluído" (gatilho de coleção,
   evolução e badges; base da lista offline de pratos já preparados).
+
+
+
+## [05/10/2026] — Conversa 2.0 (continuação: estratégia de briefings)
+
+- **Papel da IA:** arquiteto de software sênior e consultor de projetos
+  acadêmicos, acumulando desenho do processo da fase e redação do
+  documento-mestre.
+- **Técnicas aplicadas:** análise das falhas de briefing da Fase 1;
+  separação entre briefing global (mapa) e briefing de passagem (estado);
+  matriz de peso dos artefatos por sub-etapa; Definition of Done por etapa.
+- **Prompts-chave usados:**
+  1. Pergunta da dupla sobre como cada thread saberia a fase seguinte e a
+     relevância de cada artefato para sua sucessora.
+  2. Observação da dupla de que a abordagem de briefings de passagem ainda
+     contextualizava pouco a fase inteira, com proposta de um arquivo único
+     de recapitulação da Fase 2.
+  3. Confirmação de que a 2.1 recebe apenas o briefing-mestre, o diário e
+     os artefatos definidos para ela.
+- **Artefatos produzidos:** `briefing-fase2.md` v1.0 (briefing-mestre);
+  modelo de briefing de passagem; prompt de abertura da 2.1 simplificado.
+- **Insumos usados:** diário da Fase 1 (colado na conversa);
+  `resumo-1.4-fechamento.md` (anexo, para levantar pendências herdadas).
+
+### Decisões tomadas
+1. **Dois níveis de briefing:** o briefing-mestre (`briefing-fase2.md`) é
+   anexo fixo de toda sub-etapa; o briefing de passagem é escrito ao final
+   de cada conversa para a seguinte.
+2. **Briefing de passagem gerado no fim da etapa anterior**, não planejado
+   de antemão, para evitar a divergência vista na Fase 1 (briefings 1.2 e 1.4).
+3. **Precedência em caso de conflito:** artefatos aprovados > ADRs >
+   briefing de passagem > briefing-mestre.
+4. **Alterações no briefing-mestre** exigem motivo registrado no diário e
+   nova versão, como as ADRs.
+5. **Entrega de cada sub-etapa passa a ser:** artefato + entrada do diário +
+   briefing da próxima + (se couber) proposta de alteração do mestre.
+6. **A 2.1 não recebe briefing de passagem** (é a primeira etapa). Anexos:
+   `briefing-fase2.md`, `diario-de-bordo-fase2.md`, `requisitos.md`,
+   `backlog.md`, `regras-de-negocio.md`, `resumo-1.4-fechamento.md`.
+7. **Linha de base confirmada em 05/10/2026:** tag `backlog-validado-v1.0`
+   criada e histórico de revisões do `briefing-fase2.md` preenchido (v1.0).
+8. **Campo "Divisão de tarefas" descontinuado** (briefing-mestre v1.1): a
+   dupla decidiu não registrar essa informação.
+
+### Iterações relevantes (erros e retrabalho da IA)
+1. A proposta inicial de briefings de passagem contextualizava só a etapa
+   vizinha; a dupla apontou a falta de visão da fase inteira, o que levou
+   ao briefing-mestre.
+2. A matriz de peso dos artefatos foi escrita sem conferir o conteúdo de
+   `casos-de-uso.md` e `modelo-conceitual.md`, que não foram anexados;
+   pode precisar de ajuste (v1.1) quando esses arquivos forem usados.
+
+### Divergências registradas (briefing/professor × artefatos)
+- Nenhuma nesta conversa. [CONFIRMAR: o material do professor da Fase 2
+  contradiz alguma decisão da Fase 1?]
+
+### Riscos aceitos
+- Briefing-mestre pode ficar desatualizado; mitigado por versionamento e
+  pela regra de precedência.
+
+### Pendências para a próxima conversa (2.1)
+- Commitar `briefing-fase2.md` e o diário atualizado em `/docs/fase2/`.
+- Na 2.1, conferir a definição de "prato concluído" nas RNs.
