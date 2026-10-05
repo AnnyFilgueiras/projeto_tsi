@@ -136,3 +136,50 @@
 ### Pendências para a próxima conversa (2.1)
 - Commitar `briefing-fase2.md` e o diário atualizado em `/docs/fase2/`.
 - Na 2.1, conferir a definição de "prato concluído" nas RNs.
+
+
+## [05/10/2026] — Conversa 2.1 (Requisitos de qualidade)
+
+- **Papel da IA:** arquiteto de software sênior (analista de qualidade).
+- **Técnicas aplicadas:** conferência de "prato concluído" contra RN01, RN05 e o texto das US; levantamento de atributos candidatos a partir de RNF, RN e restrições do briefing; cenários de qualidade (estímulo, fonte, ambiente, resposta, medida); priorização em faixas com justificativa; lista de conflitos e riscos aceitos.
+- **Prompts-chave usados:**
+  1. Abertura da 2.1 com confirmação de fase, papel e insumos e instrução de perguntar antes de fechar a priorização.
+  2. Respostas da dupla sobre offline (RNF05), alérgenos, diabetes, observabilidade e escopo do catálogo.
+  3. Ajustes de prioridade (A07 para Médio, A09 para Alto) e de escala (1.500 usuários).
+- **Insumos usados:** `briefing-fase2.md` (seções 3, 5, 7 e 8), `diario-de-bordo-fase2.md`, `requisitos.md`, `backlog.md`, `regras-de-negocio.md`, `resumo-1.4-fechamento.md`.
+- **Artefatos produzidos:** `atributos-qualidade.md` v1.0; briefing de passagem da 2.2.
+
+### Decisões tomadas
+1. Vale a RNF05; offline cobre receitas planejadas, em preparo e preparadas. Candidatas não ficam offline.
+2. "Em preparo" é o prato aberto no passo a passo.
+3. Avaliação salva offline, com sincronização posterior; evolução e badge são desbloqueados offline, desde que as receitas planejadas tenham sido baixadas.
+4. "Prato concluído" mantém a RN01 (concluir = salvar avaliação).
+5. Alérgenos têm estado (verificado, declarado pela fonte, não verificado); lista vazia = não verificado; receita não verificada não é sugerida a quem tem restrição.
+6. MVP trata só alérgenos; diabetes é risco aceito, com aviso.
+7. A13 (observabilidade técnica) e A14 (engajamento) separados; A14 fora do MVP.
+8. Priorização: Crítico A06, A05, A08, A04; Alto A09, A01, A02; Médio A07, A03, A11, A13; Baixo A12.
+9. Dimensionamento: 1.500 usuários ativos em dia de pico; catálogo de 350 pratos; lançamento com 100 pratos verificados.
+
+### Artefatos alterados (retroalimentação)
+- Nenhum artefato da Fase 1 foi alterado nesta conversa. Alterações propostas, a abrir em uma issue agrupada: RNF05 (e RNF novo ou emenda), RN08/RN10/RN16/RF18/US09 (estado de alérgenos), US09 (diabetes), US12-c1 e US13 (redação), status das RNs, conferência do modelo conceitual. Detalhes na seção 7 de `atributos-qualidade.md`.
+
+### Iterações relevantes (erros e retrabalho da IA)
+1. Na primeira resposta, a IA tratou o texto das US12 e US13 como possível mudança de regra; a dupla manteve a RN01 e a correção ficou só de redação.
+2. A IA não havia considerado condições além de alergias (diabetes); a dupla apontou e a regra do estado de alérgenos foi criada.
+3. A dupla comentou valores de cache e de catálogo (500 pratos) que não constavam da conversa; a IA reapresentou as propostas como hipóteses, e a dupla ajustou o catálogo para 350 pratos e a escala para 1.500 usuários.
+4. A IA propôs 1.000 a 5.000 usuários; a dupla reduziu para 1.500.
+
+### Divergências registradas (briefing/professor × artefatos)
+- O briefing-mestre diz que o offline cobre "candidatos e já preparados"; a RNF05 aprovada diz "planejadas ou em preparo". Segue a RNF05, ajustada pela dupla (planejadas, em preparo e preparadas). Proposta de alteração do briefing-mestre na próxima versão.
+- O arquivo `briefing-mestre-v1.1.md` ainda traz título v1.0, sem linha v1.1 no histórico, e um trecho solto sobre "Divisão de tarefas" na seção 6. A dupla informou ter versão local corrigida, ainda não commitada.
+
+### Riscos aceitos
+- R1: diabetes e outras condições não verificadas no MVP, com aviso fixo.
+- R2: alérgenos possivelmente desatualizados durante o uso offline, com data da última atualização exibida.
+- R3: A14 fora do MVP.
+
+### Pendências para a próxima conversa (2.2)
+- Anexar a versão corrigida do briefing-mestre e commitar.
+- Abrir a issue agrupada de retroalimentação da Fase 1.
+- Revalidar na 2.3 as medidas marcadas (H): dispositivo de referência, 2 s de abertura offline, 24 h de exclusão e limites da camada gratuita.
+- Conferir se o modelo conceitual comporta o estado de alérgenos e o conceito de "em preparo".
