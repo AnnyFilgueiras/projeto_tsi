@@ -107,11 +107,10 @@ US09 — Como Cleusa, quero cadastrar as restrições alimentares da família no
 perfil e ser alertada sobre alérgenos, para cozinhar com segurança.
 Origem: RF07 | Prioridade: Must
 Critérios de aceite:
-- Dado que cadastrei uma restrição (ex.: diabetes), quando recebo sugestões,
-  então pratos incompatíveis não aparecem nas sugestões; na busca e na
-  visualização, são claramente sinalizados (RN08).
+- Dado que cadastrei uma restrição (ex.: diabetes ou outra condição na verificada), quando navego pelo aplicativo, vejo um aviso fixo informaando que apenos alérgenos são verificados.
+- Dado que cadastrei uma restrição de alérgeno (ex.: camarão), quando recebo sugestões, então pratos incompatíveis ou com estado de alérgenos "não verificado" não aparecem nas sugestões (RN08).
 - Dado que uma receita contém um alérgeno comum (ex.: glúten, lactose,
-  amendoim), quando a visualizo, então o alerta de alérgeno é exibido.
+  amendoim) ou possui estado de "não verificado", quando a visualizo, então o alerta de "compatibilidade não confirmada" é exibidos (RN16).
 ```
 
 ```
@@ -131,7 +130,7 @@ US12 — Como Cleusa, quero registrar nota, relato e alterações de cada prato
 que fiz, mantendo meu histórico, para ter meu caderno digital de receitas.
 Origem: RF11 | Prioridade: Must
 Critérios de aceite:
-- Dado que concluí um prato, quando registro a avaliação, então apenas a
+- Dado que preparei um prato, quando registro a avaliação para concluí-lo, então apenas a
   nota é obrigatória; relato e alterações são opcionais (RNF10).
 - Dado que tenho avaliações, quando acesso o histórico, então vejo cada
   preparo com data, nota e alterações.
@@ -219,9 +218,9 @@ US13 — Como Rafael, quero ganhar pontos por prato concluído conforme
 dificuldade e ineditismo, para sentir progresso real.
 Origem: RF12 | Prioridade: Could
 Critérios de aceite:
-- Dado que concluí e avaliei um prato, quando o registro é salvo, então
+- Dado que avaliei um prato, quando o registro é salvo, então
   recebo pontos calculados a partir da dificuldade da receita.
-- Dado que o prato é inédito para mim, quando concluo, então recebo um bônus
+- Dado que o prato é inédito para mim, quando o avalio, então recebo um bônus
   de ineditismo; se for repetição, o bônus não se aplica.
 - Dado que recebi pontos, quando consulto meu saldo, então vejo a origem de
   cada pontuação.
