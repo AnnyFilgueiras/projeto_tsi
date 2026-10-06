@@ -148,5 +148,5 @@ A dupla revisa o briefing antes de usá-lo.
 ## 10. Histórico de revisões
 | Versão | Data | Mudança | Motivo |
 |---|---|---|---|
-| v1.0 | [CONFIRMAR: 05/10/2026] | Criação | Conversa 2.0 |
-| v1.1 | [CONFIRMAR: 05/10/2026] | Remoção do campo Divisão de tarefas | Remoção do campo Divisão de tarefas |
+| v1.0 | 05/10/2026 | Criação | Conversa 2.0 |
+| v1.1 | 05/10/2026 | Remoção do campo Divisão de tarefas | Remoção do campo Divisão de tarefas |

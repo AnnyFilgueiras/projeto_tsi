@@ -183,3 +183,65 @@
 - Abrir a issue agrupada de retroalimentação da Fase 1.
 - Revalidar na 2.3 as medidas marcadas (H): dispositivo de referência, 2 s de abertura offline, 24 h de exclusão e limites da camada gratuita.
 - Conferir se o modelo conceitual comporta o estado de alérgenos e o conceito de "em preparo".
+
+
+## [06/10/2026] — Conversa 2.2 (Estilo arquitetural)
+
+- **Papel da IA:** arquiteto de software, com análise de trade-offs.
+- **Técnicas aplicadas:** definição de estilos candidatos; matriz estilo × atributos prioritários com pesos da 2.1 (crítico = 3, alto = 2); separação em duas decisões (sistema e servidor); regra de um estilo dominante por nível com táticas justificadas; análise do que se perde e dos gatilhos de revisão; fechamento de lacunas por perguntas numeradas antes de gerar os artefatos.
+- **Prompts-chave usados:**
+  1. Abertura da 2.2 com o briefing-mestre (seções 3, 5, 7 e 8), o briefing de passagem e o diário, com instrução de parar se faltasse algum anexo.
+  2. Instrução de gerar os arquivos somente depois de fechar todas as lacunas sobre estilos.
+  3. Respostas da dupla às lacunas: sugestão no servidor, checagem de alérgenos, desbloqueio com servidor apenas confirmando, limite de protótipo de sincronização em 10 dias.
+  4. Perguntas da dupla sobre misturar estilos, sobre "por feature" ser arquitetura ou estilo e sobre o motivo da separação em duas decisões.
+  5. Correção da dupla após a entrega: a criptografia no dispositivo é obrigatória pela LGPD e não pode ser adiada.
+- **Insumos usados:** `briefing-fase2.md`, `briefing-passagem-2.2.md`, `diario-de-bordo-fase2.md` (com a entrada 2.1), `atributos-qualidade.md` v1.0.
+- **Artefatos produzidos:** `estilo-arquitetural.md` v1.0; esta entrada; briefing de passagem da 2.3.
+
+### Decisões tomadas
+1. **Estilo do sistema (D1):** E2, offline-first com sincronização (confirmado expressamente pela dupla), restrito ao conjunto baixado (planejadas, em preparo, preparadas). Alternativa viva: E3 (BaaS). Descartados: E1 (não cobre A04 e A08) e E5 puro (conflito com a LGPD, A05, e curva alta).
+2. **Estilo interno do servidor (D2):** monólito modular; microsserviços descartados.
+3. **Sugestão e busca (A01) no servidor.** Nota do E2 em A01 caiu de 5 para 3; total do E2 em 70 (E3 e E5 com 60, E1 com 55).
+4. **Checagem de alérgenos:** servidor para sugestão e busca; cliente para abrir receita baixada; mesma suíte de testes nos dois lados.
+5. **Desbloqueio de evolução e badge:** local no cliente; servidor apenas confirma, sem revogar (RN04).
+6. **Regra do projeto:** um estilo dominante por nível, mais táticas justificadas, com registro do atributo resolvido e do custo.
+7. **Idempotência:** só o princípio na 2.2 (identificador estável gerado no cliente; reenvio tratado como repetição); mecanismo na 2.6.
+8. **Gatilho do protótipo de sincronização:** 10 dias corridos (cerca de 22% dos 45 dias do MVP).
+9. **Criptografia da restrição alimentar:** requisito do estilo, e não risco aceito. Cobre TLS, repouso no servidor e repouso no dispositivo (banco local, fila e backups). Fundamento: LGPD art. 46 e §2º. A dupla corrigiu a decisão anterior de adiar; mecanismo na 2.3 e na 2.4.
+10. **Organização por feature:** diretriz do cliente (feature-first, com camadas dentro de cada feature), não estilo na matriz; detalhamento na 2.5 e na 2.7.
+11. **Pipeline de importação e notificações assíncronas:** a avaliar na 2.3 e na 2.4.
+12. **Prazo, custo e curva de aprendizado:** colunas de apoio na 2.2; peso formal na 2.3.
+13. Esta etapa não gera ADR; o ADR de estilo (e o de servidor) nasce na 2.4.
+
+### Iterações relevantes (erros e retrabalho da IA)
+1. A IA interrompeu a primeira tentativa por não localizar `briefing-fase2.md` entre os arquivos (existia `briefing-mestre-v1.1.md` com o mesmo tamanho); a dupla anexou o arquivo.
+2. Na primeira entrega, a IA gerou os arquivos antes de fechar as lacunas e condensou os passos de confirmação do roteiro; a dupla pediu para discutir antes, e os arquivos foram refeitos.
+3. A IA considerou, na primeira matriz, que a sugestão rodava sobre catálogo local, o que contradizia a decisão da 2.1 de que candidatas não ficam offline; a dupla decidiu que a sugestão roda no servidor, e a nota de A01 foi corrigida.
+4. A IA misturou estilos de sistema e de servidor na mesma matriz (E4 perdia em A04, que é problema de cliente); a separação em D1 e D2 corrige isso.
+5. A IA tinha usado "2 semanas" como gatilho de sincronização por hipótese própria; a dupla definiu 10 dias.
+6. A dupla trocou os termos ao descrever "layer-first com camadas dentro de cada feature"; esclarecido que a proposta é feature-first.
+7. A IA aceitou adiar a criptografia e a registrou como risco aceito (R5) em vez de contestar; a dupla corrigiu. Lição: obrigação legal não se registra como risco aceito; deve virar requisito. O mesmo cuidado vale para o resto da Fase 2 (LGPD, A05, A13).
+
+### Divergências registradas (briefing/professor × artefatos)
+- **Numeração de atributos:** o briefing de passagem da 2.2 usa AQ01–AQ12; o artefato aprovado usa A01–A14. Seguidos os IDs do artefato; "AQ01 a AQ07" lido como A06, A05, A08, A04, A09, A01 e A02. O briefing da 2.3 usa só os IDs A##.
+- As divergências sobre o escopo do offline e sobre a versão do briefing-mestre já constam na entrada 2.1 e seguem válidas.
+
+### Riscos aceitos
+- R4: complexidade de sincronização consumir o prazo; mitigada pelo escopo mínimo e pelo gatilho de 10 dias.
+- R5: sugestão online dependente de rede e da camada gratuita (A01 × A11); medição na 2.3.
+- A criptografia da restrição alimentar não é risco aceito; é requisito (decisão 9).
+
+### Artefatos alterados (retroalimentação)
+- Nenhum artefato anterior alterado.
+- **A05 reaberto (proposta):** acrescentar a medida "0 registros de restrição alimentar em texto claro no dispositivo, no servidor e nos backups; comunicação somente por TLS". A alteração em `atributos-qualidade.md` ainda não foi feita.
+- `atributos-qualidade.md`: medidas (H) de A04 e A08 viram critérios do protótipo de sincronização; revalidar A01 na 2.3.
+- Fase 1: nenhuma issue nova; a issue agrupada da 2.1 segue pendente.
+
+### Pendências para a próxima conversa (2.3)
+- Atualizar `atributos-qualidade.md` com a medida de criptografia em A05 (nova versão).
+- Definir o mecanismo de criptografia (dispositivo, servidor, backups) e medir o efeito em A04 e no prazo.
+- Revisão final da dupla sobre o `estilo-arquitetural.md` e commit em `/docs/fase2/`.
+- Verificar limites da camada gratuita (A11, A01, cold start) e revalidar as medidas (H).
+- Comparar stack móvel e opções de backend e banco, com pesos formais de prazo, custo zero e curva de aprendizado.
+- Avaliar pipeline de importação do catálogo e notificações assíncronas.
+- Corrigir as datas [CONFIRMAR] no histórico do briefing-mestre e commitar a versão corrigida.
