@@ -1,7 +1,11 @@
 # Atributos de Qualidade — Panelada (Fase 2.1)
 
 > Fase 2.1 — Requisitos de qualidade. Papel da IA: arquiteto de software sênior (analista de qualidade).
-> Destino: `/docs/fase2/atributos-qualidade.md`. Versão 1.0 — 05/10/2026 — status: priorização aprovada pela dupla; medidas marcadas (H) são hipóteses a revalidar na 2.3.
+
+> Destino: `/docs/fase2/atributos-qualidade.md`.
+
+> Versão 1.1 — 06/10/2026 — status: priorização aprovada pela dupla; medidas marcadas (H) são hipóteses a revalidar na 2.3. Alteração da v1.1: inclusão de criptografia no cenário A05 (retroalimentação da 2.2).
+
 > Insumos: `requisitos.md`, `backlog.md`, `regras-de-negocio.md`, `resumo-1.4-fechamento.md`, `briefing-fase2` (seções 3, 5, 7 e 8), `diario-de-bordo-fase2.md`.
 
 ## 1. Premissas e dimensionamento
@@ -53,9 +57,9 @@ Formato: Estímulo, Fonte do estímulo, Ambiente, Resposta, Medida.
 - **Estímulo:** usuário cadastra, revoga ou exclui restrições alimentares.
 - **Fonte:** usuário.
 - **Ambiente:** operação normal.
-- **Resposta:** o dado só é gravado após consentimento explícito, com informação de que é dado sensível. Ao revogar, a restrição é removida do dispositivo imediatamente e do servidor em até 24 h (H).
-- **Medida:** 0 registros de restrição sem consentimento registrado; 100% das revogações concluídas dentro do prazo.
-- **Rastreio:** US09, RNF06, RN09.
+- **Resposta:**  o dado só é gravado após consentimento explícito, com informação de que é dado sensível. A restrição alimentar é protegida por criptografia em trânsito (TLS) e em repouso, no dispositivo (banco local e fila de sincronização), no servidor e nos backups. Ao revogar, a restrição é removida do dispositivo imediatamente e do servidor em até 24 h (H).
+- **Medida:** 0 registros de restrição sem consentimento registrado; 100% das revogações concluídas dentro do prazo; 0 registros de restrição em texto claro no dispositivo, no servidor e nos backups, verificado por inspeção do armazenamento (os arquivos do banco e dos backups ficam ilegíveis sem a chave); 100% das comunicações que carregam restrição por TLS.
+- **Rastreio:** US09, RNF06, RN09; LGPD art. 46 e §2º.
 
 ### A08 — Integridade do progresso e sincronização (Crítico)
 - **Estímulo:** usuário salva avaliação sem rede e fecha o app antes da sincronização.
@@ -135,6 +139,7 @@ Formato: Estímulo, Fonte do estímulo, Ambiente, Resposta, Medida.
 | Camada gratuita limita desempenho e escala | Custo × A01 × A11 | Verificar limites na 2.3 |
 | Curadoria manual de alérgenos consome o prazo | A09 × prazo | Lançar com 100 pratos verificados |
 | Telemetria contra dado sensível | A13 × A05 | Logs sem dado de restrição |
+| Criptografia local pode aumentar o tempo de abertura offline | A05 × A04 | Medir na 2.3 contra a meta de 2 s (H); manter a criptografia e ajustar biblioteca ou escopo |
 
 ## 6. Riscos aceitos
 
@@ -155,6 +160,7 @@ Formato: Estímulo, Fonte do estímulo, Ambiente, Resposta, Medida.
 | US12-c1, US13 | Corrigir a redação circular de "concluído" |
 | regras-de-negocio.md | Atualizar o status das RNs ("a validar na 1.4") |
 | modelo-conceitual.md | Conferir se comporta o estado de alérgenos e o conceito de "em preparo" (não verificado nesta etapa) |
+| RNF06    | Explicitar a proteção por criptografia da restrição alimentar (trânsito e repouso, no dispositivo e no servidor) |
 
 ## 8. Checagem da Definition of Done (briefing, seção 7)
 
