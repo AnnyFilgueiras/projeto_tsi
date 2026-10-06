@@ -245,3 +245,81 @@
 - Comparar stack móvel e opções de backend e banco, com pesos formais de prazo, custo zero e curva de aprendizado.
 - Avaliar pipeline de importação do catálogo e notificações assíncronas.
 - Corrigir as datas [CONFIRMAR] no histórico do briefing-mestre e commitar a versão corrigida.
+
+
+## [06/10/2026] — Conversa 2.3 (Propostas arquiteturais)
+
+- **Papel da IA:** arquiteto de software, com análise de trade-offs.
+- **Técnicas aplicadas:** levantamento de opções por camada; verificação dos limites gratuitos e de preços em fontes públicas; três propostas concretas de MVP; critérios e pesos derivados da 2.1 (prazo, custo zero, curva de aprendizado e demonstrabilidade local); matriz com análise de sensibilidade; separação entre ambiente de demonstração e arquitetura-alvo; desenho de agente de IA com aprovação humana; conferência da US10 contra RN15, UC09 e modelo conceitual; conferência do estado atual dos artefatos da Fase 1; estimativa de custo da API de IA com conversão cambial; preparação do artefato da issue de retroalimentação.
+- **Prompts-chave usados:**
+  1. Abertura da 2.3 com o briefing de passagem como guia prioritário, o briefing-mestre (seções 3, 5, 7 e 8) e o diário, com instrução de parar se faltasse algum anexo.
+  2. Correção da dupla: considerar ferramentas de estudante (GitHub Student Developer Pack).
+  3. Correção da dupla: a entrega é uma demonstração local (Docker, simulador); a arquitetura de lançamento é só proposta.
+  4. Informação da dupla: não há Mac; o Student Developer Pack ainda não está verificado; o professor exige IA via API no desenvolvimento e no uso da aplicação.
+  5. Decisão da dupla: abordagem A pura (IA na importação do catálogo, também propondo substituições da US10).
+  6. Confirmações da dupla: P1 e divisão demonstração × alvo; uso da IA pelo curador conta como "uso na aplicação"; RNF05 corrigido na Fase 1 (conferido nos arquivos).
+  7. Escolha do provedor (Kimi K3) e informação de preço; correção da moeda (yuan, e não iene) e do custo.
+  8. Pergunta da dupla sobre a IA ser a única forma de curadoria; decisão de mantê-la como assistente opcional, com fluxo manual.
+  9. Decisões sobre a RN22, `alergenos` em `Ingrediente` e fontes de receitas (custo alto ou outro idioma; importação assistida ou manual).
+- **Insumos usados:** `briefing-passagem-2.3.md`, `briefing-fase2.md`, `diario-de-bordo-fase2.md` (com as entradas 2.1 e 2.2), `atributos-qualidade.md` v1.1, `estilo-arquitetural.md` v1.0, `backlog.md`, `requisitos.md`; consulta pontual a `regras-de-negocio.md`, `casos-de-uso.md` e `modelo-conceitual.md`.
+- **Artefatos produzidos:** `propostas-arquiteturais.md` v1.1; `issue-retroalimentacao-fase1.md` v1.3 (artefato de apoio, texto da issue); esta entrada; briefing de passagem da 2.4.
+
+### Decisões tomadas (confirmadas pela dupla em 06/10/2026)
+1. **Proposta escolhida: P1** (React Native + TypeScript, servidor TypeScript próprio, monólito modular, Postgres). Total ponderado: P1 126, P2 114, P3 111 (máximo 155). P1 lidera nos quatro cenários de sensibilidade.
+2. **Duas camadas:** demonstração local (Docker Compose com API, Postgres e agente de importação; app no emulador Android) e arquitetura-alvo documentada (Cloud Run + Neon, ou Azure com crédito de estudante; a decidir na 2.4).
+3. **Plataforma da demo: Android** (sem Mac). iOS só no alvo.
+4. **P2 (Supabase)** vira plano B; **P3 (Flutter)** descartada; **Render** descartado.
+5. **Pesos:** crítico = 3, alto = 2, médio = 1; prazo = 3, custo zero = 3, curva = 2, demonstrabilidade local = 2.
+6. **IA como assistente opcional da curadoria (abordagem A pura):** o fluxo manual do UC12 continua principal; o fluxo assistido recebe o texto da receita fornecido pelo curador, traduz para português do Brasil, extrai campos, mapeia ingredientes, propõe alérgenos e substitutos e grava como `proposto`. Só o curador aprova e só o curador marca "verificado". O fluxo misto (fonte estruturada) foi descartado.
+7. **Fontes de receitas:** APIs e bancos pesquisados têm custo alto ou dados em outro idioma; a importação será assistida por IA ou manual.
+8. **Provedor de IA: Kimi K3** (Moonshot AI), por API compatível com o protocolo da OpenAI, atrás de uma interface de provedor. Formalização em ADR na 2.4.
+9. **Preço do Kimi K3:** ¥20 por milhão de tokens de entrada e ¥100 por milhão de saída, em **yuan** (US$ 3 e US$ 15 na documentação em dólares). A conversão inicial, feita como iene, estava errada em cerca de 24 vezes. Com 1 CNY ≈ R$ 0,75 (cotação de 05/10/2026, aproximada): entrada ≈ R$ 15 e saída ≈ R$ 75 por milhão. Estimativa de teto (4.000 tokens de entrada e 10.000 de saída por receita): 20 pratos ≈ R$ 16; 100 pratos ≈ R$ 81; 350 pratos ≈ R$ 284. Custo único por carga; **não é custo zero**; exige limite de gasto no console e medição com 3 a 5 receitas.
+10. **RN22:** o substituto sugerido não pode conter alérgeno da restrição do usuário; substituto sem alérgenos declarados fica "não verificado" e não é sugerido a quem tem restrição (extensão proposta, coerente com a RN08).
+11. **`alergenos` fica em `Ingrediente`** (e não na relação de substituição).
+12. **Criptografia (mecanismo proposto):** SQLCipher no dispositivo (inclui a fila), chave de 256 bits no Keystore; AES-256-GCM de aplicação nos campos de restrição no servidor; TLS no alvo, com limitação declarada na demo local.
+13. **Notificações locais;** autenticação por conta anônima com e-mail e senha opcionais.
+14. **Confirmado pela dupla:** o uso da IA pelo curador atende a exigência de "uso na aplicação".
+15. **Student Developer Pack:** será submetido; aprovação considerada praticamente certa, mas **ainda não verificada**; o ADR de custos não deve depender dele.
+
+### Artefatos alterados (retroalimentação)
+- Nenhum artefato anterior foi alterado por esta conversa.
+- **Já resolvido pela dupla (conferido em 06/10/2026):** RNF05 reescrito; RNF06 com criptografia; estado de alérgenos em RF18, RN08, RN10, RN16, US09 e modelo conceitual; status das RNs "validado".
+- **Fase 1 (issue agrupada; texto em `issue-retroalimentacao-fase1.md` v1.3):** (a) correções de texto (RN15, US09, RN16, tabela do modelo conceitual); (b) novo RNF11 (apoio opcional de IA, com tradução e aprovação), ajuste do RF18, RNF06 e RNF08; (c) `alergenos` em `Ingrediente`, RN15 ajustada, RN21 e RN22 novas; (d) UC09, UC12, US10 e US18; (e) conferência de `documento-de-requisitos.md`, `casos-de-uso.md`, `casos-de-teste.md`, `matriz-rastreabilidade.md` e `lexico.md`.
+- `atributos-qualidade.md`: proposta de v1.2 (exclusão offline conta 24 h a partir do recebimento pelo servidor; TLS da demo local; cenário de qualidade da saída da IA).
+- `estilo-arquitetural.md`: sem mudança.
+
+### Iterações relevantes (erros e retrabalho da IA)
+1. A primeira versão avaliou o P1 pensando em implantação real (cold start, cota, cartão, taxas), sem perguntar se haveria implantação, e ignorou ferramentas de estudante; a dupla corrigiu e a v1.0 separou demonstração e alvo.
+2. O requisito de IA via API deveria ter sido capturado na Fase 1 ou na 2.0; só foi identificado na 2.3. O custo foi baixo porque a importação já era um ponto aberto (A09).
+3. A leitura direta dos arquivos do projeto não retornou conteúdo; a busca nos arquivos do projeto resolveu.
+4. A IA propôs inicialmente IA sob demanda no app para a US10, mas a RN15 proíbe "inventar uma troca"; a consulta ao texto da regra levou à abordagem A pura.
+5. Na conferência da Fase 1, a IA constatou que o RNF05 já estava corrigido, enquanto uma versão anterior desta entrada o tratava como pendente; o registro foi corrigido.
+6. A IA redigiu o RNF11 e o plano de custo como se toda importação passasse pela IA; a dupla perguntou se era a única forma de curadoria, e a redação passou a tratar a IA como assistente opcional.
+7. A IA levantou a hipótese de fonte de receitas com dados estruturados (fluxo misto); a dupla informou que as fontes têm custo alto ou outro idioma, e a hipótese foi descartada.
+8. A conversão do preço do Kimi K3 foi feita pela dupla como iene (32 por real); a IA identificou que o símbolo na página é o yuan e corrigiu, com cotação pública de 05/10/2026.
+9. Algumas notas da matriz (P2 em demonstrabilidade, por exemplo) são julgamento, não medição; os limites do Supabase e do Student Developer Pack vêm de fontes secundárias.
+10. A primeira entrega saiu sem as perguntas de fechamento do roteiro (incrementos 1 e 5), como já ocorrera na 2.2; as perguntas foram feitas nas mensagens seguintes.
+
+### Divergências registradas (briefing/professor × artefatos)
+- O briefing-mestre (seção 2) descreve o offline como "candidatas e preparadas"; vale o artefato aprovado.
+- `requisitos.md` (RNF05): divergência encerrada; o texto corrigido pela dupla está de acordo com o artefato da 2.1.
+- **Material do professor × briefing:** a exigência de IA via API (desenvolvimento e uso) não consta do briefing-mestre; foi acrescentada como restrição no briefing da 2.4 e na issue de retroalimentação. Proposta de nova versão do briefing-mestre (v1.2).
+- O diário do projeto se chama `diario_de_bordo-fase2.md`; os briefings citam `diario-de-bordo-fase2.md`.
+
+### Riscos aceitos
+- R6: no alvo, conta de faturamento com cartão (Cloud Run); alternativa Azure com crédito de estudante.
+- R7: diferença P1 × P2 baseada em notas de julgamento; plano B e gatilho de 10 dias.
+- R8: o agente de IA pode errar tradução, alérgenos ou substitutos; mitigado por estado "não verificado" por padrão, aprovação humana, validação por esquema e RN22.
+- R9: custo (R$ 16 a R$ 284 por carga, hipótese), disponibilidade e mudança de oferta do Kimi K3; mitigado por interface de provedor, fluxo manual como alternativa real, execução gravada, seed pequeno e limite de gasto.
+- R10: direitos autorais e termos de uso das fontes ao traduzir e publicar receitas; mitigado por atribuição, conferência dos termos de cada fonte e preferência por fontes com licença aberta (a verificar).
+- R4 e R5 (2.2) seguem; R5 vale só para o alvo e não será medido na demo.
+- A criptografia da restrição alimentar não é risco aceito; é requisito.
+
+### Pendências para a próxima conversa (2.4)
+- Verificar o GitHub Student Developer Pack após a submissão e decidir se o alvo cita Azure e outras ofertas.
+- Confirmar o preço do Kimi K3 no console, definir limite de gasto e medir tokens com 3 a 5 receitas; testar a saída estruturada por JSON Schema.
+- Definir o esquema de saída do agente e a interface de provedor.
+- Conferir os termos de uso e as licenças das fontes de receitas.
+- Abrir a issue agrupada de retroalimentação da Fase 1 (texto pronto em `issue-retroalimentacao-fase1.md`).
+- Revisar `estilo-arquitetural.md` e commitar em `/docs/fase2/`.
+- Conferir criptografia em repouso e backups do provedor do alvo em documentação oficial.
