@@ -55,6 +55,7 @@ classDiagram
         dificuldade
         passoAPasso
         alergenos
+        estadoAlergenos
         fonte
     }
     class Sugestao {
@@ -119,7 +120,7 @@ Convenções do diagrama: atributos sem tipos e sem parênteses (nível conceitu
 | Ingrediente | Item que compõe receitas, despensa e lista de compras | nome | usado em 0..* Receita; mantido por 0..* Usuario; consolidado em 0..* ListaDeCompras; pode substituir 0..* Ingrediente |
 | Culinaria | País ou região que agrupa pratos (ex.: japonesa, nordestina) | nome; continentes (multivalorado: América, África, Europa, Ásia, Oceania) | agrupa 0..* Prato |
 | Prato | Unidade da coleção e das cadeias de evolução | nome; imagem | pertence a 1 Culinaria; detalhado por 1 Receita; é evolução de 0..1 Prato; tem 0..* evoluções; referenciado por 0..* Sugestao; agendado em 0..* ItemDeRotina; avaliado em 0..* Avaliacao |
-| Receita | Instruções de preparo de um prato | tempo de preparo; dificuldade {fácil, média, difícil}; passo a passo numerado; alérgenos; fonte (RNF08) | detalha 1 Prato; usa 1..* Ingrediente; exige 0..* Utensilio |
+| Receita | Instruções de preparo de um prato | tempo de preparo; dificuldade {fácil, média, difícil}; passo a passo numerado; alérgenos; estadoAlergenos {verificado, declarado_fonte, nao_verificado} fonte (RNF08) | detalha 1 Prato; usa 1..* Ingrediente; exige 0..* Utensilio |
 | Sugestao | Recomendação de prato apresentada ao usuário, com ciclo de vida | data/hora; situação {apresentada, candidata, descartada} | recebida por 1 Usuario; refere-se a 1 Prato |
 | PlanoDeRotina | Conjunto de pratos candidatos com datas, em um período | período {semana, quinzena}; data de início | montado por 1 Usuario; contém 1..* ItemDeRotina; gera 0..1 ListaDeCompras |
 | ItemDeRotina | Prato agendado em uma data dentro do plano | data de preparo; status {planejado, em preparo, concluído} | pertence a 1 PlanoDeRotina; agenda 1 Prato |

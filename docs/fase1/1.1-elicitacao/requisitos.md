@@ -38,7 +38,7 @@
 | RF15 | O sistema deve conceder badges ao atingir marcos definidos (ex.: pratos de N países distintos) | Escopo, C, R |
 | ~~RF16~~ | ~~O sistema deve exibir um ranking de pontos entre o usuário e seus amigos~~ — **DESCARTADO (Won't):** apenas 1 dos 5 entrevistados demonstrou interesse; social despriorizado pela dupla | Escopo, R |
 | RF17 | O sistema deve permitir sugerir um prato a um amigo | Escopo, D1, C, R |
-| RF18 | O sistema deve permitir ao curador importar e manter o catálogo de receitas, incluindo dificuldade, alérgenos e cadeias de evolução | Decisão de fonte de conteúdo |
+| RF18 | O sistema deve permitir ao curador importar e manter o catálogo de receitas, incluindo dificuldade, estado dos alérgenos (verificado, declarado pela fonte, não verificado) e cadeias de evolução | Decisão de fonte de conteúdo |
 | RF19 | O sistema deve informar os utensílios necessários em cada receita e sinalizar, nas sugestões, os pratos inviáveis pelos utensílios que o usuário declarou possuir | D1, R |
 
 ## Requisitos não funcionais
@@ -49,8 +49,8 @@
 | RNF02 | O sistema deve levar o usuário do primeiro acesso à primeira sugestão de prato em até 2 minutos, com no máximo 3 campos obrigatórios antes do primeiro uso | D1, D2, M, C, BM-Yummly (anti-req.) |
 | RNF03 | O sistema deve responder a uma solicitação de sugestão de pratos em até 2,5 segundos | Derivado (decisão rápida, D2) |
 | RNF04 | O sistema deve permitir iniciar qualquer fluxo principal (sugestões, planejamento, registro de avaliação) em até 2 toques a partir da tela inicial | C, D1, D2 |
-| RNF05 | O sistema deve permitir consultar offline as receitas já planejadas ou em preparo | C (cozinha/bancada) |
-| RNF06 | O sistema deve tratar dados de restrições alimentares como dados sensíveis, com consentimento explícito, conforme a LGPD | C, D2 |
+| RNF05 | O sistema deve permitir consultar offline as receitas planejadas, em preparo (abertas no passo a passo) e preparadas (com avaliação salva), e salvar a avaliação sem conexão; ao restabelecer a conexão, a sincronização deve ocorrer sem perda de avaliações nem duplicação de preparos | C (cozinha/bancada) |
+| RNF06 | O sistema deve tratar dados de restrições alimentares como dados sensíveis, com consentimento explícito, conforme a LGPD, e garantindo proteção criptográfica em trânsito (TLS) e em repouso (no dispositivo, servidor, fila de sincronização e backups) | C, D2 |
 | RNF07 | O sistema deve permitir configurar frequência e tipos de notificação, com limite padrão de 1 notificação por evento (compra ou preparo) e no máximo 2 por dia | D2, BM-Duolingo (anti-req.) |
 | RNF08 | O sistema deve exibir a atribuição da fonte pública de cada receita importada | Stakeholder externo |
 | RNF09 | O sistema não deve punir o usuário por inatividade (sem perda de pontos, sequências ou progresso) | BM-Duolingo (anti-req.) |
