@@ -1,7 +1,7 @@
 # Estilo Arquitetural — Panelada (Fase 2.2)
 
 > Fase 2.2 — Estilo arquitetural. Papel da IA: arquiteto de software, com análise de trade-offs.
-> Destino: `/docs/fase2/estilo-arquitetural.md`. Versão 1.0 — 06/10/2026 — status: decisões discutidas e fechadas com a dupla na conversa 2.2, com o E2 confirmado expressamente em 06/10/2026; a formalização em ADR ocorre na 2.4.
+> Destino: `/docs/fase2/estilo-arquitetural.md`. Versão 1.1 — 06/10/2026 — status: decisões formalizadas nos ADR-001 e ADR-002 (2.4). Alteração da v1.1: módulos do servidor e referências aos ADRs (retroalimentação da 2.4).
 > Insumos: `briefing-fase2.md` (seções 3, 5, 7 e 8), `briefing-passagem-2.2.md`, `diario-de-bordo-fase2.md` (com a entrada 2.1), `atributos-qualidade.md` v1.0.
 > Convenção: IDs dos atributos conforme `atributos-qualidade.md` (A01 a A14). Medidas marcadas (H) são hipóteses a revalidar na 2.3.
 
@@ -30,7 +30,7 @@
 | P4 | Regra do projeto: **um estilo dominante por nível, mais táticas justificadas.** Cada mistura registra o atributo que resolve e o que custa. | Evita combinar estilos sem ganho de atributo. |
 | P5 | A decisão se divide em duas: (D1) estilo do sistema; (D2) estilo interno do servidor. | Atributos de cliente e de servidor deixam de se misturar na matriz. |
 | P6 | Idempotência entra como princípio; o mecanismo fica para a 2.6. | O estilo continua válido com qualquer mecanismo escolhido depois. |
-| P7 | **Proteção criptográfica da restrição alimentar é requisito do estilo, e não risco aceito:** criptografia em trânsito (TLS), em repouso no servidor e em repouso no dispositivo (banco local, fila de sincronização e backups). O mecanismo concreto (por exemplo, banco local cifrado com chave guardada no Keystore ou Keychain, hipótese) é decidido na 2.3 e na 2.4. | Fundamento: LGPD art. 46 (medidas de segurança aptas a proteger o dado) e §2º (aplicadas desde a concepção); a restrição alimentar é tratada como dado sensível (A05). Custo em prazo e na abertura do banco local (A04) a medir na 2.3. |
+| P7 | **Proteção criptográfica da restrição alimentar é requisito do estilo, e não risco aceito:** criptografia em trânsito (TLS), em repouso no servidor e em repouso no dispositivo (banco local, fila de sincronização e backups). O mecanismo concreto (por exemplo, banco local cifrado com chave guardada no Keystore ou Keychain, hipótese) está no ADR-006. | Fundamento: LGPD art. 46 (medidas de segurança aptas a proteger o dado) e §2º (aplicadas desde a concepção); a restrição alimentar é tratada como dado sensível (A05). Custo em prazo e na abertura do banco local (A04) a medir na 2.3. |
 
 ## 3. D1 — Estilo do sistema
 
@@ -110,7 +110,7 @@ O total é uma ajuda de leitura, não a decisão. Os pesos formais, incluindo pr
 | Perda aceita | Atributo afetado | Mitigação |
 |---|---|---|
 | Complexidade de sincronização (fila, idempotência, reenvio) | Prazo; A08 | Escopo mínimo: só avaliação e itens da rotina sincronizam. Protótipo cedo, com limite de 10 dias corridos. |
-| Dado sensível replicado no dispositivo | A05 | Criptografia obrigatória (P7); consentimento antes da gravação; revogação apaga cópia local e fila; logs sem restrição (A13); backups do sistema operacional tratados na 2.4. |
+| Dado sensível replicado no dispositivo | A05 | Criptografia obrigatória (P7); consentimento antes da gravação; revogação apaga cópia local e fila; logs sem restrição (A13); backups do sistema operacional tratados no ADR-006. |
 | Alérgenos desatualizados offline | A06 (risco R2) | Data visível; estado "não verificado" nunca é sugerido. |
 | Regra de alérgenos em dois lugares | A06 | Mesma suíte de testes nos dois lados. |
 | Desbloqueio local diverge do servidor | A04 × A08 | RN04: nunca revogar; servidor confirma. |
@@ -146,14 +146,12 @@ Esta decisão vale se o sistema usar servidor próprio. Se a 2.3 escolher BaaS (
 **Escolha: S2 (monólito modular).**
 
 - Para equipes pequenas e MVPs, as fontes consultadas apontam o monólito, com limites de módulo claros para evoluir depois.
-- Módulos previstos (nomes provisórios): catálogo, perfil e restrições, rotina e planejamento, progresso e avaliação, notificações. A estrutura detalhada fica para a 2.5 e a 2.7.
+- Módulos previstos (nomes provisórios): catálogo, perfil e restrições, rotina e planejamento, progresso e avaliação, importação (agente de IA e rotas de curadoria). Notificações rodam no cliente (ADR-009), sem módulo no servidor. A estrutura detalhada fica para a 2.5 e a 2.7.
 - **Evolução planejada:** se A11 deixar de ser suficiente, módulos podem ser extraídos em serviços. Isso é gatilho, não decisão agora.
 
 **Perda aceita:** um único processo e uma única implantação; falha ou sobrecarga de um módulo afeta todos. **Gatilhos:** carga acima de 1.500 usuários ativos no pico com A01 violado; necessidade de escalar um módulo de forma independente.
 
-**A avaliar na 2.3 e na 2.4 (não decidido aqui):**
-- Importação do catálogo como pipeline (importar, normalizar, definir estado de alérgenos, publicar), pelo atributo A09.
-- Notificações assíncronas, pelos atributos A07 e A13; dependem da escolha entre notificação local e push.
+**Decidido na 2.4:** a importação do catálogo é um módulo da API (ADR-010, ADR-011); as notificações são locais (ADR-009).
 
 ## 5. Requisitos cruzados entre D1 e D2
 
@@ -169,7 +167,7 @@ O E2 só se sustenta se o servidor oferecer:
 
 O cliente é organizado por feature: uma pasta por funcionalidade, com camadas (apresentação, domínio, dados) dentro de cada feature, mais um núcleo compartilhado para banco local, fila de sincronização e rede. Isso não é um estilo na matriz; é uma diretriz de decomposição, ligada a A12 (a mudança de RN19 altera no máximo um módulo). O servidor segue a mesma lógica por módulo de domínio (D2). A estrutura detalhada fica para a 2.5 (C4) e a 2.7 (padrões).
 
-Itens transversais (sincronização e regra de alérgenos) ficam no núcleo compartilhado ou em uma feature própria. Se a stack for TypeScript nos dois lados, a regra de alérgenos pode virar pacote compartilhado; essa decisão pertence à 2.3.
+Itens transversais (sincronização e regra de alérgenos) ficam no núcleo compartilhado ou em uma feature própria. A regra de alérgenos é um pacote TypeScript compartilhado (ADR-014).
 
 ## 7. Conferência com a Definition of Done (2.2)
 
@@ -188,6 +186,7 @@ Os riscos R1 a R3 seguem em `atributos-qualidade.md`. A criptografia da restriç
 
 ## 9. Retroalimentação
 
-- **A05 reaberto (proposta):** acrescentar ao cenário A05 a medida "0 registros de restrição alimentar em texto claro no dispositivo, no servidor e nos backups; comunicação somente por TLS". Registrado no diário; a alteração em `atributos-qualidade.md` ainda não foi feita.
+- **A05 reaberto (proposta):** acrescentar ao cenário A05 a medida "0 registros de restrição alimentar em texto claro no dispositivo, no servidor e nos backups; comunicação somente por TLS". Registrado no diário; Aplicada em `atributos-qualidade.md` v1.1.
 - `atributos-qualidade.md`: as medidas (H) de A04 e A08 viram critérios de aceite do protótipo de sincronização; revalidar A01 na 2.3 considerando a sugestão no servidor.
 - Fase 1: nenhuma issue nova. A issue agrupada da 2.1 segue pendente.
+- **2.4:** v1.1 com a nova lista de módulos do servidor e referências aos ADRs.

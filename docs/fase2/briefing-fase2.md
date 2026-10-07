@@ -33,8 +33,9 @@
 - **Escala:** milhares de usuários (micro a pequeno porte).
 - **Stack:** experiência com React e TypeScript; Flutter não descartado
   (a comparação acontece na 2.3). Hipóteses iniciais não são decisões.
-- **Offline parcial:** apenas consulta de pratos candidatos e de pratos
+- **Offline parcial:** receitas planejadas, em preparo e preparadas; candidatas não ficam offline (RNF05 aprovada, A04).
   já preparados.
+- **IA (exigência do professor):** uso de IA no desenvolvimento e no uso da aplicação, via API. O uso da IA pelo curador na importação conta como "uso na aplicação" (confirmado pela dupla em 06/10/2026).
 - A definição de "prato concluído" (gatilho de coleção, evolução, badges e
   base da lista offline) deve ser conferida na 2.1.
 
@@ -44,7 +45,7 @@
 | 2.1 | Atributos de qualidade como cenários mensuráveis e priorizados | `atributos-qualidade.md` | 2.2, 2.3, 2.8 | Artefatos da Fase 1 (via issue) |
 | 2.2 | Estilo arquitetural com trade-offs | `estilo-arquitetural.md` | 2.3, 2.4 | 2.1 |
 | 2.3 | Pelo menos 2 propostas de MVP, matriz com critérios e escolha | `propostas-arquiteturais.md` | 2.4, 2.5 | 2.1, 2.2 |
-| 2.4 | Registro das decisões (ADR) | `docs/adr/adr-NNN-*.md` | 2.5 a 2.9 | 2.2, 2.3 |
+| 2.4 | Registro das decisões (ADR) | `/docs/fase2/adr/adr-NNN-*.md` | 2.5 a 2.9 | 2.2, 2.3 |
 | 2.5 | C4 níveis 1 a 3 (nível 4 só onde fizer sentido) | `c4-contexto.md`, `c4-containers.md`, `c4-componentes.md` | 2.6 | ADRs |
 | 2.6 | Classes, sequências e contratos | `diagrama-classes.md`, `sequencia-*.md`, `openapi.yaml`, coleção Bruno | 2.7 | C4, ADRs |
 | 2.7 | Padrões de projeto justificados | `padroes-de-projeto.md` | 2.8 | 2.6 |
@@ -149,4 +150,5 @@ A dupla revisa o briefing antes de usá-lo.
 | Versão | Data | Mudança | Motivo |
 |---|---|---|---|
 | v1.0 | 05/10/2026 | Criação | Conversa 2.0 |
-| v1.1 | 05/10/2026 | Remoção do campo Divisão de tarefas | Remoção do campo Divisão de tarefas |
+| v1.1 | 05/10/2026 | Remoção do campo Divisão de tarefas |Decisão da dupla na 2.0: campo descontinuado |
+	\| v1.2 \| 06/10/2026 \| Requisito de IA; offline corrigido; pasta dos ADRs \| Conversa 2.4 (retroalimentação) \|

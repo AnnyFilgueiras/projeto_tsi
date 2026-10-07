@@ -1,7 +1,7 @@
 # Propostas Arquiteturais — Panelada (Fase 2.3)
 
 > Fase 2.3 — Propostas arquiteturais. Papel da IA: arquiteto de software, com análise de trade-offs.
-> Destino: `/docs/fase2/propostas-arquiteturais.md`. **Versão 1.1** — 06/10/2026 — status: **escolha confirmada pela dupla** (P1, divisão demonstração × alvo, uso da IA pelo curador como "uso na aplicação", Kimi K3 como provedor de IA). A formalização em ADR ocorre na 2.4.
+> Destino: `/docs/fase2/propostas-arquiteturais.md`. Versão 1.2 — 06/10/2026: decisões formalizadas nos ADR-001 a ADR-014 (2.4); ajustes listados em "0. Mudanças".
 > Insumos: `briefing-passagem-2.3.md`, `briefing-fase2.md` (seções 3, 5, 7 e 8), `diario-de-bordo-fase2.md` (entradas 2.1 e 2.2), `atributos-qualidade.md` v1.1, `estilo-arquitetural.md` v1.0, `backlog.md`, `requisitos.md`; consultas pontuais a `regras-de-negocio.md`, `casos-de-uso.md` e `modelo-conceitual.md` (Fase 1) para a US10.
 > Convenção: IDs A01–A14 conforme `atributos-qualidade.md`. Medidas (H) são hipóteses. Notas de 1 (atende mal) a 5 (atende bem).
 
@@ -17,6 +17,7 @@
 8. **Provedor de IA (v1.1):** Kimi K3, por API. O preço da página oficial está em **yuan (CNY)**: ¥20 por milhão de tokens de entrada e ¥100 por milhão de saída (≈ US$ 3 e US$ 15). Uma conversão anterior, feita como se ¥ fossem ienes, subestimava o custo em cerca de 24 vezes.
 9. **Fontes de receitas (v1.1):** APIs e bancos de dados pesquisados têm custo alto ou entregam dados em outro idioma. A importação assistida passa a receber **o texto da receita fornecido pelo curador**, e o agente traduz, extrai, mapeia ingredientes e propõe alérgenos e substitutos. O "fluxo misto" com fonte estruturada foi descartado.
 10. **RN22 decidida (v1.1):** o substituto sugerido não pode conter alérgeno da restrição do usuário.
+11. **Ajustes da v1.2 (2.4):** agente de IA vira módulo da API (ADR-010); esforço de raciocínio e JSON Mode do Kimi (ADR-011); chave protegida via expo-secure-store (ADR-005); backup do Android (ADR-006); fotos baixadas com as planejadas (ADR-012); alvo Cloud Run + Neon (ADR-004).
 
 ## 1. Recapitulação (2.1 e 2.2)
 
@@ -30,10 +31,10 @@
 
 | | Ambiente de demonstração (entrega acadêmica) | Arquitetura-alvo (lançamento) |
 |---|---|---|
-| Execução | Docker Compose local: API TypeScript + Postgres + comando do agente de importação | Hospedagem gerenciada (seção 3) |
+| Execução | Docker Compose local: API TypeScript (com o módulo de importação e o agente de IA) + Postgres | Hospedagem gerenciada (seção 3) |
 | Cliente | App React Native em *development build* no emulador Android (`expo run:android`), falando com a API do host (no emulador, o endereço do host é `10.0.2.2`) | Publicação na Google Play; iOS opcional |
 | Dados | Seed pequeno (cerca de 20 pratos) produzido pelo fluxo assistido ou manual | 100 pratos no lançamento, 350 no dimensionamento |
-| Fotos | Servidas pela própria API ou por um servidor de arquivos no Compose | Hospedagem estática (a definir) |
+| Fotos | Servidas pela própria API (ADR-012) | Armazenamento de objetos do provedor; custo a verificar (ADR-012) |
 | Atributos medidos | A04, A08, A06, A05 (inspeção do banco local e do Postgres), A09 (importação com IA) | A01, A11 e custo ficam como hipóteses documentadas |
 
 **Consequência para a verificação:** cold start, pausa de projeto, cotas e cartão **não afetam a demo**. A01 medido localmente mede só a lógica da sugestão, e não a rede nem o provedor; isso deve ser dito na apresentação. A criptografia **precisa** aparecer na demo, porque é requisito: banco do dispositivo ilegível sem a chave e campos de restrição cifrados no Postgres.
@@ -45,8 +46,8 @@ Verificado em 06/10/2026. Itens de estudante dependem da verificação do GitHub
 | Serviço | Limite ou preço relevante | Efeito |
 |---|---|---|
 | [Render](https://render.com/docs/free) | Web service desliga após 15 min e religa em cerca de 1 min; Postgres gratuito expira em 30 dias | Descartado |
-| [Google Cloud Run](https://cloud.google.com/run/pricing) | 2 milhões de requisições/mês gratuitas; cota por conta de faturamento (cartão); cold start não medido | Opção de alvo. Cota na região de São Paulo não confirmada |
-| [Neon](https://neon.com/docs/introduction/plans) | 1 GB por projeto no plano gratuito | Cabe com folga |
+| [Google Cloud Run](https://cloud.google.com/run/pricing) | 2 milhões de requisições/mês gratuitas; cota por conta de faturamento (cartão); cold start não medido | Opção de alvo. A página oficial lista São Paulo (southamerica-east1) como Tier 1; confirmar a cota no console (ADR-004) |
+| [Neon](https://neon.com/docs/introduction/plans) | 1 GB por projeto no plano gratuito | Cabe com folga. Há região em São Paulo (aws-sa-east-1). |
 | [Supabase](https://uibakery.io/blog/supabase-pricing) | 500 MB, 50 mil MAU, pausa após 7 dias sem uso | Plano B (P2) |
 | [Azure para estudantes](https://azure.microsoft.com/en-us/free/students) | US$ 100 de crédito; serviços gratuitos, incluindo 750 horas de PostgreSQL Flexible Server B1MS; App Service gratuito limitado a 1 h/dia | Alternativa de alvo, sem cartão (maiores de 18). Crédito é temporário. A confirmar na 2.4 |
 | [GitHub Student Developer Pack](https://education.github.com/pack) | Verificação exigida; ofertas mudam (ex.: Copilot Student teve novas inscrições pausadas e o crédito da DigitalOcean saiu, segundo fontes secundárias) | Não depender de oferta específica |
@@ -54,7 +55,7 @@ Verificado em 06/10/2026. Itens de estudante dependem da verificação do GitHub
 | [Kimi K3 (API)](https://platform.kimi.ai/docs/pricing/chat) | US$ 3,00 de entrada, US$ 0,30 de entrada em cache e US$ 15,00 de saída por milhão de tokens (equivale a ¥20 / ¥100 na página em yuan); contexto de 1.048.576 tokens | Provedor escolhido. **Pagamento por uso**, não gratuito (seção 4) |
 | Google Play / Apple | US$ 25 únicos / US$ 99 por ano | Só no alvo. Sem Mac, iOS fora da demo |
 
-Crédito de estudante **não** é custo zero permanente; o ADR deve registrar isso. Não verificados: criptografia em repouso e backups dos provedores, cold start real, hospedagem das fotos, cota gratuita do Cloud Run em São Paulo, preço do Kimi K3 no console da conta da dupla.
+Crédito de estudante **não** é custo zero permanente; o ADR deve registrar isso. Não verificados: criptografia em repouso e backups dos provedores, cold start real, hospedagem das fotos, cota do Cloud Run em São Paulo (a confirmar no console), preço do Kimi K3 no console da conta da dupla.
 
 ## 4. Agente de IA na importação (abordagem A pura)
 
@@ -64,12 +65,12 @@ Crédito de estudante **não** é custo zero permanente; o ADR deve registrar is
 
 | Fluxo | Quando usar |
 |---|---|
-| Manual (UC12 original) | API indisponível, custo, ou preferência do curador |
-| Assistido por IA | Padrão da demo; fontes em outro idioma ou sem estrutura |
+| Manual (UC12 original) | Fluxo principal; também quando a API falha ou o custo pesa (ADR-010) |
+| Assistido por IA | Opcional; usado no seed da demo e para fontes em outro idioma (ADR-010) |
 
 O fluxo misto (campos estruturados vindos da fonte e IA só para alérgenos e substituições) foi descartado: as fontes pesquisadas têm custo alto ou dados em outro idioma.
 
-**Etapas do fluxo assistido (comando local, sem serviço permanente):**
+**Etapas do fluxo assistido (módulo de importação da API, acionado por rota de curadoria; ADR-010):**
 1. **Receber** o texto da receita fornecido pelo curador, em qualquer idioma, com a identificação da fonte (RN17, RNF08). O agente **não navega na web**.
 2. **Traduzir** para português do Brasil e **extrair** os campos para um esquema fixo (nome, culinária, ingredientes, utensílios, tempo, dificuldade, passo a passo, fonte).
 3. **Mapear ingredientes** para os já cadastrados no catálogo (ingrediente canônico), para não quebrar a despensa (US03) nem as substituições; ingredientes novos ficam marcados para revisão.
@@ -83,10 +84,10 @@ O fluxo misto (campos estruturados vindos da fonte e IA só para alérgenos e su
 - **Texto colado é conteúdo não confiável:** a saída é validada por esquema, o agente não tem ferramentas com efeito colateral e nada é publicado sem aprovação humana.
 - **A05:** a importação não recebe dado de usuário nem envia restrição alguma.
 - **Direitos e termos de uso:** traduzir ou adaptar receitas com IA não elimina questões de direito autoral nem dos termos de cada fonte. A atribuição (RN17, RNF08) é necessária; os termos de cada fonte devem ser conferidos antes da publicação (risco R10; não é aconselhamento jurídico).
-- **Troca de provedor:** o agente fica atrás de uma interface (porta e adaptador). **Provedor escolhido: Kimi K3**, por API compatível com o protocolo da OpenAI (`https://api.moonshot.ai/v1`); a saída estruturada por JSON Schema está documentada para a série Kimi K, mas deve ser testada no protótipo.
+- **Troca de provedor:** o agente fica atrás de uma interface (porta e adaptador). **Provedor escolhido: Kimi K3**, por API compatível com o protocolo da OpenAI (`https://api.moonshot.ai/v1`); a documentação consultada descreve o JSON Mode (objeto JSON válido); o esquema é validado no servidor (ADR-011).
 - **Rastreabilidade:** cada item guarda origem, data e aprovador. Para a demo, é possível gravar uma execução prévia como plano B se a rede falhar.
 
-**Custo estimado (teto, todas as receitas pelo agente).** Cotações de 05/10/2026, aproximadas: 1 CNY ≈ R$ 0,75 e 1 USD ≈ R$ 5,00. Entrada ≈ R$ 15 por milhão de tokens; saída ≈ R$ 75 por milhão; entrada em cache ≈ R$ 1,50 por milhão. Hipótese: 4.000 tokens de entrada e 10.000 de saída por receita. O K3 trabalha sempre em raciocínio máximo e a tradução tende a aumentar a saída, então os valores podem ser maiores.
+**Custo estimado (teto, todas as receitas pelo agente).** Cotações de 05/10/2026, aproximadas: 1 CNY ≈ R$ 0,75 e 1 USD ≈ R$ 5,00. Entrada ≈ R$ 15 por milhão de tokens; saída ≈ R$ 75 por milhão; entrada em cache ≈ R$ 1,50 por milhão. Hipótese: 4.000 tokens de entrada e 10.000 de saída por receita. Ver ADR-012
 
 | Cenário | Entrada | Saída | Total aproximado |
 |---|---|---|---|
@@ -115,11 +116,11 @@ O fluxo misto (campos estruturados vindos da fonte e IA só para alérgenos e su
 
 ### P1 — React Native + servidor TypeScript próprio
 
-- **Cliente:** React Native com TypeScript (Expo, *dev build*), por feature. SQLCipher com chave de 256 bits no Keystore; fila de sincronização na mesma base cifrada.
-- **Servidor:** Fastify ou NestJS, monólito modular (catálogo, perfil e restrições, rotina, progresso e avaliação, notificações, importação). Endpoint de sincronização idempotente.
+- **Cliente:** React Native com TypeScript (Expo, *dev build*), por feature. SQLCipher com chave de 256 bits protegida pelo Keystore via expo-secure-store; fila de sincronização na mesma base cifrada.
+- **Servidor:** Fastify ou NestJS, monólito modular (catálogo, perfil e restrições, rotina, progresso e avaliação, importação). Endpoint de sincronização idempotente.
 - **Regra de alérgenos:** pacote TypeScript único, usado no cliente e no servidor, com a mesma suíte de testes (A06), incluindo a RN22 para substitutos.
 - **Dados do servidor:** Postgres; AES-256-GCM nos campos de restrição, com chave fora do banco, para que *dumps* e backups contenham texto cifrado em qualquer provedor.
-- **Demo:** Docker Compose (API + Postgres + agente) e emulador Android.
+- **Demo:** Docker Compose (API com módulo de importação + Postgres) e emulador Android.
 - **Alvo:** Cloud Run + Neon, ou Azure com crédito de estudante (a decidir na 2.4).
 - **Riscos:** construir autenticação e sincronização no servidor; configuração nativa do SQLCipher; no alvo, cold start (R5) e conta de faturamento (R6).
 
@@ -235,11 +236,11 @@ Motivos: (1) criptografia sob controle da dupla e demonstrável por inspeção; 
 | Camada | Mecanismo (hipótese) | Verificação na demo |
 |---|---|---|
 | Trânsito | TLS no alvo; na demo local, HTTP em rede local deve ser declarado como limitação | Declarar a diferença; TLS no alvo |
-| Dispositivo | SQLCipher (inclui a fila); chave de 256 bits no Keystore | Arquivo do banco ilegível sem a chave |
+| Dispositivo | SQLCipher (inclui a fila); chave de 256 bits protegida pelo Keystore via expo-secure-store | Arquivo do banco ilegível sem a chave |
 | Servidor | AES-256-GCM nos campos de restrição; chave fora do banco | Colunas só com texto cifrado no Postgres do Compose |
 | Backups | Herdam o texto cifrado | Restaurar um *dump* e inspecionar |
-| Backup do Android | Excluir o banco local do backup automático (a confirmar na 2.4) | Teste de restauração |
-| Revogação | Apagar banco ou chave local na hora; servidor em até 24 h após receber o pedido (H) | Cenário de teste de A05 |
+| Backup do Android | Desativar o backup automático e excluir o banco e as preferências da chave por regras de extração (ADR-006) | Teste de restauração |
+| Revogação | Apagar banco ou chave local na hora; armazenamento ativo do servidor em até 24 h após receber o pedido (H); backups expiram pela retenção do provedor | Cenário de teste de A05 |
 
 A medida de abertura em 2 s (H) será feita no emulador de referência, com SQLCipher. TLS em "100% das comunicações" (A05) não vale em HTTP local; registrar como limitação da demo.
 
@@ -285,8 +286,8 @@ Detalhada no artefato `issue-retroalimentacao-fase1.md` (v1.3), que é a fonte d
 - **Documentos derivados:** `documento-de-requisitos.md`, `casos-de-uso.md`, `casos-de-teste.md`, `matriz-rastreabilidade.md` e `lexico.md` a conferir (alguns mantêm o mesmo tamanho de arquivo de antes das correções).
 
 **Fase 2:**
-- `atributos-qualidade.md` (v1.2 sugerida): exclusão offline conta 24 h a partir do recebimento pelo servidor; TLS da demo local; cenário de qualidade da saída da IA na importação (A09).
-- `estilo-arquitetural.md`: sem mudança, já que o P1 foi confirmado.
+- `atributos-qualidade.md` (v1.2, aplicada): exclusão offline conta 24 h a partir do recebimento pelo servidor; TLS da demo local; cenário de qualidade da saída da IA na importação (A09).
+- `estilo-arquitetural.md`: v1.1: módulos do servidor e referências aos ADRs.
 
 ## 15. Conferência com a Definition of Done (2.3)
 
@@ -303,5 +304,8 @@ Detalhada no artefato `issue-retroalimentacao-fase1.md` (v1.3), que é a fonte d
 | R8 | O agente de IA erra tradução, alérgenos ou substitutos | Estado "não verificado" por padrão; aprovação humana; validação por esquema; RN22 |
 | R9 | Custo (R$ 16 a R$ 284 por carga, hipótese), disponibilidade e mudança de oferta do Kimi K3 | Interface para trocar provedor; fluxo manual; execução gravada; limite de gasto; medir tokens reais |
 | R10 | Direitos autorais e termos de uso das fontes ao traduzir e publicar receitas | Atribuição; conferência dos termos de cada fonte; preferir fontes com licença aberta (a verificar) |
+| R11 | Divergência das fontes sobre uso de dados da API da Kimi para treinamento | Enviar só texto de receita; nunca dado de usuário; revisar termos antes de ampliar o uso |
+| R12 | Conta anônima sem e-mail e sem recuperação de senha é irrecuperável se o aparelho for perdido ou a sessão encerrada; vale também a regra de um aparelho por conta (ADR-007, ADR-008) | A interface incentiva vincular e-mail; sincronização assim que houver rede; aviso claro ao criar a conta; revisão se a perda de conta virar queixa recorrente |
+| R13 | Refresh token sem rotação: o roubo de um token dá acesso até a revogação ou o fim da validade (ADR-007) | Token guardado em `expo-secure-store`; validade máxima; revogação no servidor; revogação do aparelho anterior no login com e-mail; revisar a rotação se houver implantação real |
 
 A criptografia da restrição alimentar continua sendo requisito, e não risco.

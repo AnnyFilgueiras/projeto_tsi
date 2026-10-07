@@ -323,3 +323,80 @@
 - Abrir a issue agrupada de retroalimentação da Fase 1 (texto pronto em `issue-retroalimentacao-fase1.md`).
 - Revisar `estilo-arquitetural.md` e commitar em `/docs/fase2/`.
 - Conferir criptografia em repouso e backups do provedor do alvo em documentação oficial.
+
+
+## [06/10/2026] — Conversa 2.4 (Registro das decisões — ADR)
+
+- **Papel da IA:** arquiteto de software, redator técnico de ADR.
+- **Técnicas aplicadas:** ADR por decisão, com alternativas reais, consequências negativas, riscos, verificações pendentes e gatilhos de revisão; verificação em documentação oficial (Neon, Cloud Run, Azure PostgreSQL, Expo, Android, Node, Kimi API, OWASP, Creative Commons); fronteira explícita entre ADRs que tocam o mesmo tema (001, 005, 008); redação e confirmação de um ADR por vez; registro do que é hipótese (H).
+- **Prompts-chave usados:**
+  1. Abertura da 2.4 com o briefing de passagem e instrução de parar se faltasse algum anexo.
+  2. Respostas da dupla: manter `/docs/fase2/adr/`; briefing-mestre e issue como entregáveis da 2.4; placeholder `#30`; não citar ferramentas de estudante que o ADR não use.
+  3. Decisão pelos 13 ADRs previstos mais um (ADR-014).
+  4. Respostas às lacunas: preço do Kimi K3 conferido, teto de R$ 20, fotos de licença aberta, preenchimento manual do catálogo como principal, autor "Dupla".
+  5. Perguntas da dupla sobre "esvaziar" o módulo de notificações e sobre "preferência" da interface do curador; decisões: remover o módulo e adotar só endpoints de curadoria com Bruno.
+  6. Decisão da dupla de usar a observabilidade para detectar dado de alérgeno errado.
+  7. Confirmações dos itens marcados [CONFIRMAR] em cada ADR.
+- **Insumos usados:** `briefing-passagem-2.4.md`, `briefing-fase2.md` v1.1, `diario_de_bordo-fase2.md` (2.0 a 2.3), `propostas-arquiteturais.md` v1.1 (com a duplicação já removida), `estilo-arquitetural.md` v1.0, `atributos-qualidade.md` v1.1.
+- **Artefatos produzidos:** ADR-001 a ADR-014 (criados pela dupla em `/docs/fase2/adr/`); esta entrada; briefing de passagem da 2.5; propostas de alteração de `briefing-fase2.md` (v1.2), `atributos-qualidade.md` (v1.2), `propostas-arquiteturais.md` (v1.2) e `estilo-arquitetural.md` (v1.1).
+
+### Decisões tomadas (confirmadas pela dupla em 06/10/2026)
+
+| ADR | Decisão | Status |
+|---|---|---|
+| 001 | Estilo do sistema: offline-first com sincronização, restrito ao conjunto baixado (inclui fotos) | Aceito |
+| 002 | Servidor: monólito modular com Fastify; sem módulo de notificações; interface do curador só por endpoints | Aceito |
+| 003 | React Native + TypeScript (Expo, *dev build*); demo no emulador Android; iOS só no alvo | Aceito |
+| 004 | Demo em Compose (API + Postgres); alvo documentado: Cloud Run e Neon em São Paulo; Azure como alternativa; Supabase como plano B | Aceito com condições |
+| 005 | SQLite com SQLCipher (`expo-sqlite`); chave via `expo-secure-store`; fila na mesma base; `op-sqlite` como plano B de biblioteca | Aceito com condições |
+| 006 | Criptografia: SQLCipher no aparelho; AES-256-GCM de aplicação no servidor, com chave fora do banco; backup do Android desativado e com exclusões | Aceito com condições |
+| 007 | Conta anônima emitida pelo servidor; e-mail e senha opcionais; JWT curto e refresh token opaco sem rotação; sem recuperação de senha por e-mail na v1 | Aceito com condições |
+| 008 | Sincronização por operações idempotentes; restrição entra na fila; sincronização só em primeiro plano; um aparelho por conta | Aceito com condições |
+| 009 | Notificações locais; no máximo uma por tipo e 2 por dia; sem push; sem reengajamento | Aceito com condições |
+| 010 | Catálogo: fluxo manual principal e assistido opcional, mesmo esquema e portão de publicação; reescrita com palavras próprias | Aceito com condições |
+| 011 | Agente de IA: Kimi K3 atrás de interface, JSON Mode com validação no servidor, teto de R$ 20 controlado na aplicação | Aceito com condições |
+| 012 | Fotos: licença aberta, atribuição TASL, WebP, download junto com as planejadas | Aceito com condições |
+| 013 | Custos: demo sem custo exceto IA (teto de R$ 20); nenhuma decisão depende de benefício de estudante | Aceito |
+| 014 | Regra de alérgenos em pacote TypeScript compartilhado, com vetores de teste e invariantes de catálogo | Aceito |
+
+### Artefatos alterados (retroalimentação)
+
+- **Nenhum artefato foi alterado nesta conversa.** Alterações propostas (a aplicar pela dupla):
+  - `propostas-arquiteturais.md` v1.2; `atributos-qualidade.md` v1.2; `estilo-arquitetural.md` v1.1; `briefing-fase2.md` v1.2 (detalhes na entrega).
+  - **Fase 1 (issue agrupada, `#30` como placeholder):** a v1.3 do texto precisa ser anexada; acréscimos desta etapa listados na entrega.
+
+### Iterações relevantes (erros e retrabalho da IA)
+
+1. A primeira pergunta sobre a interface do curador usou "preferência" sem explicar do quê; a dupla questionou e a IA reformulou com opções e recomendação.
+2. O ADR-002 trazia um módulo de notificações no servidor, incoerente com as notificações locais; a IA apontou o ponto antes da redação, e a dupla aprovou remover o módulo.
+3. A P1 dizia "chave de 256 bits no Keystore"; a documentação indica que a chave fica protegida pelo Keystore via `expo-secure-store`. Corrigido no ADR-005 e na proposta v1.2.
+4. A 2.3 afirmou que o K3 trabalha sempre em raciocínio máximo e citou JSON Schema; a documentação mostra esforço configurável e JSON Mode. Corrigido no ADR-011 e na proposta v1.2.
+5. A 2.3 deixou a cota do Cloud Run em São Paulo como não confirmada; a página oficial lista a região entre as de preço Tier 1. Atualizado, ainda com confirmação no console.
+6. Em duas respostas, a IA levantou lacunas que a dupla já havia tratado ou que dependiam de decisão posterior (ex.: ADR-014 como ADR novo). A dupla decidiu pelo ADR-014 e aprovou.
+7. O `issue-retroalimentacao-fase1.md` v1.3, citado no briefing, não estava nos arquivos do projeto; a issue da Fase 1 ficou pendente.
+
+### Divergências registradas (briefing/professor × artefatos)
+
+- Pasta dos ADRs: o briefing-mestre trazia `docs/adr/` (seção 3 e diário 2.0) e `/docs/fase2/adr/` (seção 6). Adotado `/docs/fase2/adr/`.
+- Nome do diário: `diario_de_bordo-fase2.md` (arquivo) × `diario-de-bordo-fase2.md` (briefings). Tratados como o mesmo arquivo.
+- A seção 4 de `propostas-arquiteturais.md` v1.1 descrevia o agente como "comando"; o ADR-010 o torna módulo da API. Pela precedência, a proposta precisa da v1.2.
+- A lista de módulos de `estilo-arquitetural.md` previa "notificações" no servidor; o ADR-002 e o ADR-009 a removem. Registrado para a v1.1.
+- A exigência de IA via API não estava no briefing-mestre; entra na v1.2.
+
+### Riscos aceitos
+
+- **R11 (confirmado pela dupla):** as fontes divergem sobre o uso de dados da API da Kimi para treinamento; mitigado por enviar só texto de receita, nunca dado de usuário.
+- **R12 (confirmado pela dupla):** conta anônima sem e-mail e sem recuperação de senha é irrecuperável ao perder o aparelho (ADR-007, ADR-008); mitigado por incentivo ao vínculo de e-mail e sincronização rápida.
+- **R13 (confirmado pela dupla):** refresh token sem rotação aumenta a exposição em caso de roubo do token (ADR-007); mitigado por validade máxima, revogação no servidor e armazenamento em `expo-secure-store`.
+- R1 a R10 seguem. A criptografia continua sendo requisito, não risco.
+
+### Pendências para a próxima conversa (2.5)
+
+- Aplicar as alterações propostas nos quatro artefatos e commitar `/docs/fase2/adr/` e o diário.
+- Anexar o `issue-retroalimentacao-fase1.md` v1.3 e abrir a issue (`#30` provisório).
+- Definir o vocabulário de alérgenos e o critério de "verificado" (antes da 2.6).
+- Medidas e testes (H), em ordem de prioridade: tokens com 3 a 5 receitas e JSON Mode (ADR-011); abertura offline em 2 s com SQLCipher (ADR-005); protótipo de sincronização em 10 dias (ADR-008); WebP e peso das fotos (ADR-012); cota do Cloud Run e limite do console da Kimi (ADR-004, ADR-011, ADR-013).
+- Na 2.5, decidir em qual módulo do servidor ficam as preferências de lembrete.
+- Na 2.6, detalhar o mecanismo de idempotência, o esquema de saída do agente, o OpenAPI e a coleção Bruno de curadoria.
+- Na 2.7, definir como verificar as fronteiras entre módulos.
+- Verificação do benefício de estudante: sem impacto nas decisões desta etapa.

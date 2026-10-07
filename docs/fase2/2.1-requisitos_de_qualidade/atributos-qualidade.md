@@ -4,7 +4,7 @@
 
 > Destino: `/docs/fase2/atributos-qualidade.md`.
 
-> Versão 1.1 — 06/10/2026 — status: priorização aprovada pela dupla; medidas marcadas (H) são hipóteses a revalidar na 2.3. Alteração da v1.1: inclusão de criptografia no cenário A05 (retroalimentação da 2.2).
+> Versão 1.2 — 06/10/2026 — status: priorização aprovada pela dupla; medidas (H) são hipóteses. Alterações da v1.2: revogação e backups em A05; fotos em A04; saída da IA e imagem em A09; invariantes em A13; regra de notificação em A07 (retroalimentação da 2.3 e da 2.4).
 
 > Insumos: `requisitos.md`, `backlog.md`, `regras-de-negocio.md`, `resumo-1.4-fechamento.md`, `briefing-fase2` (seções 3, 5, 7 e 8), `diario-de-bordo-fase2.md`.
 
@@ -57,8 +57,8 @@ Formato: Estímulo, Fonte do estímulo, Ambiente, Resposta, Medida.
 - **Estímulo:** usuário cadastra, revoga ou exclui restrições alimentares.
 - **Fonte:** usuário.
 - **Ambiente:** operação normal.
-- **Resposta:**  o dado só é gravado após consentimento explícito, com informação de que é dado sensível. A restrição alimentar é protegida por criptografia em trânsito (TLS) e em repouso, no dispositivo (banco local e fila de sincronização), no servidor e nos backups. Ao revogar, a restrição é removida do dispositivo imediatamente e do servidor em até 24 h (H).
-- **Medida:** 0 registros de restrição sem consentimento registrado; 100% das revogações concluídas dentro do prazo; 0 registros de restrição em texto claro no dispositivo, no servidor e nos backups, verificado por inspeção do armazenamento (os arquivos do banco e dos backups ficam ilegíveis sem a chave); 100% das comunicações que carregam restrição por TLS.
+- **Resposta:**  o dado só é gravado após consentimento explícito, com informação de que é dado sensível. A restrição alimentar é protegida por criptografia em trânsito (TLS) e em repouso, no dispositivo (banco local e fila de sincronização), no servidor e nos backups. Ao revogar, a restrição é removida do dispositivo imediatamente e do armazenamento ativo do servidor em até 24 h (H), contadas a partir do recebimento do pedido pelo servidor. Backups mantêm só texto cifrado e expiram conforme a retenção do provedor.
+- **Medida:** 0 registros de restrição sem consentimento registrado; 100% das revogações concluídas dentro do prazo; 0 registros de restrição em texto claro no dispositivo, no servidor e nos backups, verificado por inspeção do armazenamento (os arquivos do banco e dos backups ficam ilegíveis sem a chave); 100% das comunicações que carregam restrição por TLS, no alvo. Na demo local, HTTP em rede local é limitação declarada.
 - **Rastreio:** US09, RNF06, RN09; LGPD art. 46 e §2º.
 
 ### A08 — Integridade do progresso e sincronização (Crítico)
@@ -73,16 +73,18 @@ Formato: Estímulo, Fonte do estímulo, Ambiente, Resposta, Medida.
 - **Estímulo:** usuário sem rede abre uma receita planejada, em preparo ou preparada, ou salva uma avaliação.
 - **Fonte:** usuário.
 - **Ambiente:** offline; as receitas planejadas foram baixadas antes, com conexão.
-- **Resposta:** a receita abre completa (ingredientes, passo a passo, utensílios, alérgenos) com a data da última atualização dos alérgenos. Salvar avaliação conclui localmente, e evolução e badge são desbloqueados localmente. A sincronização inicia na reconexão. Candidatas não ficam disponíveis offline (decisão da dupla).
-- **Medida (H):** abertura em até 2 s; salvar avaliação e calcular desbloqueios em até 1 s; início da sincronização em até 60 s após a reconexão.
+- **Resposta:** a receita abre completa (ingredientes, passo a passo, utensílios, alérgenos, foto) com a data da última atualização dos alérgenos. Salvar avaliação conclui localmente, e evolução e badge são desbloqueados localmente. A sincronização inicia na reconexão. Candidatas não ficam disponíveis offline (decisão da dupla).
+- **Medida (H):** abertura em até 2 s; salvar avaliação e calcular desbloqueios em até 1 s; início da sincronização em até 60 s após a reconexão; tamanho do conjunto baixado do seed, com fotos, a medir em rede 4G simulada.
 - **Rastreio:** RNF05 (reescrita proposta), US05, US12, US15, US16, RN01, RN02, RN03.
+
 
 ### A09 — Manutenibilidade e qualidade do catálogo (Alto)
 - **Estímulo:** curador importa e publica uma receita.
 - **Fonte:** curador.
 - **Ambiente:** operação normal.
 - **Resposta:** a publicação exige nome, culinária, fonte e link da fonte, ingredientes, passo a passo, tempo, dificuldade, utensílios, imagem e estado dos alérgenos. Prato de cadeia indica o prato base.
-- **Medida:** 100% das receitas publicadas com fonte e estado de alérgenos; catálogo de lançamento com 100 pratos verificados, em 10 culinárias, cobrindo os 5 continentes.
+- **Medida:** 100% das receitas publicadas com fonte, estado de alérgenos e imagem com atribuição completa (título, autor, fonte, licença); catálogo de lançamento com 100 pratos verificados, em 10 culinárias, cobrindo os 5 continentes.
+- **Cenário (saída da IA na importação):** estímulo: curador envia um texto de receita ao agente. Resposta: a saída é validada por esquema e entra como proposto. Medida: 100% das receitas de origem IA validadas e passando por aprovação do curador; 0 receitas publicadas sem aprovação; 0 estados "verificado" atribuídos pelo agente.
 - **Rastreio:** US18, RF18, RNF08, RN17, RN18, RN16.
 
 ### A01 — Desempenho da sugestão (Alto)
@@ -101,7 +103,7 @@ Formato: Estímulo, Fonte do estímulo, Ambiente, Resposta, Medida.
 ### A07 — Controle de notificações (Médio)
 - **Estímulo:** chegada das datas de compra e de preparo.
 - **Resposta:** envio de lembretes dentro da configuração do usuário.
-- **Medida:** no máximo 2 notificações por dia em 100% dos dias simulados; 0 envios com lembretes desativados.
+- **Medida:** no máximo 2 notificações por dia em 100% dos dias simulados; 0 envios com lembretes desativados. Regra proposta (H): uma notificação por tipo por dia, no máximo 2 (a conferir com a RN13).
 - **Rastreio:** US08, RNF07, RN13.
 
 ### A03 — Acesso em poucos toques (Médio)
@@ -118,7 +120,7 @@ Formato: Estímulo, Fonte do estímulo, Ambiente, Resposta, Medida.
 ### A13 — Observabilidade técnica (Médio)
 - **Estímulo:** falha de sincronização ou de importação.
 - **Resposta:** a falha é registrada com identificador, e o registro nunca contém dado de restrição alimentar.
-- **Medida:** 100% das falhas de sincronização registradas; 0 registros com dado de restrição.
+- **Medida:** 100% das falhas de sincronização registradas; 0 registros com dado de restrição; 100% das violações de invariante do catálogo registradas.
 - **Rastreio:** A08, RNF06.
 
 ### A12 — Modificabilidade (Baixo)
@@ -161,6 +163,7 @@ Formato: Estímulo, Fonte do estímulo, Ambiente, Resposta, Medida.
 | regras-de-negocio.md | Atualizar o status das RNs ("a validar na 1.4") |
 | modelo-conceitual.md | Conferir se comporta o estado de alérgenos e o conceito de "em preparo" (não verificado nesta etapa) |
 | RNF06    | Explicitar a proteção por criptografia da restrição alimentar (trânsito e repouso, no dispositivo e no servidor) |
+| Documentos da Fase 1 | Itens da 2.3 e da 2.4 estão na issue de retroalimentação (v1.4) |
 
 ## 8. Checagem da Definition of Done (briefing, seção 7)
 
