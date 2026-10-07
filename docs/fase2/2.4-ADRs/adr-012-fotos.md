@@ -97,3 +97,8 @@ R10 (estendido às imagens).
 | WebP falhar no *development build* | Passar para JPEG. |
 | Hospedagem gratuita de imagens indisponível no alvo | Servir pela API ou reavaliar o provedor. |
 | Fotos de usuário entrarem no escopo | Reabrir (moderação, LGPD, armazenamento). |
+
+## Detalhamento (2.5)
+
+- **Alvo:** o app baixa as fotos direto do armazenamento de objetos, por URL estática com hash no nome. Na demo, o download é pela API. Se não houver opção gratuita no alvo, volta a ser pela API (item 5).
+- **Preparadas:** as já baixadas permanecem no aparelho; em instalação nova, voltam sob demanda. A política de limpeza do armazenamento local continua em aberto.

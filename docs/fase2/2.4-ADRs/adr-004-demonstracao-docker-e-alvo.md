@@ -100,3 +100,7 @@ R5, R6, R7.
 | Cota ou preço do Cloud Run ou do Neon mudarem | Reavaliar o alvo; considerar o Azure. |
 | Importação exceder o tempo limite de requisição | Mover a importação para tarefa assíncrona. |
 | Dupla ganhar um Mac e quiser iOS | Registrar US$ 99 por ano (ADR-013). |
+
+## Detalhamento (2.5)
+
+- **Chave da API de IA no alvo:** fica no Secret Manager, como segredo separado da chave AES (o item 9 cita só a chave AES). Na demo continua no arquivo de ambiente fora do repositório (item 4).

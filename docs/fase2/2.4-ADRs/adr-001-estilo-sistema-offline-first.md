@@ -100,3 +100,9 @@ R2, R4, R5.
 | Catálogo passa de 350 pratos, ou o download das planejadas com fotos pesa no dispositivo de referência | Revisar a estratégia de pacotes e de fotos. |
 | A14 entra no escopo | Reavaliar eventos para telemetria, com consentimento (RNF06). |
 | Usuário passa a submeter receitas (fora da v1) | Rever moderação e fluxo de importação. |
+
+## Detalhamento (2.5)
+
+- **Índice leve do catálogo no aparelho:** identificadores e nomes de pratos e culinárias, cadeias de evolução, continente das culinárias, definições de badge e totais por culinária. Sem receita nem foto. Necessário para desbloquear evolução e badge e calcular a coleção sem rede (RN02, RN03, RN07). Não contradiz "não há catálogo completo no dispositivo": receitas e fotos continuam fora, exceto o conjunto baixado. Tamanho é hipótese, a medir com o seed.
+- **Conjunto baixado em três camadas:** (1) texto leve, sempre; (2) receita completa e foto das planejadas e em preparo; (3) preparadas já baixadas permanecem no aparelho e, em instalação nova, voltam sob demanda.
+- **Planejamento:** criar item de plano exige rede, e a receita é baixada nesse momento. Offline continuam reagendar, remover, definir data de compra, marcar comprado e avaliar.

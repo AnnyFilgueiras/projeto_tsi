@@ -103,3 +103,9 @@ R2, R4.
 | Uso em vários aparelhos virar requisito | Reabrir a regra de conflito e a conta (ADR-007). |
 | Ranking (Won't) ou pontuação global (RN19) priorizados | Reavaliar a autoridade do servidor sobre o progresso. |
 | Sincronização com o app fechado virar necessidade | Avaliar execução em segundo plano no Android. |
+
+## Detalhamento (2.5)
+
+- **Despensa, utensílios e preferências culinárias:** cópia local de leitura, baixada com o conjunto; edição só online. Não entram nas operações do item 3.
+- **Item 3 (operações):** "itens da rotina" inclui data de compra e marcação de comprado da lista de compras. **Criar item de plano exige rede** (a receita é baixada nesse momento); reagendar e remover continuam offline.
+- **Item 9 (conjunto baixado):** três camadas (texto leve; receitas planejadas e em preparo com foto; preparadas sob demanda em instalação nova). Ver ADR-001.

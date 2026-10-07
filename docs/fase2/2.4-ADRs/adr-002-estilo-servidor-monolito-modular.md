@@ -74,7 +74,7 @@ R4, R5.
 
 ## Pontos em aberto
 
-- Módulo do servidor que guarda a preferência de lembretes: decidido na 2.5.
+- Módulo do servidor que guarda a preferência de lembretes: resolvido na 2.5 (Perfil e Restrições).
 - Mecanismo de verificação das fronteiras entre módulos: 2.7.
 
 ## Verificações pendentes (H)
@@ -91,3 +91,10 @@ R4, R5.
 | As fronteiras entre módulos forem violadas repetidamente | Reavaliar NestJS ou regras de lint mais rígidas. |
 | Ativação do plano B (Supabase) | Marcar este ADR como "Substituído por ADR-NNN". |
 | Push passa a ser requisito | Criar módulo de notificações no servidor e revisar o ADR-009. |
+
+## Detalhamento (2.5)
+
+- **Componentes transversais** (não são módulos de domínio; orquestram só pelas interfaces públicas dos módulos): Identidade e Sessões, Sincronização e Sugestão e Busca. Os módulos de domínio continuam sendo os cinco listados na decisão 3.
+- **Preferências de lembrete** ficam no módulo Perfil e Restrições (frequência e tipos de lembrete são atributos de `Usuario`).
+- **Definições de badge** ficam no módulo Progresso e Avaliação, carregadas por seed pela dupla.
+- **Apoio:** Cifra de Campos Sensíveis e Registro Técnico, na API; o Pacote de Alérgenos é compartilhado com o app (ADR-014).
