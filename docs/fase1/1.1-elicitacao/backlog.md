@@ -107,10 +107,10 @@ US09 — Como Cleusa, quero cadastrar as restrições alimentares da família no
 perfil e ser alertada sobre alérgenos, para cozinhar com segurança.
 Origem: RF07 | Prioridade: Must
 Critérios de aceite:
-- Dado que cadastrei uma restrição (ex.: diabetes ou outra condição na verificada), quando navego pelo aplicativo, vejo um aviso fixo informaando que apenos alérgenos são verificados.
+- Dado que cadastrei uma restrição (ex.: diabetes ou outra condição não verificada), quando navego pelo aplicativo, vejo um aviso fixo informando que apenas alérgenos são verificados.
 - Dado que cadastrei uma restrição de alérgeno (ex.: camarão), quando recebo sugestões, então pratos incompatíveis ou com estado de alérgenos "não verificado" não aparecem nas sugestões (RN08).
 - Dado que uma receita contém um alérgeno comum (ex.: glúten, lactose,
-  amendoim) ou possui estado de "não verificado", quando a visualizo, então o alerta de "compatibilidade não confirmada" é exibidos (RN16).
+  amendoim) ou possui estado de "não verificado", quando a visualizo, então o alerta de "compatibilidade não confirmada" é exibido (RN16).
 ```
 
 ```
@@ -120,7 +120,7 @@ Origem: RF08 | Prioridade: Must
 Critérios de aceite:
 - Dado que um ingrediente da receita está marcado como indisponível ou
   restrito no meu perfil, quando visualizo a receita, então vejo ao menos uma
-  substituição sugerida para ele.
+  substituição segura sugerida para ele, em que os alérgenos não violam minha restrição (RN22).
 - Dado que não há substituto cadastrado, quando visualizo o ingrediente,
   então o sistema informa isso explicitamente, em vez de inventar uma troca.
 ```
@@ -157,6 +157,9 @@ Critérios de aceite:
 - Dado que importo uma receita de plataforma pública, quando a cadastro,
   então registro fonte, ingredientes, utensílios, dificuldade, tempo, passo a
   passo e alérgenos (RNF08).
+- Dado que utilizo um agente de IA na importação, quando o agente propõe
+  traduções, extração de campos, alérgenos ou substitutos, então o conteúdo só é
+  publicado após minha revisão e aprovação (RN21, RNF11).
 - Dado que um prato faz parte de uma cadeia como evolução, quando o cadastro,
   então indico exatamente um prato base (RN18).
 ```

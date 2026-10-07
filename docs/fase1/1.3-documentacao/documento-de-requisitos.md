@@ -53,7 +53,7 @@ Fonte modular: [personas.md](../1.1-elicitacao/personas.md)
 
 ## 3. Léxico
 
-O léxico do domínio define 25 termos — de **Prato**, **Receita** e **Culinária** até **Cadeia de evolução**, **Despensa**, **Candidata** e **Badge** — incluindo o registro explícito de **Ranking** como termo descartado (Won't) nesta versão.
+O léxico do domínio define 29 termos — de **Prato**, **Receita** e **Culinária** até **Cadeia de evolução**, **Despensa**, **Candidata** e **Badge** — incluindo o registro explícito de **Ranking** como termo descartado (Won't) nesta versão.
 
 Fonte modular: [lexico.md](../1.1-elicitacao/lexico.md)
 
@@ -84,7 +84,7 @@ Fonte modular: [lexico.md](../1.1-elicitacao/lexico.md)
 | RF15 | O sistema deve conceder badges ao atingir marcos definidos (ex.: pratos de N países distintos) | Escopo, C, R |
 | ~~RF16~~ | ~~O sistema deve exibir um ranking de pontos entre o usuário e seus amigos~~ — **DESCARTADO (Won't):** apenas 1 dos 5 entrevistados demonstrou interesse; social despriorizado pela dupla | Escopo, R |
 | RF17 | O sistema deve permitir sugerir um prato a um amigo | Escopo, D1, C, R |
-| RF18 | O sistema deve permitir ao curador importar e manter o catálogo de receitas, incluindo dificuldade, alérgenos e cadeias de evolução | Decisão de fonte de conteúdo |
+| RF18 | O sistema deve permitir ao curador importar e manter o catálogo de receitas (com apoio opcional de agente de IA), incluindo dificuldade, estado dos alérgenos (verificado, declarado pela fonte, não verificado) e cadeias de evolução | Decisão de fonte de conteúdo, Atributos de Qualidade A09 |
 | RF19 | O sistema deve informar os utensílios necessários em cada receita e sinalizar, nas sugestões, os pratos inviáveis pelos utensílios que o usuário declarou possuir | D1, R |
 
 ### Requisitos não funcionais
@@ -95,12 +95,13 @@ Fonte modular: [lexico.md](../1.1-elicitacao/lexico.md)
 | RNF02 | O sistema deve levar o usuário do primeiro acesso à primeira sugestão de prato em até 2 minutos, com no máximo 3 campos obrigatórios antes do primeiro uso | D1, D2, M, C, BM-Yummly (anti-req.) |
 | RNF03 | O sistema deve responder a uma solicitação de sugestão de pratos em até 2,5 segundos | Derivado (decisão rápida, D2) |
 | RNF04 | O sistema deve permitir iniciar qualquer fluxo principal (sugestões, planejamento, registro de avaliação) em até 2 toques a partir da tela inicial | C, D1, D2 |
-| RNF05 | O sistema deve permitir consultar offline as receitas já planejadas ou em preparo | C (cozinha/bancada) |
-| RNF06 | O sistema deve tratar dados de restrições alimentares como dados sensíveis, com consentimento explícito, conforme a LGPD | C, D2 |
+| RNF05 | O sistema deve permitir consultar offline as receitas planejadas, em preparo (abertas no passo a passo) e preparadas (com avaliação salva), e salvar a avaliação sem conexão; ao restabelecer a conexão, a sincronização deve ocorrer sem perda de avaliações nem duplicação de preparos | C (cozinha/bancada) |
+| RNF06 | O sistema deve tratar dados de restrições alimentares como dados sensíveis, com consentimento explícito, conforme a LGPD, e garantindo proteção criptográfica em trânsito (TLS) e em repouso (no dispositivo, servidor, fila de sincronização e backups). Nenhum dado de usuário é enviado a provedores de IA | C, D2, Estilo Arquitetural P7 |
 | RNF07 | O sistema deve permitir cconfigurar frequência e tipos de notificação, com limite padrão de 1 notificação por evento | D2, BM-Duolingo (anti-req.) |
-| RNF08 | O sistema deve exibir a atribuição da fonte pública de cada receita importada | Stakeholder externo |
+| RNF08 | O sistema deve exibir a atribuição da fonte pública de cada receita importada; para receitas traduzidas ou adaptadas por IA, deve manter a fonte e indicar a tradução/adaptação | Stakeholder externo, Atributos de Qualidade A09 |
 | RNF09 | O sistema não deve punir o usuário por inatividade (sem perda de pontos, sequências ou progresso) | BM-Duolingo (anti-req.) |
 | RNF10 | O registro de avaliação deve ter apenas a nota como campo obrigatório; relato e alterações são opcionais | R, walkthrough da dupla |
+| RNF11 | O sistema deve oferecer ao curador apoio (opcional) de um agente de IA, via API, na importação do catálogo (tradução para português do Brasil, extração de campos, estado dos alérgenos e substituições); toda proposta da IA exige aprovação do curador antes da publicação. A importação manual permanece disponível | Decisão de Arquitetura, Atributos de Qualidade A09 
 
 ### Anti-requisitos (benchmarking dirigido)
 
@@ -168,12 +169,13 @@ Como Cleusa, quero receber lembretes nas datas de compra e de preparo, para não
 
 #### US09 — Cadastrar restrições alimentares e receber alertas (Must · RF07)
 Como Cleusa, quero cadastrar as restrições alimentares da família no perfil e ser alertada sobre alérgenos, para cozinhar com segurança.
-- Dado que cadastrei uma restrição (ex.: diabetes), quando recebo sugestões, então pratos incompatíveis não aparecem nas sugestões; na busca e na visualização, são claramente sinalizados (RN08).
-- Dado que uma receita contém um alérgeno comum (ex.: glúten, lactose, amendoim), quando a visualizo, então o alerta de alérgeno é exibido.
+- Dado que cadastrei uma restrição (ex.: diabetes ou outra condição não verificada), quando navego pelo aplicativo, vejo um aviso fixo informando que apenas alérgenos são verificados.
+- Dado que cadastrei uma restrição de alérgeno (ex.: camarão), quando recebo sugestões, então pratos incompatíveis ou com estado de alérgenos "não verificado" não aparecem nas sugestões (RN08).
+- Dado que uma receita contém um alérgeno comum (ex.: glúten, lactose, amendoim) ou possui estado de "não verificado", quando a visualizo, então o alerta de "compatibilidade não confirmada" é exibido (RN16).
 
 #### US10 — Ver substituições sugeridas para ingredientes (Must · RF08)
 Como Cleusa, quero ver substituições sugeridas para ingredientes que não tenho ou não posso consumir, para adaptar receitas sem desistir delas.
-- Dado que um ingrediente da receita está marcado como indisponível ou restrito no meu perfil, quando visualizo a receita, então vejo ao menos uma substituição sugerida para ele.
+- Dado que um ingrediente da receita está marcado como indisponível ou restrito no meu perfil, quando visualizo a receita, então vejo ao menos uma substituição segura sugerida para ele, em que os alérgenos não violam minha restrição (RN22).
 - Dado que não há substituto cadastrado, quando visualizo o ingrediente, então o sistema informa isso explicitamente, em vez de inventar uma troca.
 
 #### US12 — Registrar avaliação de prato concluído com histórico (Must · RF11)
@@ -190,6 +192,7 @@ Como Rafael, quero ver minha coleção de pratos por país/culinária com o prog
 #### US18 — Importar e manter catálogo de receitas (Must · RF18)
 Como curador de conteúdo, quero importar e manter o catálogo de receitas com todos os atributos, para que o app tenha conteúdo confiável.
 - Dado que importo uma receita de plataforma pública, quando a cadastro, então registro fonte, ingredientes, utensílios, dificuldade, tempo, passo a passo e alérgenos (RNF08).
+- Dado que utilizo um agente de IA na importação, quando o agente propõe traduções, extração de campos, alérgenos ou substitutos, então o conteúdo só é publicado após minha revisão e aprovação (RN21, RNF11).
 - Dado que um prato faz parte de uma cadeia como evolução, quando o cadastro, então indico exatamente um prato base (RN18).
 
 ### Should
@@ -258,6 +261,7 @@ classDiagram
     }
     class Ingrediente {
         nome
+        alergenos
     }
     class Culinaria {
         nome
@@ -272,6 +276,7 @@ classDiagram
         dificuldade
         passoAPasso
         alergenos
+        estadoAlergenos
         fonte
     }
     class Sugestao {
@@ -331,10 +336,10 @@ classDiagram
 | Usuario | Pessoa que descobre pratos, planeja a rotina e registra preparos | nome; preferências culinárias; frequência de lembretes; tipos de lembrete ativos |
 | RestricaoAlimentar | Condição declarada no perfil que filtra sugestões; dado sensível (LGPD, RNF06) | nome; descrição; alérgenos associados |
 | Utensilio | Equipamento de cozinha (ex.: fogão, forno) | nome |
-| Ingrediente | Item que compõe receitas, despensa e lista de compras | nome |
+| Ingrediente | Item que compõe receitas, despensa e lista de compras | nome, alergenos |
 | Culinaria | País ou região que agrupa pratos (ex.: japonesa, nordestina) | nome; continentes (multivalorado) |
 | Prato | Unidade da coleção e das cadeias de evolução | nome; imagem |
-| Receita | Instruções de preparo de um prato | tempo de preparo; dificuldade {fácil, média, difícil}; passo a passo numerado; alérgenos; fonte (RNF08) |
+| Receita | Instruções de preparo de um prato | tempo de preparo; dificuldade {fácil, média, difícil}; passo a passo numerado; alérgenos, estadoAlergenos {verificado, declarado_fonte, nao_verificado}; fonte (RNF08) |
 | Sugestao | Recomendação de prato apresentada ao usuário, com ciclo de vida | data/hora; situação {apresentada, candidata, descartada} |
 | PlanoDeRotina | Conjunto de pratos candidatos com datas, em um período | período {semana, quinzena}; data de início |
 | ItemDeRotina | Prato agendado em uma data dentro do plano | data de preparo; status {planejado, em preparo, concluído} |
@@ -367,10 +372,10 @@ Um UC para cada US Must (12), mais UC13 para US15 (Should, registro opcional apr
 | UC06 | Gerar lista de compras consolidada | Usuario | US07 | Consolida os ingredientes do plano sem duplicatas e sem quantidades (RN14); usuário define a data de compra e marca itens como comprados; regeneração preserva marcações |
 | UC07 | Receber lembretes de compra e preparo | Usuario (+ Tempo) | US08 | Na data de compra, notificação com a lista; na data de preparo, lembrete com o prato do dia; frequência e tipos configuráveis; desativados, nada é enviado (RN13) |
 | UC08 | Cadastrar restrições alimentares | Usuario | US09 | Cadastro com consentimento explícito (dado sensível, RN09); a restrição passa a filtrar sugestões (RN08); alerta de incompatibilidade na visualização (RN16); revogável a qualquer momento |
-| UC09 | Consultar substituições de ingredientes | Usuario | US10 | Ingredientes faltantes ou incompatíveis são marcados; para cada um, o sistema exibe os substitutos globais cadastrados; sem substituto, informa explicitamente (RN15) |
+| UC09 | Consultar substituições de ingredientes | Usuario | US10 | Ingredientes faltantes ou incompatíveis são marcados; para cada um, o sistema exibe os substitutos seguros globais cadastrados; sem substituto seguro, informa explicitamente (RN15, RN22) |
 | UC10 | Registrar avaliação de prato | Usuario | US12 | Nota obrigatória (0 a 5 em passos de 0,5 — RN05), relato e alterações opcionais; ao salvar, o prato passa a constar como concluído (RN01), o preparo entra no histórico (RN06) e o sistema verifica desbloqueios de evoluções (RN02) e badges (RN03, RN04) |
 | UC11 | Consultar coleção por culinária | Usuario | US14 | Pratos concluídos (RN01) agrupados por culinária, com percentual de progresso e quantidade faltante (RN07) |
-| UC12 | Importar e manter catálogo de receitas | Curador | US18 | Curador importa receita de plataforma pública, cadastra prato e receita com todos os atributos (fonte obrigatória — RN17, RNF08) e indica exatamente um prato base se for evolução (RN18) |
+| UC12 | Importar e manter catálogo de receitas | Curador | US18 | Curador importa receita de plataforma pública, cadastra prato e receita com todos os atributos (fonte obrigatória — RN17, RNF08) e indica exatamente um prato base se for evolução (RN18) ou curador utiliza de agente de IA para traduzir, adaptar, mapear ingredientes e só cadastra essa receita após ele mesmo revisar e aprovar |
 | UC13 | Desbloquear evolução de prato | Usuario | US15 (Should) | Ao salvar a avaliação do prato base, o sistema desbloqueia as evoluções diretas (RN02, RN18); cadeias podem ter profundidade maior que dois níveis |
 
 Fonte modular (fluxos alternativos e de exceção completos): [casos-de-uso.md](../1.2-analise/casos-de-uso.md)
@@ -396,12 +401,13 @@ Fonte modular (fluxos alternativos e de exceção completos): [casos-de-uso.md](
 
 ### Perfil e restrições
 
-- **RN08** — Um prato é incompatível com o usuário quando sua receita declara ao menos um alérgeno associado a alguma restrição alimentar do perfil. Sugestões não apresentam pratos incompatíveis; na busca e na visualização, pratos incompatíveis são claramente sinalizados. *(US09, US04; RF07)*
+- **RN08** — Um prato é incompatível com o usuário quando sua receita declara ao menos um alérgeno associado a alguma restrição alimentar do perfil, ou quando seu estado de alérgenos for "não verificado". A lista de alérgenos vazia significa "não verificado", nunca "sem alérgenos". Sugestões não apresentam pratos incompatíveis; na busca e na visualização, pratos incompatíveis são claramente sinalizados com aviso sobre a incompatibilidade. *(US09, US04; RF07)*
 - **RN09** — O cadastro de restrições alimentares só é persistido após consentimento explícito do usuário, com informação de que se trata de dado sensível; o usuário pode revogar o consentimento e excluir restrições a qualquer momento. *(US09; RNF06)*
 
 ### Sugestão
 
-- **RN10** — As sugestões consideram o perfil (preferências e restrições, RN08) e o histórico (prato já concluído não é apresentado como novidade). Quando o usuário informa a despensa, as sugestões priorizam pratos compatíveis e destacam os ingredientes faltantes; pratos que exigem utensílios ausentes são sinalizados. *(US01, US03, US11; RF01, RF03, RF19)*
+- **RN10** — s sugestões consideram o perfil (preferências e restrições com alérgenos verificados, RN08) e o
+histórico (prato já concluído não é apresentado como novidade). Quando o usuário informa a despensa, as sugestões priorizam pratos compatíveis e destacam os ingredientes faltantes; pratos que exigem utensílios ausentes são sinalizados. *(US01, US03, US11; RF01, RF03, RF19)*
 - **RN11** — Aprovar uma sugestão torna-a candidata, disponível para o planejamento; descartar impede seu retorno na mesma sessão, mas ela pode reaparecer em sessões futuras. *(US02; RF02)*
 
 ### Rotina e lembretes
@@ -415,13 +421,15 @@ Fonte modular (fluxos alternativos e de exceção completos): [casos-de-uso.md](
 
 ### Substituições e alérgenos
 
-- **RN15** — Ao visualizar uma receita, para cada ingrediente faltante (ausente da despensa) ou incompatível com restrição do perfil, o sistema sugere os substitutos globais cadastrados; se não houver substituto cadastrado, o sistema informa isso explicitamente, sem inventar uma troca. *(US10; RF08)*
-- **RN16** — Toda receita que declara alérgenos exibe alerta na visualização; alérgenos associados a restrições do usuário são destacados como incompatíveis. *(US09; RF07)*
+- **RN15** — Ao visualizar uma receita, para cada ingrediente faltante (ausente da despensa) ou incompatível com restrição do perfil, o sistema sugere os substitutos globais cadastrados (vindos de cadastro manual ou de proposta de IA aprovada pelo curador); se não houver substituto cadastrado, o sistema informa isso explicitamente, sem inventar uma troca. *(US10; RF08)*
+- **RN16** — Toda receita exibe seu estado de alérgenos (verificado, declarado pela fonte, não verificado) na visualização; caso possua alérgenos associados às restrições do usuário ou tenha o estado "não verificado", o sitema alerta com "compatibilidade não confirmada". *(US09; RF07)*
 
 ### Catálogo
 
 - **RN17** — Toda receita importada registra e exibe a fonte pública de origem. *(US18; RNF08)*
 - **RN18** — Ao cadastrar um prato que participa de uma cadeia, o curador indica exatamente um prato base; prato sem base indicada é a raiz da cadeia; cadeias podem ter profundidade maior que dois níveis (evolução de evolução). *(US18, US15; RF18, RF14)*
+- **RN21** — Todo substituto de ingrediente proposto por agente de IA só é cadastrado e disponibilizado no catálogo após revisão e aprovação do curador. *US10, US18; RF08 RF18*
+- **RN22** — Um substituto cadastrado só é sugerido para um ingrediente incompatível se não contiver alérgenos associados ao perfil. Se o substituto tiver a lista de alérgenos não verificada, ele não é sugerido a quem possui alguma restrição. *US10; RF08; RN08*
 
 ### Regras futuras e excluídas
 
@@ -445,7 +453,7 @@ Cadeia do Guia Geral: Persona → RF/RNF → US → UC → Classe do modelo conc
 | RF05 | US07 | UC06 | Usuario, PlanoDeRotina, ListaDeCompras, Ingrediente | — |
 | RF06 | US08 | UC07 | Usuario, PlanoDeRotina, ItemDeRotina, ListaDeCompras | Ator secundário: Tempo |
 | RF07 | US09 | UC08 | Usuario, RestricaoAlimentar, Receita | — |
-| RF08 | US10 | UC09 | Usuario, Receita, Ingrediente, RestricaoAlimentar | — |
+| RF08 | US10 | UC09 | Usuario, Receita, Ingrediente, RestricaoAlimentar | RN15, RN22 | - |
 | RF09 | US04 | — | — | Should sem UC nesta versão |
 | RF10 | US05 | UC04 | Usuario, Prato, Receita, Ingrediente, Utensilio, RestricaoAlimentar | — |
 | RF11 | US12 | UC10 | Usuario, Avaliacao, Prato, ItemDeRotina, Badge | — |
@@ -455,7 +463,7 @@ Cadeia do Guia Geral: Persona → RF/RNF → US → UC → Classe do modelo conc
 | RF15 | US16 | — | Badge, Avaliacao (via UC10) | Should; RN03/RN04 verificadas no UC10 |
 | ~~RF16~~ | — | — | — | Won't; RN20 (excluída) |
 | RF17 | US17 | — | Amizade (fora do modelo v1) | Could |
-| RF18 | US18 | UC12 | Prato, Receita, Culinaria, Ingrediente, Utensilio | Ator: Curador |
+| RF18 | US18 | UC12 | Prato, Receita, Culinaria, Ingrediente, Utensilio | Ator: Curador; RN17, RN18, RN21, RNF11 |
 | RF19 | US11 | — | Utensilio, Receita, Sugestao | Should; FA2 do UC01 e RN10 |
 
 ---

@@ -161,7 +161,15 @@
 9. Dimensionamento: 1.500 usuários ativos em dia de pico; catálogo de 350 pratos; lançamento com 100 pratos verificados.
 
 ### Artefatos alterados (retroalimentação)
-- Nenhum artefato da Fase 1 foi alterado nesta conversa. Alterações propostas, a abrir em uma issue agrupada: RNF05 (e RNF novo ou emenda), RN08/RN10/RN16/RF18/US09 (estado de alérgenos), US09 (diabetes), US12-c1 e US13 (redação), status das RNs, conferência do modelo conceitual. Detalhes na seção 7 de `atributos-qualidade.md`.
+- `requisitos.md`: incluídos RNF11 (apoio opcional de IA), RNF08 ampliado para IA e RNF06 com restrição de envio de dados para IA.
+- `regras-de-negocio.md`: incluídas RN21 (aprovação explícita de IA pelo curador) e RN22 (segurança de alérgenos em substitutos).
+- `backlog.md`: atualizados critérios de aceite das histórias US09, US10 e US18.
+- `modelo-conceitual.md`: adicionado atributo `alergenos` na classe `Ingrediente`.
+- `casos-de-uso.md`: atualizado UC09 (substitutos seguros via RN22) e UC12 com o fluxo alternativo FA2 (IA) e exceção FE2.
+- `matriz-rastreabilidade.md`: mapeamento atualizado para cobrir RN21, RN22 e RNF11.
+- `casos-de-teste.md`: atualizados CT19 e CT20; adicionados CT28 (RN21), CT29 (RN22) e CT30 (RNF11).
+- `lexico.md`: incluídos os termos *Estado de alérgenos*, *Em preparo*, *Proposta de IA* e *Agente de IA*.
+- `documento-de-requisitos.md`: re-sincronizado com os arquivos fontes.
 
 ### Iterações relevantes (erros e retrabalho da IA)
 1. Na primeira resposta, a IA tratou o texto das US12 e US13 como possível mudança de regra; a dupla manteve a RN01 e a correção ficou só de redação.

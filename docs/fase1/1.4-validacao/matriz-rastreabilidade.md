@@ -14,7 +14,7 @@
 | RF05 | US07 (Must) | UC06 | Usuario, PlanoDeRotina, ListaDeCompras, Ingrediente | RN14 | Validado |
 | RF06 | US08 (Must) | UC07 | Usuario, PlanoDeRotina, ItemDeRotina, ListaDeCompras | RN13 | Validado |
 | RF07 | US09 (Must) | UC08 | Usuario, RestricaoAlimentar, Receita | RN08, RN09, RN16 | Validado |
-| RF08 | US10 (Must) | UC09 | Usuario, Receita, Ingrediente, RestricaoAlimentar | RN15 | Validado |
+| RF08 | US10 (Must) | UC09 | Usuario, Receita, Ingrediente, RestricaoAlimentar | RN15, RN22 | Validado |
 | RF09 | US04 (Should) | — (Should sem UC — decisão documentada) | Receita, Culinaria, Ingrediente (dimensões de busca) | RN08 (sinalização na busca) | Validado com ressalva documentada |
 | RF10 | US05 (Must) | UC04 | Usuario, Prato, Receita, Ingrediente, Utensilio, RestricaoAlimentar | RN02, RN08, RN16, RN17 | Validado |
 | RF11 | US12 (Must) | UC10 | Usuario, Avaliacao, Prato, ItemDeRotina, Badge | RN01, RN02, RN03, RN04, RN05, RN06 | Validado |
@@ -24,7 +24,7 @@
 | RF15 | US16 (Should) | — (RN03/RN04 exercitadas no UC10, passo 4) | Usuario, Avaliacao, Badge | RN03, RN04 | Validado com ressalva documentada |
 | RF16 | — (Won't) | — | — | RN20 (excluída) | Descartado — Won't (registro consistente em requisitos, backlog, léxico e RN20) |
 | RF17 | US17 (Could) | — | Amizade — fora do modelo v1 (decisão D1) | — | Fora da v1 — Could (documentado) |
-| RF18 | US18 (Must) | UC12 | Prato, Receita, Culinaria, Ingrediente, Utensilio | RN17, RN18 | Validado |
+| RF18 | US18 (Must) | UC12 | Prato, Receita, Culinaria, Ingrediente, Utensilio | RN17, RN18, RN21 | Validado |
 | RF19 | US11 (Should) | — (comportamento no FA2 do UC01) | Usuario, Utensilio, Receita, Sugestao | RN10 | Validado com ressalva documentada |
 
 ## Verificação bidirecional (caça a órfãos)
@@ -72,6 +72,7 @@
 | RNF08 (atribuição de fonte) | RN17, UC12-FE1, CT26 | Coberto |
 | RNF09 (sem punição) | RN04, RN12 | Coberto |
 | RNF10 (só nota obrigatória) | RN05, UC10-FE1, CT21 | Coberto |
+| RNF11 (apoio opcional de IA) | RN21, UC12-FA2, CT28, CT30 | Coberto |
 
 ## Revisão dedicada: RN de gamificação e rotina (passo 6 do briefing)
 

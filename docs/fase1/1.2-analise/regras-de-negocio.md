@@ -98,15 +98,22 @@ Origem: US07; RF05 | Status: validado
 
 ## Substituições e alérgenos
 
-RN15 — Ao visualizar uma receita, para cada ingredievalidadonte faltante (ausente da
+RN15 — Ao visualizar uma receita, para cada ingrediente faltante (ausente da
 despensa) ou incompatível com restrição do perfil, o sistema sugere os
-substitutos globais cadastrados; se não houver substituto cadastrado, o sistema
+substitutos globais cadastrados (vindos de cadastro manual ou de proposta de IA
+aprovada pelo curador); se não houver substituto cadastrado, o sistema
 informa isso explicitamente, sem inventar uma troca.
 Origem: US10; RF08 | Status: validado
 
-RN16 — Toda receita exibe seu estado de alérgenos (verificado, declarado pela fonte, não verificado) na visualização; alérgenos
-associados a restrições do usuário, ou tenha o estado "não verificado", são destacados como "compatibilidade não confirmada".
+RN16 — Toda receita exibe seu estado de alérgenos (verificado, declarado pela fonte, não verificado) na visualização; caso possua alérgenos
+associados às restrições do usuário ou tenha o estado "não verificado", o sitema alerta com "compatibilidade não confirmada".
 Origem: US09; RF07 | Status: validado
+
+RN21 — Todo substituto de ingrediente proposto por agente de IA só é cadastrado e disponibilizado no catálogo após revisão e aprovação do curador.
+Origem: US10, US18; RF08 RF18 | Status: validado
+
+RN22 — Um substituto cadastrado só é sugerido para um ingrediente incompatível se não contiver alérgenos associados ao perfil. Se o substituto tiver a lista de alérgenos não verificada, ele não é sugerido a quem possui alguma restrição.
+Origem: US10; RF08; RN08 | Status: validado
 
 ## Catálogo
 
