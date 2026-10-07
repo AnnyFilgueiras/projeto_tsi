@@ -1,4 +1,4 @@
-# Briefing da Fase 2 — Projeto Arquitetural (Panelada) — v1.1
+# Briefing da Fase 2 — Projeto Arquitetural (Panelada) — v1.3"
 
 > Documento-mestre da Fase 2. Deve ser anexado em TODA conversa de sub-etapa
 > (2.1 a 2.9), junto com o `diario-de-bordo-fase2.md`. Ele dá o mapa da fase
@@ -34,7 +34,6 @@
 - **Stack:** experiência com React e TypeScript; Flutter não descartado
   (a comparação acontece na 2.3). Hipóteses iniciais não são decisões.
 - **Offline parcial:** receitas planejadas, em preparo e preparadas; candidatas não ficam offline (RNF05 aprovada, A04).
-  já preparados.
 - **IA (exigência do professor):** uso de IA no desenvolvimento e no uso da aplicação, via API. O uso da IA pelo curador na importação conta como "uso na aplicação" (confirmado pela dupla em 06/10/2026).
 - A definição de "prato concluído" (gatilho de coleção, evolução, badges e
   base da lista offline) deve ser conferida na 2.1.
@@ -150,5 +149,6 @@ A dupla revisa o briefing antes de usá-lo.
 | Versão | Data | Mudança | Motivo |
 |---|---|---|---|
 | v1.0 | 05/10/2026 | Criação | Conversa 2.0 |
-| v1.1 | 05/10/2026 | Remoção do campo Divisão de tarefas |Decisão da dupla na 2.0: campo descontinuado |
-	\| v1.2 \| 06/10/2026 \| Requisito de IA; offline corrigido; pasta dos ADRs \| Conversa 2.4 (retroalimentação) \|
+| v1.1 | 05/10/2026 | Remoção do campo Divisão de tarefas | Decisão da dupla na 2.0: campo descontinuado |
+| v1.2 | 06/10/2026 | Requisito de IA; offline corrigido; pasta dos ADRs | Conversa 2.4 (retroalimentação) |
+| v1.3 | 06/10/2026 | Correções editoriais: título, linha da v1.2 e fragmento órfão | Conversa 2.5 (registro de divergências) |
