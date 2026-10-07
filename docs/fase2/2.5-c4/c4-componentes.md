@@ -1,84 +1,161 @@
 # C4 Nível 3 — Componentes — Panelada (Fase 2.5)
 
 > Fase 2.5 — C4 níveis 1 a 3. Papel da IA: arquiteto, modelador C4.
-> Destino: `/docs/fase2/c4-componentes.md`. Versão 1.0 — 07/10/2026 — status: nível 3 aprovado pela dupla (conteúdo da v0.2, sem alteração).
+> Destino: `/docs/fase2/c4-componentes.md`. Versão 1.1 — 07/10/2026 — status: nível 3 aprovado pela dupla.
+> Alteração da v1.1: os diagramas do nível 3 foram trocados do Mermaid C4 nativo (`C4Component`), ilegível com 14 e 11 elementos, por **fluxogramas Mermaid com a convenção C4**, divididos por assunto. Tabelas, decisões e rastreio da v1.0 não mudaram.
 > Insumos: `c4-contexto.md` v1.1, `c4-containers.md` v1.1, ADR-001 a ADR-014, `casos-de-uso.md`, `modelo-conceitual.md`, `regras-de-negocio.md`.
 > Escopo: componentes do **App Móvel Panelada** e da **API Panelada**. Os demais containers são armazenamento e não têm nível 3.
 > Nomes dos níveis 1 e 2 mantidos: Panelada, Usuário, Curador, Bruno, Provedor de IA (Kimi K3), App Móvel Panelada, Banco Local Cifrado, API Panelada, Banco do Servidor, Armazenamento de Fotos.
 
-## 0. Mudanças em relação à v0.1 (revisão pesada)
+## 0. Como ler os diagramas
+
+- **Cores:** azul = feature (app) ou módulo (API); verde = núcleo do app; roxo = componente transversal da API; amarelo = compartilhado ou apoio; cinza = elemento fora do container (banco, API, sistema externo).
+- **Cilindro** = armazenamento. **Retângulo grande** = fronteira do container.
+- Cada container tem uma **visão geral** e diagramas por assunto. Relações já mostradas em outro diagrama não se repetem.
+- Registro Técnico é usado por quase todos os componentes; a relação não é desenhada em nenhum diagrama.
+- Renderização: fluxogramas Mermaid padrão (GitHub e a maioria dos editores).
+
+## 0.1 Mudanças da v0.1 (revisão pesada, mantidas)
 
 1. Receita e Preparo ganha relação com o Cliente de Rede (abrir candidata online) e grava a receita no banco local.
 2. Rotina e Lista de Compras ganha relação com o Cliente de Rede e o Gerenciador de Fotos: criar item exige rede, e a receita é baixada nesse momento (decisão da dupla).
 3. Relação App → Catálogo passa a "Lê receita e baixa fotos (demo)".
 4. Definições de badge pertencem ao Progresso e Avaliação; a Sincronização lê o índice do Catálogo e do Progresso. O índice leve inclui nome de prato e de culinária.
-5. Mecanismo de idempotência fica para a 2.6 (a v0.1 antecipava um "registro de operações aplicadas").
+5. Mecanismo de idempotência fica para a 2.6.
 6. "Uma de cada tipo" nos lembretes marcado como hipótese (H).
-7. Coluna "UC e US" renomeada para "Rastreio"; cobertura de UC corrigida (UC12 só na API); notas e rótulos corrigidos.
+7. Coluna "UC e US" renomeada para "Rastreio"; cobertura de UC corrigida (UC12 só na API).
 
 ## 1. App Móvel Panelada
 
-### 1.1 Diagrama
+### 1.1 Visão geral
 
 ```mermaid
-C4Component
-  title Componentes do App Móvel Panelada
+flowchart LR
+  classDef feature fill:#dbeafe,stroke:#1d4ed8,color:#0f172a
+  classDef core fill:#dcfce7,stroke:#15803d,color:#0f172a
+  classDef module fill:#dbeafe,stroke:#1d4ed8,color:#0f172a
+  classDef trans fill:#ede9fe,stroke:#6d28d9,color:#0f172a
+  classDef shared fill:#fef9c3,stroke:#a16207,color:#0f172a
+  classDef ext fill:#e5e7eb,stroke:#4b5563,color:#0f172a
+  subgraph APP["App Móvel Panelada"]
+    direction LR
+    subgraph FEAT["Features"]
+      direction TB
+      sug["Sugestões"]:::feature
+      desp["Despensa"]:::feature
+      rec["Receita e Preparo"]:::feature
+      rot["Rotina e Lista de Compras"]:::feature
+      per["Perfil e Restrições"]:::feature
+      ava["Avaliação e Coleção"]:::feature
+      lem["Lembretes"]:::feature
+    end
+    subgraph CORE["Núcleo"]
+      direction TB
+      bco["Acesso ao Banco Local"]:::core
+      fil["Fila de Sincronização"]:::core
+      syn["Sincronizador"]:::core
+      net["Cliente de Rede e Sessão"]:::core
+      fot["Gerenciador de Fotos"]:::core
+    end
+    subgraph SUP["Compartilhado e apoio"]
+      direction TB
+      ale["Pacote de Alérgenos"]:::shared
+      reg["Registro Técnico"]:::shared
+    end
+  end
+  dbl[("Banco Local Cifrado")]:::ext
+  api["API Panelada"]:::ext
+  sec["Armazenamento seguro do Android"]:::ext
+  nti["Sistema de notificações do Android"]:::ext
 
-  Container_Boundary(app, "App Móvel Panelada") {
-    Component(sugestoes, "Sugestões", "Feature", "Pede sugestões, aprova ou descarta.")
-    Component(despensa, "Despensa", "Feature", "Cópia local de leitura; edição só online.")
-    Component(receita, "Receita e Preparo", "Feature", "Abre receita, alerta de alérgenos, passo a passo, substitutos.")
-    Component(rotina, "Rotina e Lista de Compras", "Feature", "Plano, datas e lista consolidada.")
-    Component(perfil, "Perfil e Restrições", "Feature", "Restrições com consentimento, preferências de lembrete, conta.")
-    Component(avaliacao, "Avaliação e Coleção", "Feature", "Avaliação, desbloqueio local, coleção e badges.")
-    Component(lembretes, "Lembretes", "Feature", "Agendador puro e adaptador de notificações locais.")
-    Component(banco, "Acesso ao Banco Local", "Núcleo", "Abre o SQLCipher, define a chave, migra e controla transações.")
-    Component(fila, "Fila de Sincronização", "Núcleo", "Operações idempotentes na mesma transação do dado.")
-    Component(sincronizador, "Sincronizador", "Núcleo", "Envia operações e atualiza o conjunto baixado, em primeiro plano.")
-    Component(rede, "Cliente de Rede e Sessão", "Núcleo", "HTTP, conta anônima e tokens.")
-    Component(fotoslocal, "Gerenciador de Fotos", "Núcleo", "Baixa e guarda fotos como arquivos, com atribuição.")
-    Component(alergenos, "Pacote de Alérgenos", "Compartilhado", "Regra única de alérgenos, funções puras.")
-    Component(registro, "Registro Técnico", "Apoio", "Falhas sem dado de restrição.")
-  }
-
-  ContainerDb(dblocal, "Banco Local Cifrado", "SQLite com SQLCipher", "Conjunto baixado e fila.")
-  Container(api, "API Panelada", "Fastify, TypeScript", "Servidor.")
-  Component_Ext(seguro, "Armazenamento seguro do Android", "expo-secure-store, Keystore", "Chave do banco e refresh token.")
-  Component_Ext(notifsis, "Sistema de notificações do Android", "expo-notifications", "Dispara na data agendada (ator Tempo do UC07).")
-
-  Rel(sugestoes, rede, "Pede sugestões e aprova ou descarta")
-  Rel(despensa, rede, "Edita online")
-  Rel(despensa, banco, "Lê e atualiza a cópia local")
-  Rel(receita, rede, "Lê a receita online ao abrir candidata")
-  Rel(receita, banco, "Lê e grava receita e substitutos")
-  Rel(receita, alergenos, "Classifica receita e substitutos")
-  Rel(receita, fotoslocal, "Mostra e pede fotos")
-  Rel(rotina, banco, "Lê e grava plano e lista")
-  Rel(rotina, fila, "Enfileira operações da rotina")
-  Rel(rotina, rede, "Baixa a receita ao criar item (exige rede)")
-  Rel(rotina, fotoslocal, "Pede a foto da receita")
-  Rel(perfil, banco, "Lê e grava perfil")
-  Rel(perfil, fila, "Enfileira restrição e preferências")
-  Rel(perfil, rede, "Vincula e-mail, exclui conta")
-  Rel(avaliacao, banco, "Lê índice do catálogo e histórico")
-  Rel(avaliacao, fila, "Enfileira avaliação na mesma transação")
-  Rel(lembretes, banco, "Lê rotina e configuração")
-  Rel(lembretes, notifsis, "Agenda até 2 por dia")
-  Rel(fila, banco, "Grava")
-  Rel(sincronizador, fila, "Lê e atualiza estado")
-  Rel(sincronizador, rede, "Envia e baixa")
-  Rel(sincronizador, banco, "Atualiza conjunto baixado")
-  Rel(sincronizador, fotoslocal, "Pede fotos das receitas")
-  Rel(fotoslocal, rede, "Baixa")
-  Rel(rede, api, "Requisições", "HTTP/JSON (TLS no alvo)")
-  Rel(rede, seguro, "Guarda refresh token")
-  Rel(banco, dblocal, "Lê e grava", "SQLCipher")
-  Rel(banco, seguro, "Lê a chave")
+  FEAT -->|"usam"| CORE
+  FEAT -->|"regra de alérgenos"| ale
+  bco --> dbl
+  net --> api
+  net --> sec
+  bco --> sec
+  lem --> nti
 ```
 
-Relação omitida por legibilidade: o Registro Técnico é usado pelo Sincronizador, pela Fila e por Lembretes.
+### 1.2 Dados locais e fila
 
-### 1.2 Componentes
+```mermaid
+flowchart LR
+  classDef feature fill:#dbeafe,stroke:#1d4ed8,color:#0f172a
+  classDef core fill:#dcfce7,stroke:#15803d,color:#0f172a
+  classDef module fill:#dbeafe,stroke:#1d4ed8,color:#0f172a
+  classDef trans fill:#ede9fe,stroke:#6d28d9,color:#0f172a
+  classDef shared fill:#fef9c3,stroke:#a16207,color:#0f172a
+  classDef ext fill:#e5e7eb,stroke:#4b5563,color:#0f172a
+  desp["Despensa"]:::feature
+  rec["Receita e Preparo"]:::feature
+  rot["Rotina e Lista de Compras"]:::feature
+  per["Perfil e Restrições"]:::feature
+  ava["Avaliação e Coleção"]:::feature
+  lem["Lembretes"]:::feature
+  ale["Pacote de Alérgenos"]:::shared
+  fil["Fila de Sincronização"]:::core
+  bco["Acesso ao Banco Local"]:::core
+  dbl[("Banco Local Cifrado")]:::ext
+  sec["Armazenamento seguro do Android"]:::ext
+  nti["Sistema de notificações do Android"]:::ext
+
+  desp -->|"lê e atualiza a cópia"| bco
+  rec -->|"lê e grava receita"| bco
+  rec -->|"classifica alérgenos"| ale
+  rot -->|"plano e lista"| bco
+  rot -->|"enfileira"| fil
+  per -->|"perfil"| bco
+  per -->|"enfileira restrição e preferências"| fil
+  ava -->|"índice e histórico"| bco
+  ava -->|"enfileira na mesma transação"| fil
+  lem -->|"rotina e configuração"| bco
+  lem -->|"agenda até 2 por dia"| nti
+  fil -->|"grava"| bco
+  bco -->|"SQLCipher"| dbl
+  bco -->|"lê a chave"| sec
+```
+
+### 1.3 Rede, sincronização e fotos
+
+```mermaid
+flowchart LR
+  classDef feature fill:#dbeafe,stroke:#1d4ed8,color:#0f172a
+  classDef core fill:#dcfce7,stroke:#15803d,color:#0f172a
+  classDef module fill:#dbeafe,stroke:#1d4ed8,color:#0f172a
+  classDef trans fill:#ede9fe,stroke:#6d28d9,color:#0f172a
+  classDef shared fill:#fef9c3,stroke:#a16207,color:#0f172a
+  classDef ext fill:#e5e7eb,stroke:#4b5563,color:#0f172a
+  sug["Sugestões"]:::feature
+  desp["Despensa"]:::feature
+  rec["Receita e Preparo"]:::feature
+  rot["Rotina e Lista de Compras"]:::feature
+  per["Perfil e Restrições"]:::feature
+  syn["Sincronizador"]:::core
+  fil["Fila de Sincronização"]:::core
+  bco["Acesso ao Banco Local"]:::core
+  fot["Gerenciador de Fotos"]:::core
+  net["Cliente de Rede e Sessão"]:::core
+  api["API Panelada"]:::ext
+  sec["Armazenamento seguro do Android"]:::ext
+
+  sug -->|"sugestões, aprovar ou descartar"| net
+  desp -->|"edita online"| net
+  rec -->|"lê receita de candidata"| net
+  rot -->|"baixa receita ao criar item"| net
+  per -->|"e-mail e exclusão de conta"| net
+  rec -->|"fotos"| fot
+  rot -->|"foto da receita"| fot
+  syn -->|"lê e atualiza estado"| fil
+  syn -->|"envia e baixa"| net
+  syn -->|"atualiza conjunto baixado"| bco
+  syn -->|"pede fotos"| fot
+  fot -->|"baixa"| net
+  net -->|"HTTP/JSON, TLS no alvo"| api
+  net -->|"guarda refresh token"| sec
+```
+
+### 1.4 Componentes
 
 | Componente | Tipo | Responsabilidade | Rastreio | ADRs |
 |---|---|---|---|---|
@@ -99,59 +176,141 @@ Relação omitida por legibilidade: o Registro Técnico é usado pelo Sincroniza
 
 ## 2. API Panelada
 
-### 2.1 Diagrama
+### 2.1 Visão geral
 
 ```mermaid
-C4Component
-  title Componentes da API Panelada
+flowchart LR
+  classDef feature fill:#dbeafe,stroke:#1d4ed8,color:#0f172a
+  classDef core fill:#dcfce7,stroke:#15803d,color:#0f172a
+  classDef module fill:#dbeafe,stroke:#1d4ed8,color:#0f172a
+  classDef trans fill:#ede9fe,stroke:#6d28d9,color:#0f172a
+  classDef shared fill:#fef9c3,stroke:#a16207,color:#0f172a
+  classDef ext fill:#e5e7eb,stroke:#4b5563,color:#0f172a
+  app["App Móvel Panelada"]:::ext
+  bru["Bruno"]:::ext
+  ia["Provedor de IA (Kimi K3)"]:::ext
+  dbs[("Banco do Servidor")]:::ext
+  fts[("Armazenamento de Fotos")]:::ext
 
-  Container_Boundary(api, "API Panelada") {
-    Component(catalogo, "Catálogo", "Módulo", "Pratos, receitas, ingredientes, substituições, cadeias, fotos.")
-    Component(perfilm, "Perfil e Restrições", "Módulo", "Perfil, despensa, utensílios, restrições e preferências de lembrete.")
-    Component(rotinam, "Rotina e Planejamento", "Módulo", "Sugestões do usuário, plano, itens e lista de compras.")
-    Component(progresso, "Progresso e Avaliação", "Módulo", "Avaliações, coleção, evolução, badges e suas definições.")
-    Component(importacao, "Importação", "Módulo", "Curadoria manual e assistida por IA, aprovação.")
-    Component(identidade, "Identidade e Sessões", "Transversal", "Contas, tokens e papéis.")
-    Component(sincronizacao, "Sincronização", "Transversal", "Operações idempotentes e conjunto baixado.")
-    Component(sugestao, "Sugestão e Busca", "Transversal", "Sugestões e busca com filtro de alérgenos.")
-    Component(alergenosapi, "Pacote de Alérgenos", "Compartilhado", "Mesma regra do app.")
-    Component(cifra, "Cifra de Campos Sensíveis", "Apoio", "AES-256-GCM nos campos de restrição.")
-    Component(registroapi, "Registro Técnico", "Apoio", "Logs e contagens agregadas, sem restrição.")
-  }
+  subgraph API["API Panelada"]
+    direction LR
+    subgraph TRANS["Transversais"]
+      direction TB
+      ide["Identidade e Sessões"]:::trans
+      syn["Sincronização"]:::trans
+      sug["Sugestão e Busca"]:::trans
+    end
+    subgraph MOD["Módulos de domínio"]
+      direction TB
+      cat["Catálogo"]:::module
+      per["Perfil e Restrições"]:::module
+      rot["Rotina e Planejamento"]:::module
+      pro["Progresso e Avaliação"]:::module
+      imp["Importação"]:::module
+    end
+    subgraph SUP["Compartilhado e apoio"]
+      direction TB
+      ale["Pacote de Alérgenos"]:::shared
+      cif["Cifra de Campos Sensíveis"]:::shared
+      reg["Registro Técnico"]:::shared
+    end
+  end
 
-  Container(app, "App Móvel Panelada", "React Native", "Cliente.")
-  ContainerDb(bancosrv, "Banco do Servidor", "PostgreSQL", "Dados do servidor (relações omitidas, ver nota).")
-  ContainerDb(fotossrv, "Armazenamento de Fotos", "Volume ou objetos", "Fotos WebP.")
-  System_Ext(bruno, "Bruno", "Cliente de API do Curador.")
-  System_Ext(ia, "Provedor de IA (Kimi K3)", "API na internet.")
-
-  Rel(app, identidade, "Cria conta, entra, renova token")
-  Rel(app, sugestao, "Pede sugestões e busca")
-  Rel(app, rotinam, "Aprova ou descarta sugestão (online)")
-  Rel(app, perfilm, "Edita despensa, utensílios e preferências (online)")
-  Rel(app, sincronizacao, "Envia operações e atualiza o conjunto baixado")
-  Rel(app, catalogo, "Lê receita e baixa fotos (demo)")
-  Rel(bruno, importacao, "Rotas de curadoria", "papel curador")
-  Rel(importacao, catalogo, "Grava propostas e publica aprovados")
-  Rel(importacao, ia, "Texto, fonte e ingredientes canônicos", "HTTPS")
-  Rel(importacao, fotossrv, "Grava fotos processadas")
-  Rel(importacao, alergenosapi, "Invariantes e RN22")
-  Rel(catalogo, fotossrv, "Serve fotos (demo)")
-  Rel(sugestao, catalogo, "Lê candidatos")
-  Rel(sugestao, perfilm, "Lê restrições, utensílios e despensa")
-  Rel(sugestao, progresso, "Lê pratos concluídos e evoluções desbloqueadas")
-  Rel(sugestao, rotinam, "Lê sugestões anteriores")
-  Rel(sugestao, alergenosapi, "Filtra por alérgenos")
-  Rel(sincronizacao, rotinam, "Aplica operações da rotina")
-  Rel(sincronizacao, progresso, "Aplica avaliações, confirma desbloqueios e lê definições de badge")
-  Rel(sincronizacao, perfilm, "Aplica restrição e preferências")
-  Rel(sincronizacao, catalogo, "Lê receitas, fotos e índice")
-  Rel(perfilm, cifra, "Cifra e decifra restrição")
+  app -->|"sessão, sugestão e sincronização"| TRANS
+  app -->|"edições online e leitura de receita"| MOD
+  bru -->|"rotas de curadoria"| imp
+  TRANS -->|"só por interfaces públicas"| MOD
+  MOD -->|"tabelas próprias"| dbs
+  imp --> ia
+  imp --> fts
+  cat --> fts
+  per --> cif
+  sug --> ale
+  imp --> ale
 ```
 
-Relações omitidas por legibilidade (mantidas na tabela): cada componente com dados próprios acessa o Banco do Servidor só nas próprias tabelas (ADR-002, item 4); Identidade e Sessões autentica todas as rotas, como plugin do Fastify; o Registro Técnico é usado por todos.
+### 2.2 Sugestão e Busca
 
-### 2.2 Componentes
+```mermaid
+flowchart LR
+  classDef feature fill:#dbeafe,stroke:#1d4ed8,color:#0f172a
+  classDef core fill:#dcfce7,stroke:#15803d,color:#0f172a
+  classDef module fill:#dbeafe,stroke:#1d4ed8,color:#0f172a
+  classDef trans fill:#ede9fe,stroke:#6d28d9,color:#0f172a
+  classDef shared fill:#fef9c3,stroke:#a16207,color:#0f172a
+  classDef ext fill:#e5e7eb,stroke:#4b5563,color:#0f172a
+  app["App Móvel Panelada"]:::ext
+  sug["Sugestão e Busca"]:::trans
+  cat["Catálogo"]:::module
+  per["Perfil e Restrições"]:::module
+  pro["Progresso e Avaliação"]:::module
+  rot["Rotina e Planejamento"]:::module
+  ale["Pacote de Alérgenos"]:::shared
+
+  app -->|"pede sugestões e busca"| sug
+  sug -->|"lê candidatos"| cat
+  sug -->|"restrições, utensílios e despensa"| per
+  sug -->|"concluídos e evoluções desbloqueadas"| pro
+  sug -->|"sugestões anteriores"| rot
+  sug -->|"filtra por alérgenos"| ale
+```
+
+### 2.3 Sincronização e conjunto baixado
+
+```mermaid
+flowchart LR
+  classDef feature fill:#dbeafe,stroke:#1d4ed8,color:#0f172a
+  classDef core fill:#dcfce7,stroke:#15803d,color:#0f172a
+  classDef module fill:#dbeafe,stroke:#1d4ed8,color:#0f172a
+  classDef trans fill:#ede9fe,stroke:#6d28d9,color:#0f172a
+  classDef shared fill:#fef9c3,stroke:#a16207,color:#0f172a
+  classDef ext fill:#e5e7eb,stroke:#4b5563,color:#0f172a
+  app["App Móvel Panelada"]:::ext
+  syn["Sincronização"]:::trans
+  rot["Rotina e Planejamento"]:::module
+  pro["Progresso e Avaliação"]:::module
+  per["Perfil e Restrições"]:::module
+  cat["Catálogo"]:::module
+  cif["Cifra de Campos Sensíveis"]:::shared
+
+  app -->|"envia operações e atualiza o conjunto baixado"| syn
+  syn -->|"aplica operações da rotina"| rot
+  syn -->|"aplica avaliações e confirma desbloqueios; lê definições de badge"| pro
+  syn -->|"aplica restrição e preferências"| per
+  syn -->|"lê receitas, fotos e índice"| cat
+  per -->|"cifra e decifra restrição"| cif
+```
+
+### 2.4 Curadoria e importação
+
+```mermaid
+flowchart LR
+  classDef feature fill:#dbeafe,stroke:#1d4ed8,color:#0f172a
+  classDef core fill:#dcfce7,stroke:#15803d,color:#0f172a
+  classDef module fill:#dbeafe,stroke:#1d4ed8,color:#0f172a
+  classDef trans fill:#ede9fe,stroke:#6d28d9,color:#0f172a
+  classDef shared fill:#fef9c3,stroke:#a16207,color:#0f172a
+  classDef ext fill:#e5e7eb,stroke:#4b5563,color:#0f172a
+  bru["Bruno"]:::ext
+  app["App Móvel Panelada"]:::ext
+  imp["Importação"]:::module
+  cat["Catálogo"]:::module
+  ale["Pacote de Alérgenos"]:::shared
+  ia["Provedor de IA (Kimi K3)"]:::ext
+  fts[("Armazenamento de Fotos")]:::ext
+
+  bru -->|"rotas de curadoria, papel curador"| imp
+  imp -->|"grava propostas e publica aprovados"| cat
+  imp -->|"texto, fonte e ingredientes canônicos"| ia
+  imp -->|"grava fotos processadas"| fts
+  imp -->|"invariantes e RN22"| ale
+  cat -->|"serve fotos (demo)"| fts
+  app -->|"lê receita e baixa fotos (demo)"| cat
+```
+
+Identidade e Sessões autentica todas as rotas, como plugin do Fastify, e por isso não aparece nos diagramas por assunto.
+
+### 2.5 Componentes
 
 | Componente | Tipo | Responsabilidade | Rastreio | ADRs |
 |---|---|---|---|---|
@@ -159,7 +318,7 @@ Relações omitidas por legibilidade (mantidas na tabela): cada componente com d
 | Perfil e Restrições | Módulo | Dados do Usuário: preferências culinárias, frequência e tipos de lembrete, utensílios, despensa e restrições (cifradas; consentimento RN09; revogação em até 24 h). | UC03, UC07 (configuração), UC08; US03, US08, US09 | 002, 006, 008, 009 |
 | Rotina e Planejamento | Módulo | Sugestão (apresentada, candidata, descartada), PlanoDeRotina, ItemDeRotina e ListaDeCompras (data de compra e marcações). | UC02, UC05, UC06; US02, US06, US07 | 002, 008 |
 | Progresso e Avaliação | Módulo | Avaliação, histórico, coleção, evolução, badges e definições de badge (carregadas por seed pela dupla); confirma desbloqueios sem revogar (RN04). | UC10, UC11, UC13; US12, US14, US15, US16 | 002, 008 |
-| Importação | Módulo | Ver tabela da seção 2.3. | UC12; US18, US10 | 002, 007, 010, 011, 012, 013, 014 |
+| Importação | Módulo | Ver tabela da seção 2.6. | UC12; US18, US10 | 002, 007, 010, 011, 012, 013, 014 |
 | Identidade e Sessões | Transversal | Conta anônima; e-mail e senha opcionais (Argon2id); JWT de acesso curto; refresh token opaco, com hash e rotação; revogação; papéis usuário e curador; limite de tentativas; exclusão de conta; um aparelho ativo. | RNF02; US09; UC12 (papel curador) | 007, 008 |
 | Sincronização | Transversal | Recebe operações com identificador estável e despacha às interfaces públicas dos módulos; o mecanismo de idempotência é definido na 2.6. Monta o conjunto baixado (seção 3). | UC05, UC08, UC10 | 001, 002, 008 |
 | Sugestão e Busca | Transversal | Sugestões e busca com filtro de alérgenos; combina catálogo, perfil, progresso e rotina só por interfaces públicas. | UC01, UC03; US01, US03; RN08 e RN10 (citam US04 e US11) | 001, 002, 014 |
@@ -167,9 +326,9 @@ Relações omitidas por legibilidade (mantidas na tabela): cada componente com d
 | Cifra de Campos Sensíveis | Apoio | AES-256-GCM; IV de 12 bytes novo a cada gravação; etiqueta de 16 bytes; versão da chave; identificador do usuário como dado adicional autenticado; chave fora do banco. | US09 | 006 |
 | Registro Técnico | Apoio | Falhas de sincronização e de importação, violações de invariante, contagens agregadas por resultado e versão do pacote; nunca restrição. | A13 | 008, 014 |
 
-### 2.3 Partes internas do módulo Importação
+### 2.6 Partes internas do módulo Importação
 
-Estas partes aparecem em tabela, e não como componentes do diagrama, por **legibilidade**. Detalhadas, acrescentariam seis elementos e cerca de dez relações a um diagrama que já tem os módulos de domínio, os três transversais e os componentes de apoio. Elas colaboram só entre si e com o Catálogo, por uma única relação ("grava propostas e publica aprovados"); mostrar a relação do módulo inteiro preserva a leitura da fronteira modular (ADR-002). O detalhe interno vira classes e sequência na 2.6.
+Estas partes aparecem em tabela, e não como componentes dos diagramas, por **legibilidade**. Detalhadas, acrescentariam seis elementos e cerca de dez relações a diagramas que já são densos. Elas colaboram só entre si e com o Catálogo, por uma única relação ("grava propostas e publica aprovados"); mostrar a relação do módulo inteiro preserva a leitura da fronteira modular (ADR-002). O detalhe interno vira classes e sequência na 2.6.
 
 | Parte | Responsabilidade | ADRs |
 |---|---|---|
@@ -233,4 +392,4 @@ Candidatas não ficam offline. O tamanho do índice leve é hipótese, a medir j
 - Níveis 1 a 3 coerentes, com os mesmos nomes: sim (seção 5).
 - Atores e sistemas externos presentes: sim (Usuário, Curador, Bruno, Provedor de IA, sistemas do Android).
 - Cada container ligado a pelo menos um ADR: sim (`c4-containers.md`, seções 2 e 7).
-- Os diagramas Mermaid C4 não foram renderizados; se o layout ficar ilegível, trocar por fluxogramas Mermaid com a convenção C4.
+- Diagramas do nível 3 em fluxogramas Mermaid com a convenção C4. O C4 nativo da v1.0 foi reprovado pela dupla por ilegibilidade; a legibilidade da v1.1 está a conferir.

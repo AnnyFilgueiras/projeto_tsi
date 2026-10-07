@@ -412,15 +412,16 @@
 ## [06/10/2026 a 07/10/2026] — Conversa 2.5 (C4 níveis 1 a 3)
 
 - **Papel da IA:** arquiteto, modelador C4.
-- **Técnicas aplicadas:** modelagem C4 como código (Mermaid `C4Context`, `C4Container`, `C4Component`, `C4Deployment`); lacunas fechadas por perguntas numeradas, com recomendação e trade-off; rastreabilidade container × ADR e componente × UC/US; revisão pesada do próprio artefato (consistência entre níveis, ADRs e Fase 1); registro de divergências em lotes de correção.
+- **Técnicas aplicadas:** modelagem C4 como código (Mermaid `C4Context`, `C4Container`, `C4Deployment` nos níveis 1 e 2; fluxogramas Mermaid na convenção C4 no nível 3); lacunas fechadas por perguntas numeradas, com recomendação e trade-off; rastreabilidade container × ADR e componente × UC/US; revisão pesada do próprio artefato (consistência entre níveis, ADRs e Fase 1); registro de divergências em lotes de correção.
 - **Prompts-chave usados:**
   1. Execução do briefing da 2.5 (a IA parou ao perceber que o anexo era o briefing da 2.4 e pediu o correto).
   2. Perguntas numeradas da IA (Bruno, nível 4, Google Play, preferências de lembrete, lacuna do servidor), respondidas pela dupla.
   3. Pergunta da dupla: "precisa baixar todos os dados? o que é prioritário?" (conjunto baixado).
   4. Pedido de checkup de inconsistências nos níveis 1 e 3 e, depois, "revisão pesada" do nível 3.
   5. Pergunta sobre corrigir artefatos da Fase 2 sem issue e sobre como usar o registro de divergências (lotes).
+  6. Relato da dupla de que os diagramas do nível 3 ficaram ilegíveis; pedido de nova forma de desenhá-los.
 - **Insumos usados:** `briefing-passagem-2.5.md`, `briefing-fase2.md` (v1.2), `diario_de_bordo-fase2.md` (com a entrada 2.4), `propostas-arquiteturais.md` v1.2, ADR-001 a ADR-014, `estilo-arquitetural.md` v1.1, `atributos-qualidade.md` v1.2, `casos-de-uso.md`; consultas pontuais a `modelo-conceitual.md` e `regras-de-negocio.md` (Fase 1).
-- **Artefatos produzidos:** `c4-contexto.md` v1.1, `c4-containers.md` v1.1, `c4-componentes.md` v1.0, `registro-divergencias-2.5.md`, `guia-correcoes-lote-1.md`, `pendencias-lotes-2-e-3.md`, `briefing-passagem-2.6.md`.
+- **Artefatos produzidos:** `c4-contexto.md` v1.1, `c4-containers.md` v1.1, `c4-componentes.md` v1.1, `registro-divergencias-2.5.md`, `guia-correcoes-lote-1.md`, `pendencias-lotes-2-e-3.md`, `briefing-passagem-2.6.md`.
 
 ### Decisões tomadas
 
@@ -445,11 +446,12 @@
 14. Conjunto baixado em três camadas (opção A): texto leve sempre; planejadas e em preparo com foto; preparadas sob demanda em instalação nova.
 15. Criar item de plano exige rede (opção B); offline continuam reagendar, remover, data de compra, marcar comprado e avaliar.
 16. Lista de compras (data de compra e marcações) sincroniza como operação de rotina. Definições de badge no Progresso e Avaliação, por seed.
+17. **Forma dos diagramas do nível 3:** o Mermaid C4 nativo (`C4Component`) foi reprovado pela dupla por ilegibilidade (14 elementos no app e 11 na API). Trocado por fluxogramas Mermaid na convenção C4, divididos por assunto: 3 diagramas para o app e 4 para a API, com cores por tipo de componente e relações sem repetição entre diagramas. Tabelas, rastreio e decisões não mudaram (`c4-componentes.md` v1.1).
 
 **Processo**
-17. Divergência entre ADR e briefing: prevalece o ADR (refresh token rotativo, ADR-007).
-18. Artefatos da Fase 2 são corrigidos sem issue, com registro no diário; Fase 1 por issue agrupada ao final da 2.6.
-19. Correções em três lotes: 1 antes da 2.6; 2 higiene antes da 2.8; 3 issue da Fase 1 ao final da 2.6.
+18. Divergência entre ADR e briefing: prevalece o ADR (refresh token rotativo, ADR-007).
+19. Artefatos da Fase 2 são corrigidos sem issue, com registro no diário; Fase 1 por issue agrupada ao final da 2.6.
+20. Correções em três lotes: 1 antes da 2.6; 2 higiene antes da 2.8; 3 issue da Fase 1 ao final da 2.6.
 
 ### Restrições
 
@@ -465,7 +467,7 @@
 4. O nível 2 saiu com o rastreio da API incompleto (faltavam UC04 a UC07 e UC13) e sem a US16 nos níveis 1 e 2; achado na revisão do nível 3.
 5. O nível 3 v0.1 tinha erros: faltava a relação Receita e Preparo → rede; rótulo App → Catálogo incompleto; nota sobre o Gerenciador de Fotos incorreta; afirmação falsa de cobertura (UC12 no app); definições de badge sem dono; planejamento offline contradizia candidatas online; mecanismo de idempotência antecipado; "uma de cada tipo" apresentada como fato. Uma relação inválida do Banco do Servidor consigo mesmo foi removida antes da entrega.
 6. A análise do conjunto baixado revelou lacunas não previstas nos ADRs: despensa e utensílios offline, e o índice leve do catálogo para desbloquear badges e evolução sem rede.
-7. Os diagramas Mermaid C4 não foram renderizados pela IA; a legibilidade segue a verificar.
+7. **Diagramas do nível 3 ilegíveis:** a IA entregou o nível 3 em Mermaid C4 nativo sem poder renderizá-lo e havia deixado o risco anotado apenas como "a verificar". Na conferência, a dupla constatou que os diagramas do app e da API ficaram ilegíveis. Correção: fluxogramas Mermaid na convenção C4, divididos por assunto (decisão 17). Lição: para mais de cerca de 10 elementos, usar fluxogramas por assunto desde o primeiro rascunho. Os diagramas dos níveis 1 e 2 seguem em Mermaid C4 nativo e não foram relatados como problema.
 
 ### Divergências registradas (briefing/professor × artefatos)
 
@@ -482,14 +484,15 @@ Lista completa em `registro-divergencias-2.5.md` (19 itens). Principais:
 
 | Artefato | Mudança | Status |
 |---|---|---|
-| `c4-contexto.md` v1.1, `c4-containers.md` v1.1, `c4-componentes.md` v1.0 | Criados e corrigidos na 2.5 | Feito |
+| `c4-contexto.md` v1.1, `c4-containers.md` v1.1 | Criados e corrigidos na 2.5 | Feito |
+| `c4-componentes.md` v1.1 | Criado na 2.5 (v1.0 em C4 nativo); v1.1 troca os diagramas por fluxogramas Mermaid na convenção C4, sem mudar tabelas nem decisões | Feito |
 | `atributos-qualidade.md` | RNF05 "reescrita proposta" → "corrigido" (item #9) | Feito pela dupla |
-| `atributos-qualidade.md` v1.3 | "Em preparo" existe como status de `ItemDeRotina` (item #17) | Pendente (Lote 1) |
-| ADR-001, 002, 004, 008, 012 | Seção "Detalhamento (2.5)" | Pendente (Lote 1) |
-| ADR-010 | Papel de curador "seed ou comando" (item #14) | Pendente (Lote 1) |
-| Diário (entrada 2.4) e `propostas-arquiteturais.md` §16 | R13 reescrito, a reconfirmar (item #2) | Pendente (Lote 1) |
-| `briefing-fase2.md` v1.3 | Correções editoriais (itens #4 e #5) | Pendente (Lote 1) |
-| Issue #30 | Versão do arquivo da issue e "#30 provisório" (item #8) | Pendente (Lote 1) |
+| `atributos-qualidade.md` v1.3 | "Em preparo" existe como status de `ItemDeRotina` (item #17) | Feito pela dupla (Lote 1) |
+| ADR-001, 002, 004, 008, 012 | Seção "Detalhamento (2.5)" | Feito pela dupla (Lote 1) |
+| ADR-010 | Papel de curador "seed ou comando" (item #14) | Feito pela dupla (Lote 1) |
+| Diário (entrada 2.4) e `propostas-arquiteturais.md` §16 | R13 reescrito (item #2) | Feito pela dupla (Lote 1); reconfirmação do R13 a registrar |
+| `briefing-fase2.md` v1.3 | Correções editoriais (itens #4 e #5) | Feito pela dupla (Lote 1) |
+| Issue #30 | Versão do arquivo da issue e "#30 provisório" (item #8) | Feito pela dupla (Lote 1) |
 | Demais ADRs, propostas | Higiene (Lote 2) | Pendente, antes da 2.8 |
 | Fase 1 (`casos-de-uso.md`, UC12 FE2 e itens do Lote 3) | Por issue agrupada | Pendente, ao final da 2.6 |
 
@@ -502,10 +505,8 @@ Lista completa em `registro-divergencias-2.5.md` (19 itens). Principais:
 
 ### Pendências para a próxima conversa (2.6)
 
-- **Antes de abrir a 2.6:** aplicar o Lote 1 (`guia-correcoes-lote-1.md`) e reconfirmar o R13, o R14 e o R15.
 - **Para a 2.6:** mecanismo de idempotência; esquema de saída do agente; OpenAPI e coleção Bruno de curadoria; vocabulário de alérgenos e critério de "verificado"; "em preparo" para prato aberto sem item de rotina; regra de edição de avaliação; retenção de contas anônimas, vida dos tokens e limites da fila; definição de badges de conjunto temático.
 - **Medidas (H), em ordem de prioridade:** tokens com 3 a 5 receitas e JSON Mode (ADR-011); abertura offline em 2 s com SQLCipher (ADR-005); protótipo de sincronização em 10 dias (ADR-008); WebP e peso das fotos (ADR-012); tamanho do índice leve e do conjunto do seed; cota do Cloud Run e limite do console da Kimi (ADR-004, ADR-011, ADR-013).
 - **Para a 2.7:** como verificar as fronteiras entre módulos.
-- **Para a 2.8:** Lote 2 (inclui os `[CONFIRMAR]` dos ADR-010 e ADR-012).
+- **Para a 2.8:** Lote 2
 - **Ao final da 2.6:** abrir a issue agrupada da Fase 1 (Lote 3).
-- **A verificar:** renderização dos diagramas Mermaid C4 no GitHub.
