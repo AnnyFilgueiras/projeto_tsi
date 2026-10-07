@@ -1,0 +1,73 @@
+meta {
+  name: Criar receita já como verificada é recusado
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/v1/curation/recipes
+  body: json
+  auth: inherit
+}
+
+headers {
+  Idempotency-Key: {{idemKey}}
+}
+
+body:json {
+  {
+    "name": "Crepe já verificado",
+    "cuisineId": "{{cuiFrenchId}}",
+    "baseDishId": null,
+    "prepTimeMinutes": 30,
+    "difficulty": "easy",
+    "ingredients": [
+      {
+        "ingredientId": "{{ingWheatId}}",
+        "quantity": "1",
+        "unit": "xícara"
+      },
+      {
+        "ingredientId": "{{ingEggId}}",
+        "quantity": "2",
+        "unit": "un"
+      },
+      {
+        "ingredientId": "{{ingMilkId}}",
+        "quantity": "1",
+        "unit": "xícara"
+      }
+    ],
+    "utensilIds": [
+      "{{utFryingPanId}}"
+    ],
+    "steps": [
+      "Bata a farinha, os ovos e o leite até ficar liso.",
+      "Aqueça a frigideira e despeje uma concha da massa.",
+      "Doure dos dois lados."
+    ],
+    "allergens": [
+      "trigo_centeio_cevada_aveia",
+      "ovo",
+      "leite",
+      "lactose"
+    ],
+    "allergenState": "verified",
+    "sourceName": "Receita da dupla (exemplo de teste)",
+    "sourceUrl": "https://example.org/crepe-simples"
+  }
+}
+
+assert {
+  res.status: eq 400
+}
+
+tests {
+  test("tipo do problema contém validation", function() {
+    expect(res.body.type).to.contain("validation");
+  });
+}
+
+docs {
+  `verified` só se obtém pela rota de verificação (A06).
+}

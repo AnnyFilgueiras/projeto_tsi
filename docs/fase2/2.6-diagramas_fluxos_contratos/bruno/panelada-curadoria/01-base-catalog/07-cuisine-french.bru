@@ -1,0 +1,32 @@
+meta {
+  name: Culinária: francesa
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/v1/curation/cuisines
+  body: json
+  auth: inherit
+}
+
+headers {
+  Idempotency-Key: {{idemKey}}
+}
+
+body:json {
+  {
+    "name": "Francesa",
+    "continents": [
+      "europe"
+    ]
+  }
+}
+
+vars:post-response {
+  cuiFrenchId: res.body.id
+}
+
+assert {
+  res.status: eq 201
+}

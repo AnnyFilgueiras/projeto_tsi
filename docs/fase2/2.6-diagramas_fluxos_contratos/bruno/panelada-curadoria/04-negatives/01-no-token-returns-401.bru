@@ -1,0 +1,21 @@
+meta {
+  name: Sem token retorna 401
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/v1/curation/proposals
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 401
+}
+
+tests {
+  test("tipo do problema contém unauthenticated", function() {
+    expect(res.body.type).to.contain("unauthenticated");
+  });
+}

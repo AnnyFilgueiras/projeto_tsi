@@ -1,0 +1,29 @@
+meta {
+  name: Marcar alérgenos como verificados
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/v1/curation/proposals/{{manualProposalId}}/verify
+  body: json
+  auth: inherit
+}
+
+headers {
+  Idempotency-Key: {{idemKey}}
+}
+
+body:json {
+  {
+    "checkedIngredients": true,
+    "secondSourceChecked": true,
+    "secondSourceDescription": "Conferido contra a tabela da fonte pública",
+    "unionChecked": true
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.data.allergenState: eq verified
+}

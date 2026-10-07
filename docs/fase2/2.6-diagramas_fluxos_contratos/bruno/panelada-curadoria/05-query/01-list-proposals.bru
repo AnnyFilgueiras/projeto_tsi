@@ -1,0 +1,27 @@
+meta {
+  name: Listar propostas
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/v1/curation/proposals?state=approved&page=1&size=20
+  body: none
+  auth: inherit
+}
+
+params:query {
+  state: approved
+  page: 1
+  size: 20
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("itens é lista", function() {
+    expect(res.body.items).to.be.an("array");
+  });
+}

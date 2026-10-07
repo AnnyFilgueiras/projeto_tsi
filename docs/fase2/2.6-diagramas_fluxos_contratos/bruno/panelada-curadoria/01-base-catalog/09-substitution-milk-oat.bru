@@ -1,0 +1,29 @@
+meta {
+  name: Substituição: leite por aveia
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{baseUrl}}/v1/curation/substitutions
+  body: json
+  auth: inherit
+}
+
+headers {
+  Idempotency-Key: {{idemKey}}
+}
+
+body:json {
+  {
+    "ingredientId": "{{ingMilkId}}",
+    "substituteId": "{{ingOatId}}",
+    "substituteAllergens": [
+      "trigo_centeio_cevada_aveia"
+    ]
+  }
+}
+
+assert {
+  res.status: eq 201
+}

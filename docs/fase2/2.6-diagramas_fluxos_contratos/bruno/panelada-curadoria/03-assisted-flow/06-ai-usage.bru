@@ -1,0 +1,22 @@
+meta {
+  name: Consumo de IA
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/v1/curation/ai-usage
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("consumo é numérico", function() {
+    expect(res.body.accumulatedBrl).to.be.a("number");
+    expect(res.body.capBrl).to.be.a("number");
+  });
+}

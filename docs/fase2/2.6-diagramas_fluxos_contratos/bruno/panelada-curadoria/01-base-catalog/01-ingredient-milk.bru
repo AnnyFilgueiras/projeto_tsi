@@ -1,0 +1,33 @@
+meta {
+  name: Ingrediente: leite
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/v1/curation/ingredients
+  body: json
+  auth: inherit
+}
+
+headers {
+  Idempotency-Key: {{idemKey}}
+}
+
+body:json {
+  {
+    "name": "Leite",
+    "allergens": [
+      "leite",
+      "lactose"
+    ]
+  }
+}
+
+vars:post-response {
+  ingMilkId: res.body.id
+}
+
+assert {
+  res.status: eq 201
+}

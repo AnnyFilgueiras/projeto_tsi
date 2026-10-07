@@ -1,0 +1,39 @@
+meta {
+  name: Leite sem lactose e sem marca explícita é recusado
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/v1/curation/ingredients
+  body: json
+  auth: inherit
+}
+
+headers {
+  Idempotency-Key: {{idemKey}}
+}
+
+body:json {
+  {
+    "name": "Leite sem marca explícita",
+    "allergens": [
+      "leite"
+    ],
+    "lactoseFree": false
+  }
+}
+
+assert {
+  res.status: eq 422
+}
+
+tests {
+  test("tipo do problema contém business-rule", function() {
+    expect(res.body.type).to.contain("business-rule");
+  });
+}
+
+docs {
+  Invariante do ADR-014: `leite` sem `lactose` só passa com `lactoseFree = true`.
+}

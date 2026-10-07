@@ -1,0 +1,32 @@
+meta {
+  name: Ingrediente: trigo
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/v1/curation/ingredients
+  body: json
+  auth: inherit
+}
+
+headers {
+  Idempotency-Key: {{idemKey}}
+}
+
+body:json {
+  {
+    "name": "Farinha de trigo",
+    "allergens": [
+      "trigo_centeio_cevada_aveia"
+    ]
+  }
+}
+
+vars:post-response {
+  ingWheatId: res.body.id
+}
+
+assert {
+  res.status: eq 201
+}

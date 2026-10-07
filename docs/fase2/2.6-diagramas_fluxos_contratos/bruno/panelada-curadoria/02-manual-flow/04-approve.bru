@@ -1,0 +1,20 @@
+meta {
+  name: Aprovar
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/v1/curation/proposals/{{manualProposalId}}/approve
+  body: none
+  auth: inherit
+}
+
+headers {
+  Idempotency-Key: {{idemKey}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.publicationState: eq approved
+}

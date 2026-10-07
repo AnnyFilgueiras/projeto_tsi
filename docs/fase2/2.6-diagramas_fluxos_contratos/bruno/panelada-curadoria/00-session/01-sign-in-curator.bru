@@ -1,0 +1,27 @@
+meta {
+  name: Entrar como curador
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/v1/sessions/sign-in
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "{{curatorEmail}}",
+    "password": "{{curatorPassword}}"
+  }
+}
+
+vars:post-response {
+  accessToken: res.body.tokens.accessToken
+  refreshToken: res.body.tokens.refreshToken
+}
+
+assert {
+  res.status: eq 200
+}

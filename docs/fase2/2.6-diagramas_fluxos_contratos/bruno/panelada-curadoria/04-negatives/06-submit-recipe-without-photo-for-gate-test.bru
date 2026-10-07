@@ -1,0 +1,67 @@
+meta {
+  name: Enviar receita sem foto para o teste do portão
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/v1/curation/recipes
+  body: json
+  auth: inherit
+}
+
+headers {
+  Idempotency-Key: {{idemKey}}
+}
+
+body:json {
+  {
+    "name": "Crepe sem foto",
+    "cuisineId": "{{cuiFrenchId}}",
+    "baseDishId": null,
+    "prepTimeMinutes": 30,
+    "difficulty": "easy",
+    "ingredients": [
+      {
+        "ingredientId": "{{ingWheatId}}",
+        "quantity": "1",
+        "unit": "xícara"
+      },
+      {
+        "ingredientId": "{{ingEggId}}",
+        "quantity": "2",
+        "unit": "un"
+      },
+      {
+        "ingredientId": "{{ingMilkId}}",
+        "quantity": "1",
+        "unit": "xícara"
+      }
+    ],
+    "utensilIds": [
+      "{{utFryingPanId}}"
+    ],
+    "steps": [
+      "Bata a farinha, os ovos e o leite até ficar liso.",
+      "Aqueça a frigideira e despeje uma concha da massa.",
+      "Doure dos dois lados."
+    ],
+    "allergens": [
+      "trigo_centeio_cevada_aveia",
+      "ovo",
+      "leite",
+      "lactose"
+    ],
+    "allergenState": "source_declared",
+    "sourceName": "Receita da dupla (exemplo de teste)",
+    "sourceUrl": "https://example.org/crepe-simples"
+  }
+}
+
+vars:post-response {
+  noPhotoProposalId: res.body.id
+}
+
+assert {
+  res.status: eq 201
+}

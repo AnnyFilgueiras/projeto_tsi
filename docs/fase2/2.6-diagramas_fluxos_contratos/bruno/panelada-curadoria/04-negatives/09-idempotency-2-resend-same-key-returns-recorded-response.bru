@@ -1,0 +1,30 @@
+meta {
+  name: Idempotência 2: reenvio com a mesma chave devolve a resposta gravada
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{baseUrl}}/v1/curation/ingredients
+  body: json
+  auth: inherit
+}
+
+headers {
+  Idempotency-Key: {{fixedKey}}
+}
+
+body:json {
+  {
+    "name": "Ingrediente idempotente",
+    "allergens": [
+      "ovo"
+    ]
+  }
+}
+
+tests {
+  test("devolve o mesmo id", function() {
+    expect(res.body.id).to.equal(bru.getVar("idemIngredientId"));
+  });
+}

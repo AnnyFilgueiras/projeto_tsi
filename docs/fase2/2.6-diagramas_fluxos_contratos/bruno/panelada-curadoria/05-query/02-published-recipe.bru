@@ -1,0 +1,19 @@
+meta {
+  name: Receita publicada
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/v1/recipes/{{manualProposalId}}
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+}
+
+docs {
+  Hipótese [H]: o `dishId` do prato publicado é o `id` da proposta aprovada. Se não for, trocar a variável.
+}

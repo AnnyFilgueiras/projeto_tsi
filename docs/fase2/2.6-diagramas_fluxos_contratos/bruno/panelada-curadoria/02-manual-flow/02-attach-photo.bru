@@ -1,0 +1,24 @@
+meta {
+  name: Anexar foto
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{baseUrl}}/v1/curation/proposals/{{manualProposalId}}/photo
+  body: multipartForm
+  auth: inherit
+}
+
+body:multipart-form {
+  image: @file(fixtures/dish-example.jpg)
+  author: Dupla (foto de teste)
+  title: Prato de exemplo
+  sourceUrl: https://example.org/dish-example
+  license: own_work
+  modified: false
+}
+
+assert {
+  res.status: eq 200
+}

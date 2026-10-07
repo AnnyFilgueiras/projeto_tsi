@@ -1,0 +1,29 @@
+meta {
+  name: Portão bloqueia aprovação sem foto
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/v1/curation/proposals/{{noPhotoProposalId}}/approve
+  body: none
+  auth: inherit
+}
+
+headers {
+  Idempotency-Key: {{idemKey}}
+}
+
+assert {
+  res.status: eq 422
+}
+
+tests {
+  test("tipo do problema contém publication-gate", function() {
+    expect(res.body.type).to.contain("publication-gate");
+  });
+  test("lista a violação de foto", function() {
+    var codes = res.body.violations.map(function (v) { return v.code; });
+    expect(codes).to.include("photo_without_attribution");
+  });
+}

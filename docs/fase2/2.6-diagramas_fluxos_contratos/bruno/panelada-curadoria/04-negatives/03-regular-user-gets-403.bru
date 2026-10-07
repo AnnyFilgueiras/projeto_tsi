@@ -1,0 +1,25 @@
+meta {
+  name: Usuário comum recebe 403
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/v1/curation/proposals
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{userToken}}
+}
+
+assert {
+  res.status: eq 403
+}
+
+tests {
+  test("tipo do problema contém forbidden-role", function() {
+    expect(res.body.type).to.contain("forbidden-role");
+  });
+}

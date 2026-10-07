@@ -1,0 +1,29 @@
+meta {
+  name: Substituição: leite por leite sem lactose
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/v1/curation/substitutions
+  body: json
+  auth: inherit
+}
+
+headers {
+  Idempotency-Key: {{idemKey}}
+}
+
+body:json {
+  {
+    "ingredientId": "{{ingMilkId}}",
+    "substituteId": "{{ingLactoseFreeMilkId}}",
+    "substituteAllergens": [
+      "leite"
+    ]
+  }
+}
+
+assert {
+  res.status: eq 201
+}

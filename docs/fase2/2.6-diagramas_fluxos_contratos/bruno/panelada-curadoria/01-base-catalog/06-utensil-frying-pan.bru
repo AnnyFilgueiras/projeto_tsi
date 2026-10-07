@@ -1,0 +1,29 @@
+meta {
+  name: Utensílio: frigideira
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/v1/curation/utensils
+  body: json
+  auth: inherit
+}
+
+headers {
+  Idempotency-Key: {{idemKey}}
+}
+
+body:json {
+  {
+    "name": "Frigideira"
+  }
+}
+
+vars:post-response {
+  utFryingPanId: res.body.id
+}
+
+assert {
+  res.status: eq 201
+}

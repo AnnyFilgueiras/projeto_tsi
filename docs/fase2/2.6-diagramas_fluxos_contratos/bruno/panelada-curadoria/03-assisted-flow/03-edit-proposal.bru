@@ -1,0 +1,23 @@
+meta {
+  name: Editar proposta
+  type: http
+  seq: 3
+}
+
+patch {
+  url: {{baseUrl}}/v1/curation/proposals/{{assistedProposalId}}
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "cuisineId": "{{cuiFrenchId}}",
+    "prepTimeMinutes": 25,
+    "difficulty": "easy"
+  }
+}
+
+assert {
+  res.status: eq 200
+}

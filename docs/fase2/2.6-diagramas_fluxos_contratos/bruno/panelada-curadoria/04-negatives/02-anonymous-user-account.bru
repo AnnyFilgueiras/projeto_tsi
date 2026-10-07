@@ -1,0 +1,19 @@
+meta {
+  name: Conta anônima de usuário
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/v1/accounts/anonymous
+  body: none
+  auth: none
+}
+
+vars:post-response {
+  userToken: res.body.tokens.accessToken
+}
+
+assert {
+  res.status: eq 201
+}

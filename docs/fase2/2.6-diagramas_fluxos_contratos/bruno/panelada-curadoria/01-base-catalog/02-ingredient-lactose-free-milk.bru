@@ -1,0 +1,33 @@
+meta {
+  name: Ingrediente: leite sem lactose
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/v1/curation/ingredients
+  body: json
+  auth: inherit
+}
+
+headers {
+  Idempotency-Key: {{idemKey}}
+}
+
+body:json {
+  {
+    "name": "Leite sem lactose",
+    "allergens": [
+      "leite"
+    ],
+    "lactoseFree": true
+  }
+}
+
+vars:post-response {
+  ingLactoseFreeMilkId: res.body.id
+}
+
+assert {
+  res.status: eq 201
+}

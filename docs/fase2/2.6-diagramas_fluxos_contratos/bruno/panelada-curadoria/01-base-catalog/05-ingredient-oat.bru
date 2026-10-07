@@ -1,0 +1,32 @@
+meta {
+  name: Ingrediente: aveia
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/v1/curation/ingredients
+  body: json
+  auth: inherit
+}
+
+headers {
+  Idempotency-Key: {{idemKey}}
+}
+
+body:json {
+  {
+    "name": "Aveia",
+    "allergens": [
+      "trigo_centeio_cevada_aveia"
+    ]
+  }
+}
+
+vars:post-response {
+  ingOatId: res.body.id
+}
+
+assert {
+  res.status: eq 201
+}

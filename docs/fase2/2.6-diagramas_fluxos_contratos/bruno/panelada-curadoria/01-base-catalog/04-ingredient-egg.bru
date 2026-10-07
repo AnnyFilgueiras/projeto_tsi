@@ -1,0 +1,32 @@
+meta {
+  name: Ingrediente: ovo
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/v1/curation/ingredients
+  body: json
+  auth: inherit
+}
+
+headers {
+  Idempotency-Key: {{idemKey}}
+}
+
+body:json {
+  {
+    "name": "Ovo",
+    "allergens": [
+      "ovo"
+    ]
+  }
+}
+
+vars:post-response {
+  ingEggId: res.body.id
+}
+
+assert {
+  res.status: eq 201
+}

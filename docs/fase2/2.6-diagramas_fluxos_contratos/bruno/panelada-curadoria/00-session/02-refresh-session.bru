@@ -1,0 +1,26 @@
+meta {
+  name: Renovar sessão
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/v1/sessions/refresh
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "refreshToken": "{{refreshToken}}"
+  }
+}
+
+vars:post-response {
+  accessToken: res.body.accessToken
+  refreshToken: res.body.refreshToken
+}
+
+assert {
+  res.status: eq 200
+}

@@ -1,0 +1,15 @@
+meta {
+  name: Obter proposta
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/v1/curation/proposals/{{assistedProposalId}}
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+}

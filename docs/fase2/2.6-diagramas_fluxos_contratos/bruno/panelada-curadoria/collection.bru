@@ -1,0 +1,26 @@
+auth {
+  mode: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+headers {
+  Accept: application/json
+}
+
+script:pre-request {
+  function uuid() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      var r = Math.random() * 16 | 0;
+      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+  }
+  bru.setVar('idemKey', uuid());
+}
+
+docs {
+  Coleção de curadoria do Panelada, derivada de openapi.yaml (contrato 1.1.0-2.7; identificadores em inglês, ADR-015).
+  O Bruno usa UUID v4 como Idempotency-Key; o app usa UUID v7. O contrato aceita qualquer UUID.
+}
