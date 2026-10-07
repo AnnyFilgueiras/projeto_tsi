@@ -510,3 +510,100 @@ Lista completa em `registro-divergencias-2.5.md` (19 itens). Principais:
 - **Para a 2.7:** como verificar as fronteiras entre módulos.
 - **Para a 2.8:** Lote 2
 - **Ao final da 2.6:** abrir a issue agrupada da Fase 1 (Lote 3).
+
+
+## [07/10/2026] — Conversa 2.6 (Classes, sequências e contratos)
+
+- **Papel da IA:** arquiteto, designer de componentes e de padrões (SOLID).
+- **Técnicas aplicadas:** fechamento de pendências por perguntas numeradas, com recomendação e custo; mapeamento das 13 classes conceituais para classes de projeto, separando App, API e Pacote de Alérgenos; diagramas de classe por assunto (no máximo cerca de 12 elementos); sequências Mermaid para quatro casos de uso críticos, com os componentes do C4; contrato OpenAPI 3.1 como fonte da verdade; coleção Bruno derivada do contrato; validação por script dos esquemas e dos corpos de exemplo; conferência de SOLID por componente, com correções aplicadas; busca de fontes públicas (ANVISA, Idempotency-Key, Bruno).
+- **Prompts-chave usados:**
+  1. Abertura da 2.6 com o briefing de passagem, instrução de parar se faltasse anexo e confirmação das pendências (R13, R14, R15, R10, legibilidade do nível 3, commit do C4).
+  2. Respostas da dupla às nove perguntas de fechamento (vocabulário, "verificado", idempotência, "em preparo", avaliação, tokens, badges, pacote de alérgenos, esquema do agente).
+  3. Pergunta da dupla: "intolerância à lactose foi descontinuado mesmo?" (levou à correção da IA e ao 19º código).
+  4. Correção da dupla: JWT de acesso de 45 minutos, por causa do uso no passo a passo.
+  5. Decisão da dupla: "em preparo" só local, sem sincronizar.
+  6. Pergunta da dupla sobre as vantagens e desvantagens de separar `Usuario` e `Conta`.
+  7. Aceitação de cada incremento (classes, sequências, OpenAPI, Bruno, SOLID), com ajustes pedidos pela IA.
+- **Insumos usados:** `briefing-passagem-2.6.md`, `briefing-fase2.md` v1.3, `diario_de_bordo-fase2.md` (entrada 2.5 colada na conversa), `c4-contexto.md`, `c4-containers.md`, `c4-componentes.md` (v1.1), ADR-001 a ADR-014, `regras-de-negocio.md`, `casos-de-uso.md`, `modelo-conceitual.md`; consultas pontuais a `backlog.md` e `casos-de-teste.md` (exemplos de lactose e glúten); fontes externas: texto da RDC 26/2015, Idempotency-Key (IETF e Stripe), documentação do Bruno.
+- **Artefatos produzidos:** `diagrama-classes.md` v1.0; `sequencia-uc10.md`, `sequencia-uc04.md`, `sequencia-uc08.md`, `sequencia-uc12.md`; `openapi.yaml` v1.0.0-2.6; coleção Bruno `panelada-curadoria` (46 arquivos); `retroalimentacao-2.6.md` (notas de detalhamento dos ADR, texto da issue do Lote 3 e divergências); esta entrada; `briefing-passagem-2.7.md`.
+
+### Decisões tomadas
+
+**Alérgenos**
+1. Vocabulário controlado v1 de 19 códigos: os 18 itens da lista da ANVISA (RDC 26/2015, consolidada pela RDC 727/2022) mais `lactose`, a pedido da dupla. `leite` cobre alergia; `lactose` cobre intolerância. Leite sem lactose declara só `leite`.
+2. Invariante nova (ADR-014): ingrediente com `leite` e sem `lactose` só passa com `semLactose = true`, conferido pelo curador.
+3. Restrição do usuário é escolha em catálogo fixo (`TipoRestricao`, por seed), cada tipo mapeado para códigos.
+4. "Verificado" exige checklist do curador. A segunda fonte é recomendada, não obrigatória. Receita sem alérgenos só é `verificado` com `confirmadoSemAlergenos`; sem isso, lista vazia continua `nao_verificado` (RN08).
+5. Sem restrição cadastrada, a receita classifica como `compativel`, com o estado dos alérgenos visível. "Declarado pela fonte" é `compativel` quando não há alérgeno da restrição, sempre com o aviso "compatibilidade não confirmada".
+6. Pacote de Alérgenos com três funções puras (`classificarReceita`, `filtrarCandidatas`, `substitutoPermitido`) mais `verificarInvariantes` em ponto de entrada separado. A versão do pacote avisa e não bloqueia (`X-Pacote-Alergenos-Versao`, `pacoteVersaoMinima`).
+
+**Idempotência, sessões e fila**
+7. Idempotência: UUID gerado no cliente, tabela `OperacaoProcessada` com chave `(contaId, opId)`, gravada na mesma transação do efeito, validade de 90 dias. Mesma chave com conteúdo diferente: 422 (`chave-reutilizada`).
+8. `Avaliacao.id` é o `opId`. O `id` do `ItemDeRotina` é o `opId` da operação que o cria; as demais operações do item têm `opId` próprio. Criar item exige rede e usa `Idempotency-Key`.
+9. JWT de acesso de 45 minutos. Refresh de 30 dias, rotativo, com tolerância de 60 s (`usadoEm`, `sucessorId`, `familiaId`). Conta anônima sem sincronização por 12 meses é excluída. Fila com no máximo 500 operações e 90 dias; espera progressiva de 5 s a 1 h; limite de login de 5 tentativas por 15 min.
+10. `Usuario` e `Conta` separados, com a mesma chave primária e criação em uma transação.
+11. "Em preparo" só existe com item de rotina e só no aparelho; o servidor conhece `planejado` e `concluido`.
+12. Avaliação só se acrescenta, sem edição nem exclusão (salvo exclusão de conta). O servidor recalcula os desbloqueios e só acrescenta. Prato aprovado nunca é apagado, só desativado. Operação com falha permanente só pode ser descartada (sem reenvio na v1). O desbloqueio local sobrevive à rejeição.
+13. Badges de conjunto temático: marco tipado (`prato`, `culinaria`, `n_culinarias`, `todos_continentes`, `conjunto`), carregado por seed.
+
+**Restrição alimentar e revogação**
+14. A revogação apaga a linha da restrição (sem `revogadoEm`). O app mostra "revogação pendente de envio" enquanto a operação estiver na fila. Se um cadastro for rejeitado, a restrição continua ativa no aparelho. O prazo de 24 h conta do recebimento pelo servidor.
+
+**Classes, sequências e importação**
+15. Promoção das classes-associação `ConquistaBadge`, `ItemDeCompra` e `SubstituicaoIngrediente`. `DesbloqueioEvolucao` registra a confirmação do servidor.
+16. `AplicadorDeOperacao` por tipo de operação (falha na inicialização por tipo duplicado ou sem aplicador); `ProvedorGravado` ativo só por `PROVEDOR_IA=gravado`, com `modelo = "gravado"`.
+17. Casos de uso das sequências: UC10 (com UC13 e UC11), UC04 (com UC09), UC08 e UC12 (fluxo assistido).
+18. Importação: `marcarVerificado` em chamada separada; o portão permite publicar com `nao_verificado` ou `declarado_fonte`; texto de entrada de até 20.000 caracteres (hipótese); falha do provedor ou saída inválida não grava proposta, mas registra os tokens.
+19. Conferência de SOLID: 12 correções aplicadas nas classes (divisão de `AbrirReceita`, repositórios, interfaces de fila, `Sincronizador`, cliente de rede, Identidade, Sincronização, Catálogo e Perfil, Importação, `ProvedorDeChave`), 3 condições e o dono do ciclo da sugestão (Rotina e Planejamento). Nenhum ADR nem o C4 foi contradito.
+
+**Contrato**
+20. OpenAPI 3.1 com prefixo `/v1`, 35 operações, erros em `application/problem+json`, `Idempotency-Key` nas rotas que criam recurso, nota como inteiro de 0 a 10 (meios-pontos), teto de IA com 402 e falha do provedor com 502, ambos com `fluxoManualDisponivel`.
+21. Coleção Bruno em `/docs/fase2/bruno/panelada-curadoria/` e contrato em `/docs/fase2/openapi.yaml`.
+
+### Artefatos alterados (retroalimentação)
+
+| Artefato | Mudança | Status |
+|---|---|---|
+| ADR-005, 006, 007, 008, 009, 010, 011, 012, 014 | Seção "Detalhamento (2.6)" (texto pronto em `retroalimentacao-2.6.md`) | Pendente (aplicar e commitar) |
+| `atributos-qualidade.md` | Nenhuma mudança obrigatória. "Em preparo" local e prazo de 24 h já são coerentes com A04 e A05. | Sem ação |
+| `c4-componentes.md` | Nenhuma mudança obrigatória. As 12 correções de SOLID ficam dentro dos componentes, em classes e interfaces. | Sem ação |
+| `briefing-fase2.md` | Proposta: v1.4 com o nome correto do diário (`diario_de_bordo-fase2.md`) e a correção da referência à RDC. | Proposto |
+| Fase 1 (`casos-de-uso.md`, `regras-de-negocio.md`, `backlog.md`, `casos-de-teste.md`, `modelo-conceitual.md`) | Issue agrupada do Lote 3 (texto pronto em `retroalimentacao-2.6.md`) | Pendente (abrir ao final da 2.6) |
+
+### Iterações relevantes (erros e retrabalho da IA)
+
+1. A IA indicou a RDC 26/2015 como referência do vocabulário sem saber que foi revogada. A conferência mostrou a revogação pela RDC 727/2022. A lista foi lida na RDC 26; a consolidação pela 727 vem de fonte secundária e ficou marcada para conferência.
+2. Ao propor o vocabulário, a IA escreveu "intolerância à lactose continua fora", juntando-a ao diabetes. A dupla perguntou, e a Fase 1 mostrou que a lactose é restrição suportada (US09, CT01, CT19). Resultado: `lactose` virou o 19º código.
+3. A IA propôs `id` do `ItemDeRotina` igual ao `opId`, sem notar que o item recebe várias operações. A dupla aceitou, e a IA corrigiu depois: o `id` é o `opId` da operação que cria o item.
+4. A IA sugeriu "em preparo" sincronizado e JWT de 15 minutos. A dupla escolheu "em preparo" local e 45 minutos. A IA observou que o passo a passo não depende do JWT, pois roda do banco local.
+5. Uma pergunta numerada (3a) foi repetida sem rótulo claro, e a dupla não soube a que ela se referia.
+6. A lacuna do ADR-014 (receita sem alérgenos nunca poderia ser `verificada`) só apareceu ao montar os dados de teste da coleção Bruno. Corrigida com `confirmadoSemAlergenos`.
+7. `Proposta.dados` exigia `culinariaId`, o que contradizia a proposta de IA (que devolve a culinária em texto). Corrigido ao montar a coleção.
+8. A conferência de SOLID aconteceu depois das classes e achou 12 correções. Lição: aplicar SOLID já no primeiro rascunho das classes (como na lição dos diagramas da 2.5).
+9. O ambiente de execução reiniciou duas vezes e apagou os arquivos gerados. O `openapi.yaml` e a coleção foram regerados na última rodada.
+
+### Divergências registradas (briefing/professor × artefatos)
+
+- **RDC 26/2015 × RDC 727/2022:** o briefing de passagem cita a RDC 26/2015, revogada. Segue-se a RDC 727/2022, a conferir.
+- **RN08 × decisão 5 da 2.1:** a RN08 lida literalmente trata "não verificado" como incompatível para qualquer usuário; a 2.1 diz "para quem tem restrição". Seguida a 2.1. Redação da RN08 vai ao Lote 3, junto com a regra de lista vazia confirmada.
+- **UC12 (FA2 e FE2) × ADR-010:** a Fase 1 supõe interface de usuário ("sistema notifica e redireciona"); o ADR-010 diz que a curadoria é só por API. Segue o ADR; Lote 3.
+- **US09, CT01, CT17 e CT19 × vocabulário:** os exemplos usam "lactose" e "glúten" como alérgenos. Os códigos são `lactose` e `trigo_centeio_cevada_aveia`. Lote 3.
+- **Briefing de passagem 2.6 × ADR-010 e ADR-012:** o briefing diz que os `[CONFIRMAR]` estavam resolvidos; nos arquivos continuam abertos. O R10 não foi feito.
+- **Modelo conceitual × projeto:** `ItemDeRotina.status` tem "em preparo" no modelo; no projeto esse valor é local. Lote 3 (nota no modelo).
+
+### Riscos aceitos
+
+- R1 a R12 seguem como antes. R13 reconfirmado; R14 e R15 confirmados. R10 continua pendente de verificação.
+- **R16 (proposto, a confirmar):** a revogação de restrição só chega ao servidor quando o app abre com rede, então a cópia no servidor pode existir por mais de 24 h. Mitigação: indicação de "revogação pendente de envio" e texto de consentimento claro.
+- **R17 (proposto, a confirmar):** a tolerância de 60 s no refresh token (para não derrubar a sessão legítima quando a resposta se perde) amplia um pouco a janela de uso de um token roubado. Mitigação: janela curta, família revogada em reuso fora dela.
+
+### Pendências para a próxima conversa (2.7)
+
+- **Para fechar antes de implementar:** lint do `openapi.yaml` num validador completo; abrir a coleção no Bruno e conferir `auth: inherit`, `@file(...)` e `body:multipart-form`; conferir a lista vigente da RDC 727/2022.
+- **Documentos a aplicar e commitar:** notas de detalhamento nos ADR (em `retroalimentacao-2.6.md`); `diagrama-classes.md`, as quatro sequências, `openapi.yaml` e a coleção Bruno em `/docs/fase2/`.
+- **Fase 1:** abrir a issue agrupada do Lote 3 (UC12 FE2 e FA2, RN03e, RN08, exclusão de conta, exemplos de lactose e glúten, modelo conceitual).
+- **R10 e ADR-010 e ADR-012:** verificar licenças e termos de uso das fontes; resolver os `[CONFIRMAR]` restantes.
+- **Lote 2 (antes da 2.8):** itens #1, #6, #7, #11, #12 e #13.
+- **Para a 2.7:** padrões de projeto justificados (candidatos: registro de aplicadores, portas e adaptadores, repositório, unidade de trabalho, lista de regras do portão, mecanismo de verificação das fronteiras entre módulos).
+- **Medidas (H), em ordem de prioridade:** tokens com 3 a 5 receitas e JSON Mode (ADR-011); abertura offline em 2 s com SQLCipher (ADR-005); protótipo de sincronização em 10 dias (ADR-008); WebP e peso das fotos (ADR-012); tamanho do índice leve; cota do Cloud Run e limite do console da Kimi.
+- **Em aberto:** valores de `frequencia` dos lembretes; política de limpeza do armazenamento local de fotos preparadas; existência de US ou RNF de exclusão de conta.

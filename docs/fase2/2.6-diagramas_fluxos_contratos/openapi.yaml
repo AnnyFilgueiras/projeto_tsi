@@ -1,0 +1,3185 @@
+openapi: 3.1.0
+info:
+  title: API Panelada
+  version: 1.0.0-2.6
+  summary: Contrato da API do Panelada (fonte da verdade, Fase 2.6)
+  description: 'Contrato de sessão e contas, sincronização, conjunto baixado, sugestão e busca, rotas de curadoria,
+    erros e idempotência. Gerado na conversa 2.6; a revisar pela dupla.
+
+
+    **Convenções.** JSON em UTF-8. Erros em `application/problem+json` (RFC 9457). Identificadores UUID. Datas em
+    ISO 8601.
+
+
+    **Idempotência.** Operações da fila vão em lote com `opId`. Rotas online que criam recurso exigem `Idempotency-Key`.
+    Mesma chave e mesmo conteúdo: resposta gravada. Mesma chave e conteúdo diferente: 422. Validade: 90 dias.
+
+
+    **Privacidade.** A restrição alimentar nunca trafega em query string, URL, log ou resposta de terceiros. O provedor
+    de IA só recebe texto de receita, fonte e ingredientes canônicos.
+
+
+    **Demo.** HTTP sem TLS em 10.0.2.2 (limitação declarada, ADR-006).'
+  license:
+    name: Uso acadêmico
+    identifier: LicenseRef-Academico
+servers:
+- url: http://localhost:3000
+  description: Demo, acessada pelo Bruno no computador
+- url: http://10.0.2.2:3000
+  description: Demo, acessada pelo emulador Android
+tags:
+- name: Sistema
+- name: Sessão e contas
+- name: Sincronização
+- name: Catálogo
+- name: Perfil
+- name: Sugestão e busca
+- name: Rotina
+- name: Curadoria
+  description: Só papel curador. Usadas pelo Bruno; não há tela.
+security:
+- bearerAuth: []
+paths:
+  /v1/saude:
+    get:
+      tags:
+      - Sistema
+      operationId: verificarSaude
+      summary: Verifica se a API e o banco respondem
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum:
+                    - ok
+                  versao:
+                    type: string
+                  pacoteAlergenosVersao:
+                    type: string
+                required:
+                - status
+                additionalProperties: false
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+      security: []
+  /v1/contas/anonima:
+    post:
+      tags:
+      - Sessão e contas
+      operationId: criarContaAnonima
+      summary: Cria conta anônima e devolve os tokens
+      description: 'Cria Conta e Usuario na mesma transação (mesma chave primária). Sem dado pessoal. Limitado por
+        IP.
+
+
+        Rastreio: RNF02, A02; ADR-007'
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  contaId:
+                    type: string
+                    format: uuid
+                  tokens:
+                    $ref: '#/components/schemas/ParTokens'
+                required:
+                - contaId
+                - tokens
+                additionalProperties: false
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+      security: []
+  /v1/sessoes/entrar:
+    post:
+      tags:
+      - Sessão e contas
+      operationId: entrar
+      summary: Entra com e-mail e senha
+      description: 'Revoga as sessões anteriores da conta (um aparelho ativo, ADR-008).
+
+
+        Rastreio: ADR-007'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                senha:
+                  type: string
+                  minLength: 8
+                  maxLength: 128
+              required:
+              - email
+              - senha
+              additionalProperties: false
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  contaId:
+                    type: string
+                    format: uuid
+                  tokens:
+                    $ref: '#/components/schemas/ParTokens'
+                required:
+                - contaId
+                - tokens
+                additionalProperties: false
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+        '401':
+          $ref: '#/components/responses/CredenciaisInvalidas'
+      security: []
+  /v1/sessoes/renovar:
+    post:
+      tags:
+      - Sessão e contas
+      operationId: renovarSessao
+      summary: Renova o par de tokens (refresh rotativo)
+      description: 'Cada refresh token vale uma vez. Reenvio do mesmo token dentro de 60 s do primeiro uso devolve
+        o mesmo par já emitido. Reuso fora da janela revoga a família inteira de tokens (R13, ADR-007).
+
+
+        Rastreio: ADR-007'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+              required:
+              - refreshToken
+              additionalProperties: false
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParTokens'
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+        '401':
+          $ref: '#/components/responses/RefreshInvalido'
+      security: []
+  /v1/sessoes/sair:
+    post:
+      tags:
+      - Sessão e contas
+      operationId: sair
+      summary: Revoga a sessão atual
+      description: 'Rastreio: ADR-007'
+      responses:
+        '204':
+          description: Sucesso
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+  /v1/conta/email:
+    put:
+      tags:
+      - Sessão e contas
+      operationId: vincularEmail
+      summary: Vincula e-mail e senha à conta anônima
+      description: 'Preserva o progresso. Sem recuperação de senha no MVP (ADR-007, item 8).
+
+
+        Rastreio: ADR-007'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                senha:
+                  type: string
+                  minLength: 8
+                  maxLength: 128
+              required:
+              - email
+              - senha
+              additionalProperties: false
+      responses:
+        '204':
+          description: Sucesso
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+        '409':
+          $ref: '#/components/responses/EmailEmUso'
+  /v1/conta:
+    delete:
+      tags:
+      - Sessão e contas
+      operationId: excluirConta
+      summary: Exclui a conta e todos os dados do usuário
+      description: 'Orquestra a exclusão em todos os módulos e remove as operações processadas. A existência de
+        US ou RNF de exclusão de conta ainda precisa ser verificada na Fase 1 (Lote 3).
+
+
+        Rastreio: LGPD; ADR-007 item 9'
+      responses:
+        '204':
+          description: Sucesso
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+  /v1/sincronizacao/operacoes:
+    post:
+      tags:
+      - Sincronização
+      operationId: enviarOperacoes
+      summary: Envia o lote de operações da fila
+      description: 'Cada operação leva o opId gerado no cliente. Reenvio com mesmo opId e mesmo conteúdo devolve
+        o resultado gravado com repetida=true. Mesmo opId com conteúdo diferente é recusado por operação com o problema
+        `chave-reutilizada`. Máximo de 100 operações por lote. A resposta não falha em bloco: cada operação tem
+        seu resultado.
+
+
+        Rastreio: UC05, UC08, UC10; ADR-008'
+      parameters:
+      - $ref: '#/components/parameters/PacoteVersao'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operacoes:
+                  type: array
+                  minItems: 1
+                  maxItems: 100
+                  items:
+                    $ref: '#/components/schemas/Operacao'
+              required:
+              - operacoes
+              additionalProperties: false
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultados:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ResultadoOperacao'
+                  pacoteVersaoMinima:
+                    type: string
+                required:
+                - resultados
+                - pacoteVersaoMinima
+                additionalProperties: false
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+        '413':
+          $ref: '#/components/responses/LoteGrande'
+  /v1/sincronizacao/conjunto:
+    get:
+      tags:
+      - Sincronização
+      operationId: obterConjuntoBaixado
+      summary: Obtém o conjunto baixado (texto leve e lista de receitas a baixar)
+      description: 'Camada 1: perfil, restrições, preferências, despensa, utensílios, rotina, lista de compras,
+        avaliações, conquistas e índice leve do catálogo. Devolve também as receitas das planejadas cuja versão
+        local está desatualizada ou ausente. As receitas e as fotos são baixadas à parte. A restrição só é devolvida
+        ao próprio dono.
+
+
+        Rastreio: UC04, UC10, UC11; ADR-001, ADR-008'
+      parameters:
+      - $ref: '#/components/parameters/PacoteVersao'
+      - name: versao
+        in: query
+        required: false
+        schema:
+          type: string
+        description: Versão do conjunto que o app já tem.
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConjuntoBaixado'
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+        '304':
+          description: Conjunto sem alterações desde a versão informada
+  /v1/receitas/{pratoId}:
+    get:
+      tags:
+      - Catálogo
+      operationId: obterReceita
+      summary: Obtém a receita completa de um prato aprovado
+      description: 'Inclui alérgenos por ingrediente, estado dos alérgenos, substitutos com seus alérgenos e atribuição
+        da foto. Não recebe nem devolve restrição do usuário: a classificação roda no aparelho (UC04).
+
+
+        Rastreio: UC04, UC09; RN15, RN16, RN17, RN22'
+      parameters:
+      - $ref: '#/components/parameters/PratoId'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Receita'
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+        '404':
+          $ref: '#/components/responses/NaoEncontrado'
+  /v1/fotos/{hash}:
+    get:
+      tags:
+      - Catálogo
+      operationId: obterFoto
+      summary: Baixa uma foto WebP pelo hash do conteúdo
+      description: 'Só na demo. No alvo, o app baixa por URL estática do armazenamento de objetos. Conteúdo imutável
+        e cacheável.
+
+
+        Rastreio: ADR-012'
+      parameters:
+      - name: hash
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^[a-f0-9]{64}$
+      responses:
+        '200':
+          description: Imagem WebP
+          content:
+            image/webp:
+              schema:
+                type: string
+                format: binary
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+              description: public, max-age=31536000, immutable
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+        '404':
+          $ref: '#/components/responses/NaoEncontrado'
+  /v1/perfil/despensa:
+    put:
+      tags:
+      - Perfil
+      operationId: atualizarDespensa
+      summary: Substitui a despensa
+      description: 'Edição só online; o app atualiza a cópia local de leitura (ADR-008, detalhamento 2.5).
+
+
+        Rastreio: UC03; US03'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ingredienteIds:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+              required:
+              - ingredienteIds
+              additionalProperties: false
+      responses:
+        '204':
+          description: Sucesso
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+  /v1/perfil/utensilios:
+    put:
+      tags:
+      - Perfil
+      operationId: atualizarUtensilios
+      summary: Substitui os utensílios
+      description: 'Rastreio: UC03; US11'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                utensilioIds:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+              required:
+              - utensilioIds
+              additionalProperties: false
+      responses:
+        '204':
+          description: Sucesso
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+  /v1/perfil/preferencias:
+    put:
+      tags:
+      - Perfil
+      operationId: atualizarPreferenciasCulinarias
+      summary: Substitui as preferências culinárias
+      description: 'Rastreio: UC01; RN10'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                culinariaIds:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+              required:
+              - culinariaIds
+              additionalProperties: false
+      responses:
+        '204':
+          description: Sucesso
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+  /v1/sugestoes:
+    get:
+      tags:
+      - Sugestão e busca
+      operationId: obterSugestoes
+      summary: Obtém sugestões alinhadas ao perfil
+      description: 'Online. O servidor lê restrições, preferências, despensa e histórico da conta e filtra por alérgenos
+        (RN08, RN10). Nunca recebe restrição por query string. Candidatas e prato já concluído não voltam como novidade.
+
+
+        Rastreio: UC01, UC03; RN08, RN10, RN11; A01, A06'
+      parameters:
+      - name: limite
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 20
+          default: 10
+      - name: usarDespensa
+        in: query
+        schema:
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sugestoes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SugestaoItem'
+                  semResultado:
+                    type: boolean
+                required:
+                - sugestoes
+                - semResultado
+                additionalProperties: false
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+  /v1/sugestoes/{sugestaoId}/aprovar:
+    post:
+      tags:
+      - Sugestão e busca
+      operationId: aprovarSugestao
+      summary: Aprova a sugestão e a torna candidata
+      description: 'Implementada pelo módulo Rotina e Planejamento, dono do ciclo da sugestão.
+
+
+        Rastreio: UC02; RN11'
+      parameters:
+      - $ref: '#/components/parameters/SugestaoId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SugestaoItem'
+        '409':
+          $ref: '#/components/responses/EmAndamento'
+        '422':
+          $ref: '#/components/responses/RegraDeNegocio'
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+        '404':
+          $ref: '#/components/responses/NaoEncontrado'
+  /v1/sugestoes/{sugestaoId}/descartar:
+    post:
+      tags:
+      - Sugestão e busca
+      operationId: descartarSugestao
+      summary: Descarta a sugestão
+      description: 'Implementada pelo módulo Rotina e Planejamento.
+
+
+        Rastreio: UC02; RN11'
+      parameters:
+      - $ref: '#/components/parameters/SugestaoId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '204':
+          description: Sucesso
+        '409':
+          $ref: '#/components/responses/EmAndamento'
+        '422':
+          $ref: '#/components/responses/RegraDeNegocio'
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+        '404':
+          $ref: '#/components/responses/NaoEncontrado'
+  /v1/busca:
+    get:
+      tags:
+      - Sugestão e busca
+      operationId: buscarReceitas
+      summary: Busca receitas por nome, culinária, ingrediente ou tempo
+      description: 'Pratos incompatíveis com a restrição vêm sinalizados, não ocultos (RN08). A sinalização é calculada
+        no servidor com a mesma regra do pacote de alérgenos.
+
+
+        Rastreio: US04; RN08; A06'
+      parameters:
+      - name: q
+        in: query
+        schema:
+          type: string
+          maxLength: 100
+      - name: culinariaId
+        in: query
+        schema:
+          type: string
+          format: uuid
+      - name: ingredienteId
+        in: query
+        schema:
+          type: string
+          format: uuid
+      - name: tempoMaximoMinutos
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+      - name: pagina
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: tamanho
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 20
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  itens:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ResumoPratoBusca'
+                  pagina:
+                    type: integer
+                  total:
+                    type: integer
+                required:
+                - itens
+                - pagina
+                - total
+                additionalProperties: false
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+  /v1/planos:
+    post:
+      tags:
+      - Rotina
+      operationId: criarPlano
+      summary: Cria um plano de rotina
+      description: 'Online (criar exige rede). O id do plano é gerado no cliente.
+
+
+        Rastreio: UC05; RN12; R14'
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                periodo:
+                  type: string
+                  enum:
+                  - semana
+                  - quinzena
+                dataInicio:
+                  type: string
+                  format: date
+              required:
+              - id
+              - periodo
+              - dataInicio
+              additionalProperties: false
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Plano'
+        '409':
+          $ref: '#/components/responses/EmAndamento'
+        '422':
+          $ref: '#/components/responses/RegraDeNegocio'
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+  /v1/planos/{planoId}/itens:
+    post:
+      tags:
+      - Rotina
+      operationId: criarItemDeRotina
+      summary: Cria item de rotina (prato candidato e data de preparo)
+      description: 'Online. O id do item é o opId da operação que o cria; as operações seguintes (reagendar, remover)
+        vão pela sincronização com opId próprio.
+
+
+        Rastreio: UC05; RN12; ADR-008 detalhamento 2.5'
+      parameters:
+      - $ref: '#/components/parameters/PlanoId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                pratoId:
+                  type: string
+                  format: uuid
+                dataPreparo:
+                  type: string
+                  format: date
+              required:
+              - id
+              - pratoId
+              - dataPreparo
+              additionalProperties: false
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemDeRotina'
+        '409':
+          $ref: '#/components/responses/EmAndamento'
+        '422':
+          $ref: '#/components/responses/RegraDeNegocio'
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+        '404':
+          $ref: '#/components/responses/NaoEncontrado'
+  /v1/planos/{planoId}/lista-de-compras:
+    post:
+      tags:
+      - Rotina
+      operationId: gerarListaDeCompras
+      summary: Gera ou regenera a lista de compras do plano
+      description: 'Regenerar preserva a marcação dos ingredientes que permanecem (RN14). Plano sem itens retorna
+        422.
+
+
+        Rastreio: UC06; RN14'
+      parameters:
+      - $ref: '#/components/parameters/PlanoId'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListaDeCompras'
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+        '404':
+          $ref: '#/components/responses/NaoEncontrado'
+        '422':
+          $ref: '#/components/responses/RegraDeNegocio'
+  /v1/curadoria/ingredientes:
+    post:
+      tags:
+      - Curadoria
+      operationId: cadastrarIngrediente
+      summary: Cadastra ingrediente canônico
+      description: 'Alérgenos declarados são obrigatórios. Ingrediente com `leite` e sem `lactose` exige semLactose=true.
+
+
+        Rastreio: UC12 FA1; ADR-010, ADR-014
+
+
+        Papel exigido: curador.'
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngredienteEntrada'
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ingrediente'
+        '409':
+          $ref: '#/components/responses/EmAndamento'
+        '422':
+          $ref: '#/components/responses/RegraDeNegocio'
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+        '403':
+          $ref: '#/components/responses/ProibidoPapel'
+  /v1/curadoria/utensilios:
+    post:
+      tags:
+      - Curadoria
+      operationId: cadastrarUtensilio
+      summary: Cadastra utensílio
+      description: 'Rastreio: UC12 FA1
+
+
+        Papel exigido: curador.'
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nome:
+                  type: string
+                  minLength: 2
+                  maxLength: 80
+              required:
+              - nome
+              additionalProperties: false
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Utensilio'
+        '409':
+          $ref: '#/components/responses/EmAndamento'
+        '422':
+          $ref: '#/components/responses/RegraDeNegocio'
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+        '403':
+          $ref: '#/components/responses/ProibidoPapel'
+  /v1/curadoria/culinarias:
+    post:
+      tags:
+      - Curadoria
+      operationId: cadastrarCulinaria
+      summary: Cadastra culinária
+      description: 'Rastreio: UC12 FA1; RN03
+
+
+        Papel exigido: curador.'
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nome:
+                  type: string
+                  minLength: 2
+                  maxLength: 80
+                continentes:
+                  type: array
+                  minItems: 1
+                  items:
+                    $ref: '#/components/schemas/Continente'
+              required:
+              - nome
+              - continentes
+              additionalProperties: false
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Culinaria'
+        '409':
+          $ref: '#/components/responses/EmAndamento'
+        '422':
+          $ref: '#/components/responses/RegraDeNegocio'
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+        '403':
+          $ref: '#/components/responses/ProibidoPapel'
+  /v1/curadoria/substituicoes:
+    post:
+      tags:
+      - Curadoria
+      operationId: cadastrarSubstituicao
+      summary: Cadastra substituição global dirigida
+      description: 'Substituto sem alérgenos declarados fica `nao_verificado` e não é sugerido a quem tem restrição
+        (RN22). Origem `ia` só entra por proposta aprovada (RN21).
+
+
+        Rastreio: UC09, UC12; RN15, RN21, RN22
+
+
+        Papel exigido: curador.'
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ingredienteId:
+                  type: string
+                  format: uuid
+                substitutoId:
+                  type: string
+                  format: uuid
+                alergenosDoSubstituto:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/CodigoAlergeno'
+              required:
+              - ingredienteId
+              - substitutoId
+              - alergenosDoSubstituto
+              additionalProperties: false
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Substituicao'
+        '409':
+          $ref: '#/components/responses/EmAndamento'
+        '422':
+          $ref: '#/components/responses/RegraDeNegocio'
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+        '403':
+          $ref: '#/components/responses/ProibidoPapel'
+  /v1/curadoria/receitas:
+    post:
+      tags:
+      - Curadoria
+      operationId: enviarReceitaManual
+      summary: Envia receita já estruturada (fluxo manual)
+      description: 'Entra como `proposto`, validada pelo mesmo esquema do fluxo assistido.
+
+
+        Rastreio: UC12 fluxo principal; RN17, RN18; ADR-010
+
+
+        Papel exigido: curador.'
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PropostaEntrada'
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Proposta'
+        '409':
+          $ref: '#/components/responses/EmAndamento'
+        '422':
+          $ref: '#/components/responses/RegraDeNegocio'
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+        '403':
+          $ref: '#/components/responses/ProibidoPapel'
+  /v1/curadoria/importacoes:
+    post:
+      tags:
+      - Curadoria
+      operationId: importarAssistido
+      summary: Importação assistida por IA a partir de texto
+      description: 'Só texto da receita, fonte e link seguem ao provedor. Nenhum dado de usuário. Síncrona. Em falha
+        do provedor ou bloqueio por teto, nada é gravado e a resposta traz fluxoManualDisponivel=true.
+
+
+        Rastreio: UC12 FA2 e FE2; RN15, RN17, RN21, RN22; ADR-011, ADR-013
+
+
+        Papel exigido: curador.'
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                texto:
+                  type: string
+                  minLength: 20
+                  maxLength: 20000
+                fonteNome:
+                  type: string
+                  minLength: 2
+                  maxLength: 200
+                fonteUrl:
+                  type: string
+                  format: uri
+              required:
+              - texto
+              - fonteNome
+              - fonteUrl
+              additionalProperties: false
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Proposta'
+        '409':
+          $ref: '#/components/responses/EmAndamento'
+        '422':
+          $ref: '#/components/responses/RegraDeNegocio'
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+        '403':
+          $ref: '#/components/responses/ProibidoPapel'
+        '402':
+          description: Teto de gasto de IA atingido. Use o fluxo manual.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problema'
+        '502':
+          description: Provedor de IA indisponível, erro ou saída inválida após uma tentativa de correção. Use o
+            fluxo manual.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problema'
+        '504':
+          description: Tempo limite da importação
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problema'
+  /v1/curadoria/propostas:
+    get:
+      tags:
+      - Curadoria
+      operationId: listarPropostas
+      summary: Lista receitas por estado de publicação
+      description: 'Rastreio: UC12; ADR-010
+
+
+        Papel exigido: curador.'
+      parameters:
+      - name: estado
+        in: query
+        schema:
+          $ref: '#/components/schemas/EstadoPublicacao'
+      - name: pagina
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: tamanho
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 20
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  itens:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ResumoProposta'
+                  pagina:
+                    type: integer
+                  total:
+                    type: integer
+                required:
+                - itens
+                - pagina
+                - total
+                additionalProperties: false
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+        '403':
+          $ref: '#/components/responses/ProibidoPapel'
+  /v1/curadoria/propostas/{propostaId}:
+    get:
+      tags:
+      - Curadoria
+      operationId: obterProposta
+      summary: Obtém uma proposta com saída bruta da IA e consumo
+      description: 'Rastreio: UC12; ADR-010 item 8
+
+
+        Papel exigido: curador.'
+      parameters:
+      - $ref: '#/components/parameters/PropostaId'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Proposta'
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+        '403':
+          $ref: '#/components/responses/ProibidoPapel'
+        '404':
+          $ref: '#/components/responses/NaoEncontrado'
+    patch:
+      tags:
+      - Curadoria
+      operationId: editarProposta
+      summary: Edita campos de uma proposta ainda não publicada
+      description: 'Editar receita já publicada atualiza a data de atualização dos alérgenos (ADR-010, item 10).
+        Alterar alérgenos rebaixa o estado para `declarado_fonte` ou `nao_verificado`.
+
+
+        Rastreio: UC12 FA2 passo 3
+
+
+        Papel exigido: curador.'
+      parameters:
+      - $ref: '#/components/parameters/PropostaId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PropostaEdicao'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Proposta'
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+        '403':
+          $ref: '#/components/responses/ProibidoPapel'
+        '404':
+          $ref: '#/components/responses/NaoEncontrado'
+        '422':
+          $ref: '#/components/responses/RegraDeNegocio'
+  /v1/curadoria/propostas/{propostaId}/foto:
+    put:
+      tags:
+      - Curadoria
+      operationId: anexarFoto
+      summary: Anexa a foto com atribuição
+      description: 'A imagem é redimensionada (até 1.024 px), recomprimida em WebP e nomeada pelo hash. Licenças
+        recusadas (NC, ND) retornam 422.
+
+
+        Rastreio: ADR-012; A09
+
+
+        Papel exigido: curador.'
+      parameters:
+      - $ref: '#/components/parameters/PropostaId'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+              - imagem
+              - autor
+              - urlFonte
+              - licenca
+              - alterada
+              properties:
+                imagem:
+                  type: string
+                  format: binary
+                autor:
+                  type: string
+                titulo:
+                  type: string
+                urlFonte:
+                  type: string
+                  format: uri
+                licenca:
+                  $ref: '#/components/schemas/LicencaFoto'
+                urlLicenca:
+                  type: string
+                  format: uri
+                alterada:
+                  type: boolean
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FotoPrato'
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+        '403':
+          $ref: '#/components/responses/ProibidoPapel'
+        '404':
+          $ref: '#/components/responses/NaoEncontrado'
+        '415':
+          description: Formato de imagem não suportado
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problema'
+        '422':
+          $ref: '#/components/responses/RegraDeNegocio'
+  /v1/curadoria/propostas/{propostaId}/verificar:
+    post:
+      tags:
+      - Curadoria
+      operationId: marcarAlergenosVerificados
+      summary: Marca os alérgenos como verificados
+      description: 'Só o curador marca `verificado` (A06). O checklist é gravado com curador e data. Pode ocorrer
+        antes ou depois de aprovar; depois da publicação, atualiza a data dos alérgenos.
+
+
+        Rastreio: UC12; A06; ADR-010, ADR-014
+
+
+        Papel exigido: curador.'
+      parameters:
+      - $ref: '#/components/parameters/PropostaId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChecklistVerificacao'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Proposta'
+        '409':
+          $ref: '#/components/responses/EmAndamento'
+        '422':
+          $ref: '#/components/responses/RegraDeNegocio'
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+        '403':
+          $ref: '#/components/responses/ProibidoPapel'
+        '404':
+          $ref: '#/components/responses/NaoEncontrado'
+  /v1/curadoria/propostas/{propostaId}/aprovar:
+    post:
+      tags:
+      - Curadoria
+      operationId: aprovarProposta
+      summary: Aprova e publica a proposta
+      description: 'Passa pelo portão de publicação: campos da A09, fonte (RN17), imagem com atribuição e invariantes
+        do ADR-014. Aprovar não exige `verificado`.
+
+
+        Rastreio: UC12 FE1; RN17, RN21; ADR-010, ADR-014
+
+
+        Papel exigido: curador.'
+      parameters:
+      - $ref: '#/components/parameters/PropostaId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Proposta'
+        '409':
+          $ref: '#/components/responses/EmAndamento'
+        '422':
+          description: Publicação bloqueada pelo portão (tipo `portao-publicacao`, com `violacoes`) ou Idempotency-Key
+            reutilizada com conteúdo diferente (tipo `chave-reutilizada`).
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemaPortao'
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+        '403':
+          $ref: '#/components/responses/ProibidoPapel'
+        '404':
+          $ref: '#/components/responses/NaoEncontrado'
+  /v1/curadoria/propostas/{propostaId}/descartar:
+    post:
+      tags:
+      - Curadoria
+      operationId: descartarProposta
+      summary: Descarta uma proposta não publicada
+      description: 'Rastreio: UC12; ADR-010
+
+
+        Papel exigido: curador.'
+      parameters:
+      - $ref: '#/components/parameters/PropostaId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '204':
+          description: Sucesso
+        '409':
+          $ref: '#/components/responses/EmAndamento'
+        '422':
+          $ref: '#/components/responses/RegraDeNegocio'
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+        '403':
+          $ref: '#/components/responses/ProibidoPapel'
+        '404':
+          $ref: '#/components/responses/NaoEncontrado'
+  /v1/curadoria/consumo-ia:
+    get:
+      tags:
+      - Curadoria
+      operationId: consultarConsumoIA
+      summary: Consulta o consumo acumulado de IA e o teto
+      description: 'Rastreio: ADR-011 item 8, ADR-013
+
+
+        Papel exigido: curador.'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tetoReais:
+                    type: number
+                  acumuladoReais:
+                    type: number
+                  percentual:
+                    type: number
+                  avisoAtivo:
+                    type: boolean
+                  bloqueado:
+                    type: boolean
+                required:
+                - tetoReais
+                - acumuladoReais
+                - percentual
+                - avisoAtivo
+                - bloqueado
+                additionalProperties: false
+        '400':
+          $ref: '#/components/responses/Invalida'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '429':
+          $ref: '#/components/responses/LimiteExcedido'
+        '403':
+          $ref: '#/components/responses/ProibidoPapel'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT de acesso de 45 minutos com contaId e papel (`usuario` ou `curador`).
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: 'UUID gerado no cliente (v7 no app). Mesma chave e mesmo conteúdo devolvem a resposta gravada,
+        sem reaplicar. Mesma chave com conteúdo diferente: 422. Validade de 90 dias. Em criação de recurso, é igual
+        ao `id` enviado no corpo.'
+    PacoteVersao:
+      name: X-Pacote-Alergenos-Versao
+      in: header
+      required: false
+      schema:
+        type: string
+      description: Versão do pacote de alérgenos em uso no app. A resposta traz pacoteVersaoMinima; o app avisa,
+        mas não bloqueia.
+    PratoId:
+      name: pratoId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    SugestaoId:
+      name: sugestaoId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    PlanoId:
+      name: planoId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    PropostaId:
+      name: propostaId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    Invalida:
+      description: Requisição inválida (tipo `validacao`). Lista os campos em `erros`.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problema'
+    NaoAutenticado:
+      description: Token ausente, inválido ou expirado (tipo `nao-autenticado`). O app tenta renovar com o refresh
+        token.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problema'
+    CredenciaisInvalidas:
+      description: E-mail ou senha incorretos (tipo `credenciais-invalidas`).
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problema'
+    RefreshInvalido:
+      description: Refresh token inválido, expirado ou revogado, ou reuso fora da janela de 60 s (tipo `refresh-invalido`).
+        A família de tokens é revogada.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problema'
+    ProibidoPapel:
+      description: Rota exige papel curador (tipo `proibido-papel`).
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problema'
+    NaoEncontrado:
+      description: Recurso inexistente, desativado ou de outra conta (tipo `nao-encontrado`).
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problema'
+    EmAndamento:
+      description: Requisição com a mesma Idempotency-Key ainda em processamento (tipo `em-andamento`).
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problema'
+    ChaveReutilizada:
+      description: A Idempotency-Key já foi usada com conteúdo diferente (tipo `chave-reutilizada`).
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problema'
+    RegraDeNegocio:
+      description: Regra de negócio violada (tipo `regra-de-negocio`). Em rotas com Idempotency-Key, 422 também
+        indica chave reutilizada com conteúdo diferente (tipo `chave-reutilizada`).
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problema'
+    EmailEmUso:
+      description: E-mail já vinculado a outra conta (tipo `email-em-uso`).
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problema'
+    LoteGrande:
+      description: Mais de 100 operações no lote (tipo `lote-grande`).
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problema'
+    LimiteExcedido:
+      description: Limite de tentativas ou de criação de contas excedido (tipo `limite-excedido`).
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Segundos até nova tentativa.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problema'
+  schemas:
+    CodigoAlergeno:
+      type: string
+      enum:
+      - trigo_centeio_cevada_aveia
+      - crustaceos
+      - ovo
+      - peixe
+      - amendoim
+      - soja
+      - leite
+      - amendoa
+      - avela
+      - castanha_caju
+      - castanha_brasil
+      - macadamia
+      - noz
+      - peca
+      - pistache
+      - pinoli
+      - castanha_castanea
+      - latex
+      - lactose
+      description: 'Vocabulário controlado v1: os 18 alimentos da lista da ANVISA (RDC 26/2015, consolidada pela
+        RDC 727/2022; conferir a lista vigente) mais `lactose`, adicionado pela dupla. O item 1 da RDC agrupa trigo,
+        centeio, cevada e aveia em um único código.'
+    EstadoAlergenos:
+      type: string
+      enum:
+      - verificado
+      - declarado_fonte
+      - nao_verificado
+      description: Lista vazia de alérgenos é `nao_verificado`, salvo confirmação explícita do curador (`confirmadoSemAlergenos`)
+        ao verificar (RN08).
+    Continente:
+      type: string
+      enum:
+      - america
+      - africa
+      - europa
+      - asia
+      - oceania
+    EstadoPublicacao:
+      type: string
+      enum:
+      - proposto
+      - aprovado
+      - desativado
+      description: Só `aprovado` chega ao usuário (RN21). Prato aprovado nunca é apagado, só desativado.
+    LicencaFoto:
+      type: string
+      enum:
+      - dominio_publico
+      - cc0
+      - cc_by
+      - cc_by_sa
+      - autoria_propria
+      description: Licenças NC, ND e proprietárias são recusadas (ADR-012). Lista a reconfirmar junto com o R10.
+    Dificuldade:
+      type: string
+      enum:
+      - facil
+      - media
+      - dificil
+    Problema:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri-reference
+          description: Tipo do problema, por exemplo `validacao`, `regra-de-negocio`, `chave-reutilizada`.
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+        erros:
+          type: array
+          items:
+            type: object
+            properties:
+              campo:
+                type: string
+              mensagem:
+                type: string
+            required:
+            - campo
+            - mensagem
+            additionalProperties: false
+        fluxoManualDisponivel:
+          type: boolean
+      required:
+      - type
+      - title
+      - status
+      description: Formato RFC 9457 (application/problem+json). Nunca contém restrição alimentar, alérgeno do perfil
+        nem dado pessoal (A13, A05).
+      additionalProperties: true
+    ProblemaPortao:
+      allOf:
+      - $ref: '#/components/schemas/Problema'
+      - type: object
+        properties:
+          violacoes:
+            type: array
+            items:
+              type: object
+              properties:
+                codigo:
+                  type: string
+                  enum:
+                  - campo_faltante
+                  - fonte_ausente
+                  - foto_sem_atribuicao
+                  - estado_alergenos_ausente
+                  - invariante_verificado_sem_alergenos
+                  - invariante_uniao_alergenos
+                  - invariante_substituto_verificado_sem_alergenos
+                  - invariante_leite_sem_lactose
+                campo:
+                  type: string
+                mensagem:
+                  type: string
+              required:
+              - codigo
+              - mensagem
+              additionalProperties: false
+    ParTokens:
+      type: object
+      properties:
+        tokenAcesso:
+          type: string
+          description: JWT de 45 minutos. Carrega só contaId e papel.
+        expiraEm:
+          type: string
+          format: date-time
+        refreshToken:
+          type: string
+          description: Opaco, de uso único, rotativo, validade de 30 dias.
+        refreshExpiraEm:
+          type: string
+          format: date-time
+      required:
+      - tokenAcesso
+      - expiraEm
+      - refreshToken
+      - refreshExpiraEm
+      additionalProperties: false
+    CargaAvaliacao:
+      type: object
+      properties:
+        pratoId:
+          type: string
+          format: uuid
+        nota:
+          type: integer
+          minimum: 0
+          maximum: 10
+          description: 'Meios-pontos: 0 a 10 representa 0 a 5 em passos de 0,5 (RN05).'
+        relato:
+          type: string
+          maxLength: 2000
+        alteracoes:
+          type: string
+          maxLength: 2000
+        itemId:
+          oneOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          description: Item de rotina concluído por esta avaliação (UC10 FA2).
+      required:
+      - pratoId
+      - nota
+      additionalProperties: false
+    CargaReagendar:
+      type: object
+      properties:
+        itemId:
+          type: string
+          format: uuid
+        novaData:
+          type: string
+          format: date
+      required:
+      - itemId
+      - novaData
+      additionalProperties: false
+    CargaRemoverItem:
+      type: object
+      properties:
+        itemId:
+          type: string
+          format: uuid
+      required:
+      - itemId
+      additionalProperties: false
+    CargaDataCompra:
+      type: object
+      properties:
+        planoId:
+          type: string
+          format: uuid
+        dataCompra:
+          type: string
+          format: date
+      required:
+      - planoId
+      - dataCompra
+      additionalProperties: false
+    CargaMarcarItem:
+      type: object
+      properties:
+        planoId:
+          type: string
+          format: uuid
+        ingredienteId:
+          type: string
+          format: uuid
+        comprado:
+          type: boolean
+      required:
+      - planoId
+      - ingredienteId
+      - comprado
+      additionalProperties: false
+    CargaCadastrarRestricao:
+      type: object
+      properties:
+        tipoRestricao:
+          type: string
+          description: Código do TipoRestricao do catálogo fixo.
+        consentimentoEm:
+          type: string
+          format: date-time
+      required:
+      - tipoRestricao
+      - consentimentoEm
+      additionalProperties: false
+    CargaRevogarRestricao:
+      type: object
+      properties:
+        tipoRestricao:
+          type: string
+      required:
+      - tipoRestricao
+      additionalProperties: false
+    CargaLembretes:
+      type: object
+      properties:
+        ativo:
+          type: boolean
+        tipos:
+          type: array
+          items:
+            type: string
+            enum:
+            - compra
+            - preparo
+        frequencia:
+          type: string
+          description: Valores a definir na implementação do app; RNF07 limita a 2 notificações por dia.
+      required:
+      - ativo
+      - tipos
+      additionalProperties: false
+    OpAvaliacao:
+      type: object
+      properties:
+        opId:
+          type: string
+          format: uuid
+        tipo:
+          type: string
+          const: avaliacao.registrar
+        criadaEm:
+          type: string
+          format: date-time
+        carga:
+          $ref: '#/components/schemas/CargaAvaliacao'
+      required:
+      - opId
+      - tipo
+      - criadaEm
+      - carga
+      additionalProperties: false
+    OpReagendar:
+      type: object
+      properties:
+        opId:
+          type: string
+          format: uuid
+        tipo:
+          type: string
+          const: item.reagendar
+        criadaEm:
+          type: string
+          format: date-time
+        carga:
+          $ref: '#/components/schemas/CargaReagendar'
+      required:
+      - opId
+      - tipo
+      - criadaEm
+      - carga
+      additionalProperties: false
+    OpRemoverItem:
+      type: object
+      properties:
+        opId:
+          type: string
+          format: uuid
+        tipo:
+          type: string
+          const: item.remover
+        criadaEm:
+          type: string
+          format: date-time
+        carga:
+          $ref: '#/components/schemas/CargaRemoverItem'
+      required:
+      - opId
+      - tipo
+      - criadaEm
+      - carga
+      additionalProperties: false
+    OpDataCompra:
+      type: object
+      properties:
+        opId:
+          type: string
+          format: uuid
+        tipo:
+          type: string
+          const: lista.definir_data_compra
+        criadaEm:
+          type: string
+          format: date-time
+        carga:
+          $ref: '#/components/schemas/CargaDataCompra'
+      required:
+      - opId
+      - tipo
+      - criadaEm
+      - carga
+      additionalProperties: false
+    OpMarcarItem:
+      type: object
+      properties:
+        opId:
+          type: string
+          format: uuid
+        tipo:
+          type: string
+          const: lista.marcar_item
+        criadaEm:
+          type: string
+          format: date-time
+        carga:
+          $ref: '#/components/schemas/CargaMarcarItem'
+      required:
+      - opId
+      - tipo
+      - criadaEm
+      - carga
+      additionalProperties: false
+    OpCadastrarRestricao:
+      type: object
+      properties:
+        opId:
+          type: string
+          format: uuid
+        tipo:
+          type: string
+          const: restricao.cadastrar
+        criadaEm:
+          type: string
+          format: date-time
+        carga:
+          $ref: '#/components/schemas/CargaCadastrarRestricao'
+      required:
+      - opId
+      - tipo
+      - criadaEm
+      - carga
+      additionalProperties: false
+    OpRevogarRestricao:
+      type: object
+      properties:
+        opId:
+          type: string
+          format: uuid
+        tipo:
+          type: string
+          const: restricao.revogar
+        criadaEm:
+          type: string
+          format: date-time
+        carga:
+          $ref: '#/components/schemas/CargaRevogarRestricao'
+      required:
+      - opId
+      - tipo
+      - criadaEm
+      - carga
+      additionalProperties: false
+    OpLembretes:
+      type: object
+      properties:
+        opId:
+          type: string
+          format: uuid
+        tipo:
+          type: string
+          const: lembretes.definir
+        criadaEm:
+          type: string
+          format: date-time
+        carga:
+          $ref: '#/components/schemas/CargaLembretes'
+      required:
+      - opId
+      - tipo
+      - criadaEm
+      - carga
+      additionalProperties: false
+    Operacao:
+      oneOf:
+      - $ref: '#/components/schemas/OpAvaliacao'
+      - $ref: '#/components/schemas/OpReagendar'
+      - $ref: '#/components/schemas/OpRemoverItem'
+      - $ref: '#/components/schemas/OpDataCompra'
+      - $ref: '#/components/schemas/OpMarcarItem'
+      - $ref: '#/components/schemas/OpCadastrarRestricao'
+      - $ref: '#/components/schemas/OpRevogarRestricao'
+      - $ref: '#/components/schemas/OpLembretes'
+      discriminator:
+        propertyName: tipo
+        mapping:
+          avaliacao.registrar: '#/components/schemas/OpAvaliacao'
+          item.reagendar: '#/components/schemas/OpReagendar'
+          item.remover: '#/components/schemas/OpRemoverItem'
+          lista.definir_data_compra: '#/components/schemas/OpDataCompra'
+          lista.marcar_item: '#/components/schemas/OpMarcarItem'
+          restricao.cadastrar: '#/components/schemas/OpCadastrarRestricao'
+          restricao.revogar: '#/components/schemas/OpRevogarRestricao'
+          lembretes.definir: '#/components/schemas/OpLembretes'
+      description: 'Operação da fila do app. O opId é gerado no cliente (UUID v7) e é a chave de idempotência. Na
+        avaliacao.registrar, o opId é também o id da Avaliacao. Validade do registro de idempotência: 90 dias.'
+    Desbloqueios:
+      type: object
+      properties:
+        evolucoes:
+          type: array
+          items:
+            type: string
+            format: uuid
+        conquistas:
+          type: array
+          items:
+            type: string
+            format: uuid
+      description: Confirmação do servidor. Só acrescenta; nunca revoga (RN04).
+      additionalProperties: false
+    ResultadoOperacao:
+      type: object
+      properties:
+        opId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+          - confirmada
+          - rejeitada
+        repetida:
+          type: boolean
+          description: true quando o opId já havia sido processado; nada foi reaplicado.
+        desbloqueios:
+          $ref: '#/components/schemas/Desbloqueios'
+        erro:
+          $ref: '#/components/schemas/Problema'
+      required:
+      - opId
+      - status
+      - repetida
+      description: 'Erro de rede ou 5xx não gera resultado: o app reenvia o mesmo opId.'
+      additionalProperties: false
+    ItemDeRotina:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        pratoId:
+          type: string
+          format: uuid
+        dataPreparo:
+          type: string
+          format: date
+        status:
+          type: string
+          enum:
+          - planejado
+          - concluido
+          description: '`em preparo` existe só no aparelho e não sincroniza.'
+      required:
+      - id
+      - pratoId
+      - dataPreparo
+      - status
+      additionalProperties: false
+    ListaDeCompras:
+      type: object
+      properties:
+        planoId:
+          type: string
+          format: uuid
+        dataCompra:
+          oneOf:
+          - type: string
+            format: date
+          - type: 'null'
+        itens:
+          type: array
+          items:
+            type: object
+            properties:
+              ingredienteId:
+                type: string
+                format: uuid
+              nome:
+                type: string
+              comprado:
+                type: boolean
+            required:
+            - ingredienteId
+            - nome
+            - comprado
+            additionalProperties: false
+      required:
+      - planoId
+      - itens
+      additionalProperties: false
+    Plano:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        periodo:
+          type: string
+          enum:
+          - semana
+          - quinzena
+        dataInicio:
+          type: string
+          format: date
+        itens:
+          type: array
+          items:
+            $ref: '#/components/schemas/ItemDeRotina'
+        listaDeCompras:
+          oneOf:
+          - $ref: '#/components/schemas/ListaDeCompras'
+          - type: 'null'
+      required:
+      - id
+      - periodo
+      - dataInicio
+      - itens
+      additionalProperties: false
+    Ingrediente:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        nome:
+          type: string
+        alergenos:
+          type: array
+          items:
+            $ref: '#/components/schemas/CodigoAlergeno'
+        semLactose:
+          type: boolean
+      required:
+      - id
+      - nome
+      - alergenos
+      - semLactose
+      additionalProperties: false
+    IngredienteEntrada:
+      type: object
+      properties:
+        nome:
+          type: string
+          minLength: 2
+          maxLength: 80
+        alergenos:
+          type: array
+          items:
+            $ref: '#/components/schemas/CodigoAlergeno'
+        semLactose:
+          type: boolean
+          default: false
+          description: Obrigatório true para ingrediente que declara `leite` sem `lactose` (invariante do ADR-014).
+      required:
+      - nome
+      - alergenos
+      additionalProperties: false
+    Utensilio:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        nome:
+          type: string
+      required:
+      - id
+      - nome
+      additionalProperties: false
+    Culinaria:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        nome:
+          type: string
+        continentes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Continente'
+      required:
+      - id
+      - nome
+      - continentes
+      additionalProperties: false
+    Substituicao:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        ingredienteId:
+          type: string
+          format: uuid
+        substitutoId:
+          type: string
+          format: uuid
+        substitutoNome:
+          type: string
+        alergenosDoSubstituto:
+          type: array
+          items:
+            $ref: '#/components/schemas/CodigoAlergeno'
+        estadoAlergenos:
+          $ref: '#/components/schemas/EstadoAlergenos'
+        origem:
+          type: string
+          enum:
+          - manual
+          - ia
+      required:
+      - id
+      - ingredienteId
+      - substitutoId
+      - alergenosDoSubstituto
+      - estadoAlergenos
+      additionalProperties: false
+    FotoPrato:
+      type: object
+      properties:
+        hash:
+          type: string
+          pattern: ^[a-f0-9]{64}$
+        autor:
+          type: string
+        titulo:
+          type: string
+        urlFonte:
+          type: string
+          format: uri
+        licenca:
+          $ref: '#/components/schemas/LicencaFoto'
+        urlLicenca:
+          type: string
+          format: uri
+        alterada:
+          type: boolean
+      required:
+      - hash
+      - autor
+      - urlFonte
+      - licenca
+      - alterada
+      description: Metadados TASL exibidos no app (ADR-012).
+      additionalProperties: false
+    IngredienteDaReceita:
+      type: object
+      properties:
+        ingredienteId:
+          type: string
+          format: uuid
+        nome:
+          type: string
+        alergenos:
+          type: array
+          items:
+            $ref: '#/components/schemas/CodigoAlergeno'
+        quantidade:
+          oneOf:
+          - type: string
+          - type: 'null'
+        unidade:
+          oneOf:
+          - type: string
+          - type: 'null'
+      required:
+      - ingredienteId
+      - nome
+      - alergenos
+      additionalProperties: false
+    Receita:
+      type: object
+      properties:
+        pratoId:
+          type: string
+          format: uuid
+        nome:
+          type: string
+        culinariaId:
+          type: string
+          format: uuid
+        pratoBaseId:
+          oneOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+        tempoPreparoMinutos:
+          type: integer
+          minimum: 1
+        dificuldade:
+          $ref: '#/components/schemas/Dificuldade'
+        ingredientes:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/IngredienteDaReceita'
+        utensilios:
+          type: array
+          items:
+            $ref: '#/components/schemas/Utensilio'
+        passos:
+          type: array
+          minItems: 1
+          items:
+            type: string
+        alergenos:
+          type: array
+          items:
+            $ref: '#/components/schemas/CodigoAlergeno'
+        estadoAlergenos:
+          $ref: '#/components/schemas/EstadoAlergenos'
+        alergenosAtualizadoEm:
+          type: string
+          format: date-time
+        fonteNome:
+          type: string
+        fonteUrl:
+          type: string
+          format: uri
+        foto:
+          $ref: '#/components/schemas/FotoPrato'
+        substituicoes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Substituicao'
+        atualizadoEm:
+          type: string
+          format: date-time
+      required:
+      - pratoId
+      - nome
+      - culinariaId
+      - tempoPreparoMinutos
+      - dificuldade
+      - ingredientes
+      - utensilios
+      - passos
+      - alergenos
+      - estadoAlergenos
+      - alergenosAtualizadoEm
+      - fonteNome
+      - fonteUrl
+      - foto
+      - atualizadoEm
+      additionalProperties: false
+    ResumoPrato:
+      type: object
+      properties:
+        pratoId:
+          type: string
+          format: uuid
+        nome:
+          type: string
+        culinariaId:
+          type: string
+          format: uuid
+        tempoPreparoMinutos:
+          type: integer
+        dificuldade:
+          $ref: '#/components/schemas/Dificuldade'
+        fotoHash:
+          type: string
+      required:
+      - pratoId
+      - nome
+      - culinariaId
+      - tempoPreparoMinutos
+      - dificuldade
+      additionalProperties: false
+    SugestaoItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        situacao:
+          type: string
+          enum:
+          - apresentada
+          - candidata
+          - descartada
+        prato:
+          $ref: '#/components/schemas/ResumoPrato'
+        ingredientesFaltantes:
+          type: array
+          items:
+            type: string
+            format: uuid
+        utensiliosAusentes:
+          type: array
+          items:
+            type: string
+            format: uuid
+      required:
+      - id
+      - situacao
+      - prato
+      additionalProperties: false
+    ResumoPratoBusca:
+      type: object
+      properties:
+        prato:
+          $ref: '#/components/schemas/ResumoPrato'
+        compatibilidade:
+          type: string
+          enum:
+          - compativel
+          - incompativel
+          - nao_confirmada
+      required:
+      - prato
+      - compatibilidade
+      additionalProperties: false
+    Marco:
+      oneOf:
+      - type: object
+        properties:
+          tipo:
+            const: prato
+          pratoId:
+            type: string
+            format: uuid
+        required:
+        - tipo
+        - pratoId
+        additionalProperties: false
+      - type: object
+        properties:
+          tipo:
+            const: culinaria
+          culinariaId:
+            type: string
+            format: uuid
+        required:
+        - tipo
+        - culinariaId
+        additionalProperties: false
+      - type: object
+        properties:
+          tipo:
+            const: n_culinarias
+          quantidade:
+            type: integer
+            minimum: 1
+        required:
+        - tipo
+        - quantidade
+        additionalProperties: false
+      - type: object
+        properties:
+          tipo:
+            const: todos_continentes
+        required:
+        - tipo
+        additionalProperties: false
+      - type: object
+        properties:
+          tipo:
+            const: conjunto
+          culinariaIds:
+            type: array
+            minItems: 2
+            items:
+              type: string
+              format: uuid
+        required:
+        - tipo
+        - culinariaIds
+        additionalProperties: false
+      description: Marco verificável do badge (RN03 a-e). Definido por seed da dupla.
+    DefinicaoBadge:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        nome:
+          type: string
+        descricao:
+          type: string
+        marco:
+          $ref: '#/components/schemas/Marco'
+      required:
+      - id
+      - nome
+      - descricao
+      - marco
+      additionalProperties: false
+    TipoRestricao:
+      type: object
+      properties:
+        codigo:
+          type: string
+        nome:
+          type: string
+        alergenosAssociados:
+          type: array
+          items:
+            $ref: '#/components/schemas/CodigoAlergeno'
+      required:
+      - codigo
+      - nome
+      - alergenosAssociados
+      description: Catálogo fixo, por seed. Não é dado sensível.
+      additionalProperties: false
+    Avaliacao:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        pratoId:
+          type: string
+          format: uuid
+        nota:
+          type: integer
+        relato:
+          type: string
+        alteracoes:
+          type: string
+        data:
+          type: string
+          format: date-time
+      required:
+      - id
+      - pratoId
+      - nota
+      - data
+      additionalProperties: false
+    ConjuntoBaixado:
+      type: object
+      properties:
+        versao:
+          type: string
+        geradoEm:
+          type: string
+          format: date-time
+        pacoteVersaoMinima:
+          type: string
+        perfil:
+          type: object
+          properties:
+            nome:
+              type: string
+            preferenciasCulinarias:
+              type: array
+              items:
+                type: string
+                format: uuid
+            lembretes:
+              $ref: '#/components/schemas/CargaLembretes'
+          required:
+          - preferenciasCulinarias
+          additionalProperties: false
+        restricoes:
+          type: array
+          items:
+            type: object
+            properties:
+              tipoRestricao:
+                type: string
+              consentimentoEm:
+                type: string
+                format: date-time
+            required:
+            - tipoRestricao
+            - consentimentoEm
+            additionalProperties: false
+        despensa:
+          type: array
+          items:
+            type: string
+            format: uuid
+        utensilios:
+          type: array
+          items:
+            type: string
+            format: uuid
+        planos:
+          type: array
+          items:
+            $ref: '#/components/schemas/Plano'
+        avaliacoes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Avaliacao'
+        conquistas:
+          type: array
+          items:
+            type: object
+            properties:
+              definicaoId:
+                type: string
+                format: uuid
+              dataDesbloqueio:
+                type: string
+                format: date-time
+            required:
+            - definicaoId
+            - dataDesbloqueio
+            additionalProperties: false
+        desbloqueiosEvolucao:
+          type: array
+          items:
+            type: string
+            format: uuid
+        indiceCatalogo:
+          type: object
+          properties:
+            pratos:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  nome:
+                    type: string
+                  culinariaId:
+                    type: string
+                    format: uuid
+                  pratoBaseId:
+                    oneOf:
+                    - type: string
+                      format: uuid
+                    - type: 'null'
+                required:
+                - id
+                - nome
+                - culinariaId
+                additionalProperties: false
+            culinarias:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  nome:
+                    type: string
+                  continentes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Continente'
+                  totalPratos:
+                    type: integer
+                required:
+                - id
+                - nome
+                - continentes
+                - totalPratos
+                additionalProperties: false
+            definicoesBadge:
+              type: array
+              items:
+                $ref: '#/components/schemas/DefinicaoBadge'
+          required:
+          - pratos
+          - culinarias
+          - definicoesBadge
+          additionalProperties: false
+        tiposRestricao:
+          type: array
+          items:
+            $ref: '#/components/schemas/TipoRestricao'
+        receitasParaBaixar:
+          type: array
+          items:
+            type: object
+            properties:
+              pratoId:
+                type: string
+                format: uuid
+              atualizadoEm:
+                type: string
+                format: date-time
+              fotoHash:
+                type: string
+            required:
+            - pratoId
+            - atualizadoEm
+            additionalProperties: false
+      required:
+      - versao
+      - geradoEm
+      - pacoteVersaoMinima
+      - perfil
+      - restricoes
+      - despensa
+      - utensilios
+      - planos
+      - avaliacoes
+      - conquistas
+      - desbloqueiosEvolucao
+      - indiceCatalogo
+      - tiposRestricao
+      - receitasParaBaixar
+      description: Camada 1 do conjunto baixado e lista das receitas a baixar (camada 2). Preparadas (camada 3)
+        voltam sob demanda por GET /v1/receitas/{pratoId}.
+      additionalProperties: false
+    PropostaEntrada:
+      type: object
+      properties:
+        nome:
+          type: string
+          minLength: 2
+          maxLength: 120
+        culinariaId:
+          type: string
+          format: uuid
+        pratoBaseId:
+          oneOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+        tempoPreparoMinutos:
+          type: integer
+          minimum: 1
+        dificuldade:
+          $ref: '#/components/schemas/Dificuldade'
+        ingredientes:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            properties:
+              ingredienteId:
+                type: string
+                format: uuid
+              quantidade:
+                oneOf:
+                - type: string
+                - type: 'null'
+              unidade:
+                oneOf:
+                - type: string
+                - type: 'null'
+            required:
+            - ingredienteId
+            additionalProperties: false
+        utensilioIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        passos:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            maxLength: 2000
+        alergenos:
+          type: array
+          items:
+            $ref: '#/components/schemas/CodigoAlergeno'
+        estadoAlergenos:
+          type: string
+          enum:
+          - declarado_fonte
+          - nao_verificado
+          description: '`verificado` só se obtém por /verificar (A06).'
+        fonteNome:
+          type: string
+          minLength: 2
+          maxLength: 200
+        fonteUrl:
+          type: string
+          format: uri
+      required:
+      - nome
+      - culinariaId
+      - tempoPreparoMinutos
+      - dificuldade
+      - ingredientes
+      - passos
+      - alergenos
+      - estadoAlergenos
+      - fonteNome
+      - fonteUrl
+      additionalProperties: false
+    PropostaEdicao:
+      type: object
+      properties:
+        nome:
+          type: string
+          minLength: 2
+          maxLength: 120
+        culinariaId:
+          type: string
+          format: uuid
+        pratoBaseId:
+          oneOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+        tempoPreparoMinutos:
+          type: integer
+          minimum: 1
+        dificuldade:
+          $ref: '#/components/schemas/Dificuldade'
+        ingredientes:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            properties:
+              ingredienteId:
+                type: string
+                format: uuid
+              quantidade:
+                oneOf:
+                - type: string
+                - type: 'null'
+              unidade:
+                oneOf:
+                - type: string
+                - type: 'null'
+            required:
+            - ingredienteId
+            additionalProperties: false
+        utensilioIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        passos:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            maxLength: 2000
+        alergenos:
+          type: array
+          items:
+            $ref: '#/components/schemas/CodigoAlergeno'
+        estadoAlergenos:
+          type: string
+          enum:
+          - declarado_fonte
+          - nao_verificado
+          description: '`verificado` só se obtém por /verificar (A06).'
+        fonteNome:
+          type: string
+          minLength: 2
+          maxLength: 200
+        fonteUrl:
+          type: string
+          format: uri
+      description: Qualquer subconjunto dos campos da proposta. Alterar alérgenos rebaixa o estado `verificado`.
+      additionalProperties: false
+    ChecklistVerificacao:
+      type: object
+      properties:
+        ingredientesConferidos:
+          type: boolean
+          const: true
+          description: Cada ingrediente conferido contra os 19 códigos, incluindo derivados.
+        segundaFonteConsultada:
+          type: boolean
+          description: Recomendada, não obrigatória.
+        segundaFonteDescricao:
+          type: string
+          maxLength: 300
+        uniaoConferida:
+          type: boolean
+          const: true
+          description: Alérgenos da receita batem com a união dos ingredientes.
+        semLactoseConferido:
+          type: boolean
+          description: Obrigatório true quando algum ingrediente leva semLactose.
+        confirmadoSemAlergenos:
+          type: boolean
+          description: 'Obrigatório true quando a lista de alérgenos da receita é vazia: o curador afirma que conferiu
+            e a receita não contém nenhum dos 19 códigos. Sem isso, lista vazia continua `nao_verificado` (RN08).'
+      required:
+      - ingredientesConferidos
+      - segundaFonteConsultada
+      - uniaoConferida
+      additionalProperties: false
+    SaidaAgente:
+      type: object
+      properties:
+        esquemaVersao:
+          const: '1'
+        nome:
+          type: string
+        culinaria:
+          type: string
+        idiomaOrigem:
+          type: string
+        ingredientes:
+          type: array
+          items:
+            type: object
+            properties:
+              original:
+                type: string
+              quantidade:
+                oneOf:
+                - type: string
+                - type: 'null'
+              unidade:
+                oneOf:
+                - type: string
+                - type: 'null'
+              ingredienteId:
+                oneOf:
+                - type: string
+                  format: uuid
+                - type: 'null'
+              alergenos:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CodigoAlergeno'
+              duvida:
+                type: boolean
+            required:
+            - original
+            - alergenos
+            additionalProperties: false
+        utensilios:
+          type: array
+          items:
+            type: string
+        tempoPreparoMinutos:
+          oneOf:
+          - type: integer
+          - type: 'null'
+        dificuldade:
+          oneOf:
+          - $ref: '#/components/schemas/Dificuldade'
+          - type: 'null'
+        passos:
+          type: array
+          items:
+            type: string
+        alergenos:
+          type: array
+          items:
+            $ref: '#/components/schemas/CodigoAlergeno'
+        substitutosPropostos:
+          type: array
+          items:
+            type: object
+            properties:
+              ingredienteOriginal:
+                type: string
+              substituto:
+                type: string
+              alergenosDoSubstituto:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CodigoAlergeno'
+            required:
+            - ingredienteOriginal
+            - substituto
+            - alergenosDoSubstituto
+            additionalProperties: false
+        incertezas:
+          type: array
+          items:
+            type: string
+      required:
+      - esquemaVersao
+      - nome
+      - culinaria
+      - idiomaOrigem
+      - ingredientes
+      - passos
+      - alergenos
+      - substitutosPropostos
+      - incertezas
+      description: 'Esquema de saída do agente (ADR-011). Não contém estado de alérgenos, fonte, link nem aprovação:
+        o servidor os atribui. Código fora do vocabulário é descartado e vira incerteza.'
+      additionalProperties: false
+    ResumoProposta:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        nome:
+          type: string
+        estadoPublicacao:
+          $ref: '#/components/schemas/EstadoPublicacao'
+        estadoAlergenos:
+          $ref: '#/components/schemas/EstadoAlergenos'
+        origem:
+          type: string
+          enum:
+          - manual
+          - ia
+        criadaEm:
+          type: string
+          format: date-time
+      required:
+      - id
+      - nome
+      - estadoPublicacao
+      - estadoAlergenos
+      - origem
+      - criadaEm
+      additionalProperties: false
+    Proposta:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        estadoPublicacao:
+          $ref: '#/components/schemas/EstadoPublicacao'
+        origem:
+          type: string
+          enum:
+          - manual
+          - ia
+        dados:
+          allOf:
+          - $ref: '#/components/schemas/PropostaEdicao'
+          description: Campos da receita. Em proposta de origem `ia`, campos como culinariaId podem faltar até o
+            curador completar; o portão de publicação bloqueia o que faltar (A09).
+        foto:
+          oneOf:
+          - $ref: '#/components/schemas/FotoPrato'
+          - type: 'null'
+        incertezas:
+          type: array
+          items:
+            type: string
+        saidaBruta:
+          oneOf:
+          - $ref: '#/components/schemas/SaidaAgente'
+          - type: 'null'
+        modelo:
+          oneOf:
+          - type: string
+          - type: 'null'
+          description: '`gravado` quando veio do ProvedorGravado.'
+        esquemaVersao:
+          oneOf:
+          - type: string
+          - type: 'null'
+        tokensEntrada:
+          oneOf:
+          - type: integer
+          - type: 'null'
+        tokensSaida:
+          oneOf:
+          - type: integer
+          - type: 'null'
+        verificadoPor:
+          oneOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+        verificadoEm:
+          oneOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+        aprovadoPor:
+          oneOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+        aprovadoEm:
+          oneOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+        criadaEm:
+          type: string
+          format: date-time
+      required:
+      - id
+      - estadoPublicacao
+      - origem
+      - dados
+      - incertezas
+      - criadaEm
+      additionalProperties: false
