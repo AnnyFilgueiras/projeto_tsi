@@ -118,3 +118,11 @@ R8, R9, R10.
 | Curadoria por endpoints se mostrar inviável | Priorizar a tela administrativa (Could). |
 | Usuário passar a submeter receitas | Rever moderação e fluxo de importação. |
 | Professor passar a exigir IA diante do usuário final | Reabrir a abordagem A (propostas, seção 10). |
+
+## Detalhamento
+- **Rotas:** o contrato da curadoria está no `openapi.yaml` (grupo "Curadoria"), usado pelo Bruno.
+- **Verificação:** só o curador marca "verificado", com checklist (ingredientes conferidos contra os 19 códigos; segunda fonte **recomendada**; união conferida; `semLactoseConferido`; e `confirmadoSemAlergenos` quando a lista é vazia).
+- **Portão:** bloqueia por campo da A09, fonte (RN17), foto sem atribuição e invariantes do ADR-014. Aprovar não exige "verificado".
+- **Publicação:** estados `proposto`, `aprovado` e `desativado`. Prato aprovado nunca é apagado.
+- **Curador:** conta criada por seed ou comando, com e-mail e senha (ADR-007).
+- **Pendente:** o `[CONFIRMAR]` do item 9 (R10) continua aberto.

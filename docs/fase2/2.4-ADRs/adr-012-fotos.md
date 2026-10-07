@@ -102,3 +102,5 @@ R10 (estendido às imagens).
 
 - **Alvo:** o app baixa as fotos direto do armazenamento de objetos, por URL estática com hash no nome. Na demo, o download é pela API. Se não houver opção gratuita no alvo, volta a ser pela API (item 5).
 - **Preparadas:** as já baixadas permanecem no aparelho; em instalação nova, voltam sob demanda. A política de limpeza do armazenamento local continua em aberto.
+- **Licenças:** enum do contrato `dominio_publico`, `cc0`, `cc_by`, `cc_by_sa`, `autoria_propria`. O `[CONFIRMAR]` do item 1 continua aberto até a verificação do R10.
+- **Metadados TASL:** a publicação é bloqueada sem autor, URL da fonte, licença e indicação de alteração.

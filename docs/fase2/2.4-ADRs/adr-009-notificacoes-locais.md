@@ -97,3 +97,6 @@ R4.
 | Mais de dois tipos de lembrete | Rever a regra de agrupamento. |
 | A14 entrar no escopo | Reavaliar notificações de engajamento, com consentimento (RNF06) e dentro do limite (RNF07, RNF09). |
 | iOS entrar no alvo | Verificar limites e permissões no iOS. |
+
+## Detalhamento
+- As preferências de lembrete sincronizam como a operação `lembretes.definir` (campos `ativo`, `tipos`, `frequencia`). Os valores de `frequencia` são definidos na implementação; o RNF07 limita a 2 notificações por dia.

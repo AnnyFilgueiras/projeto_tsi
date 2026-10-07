@@ -101,3 +101,11 @@ R4, R6.
 | Ativação do plano B (Supabase) | Marcar como "Substituído por ADR-NNN". |
 | Incidente de abuso nas contas anônimas | Endurecer limites ou exigir prova de uso do app. |
 | Implantação real | Revisar vida de tokens, rotação de chaves de assinatura e retenção de contas. |
+
+## Detalhamento
+- **Valores:** JWT de acesso de **45 minutos** (carrega só `contaId` e papel). Refresh de 30 dias, opaco, de uso único, rotativo, com hash.
+- **Tolerância (R17):** reenvio do mesmo refresh dentro de 60 s do primeiro uso devolve o mesmo par (campos `usadoEm` e `sucessorId`). Reuso fora da janela revoga a família (`familiaId`).
+- **Conta e perfil:** `Usuario` e `Conta` são tabelas separadas com a mesma chave primária; a criação ocorre em uma transação.
+- **Retenção:** conta anônima sem sincronização por 12 meses é excluída com seus dados. Quem vinculou e-mail não é excluído por inatividade.
+- **Limites:** 5 tentativas de login por 15 minutos por conta e IP; criação de contas anônimas limitada por IP.
+- **Curador:** a conta de curador precisa ter e-mail e senha, porque o login é por `POST /v1/sessoes/entrar`. O seed ou comando define as duas coisas.

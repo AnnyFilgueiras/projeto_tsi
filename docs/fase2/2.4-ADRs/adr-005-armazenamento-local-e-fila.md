@@ -96,3 +96,9 @@ R2, R4.
 | Falha do protótipo de sincronização (ADR-001) | Reavaliar o escopo da fila. |
 | Fotos ou conjunto baixado pesam no armazenamento | Rever a estratégia de pacotes (ADR-001, ADR-012). |
 | Ativação do plano B (Supabase) | O banco local e a fila continuam; revisar só o que depender do servidor. |
+
+## Detalhamento
+- **Operação da fila:** `opId` (UUID v7), `tipo`, `carga`, `criadaEm`, `tentativas`, `proximaTentativaEm`, `estado` (`pendente`, `confirmada`, `falha`). Tipos: `avaliacao.registrar`, `item.reagendar`, `item.remover`, `lista.definir_data_compra`, `lista.marcar_item`, `restricao.cadastrar`, `restricao.revogar`, `lembretes.definir`.
+- **Limites:** no máximo 500 operações pendentes e 90 dias de idade (hipóteses a medir).
+- **Falha permanente:** só rejeição de validação. Erro de rede e 5xx nunca mudam o estado. A operação com falha só pode ser descartada (sem reenvio na v1).
+- **Estado "em preparo":** marca local no aparelho, fora da fila.

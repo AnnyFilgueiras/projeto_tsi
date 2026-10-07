@@ -129,3 +129,9 @@ R8, R9, R10, **R11** (novo).
 | Mudança de preço, termos ou disponibilidade | Trocar o provedor pela interface. |
 | Professor passar a exigir IA diante do usuário final | Reabrir a abordagem A (alteraria a RN15 e exigiria checagem determinística de alérgenos). |
 | Importação exceder o tempo limite da requisição | Tornar a importação assíncrona (ADR-004). |
+
+## Detalhamento
+- **Esquema de saída** (`SaidaAgente`, versão `1`, em `openapi.yaml`): sem estado de alérgenos, fonte, link nem aprovação. Código fora do vocabulário é descartado e vira incerteza.
+- **Entrada:** limite de 20.000 caracteres (hipótese a medir com 3 a 5 receitas).
+- **Falhas:** teto de gasto retorna 402 e falha do provedor ou saída inválida retorna 502, ambos com `fluxoManualDisponivel`. Nada é gravado, e os tokens consumidos são registrados.
+- **Adaptadores:** `ProvedorKimi` e `ProvedorGravado` passam a mesma suíte de contrato. O gravado só é ativado por `PROVEDOR_IA=gravado` e marca `modelo = "gravado"`.

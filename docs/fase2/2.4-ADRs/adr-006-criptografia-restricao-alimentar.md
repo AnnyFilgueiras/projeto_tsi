@@ -105,3 +105,9 @@ R2, R4, R6.
 | Abertura offline acima de 2 s por causa da cifra | Trocar biblioteca ou escopo local (ADR-005); a cifra permanece. |
 | Escolha do Azure como alvo | Verificar criptografia e backups do Azure Database for PostgreSQL. |
 | Plano B (Supabase) | Marcar como "Substituído por ADR-NNN"; a cifra de aplicação pode continuar. |
+
+## Detalhamento
+- **Catálogo de restrições:** a restrição do usuário é escolha em catálogo fixo (`TipoRestricao`, por seed), mapeada para códigos de alérgeno. O tipo escolhido (`tipoCifrado`) é o dado sensível cifrado com AES-256-GCM.
+- **Revogação:** apaga a linha da restrição, sem guardar `revogadoEm`. O prazo de 24 h conta do **recebimento pelo servidor**.
+- **Chave:** obtida por `ProvedorDeChave`, com implementação por arquivo (demo) e por Secret Manager (alvo).
+- **Fila:** a restrição entra na fila cifrada pelo SQLCipher, e a carga nunca vai para log.

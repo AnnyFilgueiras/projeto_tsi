@@ -109,3 +109,11 @@ R2, R4.
 - **Despensa, utensílios e preferências culinárias:** cópia local de leitura, baixada com o conjunto; edição só online. Não entram nas operações do item 3.
 - **Item 3 (operações):** "itens da rotina" inclui data de compra e marcação de comprado da lista de compras. **Criar item de plano exige rede** (a receita é baixada nesse momento); reagendar e remover continuam offline.
 - **Item 9 (conjunto baixado):** três camadas (texto leve; receitas planejadas e em preparo com foto; preparadas sob demanda em instalação nova). Ver ADR-001.
+- **Idempotência (item 2):** `OperacaoProcessada` com chave `(contaId, opId)`, gravada na mesma transação do efeito, validade de 90 dias. Mesmo `opId` e mesmo hash devolvem a resposta gravada (`repetida = true`). Mesmo `opId` com hash diferente retorna 422 (`chave-reutilizada`). Rotas online que criam recurso usam o cabeçalho `Idempotency-Key`.
+- **Identificadores:** `Avaliacao.id` é o `opId`. O `id` do `ItemDeRotina` é o `opId` da operação que o cria; as operações seguintes têm `opId` próprio.
+- **Avaliação (item 4):** só se acrescenta, sem edição nem exclusão (salvo exclusão de conta).
+- **Reenvio (item 11):** espera de 5 s, 30 s, 2 min, 10 min e 1 h (teto).
+- **Falha (item 10):** sem reenvio na v1; a operação fica visível e pode ser descartada.
+- **Desbloqueios:** o servidor recalcula e só acrescenta; o desbloqueio local sobrevive a uma rejeição (RN04). Prato aprovado nunca é apagado, só desativado.
+- **"Em preparo":** só local, sem sincronização.
+- **Revogação de restrição (R16):** o app mostra "revogação pendente de envio" enquanto a operação estiver na fila.
