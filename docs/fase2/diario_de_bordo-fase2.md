@@ -395,16 +395,117 @@
 
 - **R11 (confirmado pela dupla):** as fontes divergem sobre o uso de dados da API da Kimi para treinamento; mitigado por enviar só texto de receita, nunca dado de usuário.
 - **R12 (confirmado pela dupla):** conta anônima sem e-mail e sem recuperação de senha é irrecuperável ao perder o aparelho (ADR-007, ADR-008); mitigado por incentivo ao vínculo de e-mail e sincronização rápida.
-- **R13 (confirmado pela dupla):** refresh token sem rotação aumenta a exposição em caso de roubo do token (ADR-007); mitigado por validade máxima, revogação no servidor e armazenamento em `expo-secure-store`.
+- **R13 (reescrito na 2.5; reconfirmar pela dupla):** o roubo de um refresh token dá acesso até a próxima rotação, a revogação ou o fim da validade (ADR-007). Com rotação, o reuso de um token antigo é rejeitado e revoga a sessão, mas uma renovação cuja resposta se perde (queda de rede) pode encerrar a sessão legítima (hipótese a testar). Mitigado por validade máxima, revogação no servidor, armazenamento em `expo-secure-store` e teste de rotação do ADR-007.
 - R1 a R10 seguem. A criptografia continua sendo requisito, não risco.
 
 ### Pendências para a próxima conversa (2.5)
 
 - Aplicar as alterações propostas nos quatro artefatos e commitar `/docs/fase2/adr/` e o diário.
-- Anexar o `issue-retroalimentacao-fase1.md` v1.3 e abrir a issue (`#30` provisório).
+- Anexar o `issue-retroalimentacao-fase1.md` v1.3 e issue aberta e concluída: #30
 - Definir o vocabulário de alérgenos e o critério de "verificado" (antes da 2.6).
 - Medidas e testes (H), em ordem de prioridade: tokens com 3 a 5 receitas e JSON Mode (ADR-011); abertura offline em 2 s com SQLCipher (ADR-005); protótipo de sincronização em 10 dias (ADR-008); WebP e peso das fotos (ADR-012); cota do Cloud Run e limite do console da Kimi (ADR-004, ADR-011, ADR-013).
 - Na 2.5, decidir em qual módulo do servidor ficam as preferências de lembrete.
 - Na 2.6, detalhar o mecanismo de idempotência, o esquema de saída do agente, o OpenAPI e a coleção Bruno de curadoria.
 - Na 2.7, definir como verificar as fronteiras entre módulos.
 - Verificação do benefício de estudante: sem impacto nas decisões desta etapa.
+
+## [06/10/2026 a 07/10/2026] — Conversa 2.5 (C4 níveis 1 a 3)
+
+- **Papel da IA:** arquiteto, modelador C4.
+- **Técnicas aplicadas:** modelagem C4 como código (Mermaid `C4Context`, `C4Container`, `C4Component`, `C4Deployment`); lacunas fechadas por perguntas numeradas, com recomendação e trade-off; rastreabilidade container × ADR e componente × UC/US; revisão pesada do próprio artefato (consistência entre níveis, ADRs e Fase 1); registro de divergências em lotes de correção.
+- **Prompts-chave usados:**
+  1. Execução do briefing da 2.5 (a IA parou ao perceber que o anexo era o briefing da 2.4 e pediu o correto).
+  2. Perguntas numeradas da IA (Bruno, nível 4, Google Play, preferências de lembrete, lacuna do servidor), respondidas pela dupla.
+  3. Pergunta da dupla: "precisa baixar todos os dados? o que é prioritário?" (conjunto baixado).
+  4. Pedido de checkup de inconsistências nos níveis 1 e 3 e, depois, "revisão pesada" do nível 3.
+  5. Pergunta sobre corrigir artefatos da Fase 2 sem issue e sobre como usar o registro de divergências (lotes).
+- **Insumos usados:** `briefing-passagem-2.5.md`, `briefing-fase2.md` (v1.2), `diario_de_bordo-fase2.md` (com a entrada 2.4), `propostas-arquiteturais.md` v1.2, ADR-001 a ADR-014, `estilo-arquitetural.md` v1.1, `atributos-qualidade.md` v1.2, `casos-de-uso.md`; consultas pontuais a `modelo-conceitual.md` e `regras-de-negocio.md` (Fase 1).
+- **Artefatos produzidos:** `c4-contexto.md` v1.1, `c4-containers.md` v1.1, `c4-componentes.md` v1.0, `registro-divergencias-2.5.md`, `guia-correcoes-lote-1.md`, `pendencias-lotes-2-e-3.md`, `briefing-passagem-2.6.md`.
+
+### Decisões tomadas
+
+**Nível 1 (contexto)**
+1. Elementos: Usuário, Curador, Panelada, Bruno e Provedor de IA (Kimi K3).
+2. Bruno mantido como sistema externo, com a ausência de tela de curadoria explícita.
+3. Google Play fora do nível 1; aparece só na implantação do alvo.
+4. Acentos mantidos nos nomes ("Usuário" corresponde à classe `Usuario` da Fase 1).
+
+**Nível 2 (containers e implantação)**
+5. Cinco containers: App Móvel Panelada, Banco Local Cifrado, API Panelada, Banco do Servidor e Armazenamento de Fotos. Fotos locais do app são componente, não container.
+6. Sem nível 4 de código. No lugar, dois diagramas de implantação (demo detalhada; alvo enxuto).
+7. Chave da API de IA no alvo no Secret Manager, separada da chave AES. Fotos do alvo por URL estática com hash no nome (na demo, pela API).
+
+**Nível 3 (componentes)**
+8. Preferências de lembrete no módulo Perfil e Restrições (frequência e tipos são atributos de `Usuario`).
+9. Três componentes transversais na API: Identidade e Sessões, Sincronização, Sugestão e Busca.
+10. Componentes de apoio: Sincronizador e Registro Técnico (app); Cifra de Campos Sensíveis e Registro Técnico (API); Pacote de Alérgenos compartilhado.
+11. Importação mostrada em tabela (seis partes) por legibilidade do diagrama.
+12. Despensa, utensílios e preferências culinárias: cópia local de leitura, edição só online.
+13. Índice leve do catálogo no aparelho (nomes, cadeias, continentes, definições de badge, totais), sem receita nem foto.
+14. Conjunto baixado em três camadas (opção A): texto leve sempre; planejadas e em preparo com foto; preparadas sob demanda em instalação nova.
+15. Criar item de plano exige rede (opção B); offline continuam reagendar, remover, data de compra, marcar comprado e avaliar.
+16. Lista de compras (data de compra e marcações) sincroniza como operação de rotina. Definições de badge no Progresso e Avaliação, por seed.
+
+**Processo**
+17. Divergência entre ADR e briefing: prevalece o ADR (refresh token rotativo, ADR-007).
+18. Artefatos da Fase 2 são corrigidos sem issue, com registro no diário; Fase 1 por issue agrupada ao final da 2.6.
+19. Correções em três lotes: 1 antes da 2.6; 2 higiene antes da 2.8; 3 issue da Fase 1 ao final da 2.6.
+
+### Restrições
+
+- Herdadas das entradas 2.0 a 2.4 (MVP em 1,5 mês; infraestrutura gratuita; 1.500 usuários no pico; 350 pratos; seed de cerca de 20; demo local; teto de R$ 20 na IA; nenhum dado de usuário vai ao provedor de IA; logs sem restrição; LGPD é requisito).
+- Candidatas não ficam offline; a sugestão e a busca são online.
+- Fronteiras entre módulos do servidor não são impostas pelo framework (verificação na 2.7).
+
+### Iterações relevantes (erros e retrabalho da IA)
+
+1. O primeiro anexo era o briefing da 2.4 com o nome de 2.5; a IA parou e pediu o correto. O segundo anexo veio com trechos da 2.4 colados no meio.
+2. No rascunho do nível 1, a IA incluiu o Google Play sem necessidade técnica; a dupla questionou e foi removido.
+3. O checkup do nível 1 achou: rastreio com a US04 (sem UC), rótulo "HTTP" sem a ressalva de TLS, falta do seed e do comando como entrada de catálogo, "seed" no lugar de "seed ou comando" (ADR-007) e o Android como sistema externo no nível 2.
+4. O nível 2 saiu com o rastreio da API incompleto (faltavam UC04 a UC07 e UC13) e sem a US16 nos níveis 1 e 2; achado na revisão do nível 3.
+5. O nível 3 v0.1 tinha erros: faltava a relação Receita e Preparo → rede; rótulo App → Catálogo incompleto; nota sobre o Gerenciador de Fotos incorreta; afirmação falsa de cobertura (UC12 no app); definições de badge sem dono; planejamento offline contradizia candidatas online; mecanismo de idempotência antecipado; "uma de cada tipo" apresentada como fato. Uma relação inválida do Banco do Servidor consigo mesmo foi removida antes da entrega.
+6. A análise do conjunto baixado revelou lacunas não previstas nos ADRs: despensa e utensílios offline, e o índice leve do catálogo para desbloquear badges e evolução sem rede.
+7. Os diagramas Mermaid C4 não foram renderizados pela IA; a legibilidade segue a verificar.
+
+### Divergências registradas (briefing/professor × artefatos)
+
+Lista completa em `registro-divergencias-2.5.md` (19 itens). Principais:
+
+- ADR-007 (refresh token rotativo) × briefing 2.5 e R13 ("sem rotação"): prevalece o ADR; R13 reescrito, a reconfirmar.
+- ADR-007 ("seed ou comando") × briefing 2.5 e ADR-010 ("só por seed"): prevalece o ADR-007.
+- `atributos-qualidade.md` dizia que "em preparo" não existe no modelo; o `modelo-conceitual.md` o tem como status de `ItemDeRotina`.
+- Roteiro do briefing 2.5 citava "lojas" no nível 1; a dupla retirou.
+- Anexo do briefing 2.5 com trechos da 2.4; título do briefing-mestre em v1.1 com revisão v1.2; versão da issue (v1.3 × v1.4); `[CONFIRMAR]` e marcadores soltos nos ADRs; "Ver ADR-012" no lugar de ADR-013; "Fastify ou NestJS" na P1.
+- Fase 1: UC12, fluxo FE2, supõe interface de usuário (item #15, Lote 3).
+
+### Artefatos alterados (retroalimentação)
+
+| Artefato | Mudança | Status |
+|---|---|---|
+| `c4-contexto.md` v1.1, `c4-containers.md` v1.1, `c4-componentes.md` v1.0 | Criados e corrigidos na 2.5 | Feito |
+| `atributos-qualidade.md` | RNF05 "reescrita proposta" → "corrigido" (item #9) | Feito pela dupla |
+| `atributos-qualidade.md` v1.3 | "Em preparo" existe como status de `ItemDeRotina` (item #17) | Pendente (Lote 1) |
+| ADR-001, 002, 004, 008, 012 | Seção "Detalhamento (2.5)" | Pendente (Lote 1) |
+| ADR-010 | Papel de curador "seed ou comando" (item #14) | Pendente (Lote 1) |
+| Diário (entrada 2.4) e `propostas-arquiteturais.md` §16 | R13 reescrito, a reconfirmar (item #2) | Pendente (Lote 1) |
+| `briefing-fase2.md` v1.3 | Correções editoriais (itens #4 e #5) | Pendente (Lote 1) |
+| Issue #30 | Versão do arquivo da issue e "#30 provisório" (item #8) | Pendente (Lote 1) |
+| Demais ADRs, propostas | Higiene (Lote 2) | Pendente, antes da 2.8 |
+| Fase 1 (`casos-de-uso.md`, UC12 FE2 e itens do Lote 3) | Por issue agrupada | Pendente, ao final da 2.6 |
+
+### Riscos aceitos
+
+- R1 a R12 seguem como na entrada 2.4 (R11 e R12 confirmados). A criptografia continua sendo requisito, não risco.
+- **R13 (reescrito na 2.5; reconfirmar pela dupla):** o roubo de um refresh token dá acesso até a próxima rotação, a revogação ou o fim da validade (ADR-007). Com rotação, o reuso de um token antigo é rejeitado e revoga a sessão, mas uma renovação cuja resposta se perde pode encerrar a sessão legítima (hipótese a testar).
+- **R14 (proposto na 2.5, a confirmar):** criar item de plano exige rede; sem conexão o usuário não consegue incluir pratos no plano. Mitigação: reagendar, remover, marcar comprado e avaliar continuam offline; as receitas planejadas ficam baixadas.
+- **R15 (proposto na 2.5, a confirmar):** em instalação nova, as receitas preparadas só voltam ao abrir com rede, o que estreita o RNF05 ao pé da letra. Mitigação: conta de um aparelho só (ADR-007, ADR-008); quem vincula e-mail recupera o histórico (R12).
+
+### Pendências para a próxima conversa (2.6)
+
+- **Antes de abrir a 2.6:** aplicar o Lote 1 (`guia-correcoes-lote-1.md`) e reconfirmar o R13, o R14 e o R15.
+- **Para a 2.6:** mecanismo de idempotência; esquema de saída do agente; OpenAPI e coleção Bruno de curadoria; vocabulário de alérgenos e critério de "verificado"; "em preparo" para prato aberto sem item de rotina; regra de edição de avaliação; retenção de contas anônimas, vida dos tokens e limites da fila; definição de badges de conjunto temático.
+- **Medidas (H), em ordem de prioridade:** tokens com 3 a 5 receitas e JSON Mode (ADR-011); abertura offline em 2 s com SQLCipher (ADR-005); protótipo de sincronização em 10 dias (ADR-008); WebP e peso das fotos (ADR-012); tamanho do índice leve e do conjunto do seed; cota do Cloud Run e limite do console da Kimi (ADR-004, ADR-011, ADR-013).
+- **Para a 2.7:** como verificar as fronteiras entre módulos.
+- **Para a 2.8:** Lote 2 (inclui os `[CONFIRMAR]` dos ADR-010 e ADR-012).
+- **Ao final da 2.6:** abrir a issue agrupada da Fase 1 (Lote 3).
+- **A verificar:** renderização dos diagramas Mermaid C4 no GitHub.
