@@ -607,3 +607,81 @@ Lista completa em `registro-divergencias-2.5.md` (19 itens). Principais:
 - **Para a 2.7:** padrões de projeto justificados (candidatos: registro de aplicadores, portas e adaptadores, repositório, unidade de trabalho, lista de regras do portão, mecanismo de verificação das fronteiras entre módulos).
 - **Medidas (H), em ordem de prioridade:** tokens com 3 a 5 receitas e JSON Mode (ADR-011); abertura offline em 2 s com SQLCipher (ADR-005); protótipo de sincronização em 10 dias (ADR-008); WebP e peso das fotos (ADR-012); tamanho do índice leve; cota do Cloud Run e limite do console da Kimi.
 - **Em aberto:** valores de `frequencia` dos lembretes; política de limpeza do armazenamento local de fotos preparadas; existência de US ou RNF de exclusão de conta.
+
+## [07/10/2026] — Conversa 2.7 (Padrões de projeto)
+
+- **Papel da IA:** arquiteto, designer de componentes e de padrões (SOLID).
+- **Técnicas aplicadas:** avaliação de cada candidato por problema, classes envolvidas, alternativa mais simples e motivo de não bastar; varredura do catálogo clássico (GoF) a pedido da dupla; convenção de contexto transacional (`Tx`) no lugar do Unit of Work; verificação de fronteiras com `eslint-plugin-boundaries` (regras de servidor e de app); renomeação do contrato por script (inventário, mapa de tradução, aplicação e validação estrutural); regeneração da coleção Bruno a partir do contrato e da árvore de arquivos informada pela dupla.
+- **Prompts-chave usados:**
+  1. Abertura da 2.7 com o briefing de passagem e instrução de parar se faltasse anexo; a IA confirmou que os arquivos exigidos estavam no projeto.
+  2. Confirmação de R16 e R17; pergunta da dupla se o lint do OpenAPI e a abertura da coleção Bruno eram necessários (não bloqueiam a 2.7).
+  3. Apoio à opção B para a regra de desbloqueio duplicada e aprovação da convenção `Tx`.
+  4. Escolha do `eslint-plugin-boundaries` (aviso no editor) e exigência de inglês obrigatório para o código.
+  5. Escopo B do inglês (código, diagramas, contrato e Bruno), aceitação das sete regras do app e pedido de ADR para a convenção de língua.
+  6. Pergunta da dupla sobre TDD e sobre quais padrões foram considerados (Strategy, Visitor, Iterator, Adapter, Singleton).
+  7. Aprovação da varredura do catálogo, da regra A8 e da seção de TDD.
+  8. Informação de que o Perplexity não aceita `.zip`; a dupla colou a árvore da coleção, o `bruno.json`, o `collection.bru`, o ambiente e uma requisição.
+- **Insumos usados:** `briefing-passagem-2.7.md`, `briefing-fase2.md` v1.3, `diario_de_bordo-fase2.md` (com a entrada 2.6), `diagrama-classes.md` v1.0, `sequencia-uc10.md`, `sequencia-uc04.md`, `sequencia-uc08.md`, `sequencia-uc12.md`, `openapi.yaml` v1.0.0-2.6 (anexado), `modelo-conceitual.md`, `regras-de-negocio.md`, ADR-001 a ADR-014, `c4-componentes.md` v1.1, `atributos-qualidade.md` v1.3; fontes externas sobre `eslint-plugin-boundaries`, `dependency-cruiser`, `ts-arch`, Singleton e TDD com portas e adaptadores.
+- **Artefatos produzidos:** `padroes-de-projeto.md` v1.1; `adr-015-idioma-dos-identificadores.md`; `glossario-identificadores.md` v1.2; `diagrama-classes.md` v1.1; `sequencia-uc04.md`, `sequencia-uc08.md`, `sequencia-uc10.md` e `sequencia-uc12.md` v1.1; `openapi.yaml` v1.1.0-2.7 com `mapa-renomeacao-openapi.md` e `.json`; coleção Bruno `panelada-curadoria` regenerada (43 arquivos); nota "Detalhamento (2.7)" do ADR-002; `issue-31-lote-3.md`; esta entrada; `briefing-passagem-2.8.md`.
+
+### Decisões tomadas
+
+1. **Padrões mantidos (com alternativa mais simples registrada):** registro de `OperationApplier` (P01); cinco portas: `LocalDatabase`, `AiProvider`, `KeyProvider`, `NotificationAdapter` (função injetada) e `RecipeSource` (primeiro candidato a corte) (P02a a P02e); repositório por feature no app (P03); Transactional Outbox no app (P04); Idempotent Receiver no servidor (P05); Facade de módulo por interfaces públicas (P06).
+2. **Convenção `Tx` (T01):** toda interface pública que escreve recebe `tx: Tx`, tipo opaco em `src/shared/`. Substitui o Unit of Work formal (R01).
+3. **Padrões removidos:** Unit of Work formal (R01); lista de regras do `PublicationGate` (R02, vira função com verificações privadas); calculadora de desbloqueio por tipo de marco (R03, `switch` com checagem `never`).
+4. **Regra de desbloqueio duplicada (opção B):** `UnlockCalculator` no app e `UnlockRules` no módulo `progress` do servidor, com suíte comum de vetores em JSON, sem pacote compartilhado novo.
+5. **Varredura do catálogo (seção 5.1 do `padroes-de-projeto.md`):** Strategy e Adapter adotados; Command já presente (`QueuedOperation`); Singleton, Iterator, Visitor, Observer, State, Decorator e Chain of Responsibility não adotados; Factory como função simples. Instância única pela raiz de composição (regra A8).
+6. **Fronteiras entre módulos (pendência do ADR-002):** `eslint-plugin-boundaries` mais `import/no-cycle`; estrutura de pastas em inglês (`modules`, `cross-cutting`, `support`, `shared`, `public/` e `internal/`); regras S1 a S8 no servidor e A1 a A8 no app; prova de funcionamento por import proibido criado de propósito.
+7. **TDD:** test-first nas regras puras e nos serviços dos atributos críticos (A05, A06, A07, A08); teste depois nas telas; medição no dispositivo para as hipóteses H; suíte de contrato nos dois provedores de IA.
+8. **Idioma (ADR-015):** identificadores, pastas, arquivos, comentários, rotas, campos e valores de enumeração em inglês; commits em inglês; pull requests e issues em português; textos dos artefatos em português; C4 mantém os nomes em português; os 19 códigos de alérgenos permanecem como estão.
+9. **Contrato:** `openapi.yaml` v1.1.0-2.7 com tags em inglês e segmentos de rota em kebab-case, por script; 35 operações, 70 referências resolvidas.
+10. **Bruno:** coleção regenerada em inglês a partir do contrato e da árvore informada.
+
+### Iterações relevantes (erros e retrabalho da IA)
+
+1. A IA avaliou só os seis candidatos do briefing e quatro que surgiram na análise; a varredura do catálogo clássico só ocorreu depois da pergunta da dupla sobre Singleton, Visitor, Iterator e Adapter. Na varredura, a IA percebeu que faltava a raiz de composição do app nas regras (A8).
+2. O glossário aprovado cobria classes, valores e contrato, mas não atributos e métodos; a lacuna apareceu ao aplicar a renomeação e gerou as seções 9 e 9.1, aprovadas na v1.2.
+3. Os arquivos gerados no ambiente de execução se perderam entre mensagens; a IA reentregou as versões consolidadas e deu a instrução manual para o item `Tx` da seção 8 do `padroes-de-projeto.md`.
+4. A leitura do `openapi.yaml` pelos arquivos do projeto devolveu só trechos; a IA pediu o anexo, e a renomeação foi feita por script sobre o arquivo anexado.
+5. A coleção Bruno não pôde ser enviada em `.zip`; a IA reconstruiu as requisições por inferência a partir do nome dos arquivos e do contrato, e só a requisição colada pela dupla serviu de modelo.
+6. A IA listou o lint do OpenAPI e a abertura do Bruno como pendências e a dupla perguntou se eram necessários; eles não bloqueiam a 2.7, mas fazem parte do DoD da 2.6 (divergência abaixo).
+
+### Divergências registradas (briefing/professor × artefatos)
+
+- **DoD da 2.6 × estado real:** o briefing-mestre exige "OpenAPI válido e coleção Bruno executável". Não há lint do OpenAPI nem execução da coleção. Registrado como pendência antes da 2.8.
+- **ADR-002 item 4 × `src/shared/`:** o item diz que o pacote de alérgenos é a única dependência comum; a 2.7 acrescenta `src/shared/` (tipo `Tx` e contrato `OperationApplier`) no servidor. Tratado por nota "Detalhamento (2.7)", sem substituir o ADR.
+- **`diagrama-classes.md` v1.0 × padrão:** `PortaoPublicacao` era classe; passa a função (R02).
+- **`sequencia-uc10.md` v1.0 × contrato:** a sequência validava "0 a 5 em passos de 0,5" e o contrato usa inteiro de 0 a 10. Explicitado na v1.1: a interface valida em meios-pontos e o contrato carrega `score` inteiro (item 7 do Lote 3).
+- **`atributos-qualidade.md`:** a linha de versão do cabeçalho está como instrução entre aspas. Correção editorial pendente.
+- **Briefing de passagem 2.7 × conversa:** os anexos "exatos" estavam no projeto, e só o briefing foi anexado à conversa.
+- **Divergências herdadas da 2.6** (RDC 26/2015 × 727/2022, RN08, UC12 FE2, exemplos de alérgenos, `[CONFIRMAR]` dos ADR-010 e ADR-012, "em preparo", nome do diário) seguem como registradas e vão no Lote 3 (issue #31).
+
+### Artefatos alterados (retroalimentação)
+
+| Artefato | Mudança | Motivo |
+|---|---|---|
+| `diagrama-classes.md` v1.0 → v1.1 | Inglês, `Tx`, `OperationApplier` em `shared`, `PublicationGate` como função, `UnlockRules` | Padrões T01, P01, R02 e decisão B; ADR-015 |
+| `sequencia-uc04/08/10/12.md` v1.0 → v1.1 | Inglês e `Tx` nas escritas entre módulos; `UnlockRules` no UC10 | ADR-015; T01 |
+| `openapi.yaml` v1.0.0-2.6 → v1.1.0-2.7 | Identificadores em inglês | ADR-015 (escopo B) |
+| Coleção Bruno | Regenerada em inglês | ADR-015 (escopo B) |
+| ADR-002 | Nota "Detalhamento (2.7)" | Fronteiras, `src/shared/`, `Tx` |
+| ADR-015 | Novo | Convenção de língua |
+
+Nenhum artefato da Fase 1 foi alterado diretamente. Nenhum ADR foi marcado como "Substituído". Os textos dos ADRs 007, 010, 011, 012 e 014 não foram relidos nesta etapa: se citarem rotas, campos ou nomes em português, o texto fica como histórico e o ADR-015 prevalece.
+
+### Riscos aceitos
+
+- R1 a R15 seguem como nas entradas anteriores. **R16** (revogação pode passar de 24 h até o app abrir com rede) e **R17** (tolerância de 60 s no refresh) foram confirmados pela dupla em 07/10/2026. R10 segue não verificado.
+- **R18 (proposto na 2.7, a confirmar):** a regra de desbloqueio existe em duas implementações (app e servidor) e pode divergir. Mitigação: suíte comum de vetores na CI.
+- **R19 (proposto na 2.7, a confirmar):** o lint de fronteiras não enxerga SQL em texto que consulte a tabela de outro módulo. Mitigação: item de checklist de PR e revisão da 2.8.
+- A criptografia continua sendo requisito, não risco.
+
+### Pendências para a próxima conversa (2.8)
+
+- Confirmar R18 e R19.
+- Aplicar e commitar os artefatos da 2.7 em `/docs/fase2/` e as notas "Detalhamento (2.7)" nos ADRs; abrir a issue #31 (Lote 3) com `issue-31-lote-3.md`.
+- Lint do OpenAPI (Redocly ou Spectral) e execução da coleção Bruno contra a API; conferir as hipóteses da coleção regenerada (receita publicada, fluxo assistido, negativos 02 e 03).
+- Itens do Lote 2 adiados para antes da 2.8: #1, #6, #7, #11, #12 e #13 (ler em `pendencias-lotes-2-e-3.md`).
+- R10 (licenças e termos das fontes) e os `[CONFIRMAR]` dos ADR-010 e ADR-012.
+- Briefing-mestre v1.4: nome do diário, língua do código e `padroes-de-projeto.md` como insumo da 2.8.
+- Itens não verificados: lint do OpenAPI, execução da coleção, lista vigente da RDC 727/2022, criptografia em repouso e backups do alvo, cold start, hospedagem das fotos, cota do Cloud Run, limite do console da Kimi, tokens reais, tamanho do índice leve, abertura offline com SQLCipher em 2 s, existência de US ou RNF de exclusão de conta, versões das ferramentas de lint e a regra `import/no-cycle` com o resolver TypeScript.
