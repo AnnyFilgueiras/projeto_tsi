@@ -41,6 +41,7 @@ classDiagram
     }
     class Ingrediente {
         nome
+        alergenos
     }
     class Culinaria {
         nome
@@ -117,10 +118,10 @@ Convenções do diagrama: atributos sem tipos e sem parênteses (nível conceitu
 | Usuario | Pessoa que descobre pratos, planeja a rotina e registra preparos | nome; preferências culinárias; frequência de lembretes; tipos de lembrete ativos | declara 0..* RestricaoAlimentar; possui 0..* Utensilio; mantém 0..* Ingrediente (despensa); recebe 0..* Sugestao; monta 0..* PlanoDeRotina; registra 0..* Avaliacao; conquista 0..* Badge |
 | RestricaoAlimentar | Condição declarada no perfil que filtra sugestões; dado sensível (LGPD, RNF06) | nome; descrição; alérgenos associados | declarada por 0..* Usuario |
 | Utensilio | Equipamento de cozinha (ex.: fogão, forno) | nome | possuído por 0..* Usuario; exigido por 0..* Receita |
-| Ingrediente | Item que compõe receitas, despensa e lista de compras | nome | usado em 0..* Receita; mantido por 0..* Usuario; consolidado em 0..* ListaDeCompras; pode substituir 0..* Ingrediente |
+| Ingrediente | Item que compõe receitas, despensa e lista de compras | nome; alergenos | usado em 0..* Receita; mantido por 0..* Usuario; consolidado em 0..* ListaDeCompras; pode substituir 0..* Ingrediente |
 | Culinaria | País ou região que agrupa pratos (ex.: japonesa, nordestina) | nome; continentes (multivalorado: América, África, Europa, Ásia, Oceania) | agrupa 0..* Prato |
 | Prato | Unidade da coleção e das cadeias de evolução | nome; imagem | pertence a 1 Culinaria; detalhado por 1 Receita; é evolução de 0..1 Prato; tem 0..* evoluções; referenciado por 0..* Sugestao; agendado em 0..* ItemDeRotina; avaliado em 0..* Avaliacao |
-| Receita | Instruções de preparo de um prato | tempo de preparo; dificuldade {fácil, média, difícil}; passo a passo numerado; alérgenos; estadoAlergenos {verificado, declarado_fonte, nao_verificado} fonte (RNF08) | detalha 1 Prato; usa 1..* Ingrediente; exige 0..* Utensilio |
+| Receita | Instruções de preparo de um prato | tempo de preparo; dificuldade {fácil, média, difícil}; passo a passo numerado; alérgenos; estadoAlergenos {verificado, declarado_fonte, nao_verificado}; fonte (RNF08) | detalha 1 Prato; usa 1..* Ingrediente; exige 0..* Utensilio |
 | Sugestao | Recomendação de prato apresentada ao usuário, com ciclo de vida | data/hora; situação {apresentada, candidata, descartada} | recebida por 1 Usuario; refere-se a 1 Prato |
 | PlanoDeRotina | Conjunto de pratos candidatos com datas, em um período | período {semana, quinzena}; data de início | montado por 1 Usuario; contém 1..* ItemDeRotina; gera 0..1 ListaDeCompras |
 | ItemDeRotina | Prato agendado em uma data dentro do plano | data de preparo; status {planejado, em preparo, concluído} | pertence a 1 PlanoDeRotina; agenda 1 Prato |

@@ -67,7 +67,7 @@ Fluxo principal:
 4. A cada avanço, o passo atual fica destacado.
 
 Fluxos alternativos/exceção:
-- FA1 Receita com alérgenos: sistema exibe alerta; alérgeno associado a restrição do usuário é destacado como incompatível (RN08, RN16).
+- FA1 Receita com alérgenos ou não verificado: sistema exibe o estado dos alérgenos (verificado, declarado pela fonte ou não verificado); se contiver alérgeno associado a restrição do usuário ou estiver com estado "não verificado", exibe o alerta de "compatibilidade não confirmada" (RN08, RN16).
 - FA2 Ingrediente faltante ou restrito: usuário aciona substituições (UC09).
 - FA3 Prato é evolução bloqueada: sistema indica qual prato base precisa ser avaliado (RN02).
 
@@ -120,8 +120,8 @@ Ator: Usuario | Origem: US09 | Classes: Usuario, RestricaoAlimentar, Receita
 Fluxo principal:
 1. Usuario abre o perfil e informa uma restrição alimentar.
 2. Sistema informa que se trata de dado sensível e solicita consentimento explícito (RN09).
-3. Com o consentimento, a restrição é salva e passa a filtrar as sugestões (RN08).
-4. Ao visualizar receita com alérgeno associado à restrição, Usuario vê o alerta de incompatibilidade (RN16).
+3. Com o consentimento, a restrição é salva, o sistema exibe o aviso fixo informando que apenas alérgenos possuem verificação automatizada e passa a filtrar as sugestões (RN08).
+4. Ao visualizar receita com alérgeno associado à restrição ou com estado "não verificado", Usuario vê o alerta de "compatibilidade não confirmada" (RN16).
 
 Fluxos alternativos/exceção:
 - FA1 Consentimento negado: a restrição não é persistida (RN09).
@@ -133,11 +133,11 @@ Ator: Usuario | Origem: US10 | Classes: Usuario, Receita, Ingrediente, Restricao
 
 Fluxo principal:
 1. Ao visualizar uma receita (UC04), o sistema marca os ingredientes faltantes (ausentes da despensa) ou incompatíveis com restrições do perfil (RN08).
-2. Para cada ingrediente marcado, o sistema exibe os substitutos globais cadastrados (RN15).
+2. Para cada ingrediente marcado, o sistema exibe os substitutos globais cadastrados (RN15) cujos alérgenos não violam a restrição do usuário (RN15, RN22).
 3. Usuario decide adotar ou não a substituição no preparo.
 
 Fluxos alternativos/exceção:
-- FA1 Sem substituto cadastrado: sistema informa explicitamente, sem inventar uma troca (RN15).
+- FA1 Sem substituto seguro cadastrado: sistema informa explicitamente, sem inventar uma troca (RN15, RN22).
 
 ## UC10 — Registrar avaliação de prato
 
@@ -179,7 +179,13 @@ Fluxo principal:
 
 Fluxos alternativos/exceção:
 - FA1 Ingrediente, utensílio ou culinária inexistentes: Curador cadastra no ato (uma culinária pode existir temporariamente sem pratos — D11c).
+- FA2 Importação assistida por IA:
+    1. Curador fornece o texto da receita (em qualquer idioma).
+    2. Agente de IA traduz o texto para PT-BR, extrai os campos da receita, mapeia os ingredientes para os que já existem no catálogo, propõe alérgenos e substitutos.
+    3. Curador revisa, ajusta e aprova as propostas da IA (RN17, RNF08).
+    4. Sistema valida os campos obrigatórios e publica no catálogo.
 - FE1 Fonte ausente: sistema bloqueia a publicação (RN17, RNF08).
+- FE2 Indisponibilidade ou falha na API de IA: sistema notifica o curador e redireciona para o fluxo principal de importação manual.
 
 ## UC13 — Desbloquear evolução de prato
 

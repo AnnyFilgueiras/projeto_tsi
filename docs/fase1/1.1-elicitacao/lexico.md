@@ -29,3 +29,7 @@
 | **Curador** | Papel responsável por importar e manter o catálogo de receitas (fonte, dificuldade, alérgenos, cadeias de evolução). |
 | **Catálogo** | Conjunto curado de receitas importadas de plataformas públicas; usuários não submetem receitas na v1. |
 | **Ranking** | Comparação de pontos entre amigos. **Descartado (Won't)** nesta versão: apenas 1 dos 5 entrevistados demonstrou interesse e a implementação cuidadosa do social foi despriorizada. |
+| **Estado de alérgenos** | Nível de verificação dos alérgenos de uma receita ou ingrediente (verificado, declarado pela fonte, não verificado); lista vazia significa não verificado. |
+| **Em preparo** | Estado temporário de um prato ou item de rotina quando aberto no passo a passo pelo usuário. |
+| **Proposta de IA** | Sugestão gerada por agente de IA na importação (tradução para PT-BR, extração de campos, alérgenos e substitutos), que aguarda revisão e aprovação do curador. |
+| **Agente de IA** | Componente assistivo via API que auxilia o curador na importação de receitas, sem autonomia para publicar no catálogo sem aprovação humana. |

@@ -209,19 +209,28 @@ Resultado: [x] Passa  [ ] Falha → motivo:
 ```
 CT19 — Origem: US10 (critério 1)
 Dado que a receita de "Bechamel" usa leite, que o leite é incompatível com a
-minha restrição (lactose) e que "leite → leite de aveia" está cadastrado
-como substituição global,
+minha restrição (lactose) e que "leite → leite de aveia" está cadastrado com
+alérgenos verificados sem lactose,
 quando visualizo a receita,
-então vejo "leite de aveia" como substituição sugerida para o leite (RN15).
+então vejo "leite de aveia" como substituição segura sugerida para o leite (RN15).
 Resultado: [x] Passa  [ ] Falha → motivo:
 ```
 
 ```
 CT20 — Origem: US10 (critério 2)
-Dado que o ingrediente "queijo pecorino" não tem substituto cadastrado,
-quando o visualizo marcado como faltante,
-então o sistema informa explicitamente "sem substituto cadastrado" e não
+Dado que o ingrediente "queijo pecorino" não tem substituto cadastrado ou
+todos os cadastrados contêm alérgenos da minha restrição (ou estão "não verificados"),
+quando o visualizo marcado como restrito ou faltante,
+então o sistema informa explicitamente "sem substituto seguro cadastrado" e não
 sugere nenhuma troca (RN15).
+Resultado: [x] Passa  [ ] Falha → motivo:
+```
+
+```
+CT29 — Origem: US10, RN22
+Dado que um substituto cadastrado possui estado de alérgenos "não verificado",
+quando um usuário com restrição de alérgeno visualiza a receita que exige o ingrediente base,
+então o substituto não verificado é ocultado da lista de sugestões de troca (RN22).
 Resultado: [x] Passa  [ ] Falha → motivo:
 ```
 
@@ -277,11 +286,11 @@ Resultado: [x] Passa  [ ] Falha → motivo:
 
 ```
 CT26 — Origem: US18 (critério 1, texto corrigido)
-Dado que importo uma receita de plataforma pública,
+Dado que importo uma receita de plataforma pública internacional (com ou sem IA),
 quando a cadastro,
 então registro fonte, ingredientes, utensílios, dificuldade, tempo, passo a
-passo e alérgenos (RNF08); e, se a fonte estiver ausente, o sistema bloqueia
-a publicação (RN17, UC12-FE1).
+passo e alérgenos (RNF08); e, se o texto foi traduzido/adaptado por IA, o sistema
+mantém a fonte pública original e sinaliza a tradução (RN17, RNF08).
 Resultado: [x] Passa  [ ] Falha → motivo:
 ```
 
@@ -291,6 +300,22 @@ Dado que o prato "Cuscuz recheado" faz parte de uma cadeia como evolução,
 quando o cadastro,
 então indico exatamente um prato base ("Cuscuz" — RN18); e um prato sem base
 indicada permanece como raiz da cadeia.
+Resultado: [x] Passa  [ ] Falha → motivo:
+```
+
+```
+CT28 — Origem: US18, RN21
+Dado que o agente de IA gerou propostas de tradução, alérgenos e substitutos para uma receita,
+quando o curador visualiza as propostas sem clicar em aprovar,
+então o sistema impede a publicação no catálogo até a confirmação explícita (RN21, RNF11).
+Resultado: [x] Passa  [ ] Falha → motivo:
+```
+
+```
+CT30 — Origem: RNF11
+Dado que o curador tenta importar uma receita com o apoio do agente de IA e a API do provedor falha ou fica indisponível,
+quando ocorre a falha,
+então o sistema exibe um aviso de indisponibilidade e disponibiliza a interface de importação manual completa (UC12-FE2, RNF11).
 Resultado: [x] Passa  [ ] Falha → motivo:
 ```
 

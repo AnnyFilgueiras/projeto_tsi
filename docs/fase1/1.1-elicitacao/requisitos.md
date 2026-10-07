@@ -38,7 +38,7 @@
 | RF15 | O sistema deve conceder badges ao atingir marcos definidos (ex.: pratos de N países distintos) | Escopo, C, R |
 | ~~RF16~~ | ~~O sistema deve exibir um ranking de pontos entre o usuário e seus amigos~~ — **DESCARTADO (Won't):** apenas 1 dos 5 entrevistados demonstrou interesse; social despriorizado pela dupla | Escopo, R |
 | RF17 | O sistema deve permitir sugerir um prato a um amigo | Escopo, D1, C, R |
-| RF18 | O sistema deve permitir ao curador importar e manter o catálogo de receitas, incluindo dificuldade, estado dos alérgenos (verificado, declarado pela fonte, não verificado) e cadeias de evolução | Decisão de fonte de conteúdo |
+| RF18 | O sistema deve permitir ao curador importar e manter o catálogo de receitas (com apoio opcional de agente de IA), incluindo dificuldade, estado dos alérgenos (verificado, declarado pela fonte, não verificado) e cadeias de evolução | Decisão de fonte de conteúdo, Atributos de Qualidade A09 |
 | RF19 | O sistema deve informar os utensílios necessários em cada receita e sinalizar, nas sugestões, os pratos inviáveis pelos utensílios que o usuário declarou possuir | D1, R |
 
 ## Requisitos não funcionais
@@ -50,11 +50,12 @@
 | RNF03 | O sistema deve responder a uma solicitação de sugestão de pratos em até 2,5 segundos | Derivado (decisão rápida, D2) |
 | RNF04 | O sistema deve permitir iniciar qualquer fluxo principal (sugestões, planejamento, registro de avaliação) em até 2 toques a partir da tela inicial | C, D1, D2 |
 | RNF05 | O sistema deve permitir consultar offline as receitas planejadas, em preparo (abertas no passo a passo) e preparadas (com avaliação salva), e salvar a avaliação sem conexão; ao restabelecer a conexão, a sincronização deve ocorrer sem perda de avaliações nem duplicação de preparos | C (cozinha/bancada) |
-| RNF06 | O sistema deve tratar dados de restrições alimentares como dados sensíveis, com consentimento explícito, conforme a LGPD, e garantindo proteção criptográfica em trânsito (TLS) e em repouso (no dispositivo, servidor, fila de sincronização e backups) | C, D2 |
+| RNF06 | O sistema deve tratar dados de restrições alimentares como dados sensíveis, com consentimento explícito, conforme a LGPD, e garantindo proteção criptográfica em trânsito (TLS) e em repouso (no dispositivo, servidor, fila de sincronização e backups). Nenhum dado de usuário é enviado a provedores de IA | C, D2, Estilo Arquitetural P7 |
 | RNF07 | O sistema deve permitir configurar frequência e tipos de notificação, com limite padrão de 1 notificação por evento (compra ou preparo) e no máximo 2 por dia | D2, BM-Duolingo (anti-req.) |
-| RNF08 | O sistema deve exibir a atribuição da fonte pública de cada receita importada | Stakeholder externo |
+| RNF08 | O sistema deve exibir a atribuição da fonte pública de cada receita importada; para receitas traduzidas ou adaptadas por IA, deve manter a fonte e indicar a tradução/adaptação | Stakeholder externo, Atributos de Qualidade A09 |
 | RNF09 | O sistema não deve punir o usuário por inatividade (sem perda de pontos, sequências ou progresso) | BM-Duolingo (anti-req.) |
 | RNF10 | O registro de avaliação deve ter apenas a nota como campo obrigatório; relato e alterações são opcionais | R, walkthrough da dupla |
+| RNF11 | O sistema deve oferecer ao curador apoio (opcional) de um agente de IA, via API, na importação do catálogo (tradução para português do Brasil, extração de campos, estado dos alérgenos e substituições); toda proposta da IA exige aprovação do curador antes da publicação. A importação manual permanece disponível | Decisão de Arquitetura, Atributos de Qualidade A09 |
 
 ## Anti-requisitos (benchmarking dirigido)
 
