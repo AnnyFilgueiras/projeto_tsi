@@ -105,7 +105,7 @@ R8, R9, R10.
   `proposto` → aprovado).
 - O portão de publicação bloqueia receita sem fonte, sem estado dos
   alérgenos e com invariante violada.
-- O papel de curador só é obtido pelo seed (ADR-007).
+- O papel de curador só é obtido por seed ou comando da dupla (ADR-007, decisão 6).
 - Definir o vocabulário controlado de alérgenos e o critério de "verificado".
 - Conferir termos de uso das fontes escolhidas para o seed.
 
