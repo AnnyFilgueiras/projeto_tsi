@@ -306,6 +306,6 @@ Detalhada no artefato `issue-retroalimentacao-fase1.md` (v1.3), que é a fonte d
 | R10 | Direitos autorais e termos de uso das fontes ao traduzir e publicar receitas | Atribuição; conferência dos termos de cada fonte; preferir fontes com licença aberta (a verificar) |
 | R11 | Divergência das fontes sobre uso de dados da API da Kimi para treinamento | Enviar só texto de receita; nunca dado de usuário; revisar termos antes de ampliar o uso |
 | R12 | Conta anônima sem e-mail e sem recuperação de senha é irrecuperável se o aparelho for perdido ou a sessão encerrada; vale também a regra de um aparelho por conta (ADR-007, ADR-008) | A interface incentiva vincular e-mail; sincronização assim que houver rede; aviso claro ao criar a conta; revisão se a perda de conta virar queixa recorrente |
-| R13 | Refresh token sem rotação: o roubo de um token dá acesso até a revogação ou o fim da validade (ADR-007) | Token guardado em `expo-secure-store`; validade máxima; revogação no servidor; revogação do aparelho anterior no login com e-mail; revisar a rotação se houver implantação real |
+| R13 | Roubo do refresh token dá acesso até a rotação, a revogação ou o fim da validade; com rotação, uma resposta de renovação perdida pode encerrar a sessão legítima (hipótese) (ADR-007)". Na coluna "Mitigação": "Token em expo-secure-store; validade máxima; revogação no servidor; revogação do aparelho anterior no login com e-mail; teste de rotação (ADR-007) |
 
 A criptografia da restrição alimentar continua sendo requisito, e não risco.

@@ -4,7 +4,7 @@
 
 > Destino: `/docs/fase2/atributos-qualidade.md`.
 
-> Versão 1.2 — 06/10/2026 — status: priorização aprovada pela dupla; medidas (H) são hipóteses. Alterações da v1.2: revogação e backups em A05; fotos em A04; saída da IA e imagem em A09; invariantes em A13; regra de notificação em A07 (retroalimentação da 2.3 e da 2.4).
+> "Versão 1.3 — 06/10/2026" e acrescentar no fim das alterações: "Alterações da v1.3: 'em preparo' (§2) e §7 atualizados (retroalimentação da 2.5)."
 
 > Insumos: `requisitos.md`, `backlog.md`, `regras-de-negocio.md`, `resumo-1.4-fechamento.md`, `briefing-fase2` (seções 3, 5, 7 e 8), `diario-de-bordo-fase2.md`.
 
@@ -25,7 +25,7 @@
 - **Definição vigente (RN01):** um prato está concluído quando existe ao menos uma avaliação salva pelo usuário para ele. Histórico, coleção, badges e desbloqueio de evolução usam só pratos concluídos.
 - **Decisão da dupla:** a regra é mantida. Nota 0 é válida (RN05) e também conclui o prato.
 - **Efeito na lista offline:** o conjunto "preparadas" é o conjunto de pratos com avaliação salva.
-- **"Em preparo":** prato que o usuário abriu no passo a passo (definição da dupla). Não existe como estado no modelo conceitual da Fase 1 (pendência de retroalimentação, seção 7).
+- **"Em preparo":** prato que o usuário abriu no passo a passo (definição da dupla). Existe no modelo conceitual da Fase 1 como status de ItemDeRotina {planejado, em preparo, concluído}; o caso de um prato aberto sem item de rotina fica para a 2.6.
 - **Ambiguidade textual:** US12-c1 ("Dado que concluí um prato, quando registro a avaliação") e US13 ("concluí e avaliei") sugerem um passo anterior à avaliação. A lógica da RN01 não muda; a redação será corrigida via issue.
 - **Consequência de qualidade:** como a avaliação é o gatilho de coleção, evolução e badges, ela precisa ser salva sem rede (A04) e sem perda (A08).
 
@@ -75,7 +75,7 @@ Formato: Estímulo, Fonte do estímulo, Ambiente, Resposta, Medida.
 - **Ambiente:** offline; as receitas planejadas foram baixadas antes, com conexão.
 - **Resposta:** a receita abre completa (ingredientes, passo a passo, utensílios, alérgenos, foto) com a data da última atualização dos alérgenos. Salvar avaliação conclui localmente, e evolução e badge são desbloqueados localmente. A sincronização inicia na reconexão. Candidatas não ficam disponíveis offline (decisão da dupla).
 - **Medida (H):** abertura em até 2 s; salvar avaliação e calcular desbloqueios em até 1 s; início da sincronização em até 60 s após a reconexão; tamanho do conjunto baixado do seed, com fotos, a medir em rede 4G simulada.
-- **Rastreio:** RNF05 (reescrita proposta), US05, US12, US15, US16, RN01, RN02, RN03.
+- **Rastreio:** RNF05 (corrigido), US05, US12, US15, US16, RN01, RN02, RN03.
 
 
 ### A09 — Manutenibilidade e qualidade do catálogo (Alto)
@@ -161,7 +161,7 @@ Formato: Estímulo, Fonte do estímulo, Ambiente, Resposta, Medida.
 | US09 | Registrar que diabetes e outras condições não são verificadas na v1 |
 | US12-c1, US13 | Corrigir a redação circular de "concluído" |
 | regras-de-negocio.md | Atualizar o status das RNs ("a validar na 1.4") |
-| modelo-conceitual.md | Conferir se comporta o estado de alérgenos e o conceito de "em preparo" (não verificado nesta etapa) |
+| modelo-conceitual.md | Conferido na 2.5: estado de alérgenos presente; "em preparo" existe como status de ItemDeRotina |
 | RNF06    | Explicitar a proteção por criptografia da restrição alimentar (trânsito e repouso, no dispositivo e no servidor) |
 | Documentos da Fase 1 | Itens da 2.3 e da 2.4 estão na issue de retroalimentação (v1.4) |
 
