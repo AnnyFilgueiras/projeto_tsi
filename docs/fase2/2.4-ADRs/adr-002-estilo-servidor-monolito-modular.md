@@ -98,3 +98,14 @@ R4, R5.
 - **Preferências de lembrete** ficam no módulo Perfil e Restrições (frequência e tipos de lembrete são atributos de `Usuario`).
 - **Definições de badge** ficam no módulo Progresso e Avaliação, carregadas por seed pela dupla.
 - **Apoio:** Cifra de Campos Sensíveis e Registro Técnico, na API; o Pacote de Alérgenos é compartilhado com o app (ADR-014).
+
+## Detalhamento (2.7)
+
+- **Mecanismo de verificação das fronteiras (pendência fechada):** `eslint-plugin-boundaries` (aviso no editor) mais `import/no-cycle`, rodando no `npm run lint` local e na CI gratuita. As regras S1 a S8 e a estrutura de pastas estão em `padroes-de-projeto.md`, seção 6. Pré-requisitos a conferir na instalação: ESLint 9 ou superior, parser e resolver TypeScript.
+- **Critério de pronto do mecanismo:** criar de propósito um import proibido (por exemplo, `routine` importando `catalog/internal`), ver o lint falhar e remover o import.
+- **Limitação declarada:** o lint não vê SQL em texto que consulte a tabela de outro módulo. Mitigação: item de checklist de PR e revisão da 2.8 (R19).
+- **Item 3 da decisão (nomes dos módulos):** na implementação, as pastas são `modules/{catalog,profile,routine,progress,importer}` e `cross-cutting/{identity,sync,suggestion-search}` (ADR-015).
+- **Item 4 da decisão (dependência comum):** o pacote de alérgenos continua sendo a única dependência comum entre servidor e app. Dentro do servidor passa a existir `src/shared/`, que guarda só o tipo opaco `Tx` e o contrato `OperationApplier`. Isso não substitui o ADR.
+- **Convenção `Tx`:** toda interface pública de módulo que escreve recebe `tx: Tx`. Quem abre a transação a passa adiante. Substitui um Unit of Work formal.
+- **Registro de aplicadores:** os aplicadores de operação ficam no módulo dono do tipo e são registrados na raiz de composição (`src/app.ts`).
+- **Quando revisitar:** o gatilho existente se mantém ("fronteiras violadas repetidamente"); se o lint não se sustentar, reavaliar NestJS.
