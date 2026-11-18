@@ -10,20 +10,69 @@ Repositório do trabalho da disciplina **Tópicos em Sistemas de Informação** 
 
 - **Dupla:** Anny Filgueiras ([@AnnyFilgueiras](https://github.com/AnnyFilgueiras)) e Gabryel Souza ([@gabryelsouzz](https://github.com/gabryelsouzz))
 - **Professor(a):** Patrick Henrique
-- **Fase atual:** Fase 1 — Engenharia de Requisitos
+- **Fase atual:** Fase 2 — Projeto Arquitetural (Sub-etapas 2.1 a 2.7 concluídas; preparação de Governança, Gamificação e MVP)
 
-## Status da Fase 1
+---
+
+## Governança Multi-Agente e Continuidade
+
+Este repositório é estruturado para desenvolvimento colaborativo entre a dupla e múltiplos agentes de IA (via CLI e Web), garantindo rastreabilidade e passagem de contexto sem perda de histórico:
+
+- **[`AGENTS.md`](./AGENTS.md):** Guia mestre e ponto de entrada obrigatório para qualquer agente de IA (mapa do repositório, regras de precedência, convenção bilíngue do [ADR-015](./docs/fase2/adr/adr-015-idioma-dos-identificadores.md) e matriz de leitura).
+- **[`STATE.md`](./STATE.md):** Painel vivo de progresso do projeto, diretrizes estratégicas de MVP/Deploy/Gamificação, quadro de Issues ativas e *Handoff* entre sessões.
+- **[`docs/playbooks/`](./docs/playbooks/):** Manuais operacionais objetivos para tarefas recorrentes:
+  - [01 — Ciclo de Sessão, GitHub Issues e Diário de Bordo](./docs/playbooks/01-sessao-issues-e-diario.md)
+  - [02 — Evolução Arquitetural, ADRs e Retroalimentação](./docs/playbooks/02-arquitetura-adrs-e-retroalimentacao.md)
+  - [03 — Qualidade, Fronteiras Modulares, Contratos e TDD](./docs/playbooks/03-qualidade-fronteiras-e-contratos.md)
+
+---
+
+## Status e Documentação da Fase 2 — Projeto Arquitetural
+
+| Sub-etapa | Artefato principal | Status |
+|---|---|---|
+| 2.1 Requisitos de Qualidade | [Cenários de qualidade priorizados (A01–A14)](./docs/fase2/atributos-qualidade.md) | ✅ Concluída |
+| 2.2 Estilo Arquitetural | [Offline-first parcial + Monólito Modular](./docs/fase2/estilo-arquitetural.md) | ✅ Concluída |
+| 2.3 Propostas Arquiteturais | [Comparação de propostas de MVP e escolha da P1](./docs/fase2/propostas-arquiteturais.md) | ✅ Concluída |
+| 2.4 Decisões Arquiteturais (ADRs) | [ADR-001 a ADR-015](./docs/fase2/adr/) | ✅ Concluída |
+| 2.5 Modelo C4 | [Contexto](./docs/fase2/c4-contexto.md), [Containers e Implantação](./docs/fase2/c4-containers.md), [Componentes](./docs/fase2/c4-componentes.md) | ✅ Concluída |
+| 2.6 Classes, Fluxos e Contratos | [Classes](./docs/fase2/diagrama-classes.md), Sequências ([UC04](./docs/fase2/sequencia-uc04.md), [UC08](./docs/fase2/sequencia-uc08.md), [UC10](./docs/fase2/sequencia-uc10.md), [UC12](./docs/fase2/sequencia-uc12.md)), [OpenAPI 3.1](./docs/fase2/openapi.yaml), [Glossário](./docs/fase2/glossario-identificadores.md) e [Coleção Bruno](./docs/fase2/bruno/panelada-curadoria/) | ✅ Concluída |
+| 2.7 Padrões de Projeto e Fronteiras | [Padrões justificados, regras `eslint-plugin-boundaries` e TDD](./docs/fase2/padroes-de-projeto.md) | ✅ Concluída |
+| 2.8 Revisão Arquitetural | Revisão pesada ("advogado do diabo") | ⏳ Pendente |
+| 2.9 Fechamento da Fase 2 | Checklist final e resumo para a Fase 3 | ⏳ Pendente |
+
+- **Documento-mestre da Fase 2:** [Briefing da Fase 2](./docs/fase2/briefing-fase2.md)
+- **Diário de Bordo da Fase 2:** [Registro incremental do processo com IA na Fase 2](./docs/fase2/diario_de_bordo-fase2.md)
+
+### Índice de ADRs (`docs/fase2/adr/`)
+- [ADR-001 — Estilo do sistema: offline-first com sincronização](./docs/fase2/adr/adr-001-estilo-sistema-offline-first.md)
+- [ADR-002 — Estilo do servidor: monólito modular](./docs/fase2/adr/adr-002-estilo-servidor-monolito-modular.md)
+- [ADR-003 — Stack móvel: React Native com Expo (Android)](./docs/fase2/adr/adr-003-stack-movel-react-native-android.md)
+- [ADR-004 — Demonstração em Docker Compose, arquitetura-alvo e deploy cloud](./docs/fase2/adr/adr-004-demonstracao-docker-e-alvo.md)
+- [ADR-005 — Armazenamento local cifrado (SQLCipher) e fila](./docs/fase2/adr/adr-005-armazenamento-local-e-fila.md)
+- [ADR-006 — Criptografia da restrição alimentar (LGPD)](./docs/fase2/adr/adr-006-criptografia-restricao-alimentar.md)
+- [ADR-007 — Autenticação: conta anônima, e-mail opcional e JWT/Refresh](./docs/fase2/adr/adr-007-autenticacao.md)
+- [ADR-008 — Estratégia offline, sincronização idempotente e estágios do MVP](./docs/fase2/adr/adr-008-estrategia-offline-e-sincronizacao.md)
+- [ADR-009 — Notificações locais agendadas no aparelho](./docs/fase2/adr/adr-009-notificacoes-locais.md)
+- [ADR-010 — Catálogo curado, fluxo manual e importação](./docs/fase2/adr/adr-010-catalogo-e-importacao.md)
+- [ADR-011 — Agente de IA na importação assistida (Kimi K3)](./docs/fase2/adr/adr-011-agente-ia-importacao.md)
+- [ADR-012 — Fotos das receitas: licença aberta, atribuição TASL e armazenamento](./docs/fase2/adr/adr-012-fotos.md)
+- [ADR-013 — Política de custo zero e ferramentas de estudante](./docs/fase2/adr/adr-013-custo-e-ferramentas-estudante.md)
+- [ADR-014 — Regra de alérgenos em pacote TypeScript compartilhado](./docs/fase2/adr/adr-014-regra-alergenos-compartilhada.md)
+- [ADR-015 — Idioma dos identificadores, código e artefatos](./docs/fase2/adr/adr-015-idioma-dos-identificadores.md)
+
+---
+
+## Status e Documentação da Fase 1 — Engenharia de Requisitos (Baseline `backlog-validado-v1.0`)
 
 | Sub-etapa | Artefato principal | Status |
 |---|---|---|
 | 1.1 Elicitação | Léxico, personas, RF/RNF, backlog MoSCoW | ✅ Concluída |
 | 1.2 Análise | Modelo conceitual (UML/Mermaid), casos de uso, regras de negócio | ✅ Concluída |
-| 1.3 Documentação | Este repositório + documento de requisitos consolidado | ✅ Concluída |
-| 1.4 Validação | Checklist de qualidade, matriz de rastreabilidade, ata de revisão | ✅ Concluída |
+| 1.3 Documentação | Documento de requisitos consolidado | ✅ Concluída |
+| 1.4 Validação | Casos de teste, matriz de rastreabilidade, ata de revisão, resumo de fechamento | ✅ Concluída |
 
-## Documentação da Fase 1
-
-**Leitura recomendada:** o [Documento de Requisitos consolidado](./docs/fase1/1.3-documentacao/documento-de-requisitos.md) amarra, em texto único, visão, personas, requisitos, backlog, modelo conceitual, casos de uso, regras de negócio e rastreabilidade.
+**Leitura recomendada da Fase 1:** o [Documento de Requisitos consolidado](./docs/fase1/1.3-documentacao/documento-de-requisitos.md) amarra visão, personas, requisitos, backlog, modelo conceitual, casos de uso, regras de negócio e rastreabilidade.
 
 ### 1.1 — Elicitação
 - [Léxico do domínio](./docs/fase1/1.1-elicitacao/lexico.md)
@@ -34,34 +83,30 @@ Repositório do trabalho da disciplina **Tópicos em Sistemas de Informação** 
 ### 1.2 — Análise
 - [Modelo conceitual do domínio (diagrama de classes UML em Mermaid)](./docs/fase1/1.2-analise/modelo-conceitual.md)
 - [Casos de uso (UC01–UC13)](./docs/fase1/1.2-analise/casos-de-uso.md)
-- [Regras de negócio (RN01–RN20)](./docs/fase1/1.2-analise/regras-de-negocio.md)
+- [Regras de negócio (RN01–RN22)](./docs/fase1/1.2-analise/regras-de-negocio.md)
 
 ### 1.3 — Documentação
 - [Documento de requisitos consolidado](./docs/fase1/1.3-documentacao/documento-de-requisitos.md)
 
 ### 1.4 — Validação
-- Em produção (checklist de qualidade, matriz de rastreabilidade e ata de revisão serão publicados aqui).
+- [Casos de teste (CT01–CT30)](./docs/fase1/1.4-validacao/casos-de-teste.md)
+- [Matriz de rastreabilidade](./docs/fase1/1.4-validacao/matriz-rastreabilidade.md)
+- [Ata de revisão](./docs/fase1/1.4-validacao/ata-revisao.md)
+- [Resumo de fechamento da 1.4](./docs/fase1/1.4-validacao/resumo-1.4-fechamento.md)
+- [Diário de bordo da Fase 1](./docs/fase1/diario_de_bordo-fase1.md)
 
-## Gestão do backlog
+---
 
-- **Issues:** uma issue por história de usuário (US01–US18), cada uma com história, critérios de aceite em Given/When/Then, origem (RF/UC), labels de prioridade (`must`, `should`, `could`) e de fase (`elicitacao`, `analise`, `validacao`).
-- **Milestone:** `Fase 1 — Engenharia de Requisitos`.
-- **Kanban (Projects):** [quadro do projeto](https://github.com/users/AnnyFilgueiras/projects/1) com as colunas `Backlog | Em refinamento | Validado` (movimentação ocorre na sub-etapa 1.4).
+## Estrutura do Repositório
 
-## Estrutura do repositório
-
+```text
+/
+├── AGENTS.md                        Guia mestre para agentes de IA (ponto de entrada)
+├── CLAUDE.md                        Ponteiro de inicialização para agentes CLI
+├── STATE.md                         Painel vivo de progresso, issues, decisões e handoff
+├── README.md                        Este arquivo
+└── docs/
+    ├── playbooks/                   Manuais operacionais para tarefas recorrentes dos agentes
+    ├── fase1/                       Artefatos da Fase 1 (1.1 a 1.4, assets e diário de bordo)
+    └── fase2/                       Artefatos da Fase 2 (2.1 a 2.7, adr/, bruno/ e diário de bordo)
 ```
-/docs
-  /fase1
-    /1.1-elicitacao      lexico.md, personas.md, requisitos.md, backlog.md
-    /1.2-analise         modelo-conceitual.md, casos-de-uso.md, regras-de-negocio.md
-    /1.3-documentacao    documento-de-requisitos.md
-    /1.4-validacao       checklist.md, matriz-rastreabilidade.md, ata-revisao.md (em produção)
-  diario-de-bordo.md     registro do processo, atualizado a cada sub-etapa
-/assets                  PNG/SVG dos diagramas (insumo do slide final)
-README.md                este arquivo
-```
-
-## Diário de bordo
-
-O [diário de bordo](./docs/diario-de-bordo.md) registra, a cada sub-etapa, o papel da IA generativa, as técnicas aplicadas, os prompts-chave, as decisões tomadas, as iterações e as pendências. Ele é a evidência do processo de geração de requisitos com IA — e o insumo do slide final da fase.
