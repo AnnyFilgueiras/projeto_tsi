@@ -45,7 +45,7 @@ sequenceDiagram
 - O `opId` é gerado uma vez e é o `id` do `Rating` e da operação.
 - A interface valida 0 a 5 em passos de 0,5; no contrato e no banco, `score` é um inteiro de 0 a 10 (RN05).
 - Repetir um prato gera novo `opId`, sem sobrescrever avaliações anteriores (FA1, RN06). Evolução já desbloqueada não gera novo desbloqueio (RN02).
-- `UnlockCalculator` é pura e trata os cinco tipos de marco por `switch` com checagem de exaustividade (R03).
+- `UnlockCalculator` é pura e trata os oito tipos de marco da RN03 (a–h, ADR-016) por `switch` com checagem de exaustividade (R03).
 - Nada aqui usa rede. Medida (H): salvar e desbloquear em até 1 s (A04).
 
 ## 2. Sincronizar

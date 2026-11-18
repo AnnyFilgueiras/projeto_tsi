@@ -103,13 +103,13 @@ Um padrão só entra se tiver (1) um problema concreto do projeto, (2) as classe
 |---|---|---|---|---|
 | R01 | Unit of Work formal | Rastrear mudanças e confirmar em bloco é exagero para duas transações conhecidas | T01 (`Tx` explícito) | Escritas envolverem mais de três módulos |
 | R02 | Lista de regras no `PublicationGate` (`PortaoPublicacao`) | O requisito é devolver **todas** as violações, e quatro verificações atendem isso. Uma interface de regra não pagaria o custo. | Função com helpers privados, um por verificação, sem interface nem classe | Mais de seis regras |
-| R03 | Calculadora de desbloqueio por tipo de marco | Os cinco tipos da RN03 são fixos, carregados por seed pela dupla | `switch` sobre união discriminada com checagem `never` (a compilação falha se surgir um sexto tipo) | Sexto tipo de marco |
+| R03 | Calculadora de desbloqueio por tipo de marco | Os oito tipos da RN03 (a–h, ADR-016) são fixos, carregados por seed pela dupla | `switch` sobre união discriminada com checagem `never` (a compilação falha se surgir um tipo não tratado) | Mais de dez tipos de marco |
 
-### Regra de desbloqueio nos dois lados e Ponto de Extensão para Gamificação (Opção 2A)
+### Regra de desbloqueio nos dois lados e Aplicação do Framework Conceitual de Gamificação (Opção 2A / ADR-016)
 
 O app calcula o desbloqueio localmente e o servidor o recalcula (só acrescenta, RN04). Decisão da dupla (opção B): **duas implementações** (`UnlockCalculator` no app, `UnlockRules` no módulo `progress` do servidor), com **uma suíte comum de vetores** em arquivo JSON usado só nos testes, no mesmo modelo dos vetores do Pacote de Alérgenos (ADR-014). Não há pacote compartilhado novo. Risco: as duas implementações podem divergir se um vetor não for atualizado; a CI roda a suíte nos dois lados.
 
-- **Preparação para o Framework Conceitual de Gamificação (6D / Octalysis — 18/11/2026):** O requisito acadêmico de aplicar um framework metodológico de gamificação (como Octalysis ou 6D) atuará sobre as regras de negócio e definições declarativas de marcos (`MilestoneDefinition` / `BadgeDefinition`). Tecnicamente, `UnlockCalculator` e `UnlockRules` constituem a fronteira única de gamificação do sistema: novos tipos de marcos, loops de progresso ou conquistas derivados do framework conceitual ficam isolados no módulo `progress` e na suíte de vetores JSON, cumprindo `A12` (modificabilidade restrita a um módulo).
+- **Aplicação do Framework Conceitual de Gamificação (6D + Octalysis — 18/11/2026, ADR-016 e `framework-gamificacao.md`):** A modelagem metodológica híbrida (6D de Werbach & Hunter + Octalysis de Yu-kai Chou) expandiu declarativamente a `RN03` de 5 para 8 tipos de marco (`dish`, `cuisine`, `n_cuisines`, `all_continents`, `set`, `total_dishes`, `evolution_level`, `adaptation_count`) sem criar novas tabelas. Tecnicamente, `UnlockCalculator` e `UnlockRules` constituem a fronteira única de gamificação do sistema: os 8 tipos de marcos, loops de progresso e conquistas ficam isolados no módulo `progress` e na suíte de vetores JSON, cumprindo `A12` (modificabilidade restrita a um módulo).
 
 ### 5.1 Varredura do catálogo de padrões
 
@@ -117,7 +117,7 @@ Na v1.0 avaliei os seis candidatos do briefing e quatro que surgiram na análise
 
 | Padrão | Onde poderia entrar | Decisão | Motivo |
 |---|---|---|---|
-| Strategy | Aplicadores de operação, provedores de IA, chave, fonte de receita, calculadora de marco | **Adotado** em P01, P02b, P02c e P02e. Rejeitado para a calculadora (R03). | Há variação real em P01 e P02. Na calculadora os cinco tipos são fixos. |
+| Strategy | Aplicadores de operação, provedores de IA, chave, fonte de receita, calculadora de marco | **Adotado** em P01, P02b, P02c e P02e. Rejeitado para a calculadora (R03). | Há variação real em P01 e P02. Na calculadora os oito tipos (RN03 a–h, ADR-016) são fixos. |
 | Adapter | Cada porta de P02 | **Adotado** (P02a a P02e) | Isola SQLCipher, Kimi, Secret Manager, notificações e rede |
 | Command | `QueuedOperation`: operação persistida como dado (tipo e carga), executada depois pelo aplicador | **Já presente**, sem classe nova | A fila e o registro de P01 formam Command mais manipulador. Só ganha nome. |
 | Singleton | `LocalDatabase`, `HttpClient`, chave, instância do Fastify | **Não adotado** | Estado global e dependência escondida atrapalham o teste. A instância única vem da raiz de composição, que cria uma vez e injeta (regra A8). |

@@ -2569,7 +2569,40 @@ components:
         - type
         - cuisineIds
         additionalProperties: false
-      description: Marco verificável do badge (RN03 a-e). Definido por seed da dupla.
+      - type: object
+        properties:
+          type:
+            const: total_dishes
+          quantity:
+            type: integer
+            minimum: 1
+        required:
+        - type
+        - quantity
+        additionalProperties: false
+      - type: object
+        properties:
+          type:
+            const: evolution_level
+          minLevel:
+            type: integer
+            minimum: 2
+        required:
+        - type
+        - minLevel
+        additionalProperties: false
+      - type: object
+        properties:
+          type:
+            const: adaptation_count
+          quantity:
+            type: integer
+            minimum: 1
+        required:
+        - type
+        - quantity
+        additionalProperties: false
+      description: Marco verificável do badge (RN03 a-h, ADR-016). Definido por seed da dupla.
     BadgeDefinition:
       type: object
       properties:

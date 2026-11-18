@@ -3,7 +3,7 @@
 > Fase 1.2 — Análise. IDs estáveis (RN##); toda RN é rastreável a US/RF.
 > Destino no repositório: `/docs/fase1/1.2-analise/regras-de-negocio.md`.
 
-## Fundamentos da gamificação
+## Fundamentos da gamificação (6D Framework + Octalysis — ADR-016)
 
 RN01 — Um prato é considerado concluído por um usuário somente quando existe ao
 menos uma avaliação salva por ele para esse prato. Histórico, coleção, badges e
@@ -16,14 +16,24 @@ prato base precisa ser avaliado. Avaliações adicionais do mesmo prato base nã
 geram novo desbloqueio.
 Origem: US15; RF14 | Status: validado
 
-RN03 — O marco de um badge é verificável e assume uma das formas: (a) avaliação
-de um prato específico (ex.: Mini Chef — avaliar Ratatouille); (b) avaliação de
-ao menos um prato de uma culinária (ex.: Chegando na Arábia); (c) avaliação de
-pratos de N culinárias distintas (ex.: 10 culinárias); (d) avaliação de ao menos
-um prato de cada continente do catálogo — América, África, Europa, Ásia e Oceania
-(ex.: Rei do Mundo); (e) avaliação de pratos de todas as culinárias de um conjunto
-temático definido pelo curador (ex.: Grandes Civilizações — Egito, Grécia, Itália).
-Origem: US16; RF15 | Status: validado
+RN03 — O marco de um badge é verificável, definido declarativamente por seed da
+dupla e fundamentado no framework híbrido 6D + Octalysis (ADR-016), assumindo
+uma das oito formas: (a) avaliação de um prato específico (ex.: Mini Chef —
+avaliar Ratatouille); (b) avaliação de ao menos um prato de uma culinária (ex.:
+Chegando na Arábia); (c) avaliação de pratos de N culinárias distintas (ex.: 10
+culinárias); (d) avaliação de ao menos um prato de cada continente do catálogo —
+América, África, Europa, Ásia e Oceania (ex.: Rei do Mundo); (e) avaliação de
+pratos de todas as culinárias de um conjunto temático definido pelo curador
+(ex.: Grandes Civilizações — Egito, Grécia, Itália); (f) avaliação de ao menos
+N pratos distintos do catálogo (ex.: Primeiro Fogo — 1 prato; Chef de Rotina —
+5 pratos; Onboarding e consistência — 6D Progression Stair / CD2); (g) avaliação
+de ao menos um prato com nível de profundidade ≥ k (k ≥ 2) em uma cadeia de
+evolução, onde o prato raiz tem nível 1, sua evolução direta nível 2 e assim
+sucessivamente (ex.: Além do Básico / Mestre da Evolução — Maestria CD2); (h)
+registro de avaliação com alterações pessoais na receita (`alteracoes` não vazio)
+em ao menos N preparos (ex.: Toque Pessoal / Alquimista da Cozinha — Expressão
+Criativa CD3).
+Origem: US16, US12, US15; RF15, RF11, RF14; ADR-016 | Status: validado (estendido na retroalimentação 6D + Octalysis)
 
 RN04 — Um badge é concedido uma única vez por usuário, no momento em que seu marco
 passa a ser atendido, registrando a data de desbloqueio; o perfil exibe os badges

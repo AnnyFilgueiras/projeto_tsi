@@ -298,8 +298,8 @@ classDiagram
 - `RoutineItem.status` no servidor só assume `planned` ou `completed`. O `id` do item é o `opId` da operação que o cria. Cada operação seguinte tem `opId` próprio.
 - Avaliações, conquistas e desbloqueios só se acrescentam (RN04, RN06, RNF09). Não há edição nem exclusão de avaliação, exceto na exclusão de conta.
 - `encryptedType` usa AES-256-GCM, com versão da chave e a conta como dado autenticado (ADR-006). A revogação apaga a linha.
-- `BadgeDefinition` guarda o `milestone` tipado (`dish`, `cuisine`, `n_cuisines`, `all_continents`, `set`), carregado por seed.
-- `UnlockRules` (nova na v1.1) recalcula desbloqueios no servidor, só acrescentando. É pura e passa pelos mesmos vetores de teste do `UnlockCalculator` do app. Os cinco tipos de marco são tratados por `switch` sobre união discriminada, com checagem `never`.
+- `BadgeDefinition` guarda o `milestone` tipado (`dish`, `cuisine`, `n_cuisines`, `all_continents`, `set`, `total_dishes`, `evolution_level`, `adaptation_count` — RN03 a–h, ADR-016), carregado por seed.
+- `UnlockRules` (nova na v1.1) recalcula desbloqueios no servidor, só acrescentando. É pura e passa pelos mesmos vetores de teste do `UnlockCalculator` do app. Os oito tipos de marco (RN03 a–h, formalizados pelo framework 6D + Octalysis no ADR-016 e em `framework-gamificacao.md`) são tratados por `switch` sobre união discriminada, com checagem `never`.
 
 ## 6. API: Identidade e Sessões
 
@@ -537,7 +537,7 @@ classDiagram
 - A restrição entra na fila cifrada pelo SQLCipher. Nenhum log leva a carga.
 - As features usam repositórios, não SQL. Só os repositórios conhecem as tabelas (regras A2 e A3). A instância única de `LocalDatabase` nasce na raiz de composição do app (regra A8).
 - **Implementação em 2 estágios de `OperationEnqueuer` (`P04` — ADR-008, Opção 3C):** Na raiz de composição (`src/app/composition`), o Estágio 1 do MVP pode injetar `DirectOnlineOperationEnqueuer` (que envia a operação imediatamente à API com `Idempotency-Key` e atualiza o SQLCipher local, exigindo rede para mutações enquanto a leitura das receitas planejadas já ocorre offline), passando a `SyncQueue` (`OutboxOperationEnqueuer`) + `Synchronizer` no Estágio 2 sem alterar as features.
-- **Ponto de extensão de Gamificação (`UnlockCalculator` e `UnlockRules` — Opção 2A):** Concentram todas as regras de desbloqueio orientadas a definições declarativas de marcos (`BadgeDefinition`), isolando futuras extensões do framework metodológico de gamificação (6D/Octalysis) dentro do domínio de progresso (`A12`).
+- **Ponto de extensão de Gamificação (`UnlockCalculator` e `UnlockRules` — Opção 2A, ADR-016):** Concentram todas as regras de desbloqueio orientadas a definições declarativas de marcos (`BadgeDefinition`), isolando os oito tipos de marco do framework metodológico de gamificação (6D + Octalysis, ver `framework-gamificacao.md`) dentro do domínio de progresso (`A12`).
 
 ## 10. App: rede e sincronização
 
@@ -678,7 +678,7 @@ classDiagram
 ```
 
 - Perfil e Restrições tem um caso de uso por assunto: restrição, revogação, preferências, lembretes, e-mail e exclusão de conta.
-- `UnlockCalculator` é pura e testável sem banco nem rede. Os cinco tipos de marco da RN03 são tratados por `switch` sobre união discriminada, com checagem `never` (R03). Os vetores de teste são comuns com `UnlockRules` do servidor.
+- `UnlockCalculator` é pura e testável sem banco nem rede. Os oito tipos de marco da RN03 (a–h, ADR-016) são tratados por `switch` sobre união discriminada, com checagem `never` (R03). Os vetores de teste são comuns com `UnlockRules` do servidor.
 - Salvar avaliação, desbloqueios locais e a operação da fila ocorre numa única transação (Outbox, P04).
 - `NotificationAdapter` é uma função injetada (P02d), não uma hierarquia de classes.
 
@@ -737,7 +737,7 @@ Pacote de Alérgenos (com `CatalogInvariants` em ponto de entrada separado), Lem
 
 - **L, provedor de IA:** `KimiProvider` e `RecordedProvider` passam a mesma suíte de contrato (mantido, P02b).
 - **O, portão de publicação:** decidido na 2.7 como função com verificações privadas, sem interface de regra (R02). Reavaliar acima de seis regras.
-- **O, calculadora de badges:** decidido na 2.7 como `switch` com checagem `never` (R03). Reavaliar se surgir um sexto tipo.
+- **O, calculadora de badges:** decidido na 2.7 como `switch` com checagem `never` (R03), estendido de 5 para 8 tipos declarativos pelo ADR-016 (6D + Octalysis). Reavaliar acima de dez tipos.
 - **Dono do ciclo da sugestão:** o módulo Rotina e Planejamento, conforme o C4. As rotas `aprovar` e `descartar` ficam no grupo "Sugestão e busca" do OpenAPI.
 - Nenhum ADR nem o C4 foi contradito. Não há ADR a marcar como "Substituído". O ADR-002 recebe nota sobre `src/shared/`; o ADR-015 registra o idioma.
 

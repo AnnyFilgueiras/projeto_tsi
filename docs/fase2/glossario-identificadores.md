@@ -42,7 +42,7 @@
 | proposto / aprovado / desativado | proposed / approved / deactivated |
 | pendente / confirmada / falha (fila) | pending / confirmed / failed (contrato: confirmed / rejected) |
 | usuario / curador (papel) | user / curator |
-| prato / culinaria / n_culinarias / todos_continentes / conjunto (marco) | dish / cuisine / n_cuisines / all_continents / set |
+| prato / culinaria / n_culinarias / todos_continentes / conjunto / total_pratos / nivel_evolucao / contagem_adaptacoes (marco, RN03 a–h, ADR-016) | dish / cuisine / n_cuisines / all_continents / set / total_dishes / evolution_level / adaptation_count |
 | manual / ia (origem) | manual / ai |
 | facil / media / dificil | easy / medium / hard |
 | semana / quinzena | week / fortnight |
@@ -184,7 +184,7 @@ Permanecem como estão: `Idempotency-Key`, `problem+json` e os 19 códigos do vo
 | dataPreparo / dataCompra | prepDate / purchaseDate |
 | comprado | purchased |
 | nota / relato / alteracoes / data (Avaliacao) | score / comment / changes / date |
-| marco | milestone |
+| marco / nivelMinimo (marco de evolução) | milestone / minLevel |
 | dataDesbloqueio | unlockedAt |
 | papel / senhaHash / criadaEm / ultimoAcessoEm | role / passwordHash / createdAt / lastAccessAt |
 | familiaId / hashToken / expiraEm / usadoEm / sucessorId / revogadaEm | familyId / tokenHash / expiresAt / usedAt / successorId / revokedAt |

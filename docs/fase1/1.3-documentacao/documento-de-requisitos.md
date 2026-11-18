@@ -214,8 +214,8 @@ Como Rafael, quero ver os utensílios que cada receita exige e que as sugestões
 - Dado que um prato exige utensílio que não tenho, quando o visualizo, então o sistema indica qual utensílio falta antes do preparo.
 
 #### US16 — Receber badges ao atingir marcos (Should · RF15)
-Como Cleusa, quero receber badges ao atingir marcos, para ter orgulho da minha trajetória na cozinha.
-- Dado que concluí pratos de 10 culinárias distintas, quando o décimo é registrado, então recebo o badge correspondente.
+Como Cleusa, quero receber badges ao atingir marcos de exploração cultural, evolução de pratos e adaptações criativas, para ter orgulho da minha trajetória na cozinha.
+- Dado que atingi o marco verificável de um badge (seja por prato específico, culinária, N culinárias distintas, todos os continentes, conjunto temático, total de pratos concluídos, nível em cadeia de evolução ou contagem de preparos com alterações registradas — RN03 a–h), quando a avaliação que completa o marco é salva, então recebo o badge correspondente uma única vez com a data de desbloqueio (RN04).
 - Dado que abro meu perfil, quando vejo os badges, então vejo os conquistados e os critérios dos ainda não obtidos.
 
 ### Could
@@ -386,11 +386,11 @@ Fonte modular (fluxos alternativos e de exceção completos): [casos-de-uso.md](
 
 18 RNs ativas, 1 futura (RN19) e 1 excluída (RN20). Toda RN é rastreável a US/RF. Status das ativas: a validar na 1.4.
 
-### Fundamentos da gamificação
+### Fundamentos da gamificação (6D Framework + Octalysis — ADR-016)
 
 - **RN01** — Um prato é considerado concluído por um usuário somente quando existe ao menos uma avaliação salva por ele para esse prato. Histórico, coleção, badges e desbloqueio de evolução consideram exclusivamente pratos concluídos. *(US12, US14, US15, US16; RF11, RF13, RF14, RF15)*
 - **RN02** — Uma evolução é desbloqueada quando o usuário salva a primeira avaliação do prato base correspondente; enquanto bloqueada, a evolução exibe qual prato base precisa ser avaliado. Avaliações adicionais do mesmo prato base não geram novo desbloqueio. *(US15; RF14)*
-- **RN03** — O marco de um badge é verificável e assume uma das formas: (a) avaliação de um prato específico; (b) avaliação de ao menos um prato de uma culinária; (c) avaliação de pratos de N culinárias distintas; (d) avaliação de ao menos um prato de cada continente do catálogo (América, África, Europa, Ásia e Oceania); (e) avaliação de pratos de todas as culinárias de um conjunto temático definido pelo curador. *(US16; RF15)*
+- **RN03** — O marco de um badge é verificável, definido declarativamente por seed da dupla e fundamentado no framework híbrido 6D + Octalysis (ADR-016), assumindo uma das oito formas: (a) avaliação de um prato específico; (b) avaliação de ao menos um prato de uma culinária; (c) avaliação de pratos de N culinárias distintas; (d) avaliação de ao menos um prato de cada continente do catálogo (América, África, Europa, Ásia e Oceania); (e) avaliação de pratos de todas as culinárias de um conjunto temático definido pelo curador; (f) avaliação de ao menos N pratos distintos do catálogo (consistência/onboarding — 6D Progression Stair / CD2); (g) avaliação de ao menos um prato com nível de profundidade ≥ k (k ≥ 2) em uma cadeia de evolução (maestria em árvore — CD2); (h) registro de avaliação com alterações pessoais na receita (`alteracoes` não vazio) em ao menos N preparos (expressão criativa — CD3). *(US16, US12, US15; RF15, RF11, RF14; ADR-016)*
 - **RN04** — Um badge é concedido uma única vez por usuário, no momento em que seu marco passa a ser atendido, registrando a data de desbloqueio; o perfil exibe os badges conquistados e os critérios dos não obtidos; badges nunca são revogados ou perdidos. *(US16; RF15, RNF09)*
 
 ### Avaliação, histórico e coleção

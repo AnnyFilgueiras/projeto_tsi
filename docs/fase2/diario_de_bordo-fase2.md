@@ -741,3 +741,50 @@ Nenhum artefato da Fase 1 foi alterado diretamente. Nenhum ADR foi marcado como 
 
 ### Pendências para a próxima sessão
 - Ver quadro consolidado na Seção 3 do `STATE.md` (Frente A: `GOV-04` workflows/skills de Issues; Frente B: fechamento da Fase 2 `F2-01` a `F2-05`; Frente C: `GAM-01`/`GAM-02` framework conceitual de gamificação; Frente D: `MVP-01` a `MVP-04`).
+
+
+
+## [18/11/2026] — Modelagem Conceitual de Gamificação (Framework Híbrido 6D + Octalysis — GAM-01 e GAM-02)
+
+- **Papel da IA:** arquiteto de software e especialista em design de sistemas gamificados (*gamification designer*).
+- **Técnicas aplicadas:** levantamento comparativo de frameworks conceituais de gamificação da literatura (*6D Framework*, *Octalysis*, *MDA*, *Hexad User Types* e *Self-Determination Theory*); análise de trade-offs entre 3 níveis de intervenção arquitetural (Nível 1 apenas documental, Nível 2 extensão declarativa de `RN03` sem novas tabelas, Nível 3 ativação de sistema de pontos extrínsecos no MVP); modelagem passo a passo pelos 6 passos do **6D (Werbach & Hunter)** combinados aos **8 Core Drives do Octalysis (Yu-kai Chou)**; verificação da fronteira modular (`A12`) e retroalimentação sincronizada entre Fase 2 e Fase 1.
+- **Prompts-chave / Contexto da sessão:**
+  1. Solicitação de levantamento dos frameworks conceituais de gamificação existentes (ex.: 6D, Octalysis), análise de pontos fortes/fracos e impacto no Panelada, escolha do framework, avaliação do impacto no que já foi consolidado, projeto das alterações no repositório e implementação.
+  2. Escolha da abordagem híbrida (**6D como estrutura de engenharia + Octalysis como lente motivacional**), orientação de trabalhar em uma branch separada registrando as decisões e pedido de aprofundamento técnico sobre o nível de intervenção funcional visando qualidade, praticidade e prevenção de refatorações custosas no futuro.
+  3. Escolha do **Nível 2 de intervenção**: formalizar o framework híbrido 6D + Octalysis e estender declarativamente a `RN03` (e `UnlockCalculator` / `UnlockRules` / schema `Milestone`) de 5 para 8 tipos de marco (`total_dishes`, `evolution_level` e `adaptation_count`), operando sobre dados já existentes em `Rating` e `Dish` sem criar novas tabelas.
+- **Insumos usados:** `STATE.md`, `AGENTS.md`, `docs/playbooks/01..02`, `regras-de-negocio.md`, `backlog.md`, `lexico.md`, `modelo-conceitual.md`, `documento-de-requisitos.md`, `matriz-rastreabilidade.md`, `atributos-qualidade.md`, `diagrama-classes.md`, `padroes-de-projeto.md`, `sequencia-uc10.md`, `openapi.yaml`, `glossario-identificadores.md`.
+- **Artefatos produzidos:** `docs/fase2/framework-gamificacao.md` v1.0, `docs/fase2/adr/adr-016-framework-conceitual-gamificacao.md` e atualizações de retroalimentação nos artefatos da Fase 1 e da Fase 2.
+
+### Decisões tomadas
+1. **Escolha do Framework Híbrido (6D + Octalysis — `ADR-016`):**
+   - O **6D Framework (Werbach & Hunter)** estrutura a engenharia de gamificação nos 6 passos (**D1** Objetivos, **D2** Comportamentos-alvo, **D3** Jogadores/Personas, **D4** Loops de atividade — *Engagement Loop* e *Progression Stair*, **D5** Diversão e ética motivacional, **D6** Ferramentas e Pirâmide **DMC** — Dinâmicas, Mecânicas e Componentes).
+   - O **Octalysis (Yu-kai Chou)** fundamenta psicologicamente os passos D2, D3 e D5 com os **8 Core Drives**, diferenciando motivação **White Hat** (*CD1 Epic Meaning*, *CD2 Accomplishment*, *CD3 Creativity*, *CD4 Ownership*) de **Black Hat** (*CD8 Loss & Avoidance*), o que justifica teoricamente a filosofia **Não Punitiva (`RNF09`, `RN04`, `RN12`)** e o descarte do ranking competitivo (`RN20`).
+2. **Nível 2 de Intervenção — Extensão Declarativa da `RN03` (`a..h`) sem Novas Tabelas:**
+   - A análise pelo 6D + Octalysis revelou que os 5 tipos originais de marco da `RN03` (`a..e`) premiavam apenas a exploração geográfica (*CD4* e *CD7*), deixando sem cobertura de conquista três dimensões cujos dados já estão persistidos em `Rating` (`changes`) e `Dish` (`baseDishId`):
+     - `(f) total_dishes` (*Onboarding e consistência — 6D Progression Stair / CD2*): concluir ao menos $N$ pratos distintos do catálogo;
+     - `(g) evolution_level` (*Maestria em árvore — 6D Progression Stair / CD2*): concluir ao menos um prato com nível de profundidade $\ge k$ ($k \ge 2$) em uma cadeia de evolução (`RN18`);
+     - `(h) adaptation_count` (*Expressão criativa e autoria — Octalysis CD3*): registrar avaliação com `alteracoes` (`changes`) não vazio em ao menos $N$ preparos (`RN05`, `US12`).
+   - Essa decisão evita refatoração futura no contrato de `UnlockCalculator` e `UnlockRules` durante a Fase 3, mantendo custo zero de banco de dados (nenhuma tabela ou coluna nova) e preservando 100% o isolamento modular no módulo `progress` (`A12`).
+3. **Manutenção de Pontuação (`US13`/`RN19`) como *Could* e Ranking (`RN20`) como *Won't*:**
+   - Fundamentado na crítica do 6D à *PBL Fallacy* (pontos extrínsecos abstratos adicionam menos valor quando já há progressão semântica em árvores de evolução e coleção cultural) e na análise *White Hat* do Octalysis.
+
+### Artefatos alterados (retroalimentação)
+- `docs/fase2/framework-gamificacao.md` *(novo)*: documento metodológico completo (passos D1 a D6, matriz dos 8 Core Drives, diagramas Mermaid dos loops e da pirâmide DMC, catálogo dos 8 tipos de marco e matriz de rastreabilidade).
+- `docs/fase2/adr/adr-016-framework-conceitual-gamificacao.md` *(novo)*: registro formal da decisão arquitetural e metodológica.
+- `docs/fase2/openapi.yaml`: schema `Milestone` (`oneOf`) expandido de 5 para 8 variantes (`total_dishes`, `evolution_level`, `adaptation_count`).
+- `docs/fase2/glossario-identificadores.md`: adicionadas as equivalências PT→EN dos 3 novos tipos de marco e do atributo `minLevel`.
+- `docs/fase2/diagrama-classes.md`, `docs/fase2/padroes-de-projeto.md` e `docs/fase2/sequencia-uc10.md`: atualizados de 5 para 8 tipos de marco no `switch` exaustivo (`R03`) de `UnlockCalculator` e `UnlockRules`, referenciando o `ADR-016` e `framework-gamificacao.md`.
+- `docs/fase1/1.2-analise/regras-de-negocio.md`, `docs/fase1/1.1-elicitacao/backlog.md`, `docs/fase1/1.1-elicitacao/lexico.md`, `docs/fase1/1.3-documentacao/documento-de-requisitos.md` e `docs/fase1/1.4-validacao/matriz-rastreabilidade.md`: retroalimentados com as alíneas `(f)`, `(g)` e `(h)` da `RN03`, atualização de `US16` e fundamentação 6D + Octalysis.
+- `AGENTS.md`, `README.md` e `STATE.md`: atualizados com os novos artefatos e conclusão de `GAM-01` e `GAM-02`.
+
+### Iterações relevantes (erros e retrabalho da IA)
+1. Na primeira pergunta sobre o nível de intervenção, as opções resumidas não deixavam claro o impacto técnico interno de adicionar novos tipos declarativos de marco nem o custo futuro de refatorar `UnlockCalculator`/`UnlockRules`; após pedido de aprofundamento da dupla, a IA detalhou a assinatura `(rating, index, state)`, os dados já existentes em `Rating` e `Dish` e comparou os 3 níveis de intervenção, permitindo a escolha fundamentada do Nível 2.
+
+### Divergências registradas (briefing/professor × artefatos)
+- Nenhuma divergência; a exigência extra do professor foi integrada harmoniosamente aos artefatos da Fase 1 e da Fase 2 respeitando a regra de precedência e o isolamento modular (`A12`).
+
+### Riscos aceitos
+- Mantidos `R1` a `R19`; o risco de divergência entre `UnlockCalculator` (App) e `UnlockRules` (API) para os 8 tipos de marco permanece mitigado pela suíte única de vetores JSON na CI.
+
+### Pendências para a próxima sessão
+- Ver quadro atualizado na Seção 3 do `STATE.md` (Frente A: `GOV-04`; Frente B: `F2-01` a `F2-05`; Frente D: `MVP-01` a `MVP-04`).

@@ -12,7 +12,7 @@
 - **Status Geral das Fases:**
   - ✅ **Fase 1 (Engenharia de Requisitos):** Concluída (`1.1` Elicitação, `1.2` Análise, `1.3` Documentação, `1.4` Validação). Recebe atualizações apenas via GitHub Issues agrupadas de retroalimentação (Lote 1 concluído na Issue #30; Lote 3 pronto para Issue #31).
   - 🔄 **Fase 2 (Projeto Arquitetural):** `2.1` a `2.7` concluídas e reorganizadas em caminhos canônicos em [`./docs/fase2/`](./docs/fase2/). Pendentes: higiene final (Lote 2), validação executável de OpenAPI/Bruno, `2.8` (Revisão Arquitetural) e `2.9` (Checklist Final).
-  - ⏳ **Frente Transversal — Gamificação Metodológica:** Requisito adicionado após a Fase 2 para fundamentar e expandir a gamificação do projeto usando um **framework conceitual especializado** (ex.: **Octalysis** ou **6D**).
+  - ✅ **Frente Transversal — Gamificação Metodológica:** Concluída na branch `feat/gamification-framework-6d-octalysis` ([`framework-gamificacao.md`](./docs/fase2/framework-gamificacao.md) e [ADR-016](./docs/fase2/adr/adr-016-framework-conceitual-gamificacao.md)), aplicando o framework híbrido **6D (Werbach & Hunter) + Octalysis (Yu-kai Chou)** e expandindo declarativamente `RN03` e `UnlockCalculator`/`UnlockRules` para 8 tipos de marco sem novas tabelas (`A12`).
   - ⏳ **Fase 3 (Implementação do MVP e Deploy em Cloud Gratuita):** Topologia do monorepo e estratégia incremental de 2 estágios definidas e documentadas nos ADRs.
 
 ---
@@ -25,9 +25,9 @@ Qualquer agente que trabalhe em documentação ou código deve respeitar estas 4
    - Único repositório contendo `docs/`, e futuramente `packages/allergen-rules/`, `apps/api/` e `apps/mobile/`.
    - Caminhos físicos de [`./docs/fase2/`](./docs/fase2/) batem 100% com os cabeçalhos dos artefatos (`/docs/fase2/*.md`, `/docs/fase2/adr/` e `/docs/fase2/bruno/`).
    - Controle de tarefas centrado em **GitHub Issues** espelhadas neste `STATE.md`, guiado pelos manuais em [`./docs/playbooks/`](./docs/playbooks/).
-2. **Ponto de Extensão Isolado para Framework Conceitual de Gamificação (`Opção 2A`):**
-   - O "framework de gamificação" exigido na disciplina é um **framework metodológico/conceitual** (como **6D** ou **Octalysis**), não uma biblioteca externa de código.
-   - Tecnicamente, toda regra de progresso/recompensa permanece isolada nas funções puras `UnlockCalculator` (App) e `UnlockRules` (API, módulo `progress`), orientadas a definições declarativas de marcos (`MilestoneDefinition`) e testadas por vetores JSON comuns. Quando a modelagem 6D/Octalysis ocorrer em conversa futura, ela atualizará os requisitos (Fase 1) e estenderá o módulo `progress` sem vazar para outros módulos (`A12`).
+2. **Ponto de Extensão Isolado e Modelagem 6D + Octalysis de Gamificação (`Opção 2A` — [ADR-016](./docs/fase2/adr/adr-016-framework-conceitual-gamificacao.md) e [`framework-gamificacao.md`](./docs/fase2/framework-gamificacao.md)):**
+   - O "framework de gamificação" exigido na disciplina foi modelado com a abordagem híbrida **6D Framework (Werbach & Hunter) + Octalysis (Yu-kai Chou)**.
+   - Tecnicamente, toda regra de progresso/recompensa permanece isolada nas funções puras `UnlockCalculator` (App) e `UnlockRules` (API, módulo `progress`), orientadas às 8 definições declarativas de marcos (`Milestone` na `RN03 a–h`: `dish`, `cuisine`, `n_cuisines`, `all_continents`, `set`, `total_dishes`, `evolution_level`, `adaptation_count`) e testadas por vetores JSON comuns, sem vazar para outros módulos (`A12`).
 3. **Implementação do Offline-First em 2 Estágios Reversíveis (`Opção 3C` — [ADR-008](./docs/fase2/adr/adr-008-estrategia-offline-e-sincronizacao.md)):**
    - **Estágio 1 (Primeiro Deploy do MVP):** O app já utiliza o banco local cifrado (`SqlCipherDatabase` atrás da porta `LocalDatabase` — `P02a`) para **leitura offline** das receitas planejadas/em preparo e checagem local de alérgenos (`A04`, `A05`, `A06`). Porém, **escritas/mutações** (avaliar prato, agendar rotina, editar restrição) exigem rede no Estágio 1. Para garantir transição sem retrabalho para o offline completo, os casos de uso chamam desde o início a porta `OperationEnqueuer` (`P04`), injetada na raiz de composição (`src/app/composition`) com o adaptador `DirectOnlineOperationEnqueuer`.
    - **Estágio 2 (Offline-First Completo):** Troca-se na raiz de composição o adaptador para `OutboxOperationEnqueuer` + `Synchronizer` e ativa-se a tabela `ProcessedOperation` (`Idempotent Receiver` — `P05`), sem alterar nenhuma tela ou caso de uso.
@@ -53,8 +53,8 @@ Qualquer agente que trabalhe em documentação ou código deve respeitar estas 4
 - [ ] **F2-05 (Etapa 2.9 — Fechamento da Fase 2):** Produzir `docs/fase2/checklist-final.md` e `docs/fase2/resumo-fase2-para-fase3.md`.
 
 ### Frente C — Modelagem do Framework de Gamificação
-- [ ] **GAM-01:** Selecionar e aplicar o framework conceitual de gamificação (ex.: **Octalysis** ou **6D**) ao domínio do Panelada.
-- [ ] **GAM-02:** Retroalimentar artefatos da Fase 1 (RNs, US, Léxico) e estender declarativamente os tipos de marco/regras do módulo `progress` (`UnlockCalculator` / `UnlockRules`) e seus vetores JSON.
+- [x] **GAM-01:** Selecionar e aplicar o framework conceitual de gamificação (**Abordagem Híbrida 6D + Octalysis**) ao domínio do Panelada ([`docs/fase2/framework-gamificacao.md`](./docs/fase2/framework-gamificacao.md) e [ADR-016](./docs/fase2/adr/adr-016-framework-conceitual-gamificacao.md)).
+- [x] **GAM-02:** Retroalimentar artefatos da Fase 1 (`RN03 a–h`, `US16`, Léxico, Documento Consolidado e Matriz de Rastreabilidade) e estender declarativamente os 8 tipos de marco do módulo `progress` (`UnlockCalculator` / `UnlockRules` / schema `Milestone` no `openapi.yaml`).
 
 ### Frente D — Implementação do MVP e Primeiro Deploy (Fase 3)
 - [ ] **MVP-01:** Definir o recorte funcional prioritário de histórias/telas para o primeiro deploy (Estágio 1).
@@ -66,15 +66,14 @@ Qualquer agente que trabalhe em documentação ou código deve respeitar estas 4
 
 ## 4. Handoff da Última Sessão
 
-- **Data e Agente:** `18/11/2026` — Antigravity CLI (papel: Arquiteto de Software e Governança Multi-Agente).
+- **Data e Agente:** `18/11/2026` — Antigravity CLI (papel: Arquiteto de Software e Designer de Gamificação).
+- **Branch de Trabalho:** `feat/gamification-framework-6d-octalysis`
 - **O que foi feito:**
-  1. Reorganização física completa de `/docs/fase2/` (`Opção 1B`), alinhando todos os arquivos aos destinos canônicos declarados nos cabeçalhos (`/docs/fase2/*.md`, `/docs/fase2/adr/` e `/docs/fase2/bruno/`).
-  2. Implantação do sistema de governança para agentes CLI: criação de `AGENTS.md`, `CLAUDE.md`, `STATE.md`, três manuais operacionais em `docs/playbooks/` (`01`, `02`, `03`) e atualização completa do `README.md`.
-  3. Registro das decisões arquiteturais de preparação para o MVP e Gamificação (`Opções 2A, 3C e 4C`) nos ADRs (`002`, `004`, `008`, `012`), `c4-containers.md`, `padroes-de-projeto.md`, `diagrama-classes.md`, `briefing-fase2.md` (v1.5) e `diario_de_bordo-fase2.md`.
+  1. Levantamento e comparação de 5 frameworks conceituais de gamificação (*6D*, *Octalysis*, *MDA*, *Hexad* e *SDT*), com escolha e aplicação completa da **Abordagem Híbrida 6D (Werbach & Hunter) + Octalysis (Yu-kai Chou)** em [`docs/fase2/framework-gamificacao.md`](./docs/fase2/framework-gamificacao.md) e formalização no [`ADR-016`](./docs/fase2/adr/adr-016-framework-conceitual-gamificacao.md).
+  2. Adoção do **Nível 2 de intervenção arquitetural**: expansão declarativa da `RN03` e da união discriminada `Milestone` de 5 para **8 tipos de marco** (`dish`, `cuisine`, `n_cuisines`, `all_continents`, `set`, `total_dishes`, `evolution_level`, `adaptation_count`), cobrindo *Onboarding/Consistência* (6D/CD2), *Maestria em Cadeia de Evolução* (6D/CD2) e *Expressão Criativa* (CD3) usando dados já existentes em `Rating` e `Dish` (zero novas tabelas, mantendo `A12`).
+  3. Retroalimentação sincronizada nos artefatos da Fase 2 (`openapi.yaml`, `glossario-identificadores.md`, `diagrama-classes.md`, `padroes-de-projeto.md`, `sequencia-uc10.md`, `diario_de_bordo-fase2.md`) e da Fase 1 (`regras-de-negocio.md`, `backlog.md`, `lexico.md`, `documento-de-requisitos.md`, `matriz-rastreabilidade.md`).
 - **Decisões tomadas:**
-  - Monorepo mantido; caminhos de `docs/fase2/` achatados com subpastas apenas para `adr/` e `bruno/`.
-  - Gamificação reconhecida como framework conceitual/metodológico (6D/Octalysis) a ser modelado em conversa futura, tendo `UnlockCalculator`/`UnlockRules` como ponto de extensão isolado (`2A`).
-  - Offline-First dividido em 2 estágios plugáveis via porta `OperationEnqueuer` (`DirectOnlineOperationEnqueuer` no Estágio 1 com leitura SQLCipher offline -> `OutboxOperationEnqueuer` no Estágio 2) (`3C`).
-  - Deploy real em nuvem gratuita via Supabase (PostgreSQL + Storage por trás da API Fastify, mantendo cifra `AES-256-GCM` na aplicação) + PaaS container gratuita, em paridade com o Docker Compose local via porta `PhotoStorage` (`4C`).
-- **Arquivos criados/alterados:** `AGENTS.md`, `CLAUDE.md`, `STATE.md`, `README.md`, `docs/playbooks/01..03-*.md`, `docs/superpowers/specs/2026-11-18-governance-and-architecture-refactoring-design.md`, `docs/superpowers/plans/2026-11-18-governance-and-architecture-refactoring.md` e artefatos movidos/atualizados em `docs/fase2/`.
-- **Próximo passo recomendado:** Definir em nova conversa uma das três frentes imediatas do backlog: (a) **GOV-04** (criação das skills/workflows de Issues), (b) **GAM-01** (modelagem do framework conceitual de gamificação) ou (c) **F2-01 a F2-05** (fechamento das etapas 2.8 e 2.9 da Fase 2).
+  - **6D + Octalysis (`ADR-016`):** 6D estrutura a engenharia (D1 a D6, *Engagement Loop*, *Progression Stair* e Pirâmide DMC) e Octalysis fundamenta a psicologia motivacional (8 Core Drives e design *White Hat* não punitivo para `RNF09`, `RN04`, `RN12` e `RN20`).
+  - **8 tipos fixos de marco em `UnlockCalculator` / `UnlockRules` (`R03`):** mantido o `switch` exaustivo com checagem `never` e validação por suíte compartilhada de vetores JSON.
+- **Arquivos criados/alterados:** `docs/fase2/framework-gamificacao.md`, `docs/fase2/adr/adr-016-framework-conceitual-gamificacao.md`, `docs/fase2/openapi.yaml`, `docs/fase2/glossario-identificadores.md`, `docs/fase2/diagrama-classes.md`, `docs/fase2/padroes-de-projeto.md`, `docs/fase2/sequencia-uc10.md`, `docs/fase2/diario_de_bordo-fase2.md`, `docs/fase1/1.2-analise/regras-de-negocio.md`, `docs/fase1/1.1-elicitacao/backlog.md`, `docs/fase1/1.1-elicitacao/lexico.md`, `docs/fase1/1.3-documentacao/documento-de-requisitos.md`, `docs/fase1/1.4-validacao/matriz-rastreabilidade.md`, `AGENTS.md`, `README.md` e `STATE.md`.
+- **Próximo passo recomendado:** Revisar e fazer merge da branch `feat/gamification-framework-6d-octalysis` na `main` (ou abrir PR/Issue correspondente) e seguir para (a) **GOV-04** (criação das skills/workflows de Issues) ou (b) **F2-01 a F2-05** (fechamento das etapas 2.8 e 2.9 da Fase 2).

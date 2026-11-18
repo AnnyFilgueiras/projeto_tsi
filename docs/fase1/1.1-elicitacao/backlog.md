@@ -12,7 +12,7 @@
 | **Could** (2) | US13, US17 |
 | **Won't** (1) | Ranking entre amigos (ex-RF16): apenas 1 dos 5 entrevistados tinha interesse; social exige implementação cuidadosa; dupla optou por foco |
 
-Decisões de priorização: a identidade de gamificação é coleção (Must) → evolução (primeiro Should) → badges (Should); pontuação (US13) é Could por ser mecânica "batida". US08 (lembretes) é Must por fundamentação em computação persuasiva, desde que não irritante (RNF07).
+Decisões de priorização: a identidade de gamificação — estruturada metodologicamente pelo framework híbrido **6D (Werbach & Hunter) + Octalysis (Yu-kai Chou)** ([`framework-gamificacao.md`](../../fase2/framework-gamificacao.md), [ADR-016](../../fase2/adr/adr-016-framework-conceitual-gamificacao.md)) — prioriza motivadores *White Hat* de posse cultural, maestria e criatividade: coleção (Must, CD4) → evolução em árvore (primeiro Should, CD2) → badges multi-dimensionais (Should, CD1/CD2/CD3/CD4); pontuação extrínseca avulsa (US13) permanece Could por evitar a *PBL Fallacy*. US08 (lembretes) é Must por fundamentação em computação persuasiva e design não punitivo (RNF09), desde que não irritante (RNF07).
 
 ---
 
@@ -204,12 +204,17 @@ Critérios de aceite:
 ```
 
 ```
-US16 — Como Cleusa, quero receber badges ao atingir marcos, para ter orgulho
-da minha trajetória na cozinha.
+US16 — Como Cleusa, quero receber badges ao atingir marcos de exploração
+cultural, evolução de pratos e adaptações criativas, para ter orgulho da minha
+trajetória na cozinha.
 Origem: RF15 | Prioridade: Should
 Critérios de aceite:
-- Dado que concluí pratos de 10 culinárias distintas, quando o décimo é
-  registrado, então recebo o badge correspondente.
+- Dado que atingi o marco verificável de um badge (seja por prato específico,
+  culinária, N culinárias distintas, todos os continentes, conjunto temático,
+  total de pratos concluídos, nível em cadeia de evolução ou contagem de
+  preparos com alterações registradas — RN03 a–h), quando a avaliação que
+  completa o marco é salva, então recebo o badge correspondente uma única vez
+  com a data de desbloqueio (RN04).
 - Dado que abro meu perfil, quando vejo os badges, então vejo os conquistados
   e os critérios dos ainda não obtidos.
 ```
