@@ -117,3 +117,13 @@ R2, R4.
 - **Desbloqueios:** o servidor recalcula e só acrescenta; o desbloqueio local sobrevive a uma rejeição (RN04). Prato aprovado nunca é apagado, só desativado.
 - **"Em preparo":** só local, sem sincronização.
 - **Revogação de restrição (R16):** o app mostra "revogação pendente de envio" enquanto a operação estiver na fila.
+
+## Detalhamento (Implementação Incremental em 2 Estágios para o MVP — 18/11/2026)
+
+- **Mitigação de risco de prazo (`R4`) com retorno transparente ao plano original (Opção 3C):** Para não bloquear o primeiro deploy funcional do MVP na construção completa da fila de reenvio em background, a implementação desta estratégia é dividida em dois estágios plugáveis na raiz de composição do app (`src/app/composition`):
+  1. **Estágio 1 (Primeiro Deploy do MVP — Leitura Offline + Escrita Online via Porta):**
+     - O banco local cifrado (`SqlCipherDatabase` via porta `LocalDatabase` — `P02a`) e o download das receitas planejadas/em preparo já entram ativos desde o Estágio 1, garantindo abertura offline na cozinha (`A04`), proteção criptográfica local (`A05`, ADR-005/006) e checagem local de alérgenos (`A06`, ADR-014).
+     - Os casos de uso que realizam mutações (`RegisterRating`, reagendamento/lista de compras em `Routine`, cadastro/revogação em `Profile`) **chamam obrigatoriamente a porta `OperationEnqueuer` (`P04`)** desde o primeiro dia.
+     - No Estágio 1, a raiz de composição injeta `DirectOnlineOperationEnqueuer` nessa porta: ele envia a operação imediatamente à API (com `Idempotency-Key` / `opId` estável) e grava a confirmação na cópia local do `SqlCipherDatabase`, exigindo conectividade no momento de salvar a mutação.
+  2. **Estágio 2 (Offline-First Completo — Outbox + Synchronizer):**
+     - Substitui-se na raiz de composição o `DirectOnlineOperationEnqueuer` pelo `OutboxOperationEnqueuer` (`SyncQueue`) + `Synchronizer` com espera progressiva, ativando a tabela `ProcessedOperation` (`Idempotent Receiver` — `P05`) no servidor para lotes offline, **sem alterar nenhuma tela ou caso de uso das features**.

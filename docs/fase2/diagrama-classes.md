@@ -470,6 +470,7 @@ classDiagram
 - **Cifra de Campos Sensíveis** (componente de apoio, usado só pelo módulo `profile`, regra S5): `FieldCipher` recebe a chave por uma interface `KeyProvider`, com `FileKey` (demo) e `SecretManagerKey` (alvo). A chave de IA fica em segredo separado.
 - O servidor atribui `unverified` a todo alérgeno proposto, preenche fonte e link a partir do curador e descarta ids canônicos inexistentes e códigos fora do vocabulário (ADR-011, item 4).
 - `PublicationGate` é **uma função** com uma verificação privada por regra (R02). Ela chama `CatalogInvariants.checkInvariants` e bloqueia por campo da A09, fonte (RN17), foto sem os quatro elementos de atribuição ou invariante violada. Devolve todas as violações. Aprovar não exige `verified`.
+- `PhotoProcessor` grava e lê os arquivos WebP através da porta `PhotoStorage` (`P02f`), com os adaptadores `LocalDiskPhotoStorage` (volume do Docker Compose local) e `SupabasePhotoStorage` (deploy em Cloud Gratuita — ADR-004, ADR-012).
 - Os dois adaptadores de `AiProvider` passam a mesma suíte de contrato (mesmo esquema de saída, mesmos erros, mesmo registro de tokens). O gravado só é selecionado por `PROVEDOR_IA=gravado` e marca `model = "recorded"`.
 - Falha do provedor ou saída inválida após uma tentativa de correção não grava proposta. Os tokens consumidos são registrados.
 
@@ -535,6 +536,8 @@ classDiagram
 - Limites: 500 operações pendentes e 90 dias de idade. Espera progressiva de 5 s, 30 s, 2 min, 10 min e 1 h (teto).
 - A restrição entra na fila cifrada pelo SQLCipher. Nenhum log leva a carga.
 - As features usam repositórios, não SQL. Só os repositórios conhecem as tabelas (regras A2 e A3). A instância única de `LocalDatabase` nasce na raiz de composição do app (regra A8).
+- **Implementação em 2 estágios de `OperationEnqueuer` (`P04` — ADR-008, Opção 3C):** Na raiz de composição (`src/app/composition`), o Estágio 1 do MVP pode injetar `DirectOnlineOperationEnqueuer` (que envia a operação imediatamente à API com `Idempotency-Key` e atualiza o SQLCipher local, exigindo rede para mutações enquanto a leitura das receitas planejadas já ocorre offline), passando a `SyncQueue` (`OutboxOperationEnqueuer`) + `Synchronizer` no Estágio 2 sem alterar as features.
+- **Ponto de extensão de Gamificação (`UnlockCalculator` e `UnlockRules` — Opção 2A):** Concentram todas as regras de desbloqueio orientadas a definições declarativas de marcos (`BadgeDefinition`), isolando futuras extensões do framework metodológico de gamificação (6D/Octalysis) dentro do domínio de progresso (`A12`).
 
 ## 10. App: rede e sincronização
 

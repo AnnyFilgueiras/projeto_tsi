@@ -685,3 +685,59 @@ Nenhum artefato da Fase 1 foi alterado diretamente. Nenhum ADR foi marcado como 
 - R10 (licenças e termos das fontes) e os `[CONFIRMAR]` dos ADR-010 e ADR-012.
 - Briefing-mestre v1.4: nome do diário, língua do código e `padroes-de-projeto.md` como insumo da 2.8.
 - Itens não verificados: lint do OpenAPI, execução da coleção, lista vigente da RDC 727/2022, criptografia em repouso e backups do alvo, cold start, hospedagem das fotos, cota do Cloud Run, limite do console da Kimi, tokens reais, tamanho do índice leve, abertura offline com SQLCipher em 2 s, existência de US ou RNF de exclusão de conta, versões das ferramentas de lint e a regra `import/no-cycle` com o resolver TypeScript.
+
+
+
+## [18/11/2026] — Refatoração de Governança Multi-Agente e Alinhamento Arquitetural para MVP
+
+- **Papel da IA:** arquiteto de software sênior e especialista em governança de repositórios multi-agente.
+- **Técnicas aplicadas:** diagnóstico estrutural do repositório e da arquitetura (pontos fortes, riscos de prazo no MVP e lacunas entre demo local e deploy real); análise de opções com trade-offs explícitos para quatro dimensões (estrutura do repositório, preparação para framework conceitual de gamificação, mitigação da complexidade offline-first e estratégia de deploy em nuvem gratuita); elaboração de especificação formal (*Design Doc*) e plano de implementação; reorganização física de `/docs/fase2/` para coincidir com os cabeçalhos canônicos; criação de pontos de entrada e playbooks determinísticos para agentes CLI.
+- **Prompts-chave / Contexto da sessão:**
+  1. Solicitação de remodelagem da governança para trabalho colaborativo no GitHub entre a dupla e múltiplos agentes de IA (com migração progressiva do Perplexity Web para agentes CLI), além de diagnóstico da arquitetura visando um MVP com deploy real e a futura adição de um framework especializado de gamificação.
+  2. Esclarecimento da dupla de que o repositório seguirá inicialmente como monorepo, com controle de tarefas via GitHub Issues, e pedido de recomendação sobre topologia e gestão de estado.
+  3. Definição de escopo pela dupla: a escolha e modelagem do framework de gamificação ficará para conversa futura; esta conversa foca na refatoração estrutural e de governança.
+  4. Esclarecimento crucial da dupla: "framework de gamificação" refere-se a um **framework conceitual/metodológico** (ex.: **6D** ou **Octalysis**), e não a uma biblioteca de código, escolhendo as opções **1B** (padronizar `/docs/fase2/` com artefatos na raiz da fase e subpastas apenas para `adr/` e `bruno/`), **2A** (ponto de extensão isolado para gamificação), **3C** (offline em 2 estágios com retorno fácil ao plano original) e **4C** (deploy cloud gratuito com Supabase PostgreSQL/Storage + PaaS para o container da API).
+  5. Aprovação do Design Doc e do Plano de Implementação, com verificação de compatibilidade para futuros workflows/skills de geração e implementação de GitHub Issues.
+- **Insumos usados:** `README.md`, `briefing-fase2.md`, `diario_de_bordo-fase2.md` (entradas 2.0 a 2.7), `estilo-arquitetural.md`, `c4-containers.md`, `c4-componentes.md`, `padroes-de-projeto.md`, `diagrama-classes.md`, `adr-002`, `adr-004`, `adr-008`, `adr-012`.
+- **Artefatos produzidos:** `AGENTS.md`, `CLAUDE.md`, `STATE.md`, `docs/playbooks/01-sessao-issues-e-diario.md`, `docs/playbooks/02-arquitetura-adrs-e-retroalimentacao.md`, `docs/playbooks/03-qualidade-fronteiras-e-contratos.md`, `docs/superpowers/specs/2026-11-18-governance-and-architecture-refactoring-design.md`, `docs/superpowers/plans/2026-11-18-governance-and-architecture-refactoring.md` e esta entrada.
+
+### Decisões tomadas
+1. **Topologia Monorepo + Governança no Repositório (`AGENTS.md` + `STATE.md` + `GitHub Issues`):**
+   - Mantido o monorepo (reunindo `docs/` e futuramente `packages/allergen-rules/`, `apps/api/` e `apps/mobile/`), maximizando a visibilidade de agentes CLI sobre contratos, regras compartilhadas e código.
+   - `AGENTS.md` (com ponteiro em `CLAUDE.md`) passa a ser o ponto de entrada universal para qualquer agente, enquanto `STATE.md` substitui os antigos briefings de passagem manuais como painel vivo sincronizado com as GitHub Issues.
+   - Padronizado no Playbook 01 o template canônico de GitHub Issue (`Contexto e Rastreabilidade`, `Escopo e Camada`, `Critérios de Aceite`, `Verificação e Testes`) para preparar os futuros workflows/skills de criação e execução de Issues.
+2. **Alinhamento Físico de `/docs/fase2/` (`Opção 1B`):**
+   - Os artefatos da Fase 2 foram movidos das subpastas numeradas (`2.1-...` a `2.7-...`) para os destinos exatos declarados nos seus cabeçalhos (`/docs/fase2/*.md`, `/docs/fase2/adr/` e `/docs/fase2/bruno/panelada-curadoria/`), eliminando erros de arquivo não encontrado em agentes CLI. A Fase 1 mantém sua estrutura `1.1` a `1.4` intacta.
+3. **Ponto de Extensão para o Framework Conceitual de Gamificação (`Opção 2A`):**
+   - Sendo o framework de gamificação uma metodologia de design (ex.: Octalysis ou 6D), a arquitetura técnica não exige acoplamento com engine externa. `UnlockCalculator` (App) e `UnlockRules` (API, módulo `progress`), orientados a definições declarativas de marcos (`BadgeDefinition` / `MilestoneDefinition`) e validados por vetores JSON comuns, ficam registrados como o ponto único de extensão para as mecânicas que vierem da futura modelagem de gamificação (`A12`).
+4. **Implementação Incremental do Offline-First em 2 Estágios Reversíveis (`Opção 3C`):**
+   - **Estágio 1 (Primeiro Deploy do MVP):** `SqlCipherDatabase` ativo para leitura offline das receitas planejadas/em preparo e checagem local de alérgenos (`A04`, `A05`, `A06`). As mutações chamam obrigatoriamente a porta `OperationEnqueuer` (`P04`), mas a raiz de composição (`src/app/composition`) injeta `DirectOnlineOperationEnqueuer` (envio imediato com `Idempotency-Key` e atualização da cópia local, exigindo rede).
+   - **Estágio 2 (Offline-First Completo):** Troca-se na raiz de composição o adaptador por `OutboxOperationEnqueuer` (`SyncQueue`) + `Synchronizer` e ativa-se `ProcessedOperation` (`P05`), voltando ao plano offline completo sem alterar telas nem casos de uso.
+5. **Estratégia de Deploy Real em Cloud Gratuita com Paridade Local (`Opção 4C`):**
+   - Uso do **Supabase (Free Tier)** exclusivamente como **PostgreSQL gerenciado e Object Storage de fotos WebP** por trás da `API Panelada` (Fastify), hospedada em PaaS de container gratuita (Render / Fly.io / Koyeb).
+   - **Sem uso de SDK BaaS no cliente:** todo o tráfego passa pela API Fastify, preservando a criptografia `AES-256-GCM` em memória na aplicação (`FieldCipher`, ADR-006) para as restrições alimentares (`A05`).
+   - Paridade mantida com o Docker Compose local através de variáveis de ambiente e da porta `PhotoStorage` (`P02f`: `LocalDiskPhotoStorage` vs. `SupabasePhotoStorage`).
+
+### Artefatos alterados (retroalimentação)
+- `/docs/fase2/*`: arquivos movidos das subpastas `2.1`–`2.7` para `/docs/fase2/`, `/docs/fase2/adr/` e `/docs/fase2/bruno/`.
+- `README.md`: atualizado para cobrir Fase 1, Fase 2 (2.1 a 2.7) e a nova governança multi-agente.
+- `briefing-fase2.md`: atualizado para `v1.5` com nota de governança apontando para `AGENTS.md` e `STATE.md`.
+- `adr-002-estilo-servidor-monolito-modular.md`: confirmada seção `Detalhamento (2.7)` já presente no arquivo.
+- `adr-004-demonstracao-docker-e-alvo.md`: adicionada seção `Detalhamento (Governança e Estratégia de Deploy MVP — 18/11/2026)`.
+- `adr-008-estrategia-offline-e-sincronizacao.md`: adicionada seção `Detalhamento (Implementação Incremental em 2 Estágios para o MVP — 18/11/2026)`.
+- `adr-012-fotos.md`: adicionada seção `Detalhamento (Governança e Estratégia de Deploy MVP — 18/11/2026)`.
+- `c4-containers.md`: adicionada subseção `5.1. Implantação do MVP em Cloud Gratuita (Detalhamento 18/11/2026 — Opção 4C)`.
+- `padroes-de-projeto.md` e `diagrama-classes.md`: incluída a porta `P02f` (`PhotoStorage`), os dois estágios de composição de `OperationEnqueuer` (`P04`) e o ponto de extensão de gamificação em `UnlockCalculator` / `UnlockRules`.
+
+### Iterações relevantes (erros e retrabalho da IA)
+1. Inicialmente a IA interpretou "framework especializado para gamificação" como uma biblioteca de software/engine externa e sugeriu criar uma porta de código `GamificationProvider`; a dupla esclareceu tratar-se de um framework conceitual/metodológico ("de pensamento", como 6D ou Octalysis), o que validou o desenho atual de funções puras (`UnlockCalculator` / `UnlockRules`) e direcionou a extensão para regras e marcos declarativos no módulo `progress`.
+2. Quando a IA perguntou sobre o provedor cloud e o recorte funcional do MVP, a dupla alertou para não misturar responsabilidades diferentes na mesma conversa; o escopo foi imediatamente focado na refatoração estrutural, governança e pontos de extensão arquiteturais.
+
+### Divergências registradas (briefing/professor × artefatos)
+- **Caminhos declarados nos cabeçalhos (`> Destino: /docs/fase2/...`) × caminhos antigos no disco (`2.1-...` a `2.7-...`):** divergência eliminada nesta refatoração com a Opção 1B.
+
+### Riscos aceitos
+- Mantidos `R1` a `R19` registrados até a 2.7.
+
+### Pendências para a próxima sessão
+- Ver quadro consolidado na Seção 3 do `STATE.md` (Frente A: `GOV-04` workflows/skills de Issues; Frente B: fechamento da Fase 2 `F2-01` a `F2-05`; Frente C: `GAM-01`/`GAM-02` framework conceitual de gamificação; Frente D: `MVP-01` a `MVP-04`).

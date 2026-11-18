@@ -104,3 +104,9 @@ R10 (estendido às imagens).
 - **Preparadas:** as já baixadas permanecem no aparelho; em instalação nova, voltam sob demanda. A política de limpeza do armazenamento local continua em aberto.
 - **Licenças:** enum do contrato `dominio_publico`, `cc0`, `cc_by`, `cc_by_sa`, `autoria_propria`. O `[CONFIRMAR]` do item 1 continua aberto até a verificação do R10.
 - **Metadados TASL:** a publicação é bloqueada sem autor, URL da fonte, licença e indicação de alteração.
+
+## Detalhamento (Governança e Estratégia de Deploy MVP — 18/11/2026)
+
+- **Porta `PhotoStorage` (`P02f`) e Hospedagem no Supabase Storage (Opção 4C):** Para manter paridade entre o Docker Compose local e o deploy real em nuvem gratuita (ADR-004), a gravação e leitura de fotos no servidor ficam atrás da porta `PhotoStorage`:
+  - **Local (Docker Compose):** `LocalDiskPhotoStorage` grava os arquivos WebP nomeados por hash no volume do Compose e a própria API os serve.
+  - **Deploy Cloud Gratuita:** `SupabasePhotoStorage` grava os arquivos WebP no bucket gratuito do Supabase Storage, mantendo o download idempotente por hash no nome e o armazenamento local persistente no aparelho (`PhotoManager`) para uso offline das receitas planejadas.

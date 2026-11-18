@@ -142,6 +142,38 @@ Notas do alvo:
 - **Fotos:** se não houver opção gratuita de armazenamento de objetos, o app volta a baixar pela API, como na demo (ADR-012).
 - **Hipóteses:** A01 e A11 (cold start, cotas, latência) não são medidas; cota do Cloud Run em São Paulo e hospedagem de fotos seguem a verificar.
 
+### 5.1. Implantação do MVP em Cloud Gratuita (Detalhamento 18/11/2026 — Opção 4C)
+
+Para viabilizar um deploy real do MVP em camada gratuita sem cartão de crédito obrigatório e com mínima fricção operacional, mantendo paridade com o Docker Compose local (seção 4):
+
+```mermaid
+C4Deployment
+  title Implantação do MVP em Cloud Gratuita (Opção 4C)
+
+  Deployment_Node(cel_mvp, "Aparelho ou Emulador Android", "Expo development build") {
+    Container(app_mvp, "App Móvel Panelada", "React Native, TypeScript", "Mesmo app da demo.")
+    ContainerDb(dblocal_mvp, "Banco Local Cifrado", "SQLite com SQLCipher", "Chave em expo-secure-store.")
+  }
+  Deployment_Node(paas_api, "PaaS de Container Gratuita (Render / Fly.io / Koyeb)", "Mesma imagem Docker da API; segredos em variáveis de ambiente seguras") {
+    Container(api_mvp, "API Panelada", "Node.js, Fastify, TypeScript", "Cifra restrições em memória com AES-256-GCM (FieldCipher) antes de gravar no banco.")
+  }
+  Deployment_Node(supa, "Supabase (Free Tier — apenas Infraestrutura)", "Sem uso de SDK BaaS no cliente") {
+    ContainerDb(db_mvp, "Banco do Servidor", "PostgreSQL gerenciado", "Colunas de restrição contêm apenas ciphertext AES-256-GCM.")
+    ContainerDb(fotos_mvp, "Armazenamento de Fotos", "Supabase Storage", "Fotos WebP com hash no nome e metadados TASL.")
+  }
+  System_Ext(ia_mvp, "Provedor de IA (Kimi K3)", "API na internet.")
+
+  Rel(app_mvp, dblocal_mvp, "Lê e grava", "SQLCipher")
+  Rel(app_mvp, api_mvp, "Requisições", "HTTPS")
+  Rel(app_mvp, fotos_mvp, "Baixa fotos por URL estática com hash no nome", "HTTPS")
+  Rel(api_mvp, db_mvp, "Lê e grava", "SQL / TLS")
+  Rel(api_mvp, fotos_mvp, "Grava via porta PhotoStorage", "HTTPS")
+  Rel(api_mvp, ia_mvp, "Importação assistida", "HTTPS")
+```
+
+- **Proteção LGPD (`A05` e ADR-006):** O Supabase é utilizado estritamente como provedor de PostgreSQL e Object Storage por trás da `API Panelada`. A chave AES permanece exclusiva nas variáveis de ambiente da PaaS da API, e o banco nunca recebe restrição alimentar em texto claro.
+- **Paridade via Porta `PhotoStorage` (`P02f`):** Localmente usa `LocalDiskPhotoStorage` (volume do Compose); na nuvem usa `SupabasePhotoStorage`.
+
 ## 6. Decisões de detalhamento (dupla, 06/10/2026)
 
 Registradas como detalhamento dos ADRs, sem ADR novo.

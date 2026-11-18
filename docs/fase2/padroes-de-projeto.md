@@ -20,8 +20,9 @@ Um padrão só entra se tiver (1) um problema concreto do projeto, (2) as classe
 | P02c | Porta `KeyProvider` | API: Cifra | Mantido |
 | P02d | Porta `NotificationAdapter` | App: Lembretes | Mantido, mínimo (função injetada) |
 | P02e | Porta `RecipeSource` | App: Receita e Preparo | Mantido (primeiro a cortar) |
+| P02f | Porta `PhotoStorage` | API: Importação e Catálogo | Mantido (paridade Docker local × Supabase Storage) |
 | P03 | Repositório por feature | App | Mantido |
-| P04 | Transactional Outbox | App: avaliação e fila | Mantido (já existia no desenho) |
+| P04 | Transactional Outbox (em 2 estágios via `OperationEnqueuer`) | App: avaliação, rotina e perfil | Mantido (Estágio 1 online direto -> Estágio 2 Outbox) |
 | P05 | Idempotent Receiver | API: Sincronização | Mantido (já existia no desenho) |
 | P06 | Facade de módulo (interfaces públicas) | API | Mantido (já existia no desenho) |
 | T01 | Contexto transacional explícito (`Tx`) | API | Convenção que substitui o Unit of Work |
@@ -49,6 +50,7 @@ Um padrão só entra se tiver (1) um problema concreto do projeto, (2) as classe
 | P02c | `KeyProvider` (`ProvedorDeChave`): `FileKey` (demo) e `SecretManagerKey` (alvo) | Há duas implementações reais (ADR-006, ADR-004). | `if` por ambiente | Mantido |
 | P02d | `NotificationAdapter` (`AdaptadorNotificacoes`): `expo-notifications` e falso | O limite de 2 por dia (A07) se testa com um falso. O `ReminderScheduler` já é puro. | Chamar `expo-notifications` direto | Mantido como **função injetada**, sem hierarquia de classes |
 | P02e | `RecipeSource` (`FonteDeReceita`): `LocalRecipeSource` e `RemoteRecipeSource` | Isola o caminho offline da receita (A04, crítico). `LoadRecipe` testa sem rede e sem banco. | `if` local/remoto dentro de `LoadRecipe` | Mantido, sem fábrica. São só dois ramos: **primeiro candidato a corte** se a dupla achar pesado. |
+| P02f | `PhotoStorage`: `LocalDiskPhotoStorage` (Docker Compose) e `SupabasePhotoStorage` (Cloud Gratuita); falso em testes | Permite que a mesma imagem da API rode no Docker Compose local e no deploy real em nuvem gratuita (ADR-004, ADR-012, Opção 4C). | Gravar sempre em disco local | Mantido |
 
 ### P03 — Repositório por feature (app)
 
@@ -60,12 +62,13 @@ Um padrão só entra se tiver (1) um problema concreto do projeto, (2) as classe
 - **No servidor:** o acesso a dados fica em `internal/` de cada módulo. Isso é a fronteira do ADR-002, não um padrão extra.
 - **Rastreio:** A04, A05, A08; ADR-005, ADR-006.
 
-### P04 — Transactional Outbox no app
+### P04 — Transactional Outbox no app (com implementação em 2 estágios no MVP)
 
-- **Problema:** salvar a avaliação e perder a operação de sincronização (ou o contrário) viola A08 ("0 avaliações perdidas").
-- **Classes:** `RegisterRating`, `OperationEnqueuer` (`EnfileiradorDeOperacoes`), `SyncQueue` (`FilaSincronizacao`), `QueuedOperation` (`OperacaoFila`), `LocalDatabase.transaction`.
+- **Problema:** salvar a avaliação e perder a operação de sincronização (ou o contrário) viola A08 ("0 avaliações perdidas"). Ao mesmo tempo, construir toda a fila de reenvio em background antes do primeiro deploy pode comprometer o prazo do MVP (R4).
+- **Classes:** `RegisterRating`, `OperationEnqueuer` (`EnfileiradorDeOperacoes`), `DirectOnlineOperationEnqueuer` (Estágio 1 do MVP), `OutboxOperationEnqueuer` / `SyncQueue` (`FilaSincronizacao`, Estágio 2 do MVP), `QueuedOperation` (`OperacaoFila`), `LocalDatabase.transaction`.
 - **Alternativa mais simples:** uma coluna `synced` em cada tabela, com varredura para enviar.
 - **Por que não basta:** a revogação de restrição **apaga a linha** (decisão da 2.6), então não há linha onde marcar a operação. A coluna também não guarda o `opId` estável nem a ordem de criação.
+- **Estratégia em 2 estágios (Opção 3C — ADR-008):** Os casos de uso chamam sempre a interface `OperationEnqueuer`. No **Estágio 1 (Primeiro Deploy)**, a raiz de composição (`src/app/composition`, regra A8) injeta `DirectOnlineOperationEnqueuer` (envia direto à API com `Idempotency-Key` e atualiza o SQLCipher local, exigindo rede para mutações enquanto a leitura das receitas planejadas já funciona offline). No **Estágio 2**, a raiz de composição passa a injetar `OutboxOperationEnqueuer` (`SyncQueue`) + `Synchronizer`, ativando o Outbox offline completo sem modificar nenhum caso de uso ou tela.
 - **Rastreio:** A08, A04; ADR-005, ADR-008; UC08, UC10.
 
 ### P05 — Idempotent Receiver no servidor
@@ -102,9 +105,11 @@ Um padrão só entra se tiver (1) um problema concreto do projeto, (2) as classe
 | R02 | Lista de regras no `PublicationGate` (`PortaoPublicacao`) | O requisito é devolver **todas** as violações, e quatro verificações atendem isso. Uma interface de regra não pagaria o custo. | Função com helpers privados, um por verificação, sem interface nem classe | Mais de seis regras |
 | R03 | Calculadora de desbloqueio por tipo de marco | Os cinco tipos da RN03 são fixos, carregados por seed pela dupla | `switch` sobre união discriminada com checagem `never` (a compilação falha se surgir um sexto tipo) | Sexto tipo de marco |
 
-### Regra de desbloqueio nos dois lados
+### Regra de desbloqueio nos dois lados e Ponto de Extensão para Gamificação (Opção 2A)
 
 O app calcula o desbloqueio localmente e o servidor o recalcula (só acrescenta, RN04). Decisão da dupla (opção B): **duas implementações** (`UnlockCalculator` no app, `UnlockRules` no módulo `progress` do servidor), com **uma suíte comum de vetores** em arquivo JSON usado só nos testes, no mesmo modelo dos vetores do Pacote de Alérgenos (ADR-014). Não há pacote compartilhado novo. Risco: as duas implementações podem divergir se um vetor não for atualizado; a CI roda a suíte nos dois lados.
+
+- **Preparação para o Framework Conceitual de Gamificação (6D / Octalysis — 18/11/2026):** O requisito acadêmico de aplicar um framework metodológico de gamificação (como Octalysis ou 6D) atuará sobre as regras de negócio e definições declarativas de marcos (`MilestoneDefinition` / `BadgeDefinition`). Tecnicamente, `UnlockCalculator` e `UnlockRules` constituem a fronteira única de gamificação do sistema: novos tipos de marcos, loops de progresso ou conquistas derivados do framework conceitual ficam isolados no módulo `progress` e na suíte de vetores JSON, cumprindo `A12` (modificabilidade restrita a um módulo).
 
 ### 5.1 Varredura do catálogo de padrões
 

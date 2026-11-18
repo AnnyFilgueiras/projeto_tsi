@@ -104,3 +104,10 @@ R5, R6, R7.
 ## Detalhamento (2.5)
 
 - **Chave da API de IA no alvo:** fica no Secret Manager, como segredo separado da chave AES (o item 9 cita só a chave AES). Na demo continua no arquivo de ambiente fora do repositório (item 4).
+
+## Detalhamento (Governança e Estratégia de Deploy MVP — 18/11/2026)
+
+- **Deploy real do MVP em Cloud Gratuita (Opção 4C):** Para viabilizar o primeiro deploy funcional do MVP sem exigir cartão de crédito nem configurar múltiplos serviços isolados no GCP, a implantação em nuvem adota **Supabase (Free Tier)** em conjunto com uma **PaaS gratuita de container para a API Fastify** (Render / Fly.io / Koyeb):
+  1. **Supabase restrito a Infraestrutura (PostgreSQL + Object Storage):** O Supabase é utilizado exclusivamente como banco PostgreSQL gerenciado (`DATABASE_URL`) e armazenamento de objetos para as fotos WebP das receitas (`PhotoStorage`). **Não se utiliza o SDK BaaS do Supabase no cliente móvel**; todo o tráfego continua passando pela `API Panelada` (Fastify).
+  2. **Preservação integral da LGPD (`A05` e ADR-006):** Como a API Fastify continua intermediando todas as leituras e escritas, os campos de restrição alimentar continuam sendo cifrados e decifrados em memória pela aplicação com `AES-256-GCM` (`FieldCipher`) antes de chegar ao disco do PostgreSQL no Supabase, e a chave AES permanece configurada apenas nas variáveis de ambiente seguras da API (fora do banco).
+  3. **Paridade com o Docker Compose local:** O ambiente local em Docker Compose (`api` + `postgres` + volume local de fotos) é mantido intacto para desenvolvimento diário e como fallback offline garantido para a demonstração acadêmica. A diferença entre disco local e nuvem fica isolada por variáveis de ambiente e pela porta `PhotoStorage` (`LocalDiskPhotoStorage` vs. `SupabasePhotoStorage`).
