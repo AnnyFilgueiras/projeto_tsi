@@ -263,6 +263,20 @@ data e sua nota, sem sobrescrita (RN06).
 Resultado: [x] Passa  [ ] Falha → motivo:
 ```
 
+```
+CT31 — Origem: US12, US15, US16; RN01, RN02, RN03 (a–h), RN04; ADR-016 (6D + Octalysis)
+Dado que concluí pela primeira vez o prato base "Cuscuz" registrando nota 4,5 e
+alteração pessoal "Adicionei queijo coalho na massa" (`alteracoes` não vazio),
+quando a avaliação é salva,
+então "Cuscuz" entra na coleção (RN01), sua evolução direta "Cuscuz recheado"
+é desbloqueada (RN02), e os marcos aplicáveis de volume (`total_dishes = 1`,
+RN03f) e de expressão criativa (`adaptation_count = 1`, RN03h) concedem os
+respectivos badges uma única vez com `dataDesbloqueio` (RN04); e, ao salvar
+uma segunda avaliação de "Cuscuz" com ou sem alterações, nenhum badge ou
+evolução já conquistado é duplicado ou revogado (RN02, RN04).
+Resultado: [x] Passa  [ ] Falha → motivo:
+```
+
 ## US14 — Coleção por culinária
 
 ```

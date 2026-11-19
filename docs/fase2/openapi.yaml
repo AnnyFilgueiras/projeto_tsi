@@ -4,8 +4,8 @@ info:
   version: 1.1.0-2.7
   summary: Contrato da API do Panelada (fonte da verdade, Fase 2.6)
   description: 'Contrato de sessão e contas, sincronização, conjunto baixado, sugestão e busca, rotas de curadoria,
-    erros e idempotência. Gerado na conversa 2.6; v1.1 da 2.7 (identificadores em inglês, ADR-015); a revisar pela
-    dupla.
+    erros e idempotência. Gerado na conversa 2.6; v1.1 da 2.7 (identificadores em inglês, ADR-015; marcos de badge
+    estendidos para 8 variantes conforme framework 6D + Octalysis, ADR-016); a revisar pela dupla.
 
 
     **Convenções.** JSON em UTF-8. Erros em `application/problem+json` (RFC 9457). Identificadores UUID. Datas em
@@ -2602,6 +2602,8 @@ components:
         - type
         - quantity
         additionalProperties: false
+      discriminator:
+        propertyName: type
       description: Marco verificável do badge (RN03 a-h, ADR-016). Definido por seed da dupla.
     BadgeDefinition:
       type: object

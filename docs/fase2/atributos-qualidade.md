@@ -16,7 +16,7 @@
 | Custo | Infraestrutura gratuita; pagamento único baixo aceitável | Briefing, seção 2 |
 | Escala | Até 1.500 usuários ativos em um dia de pico | Decisão da dupla (05/10/2026) |
 | Catálogo (dimensionamento) | 350 pratos | Decisão da dupla (05/10/2026) |
-| Catálogo (lançamento do MVP) | 100 pratos verificados, em 10 culinárias, cobrindo os 5 continentes; ao menos 1 cadeia de evolução com 2 níveis (nem todos os pratos precisam ter 2 níveis) | Decisão da dupla; cobertura derivada de US16 e RN03 |
+| Catálogo (lançamento do MVP) | 100 pratos verificados, em 10 culinárias, cobrindo os 5 continentes; ao menos 1 cadeia de evolução com 3 níveis (para exercitar os marcos `minLevel: 2` e `minLevel: 3` da RN03g / ADR-016; nem todos os pratos precisam ter cadeia) | Decisão da dupla; cobertura derivada de US16, RN03 e ADR-016 |
 | Dispositivo de referência (H) | Android com 4 GB de RAM, rede 4G | Hipótese, revisar na 2.3 |
 | Fora do MVP | A14 (instrumentação de engajamento) | Decisão da dupla (05/10/2026) |
 

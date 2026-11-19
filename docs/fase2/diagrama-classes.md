@@ -299,7 +299,7 @@ classDiagram
 - Avaliações, conquistas e desbloqueios só se acrescentam (RN04, RN06, RNF09). Não há edição nem exclusão de avaliação, exceto na exclusão de conta.
 - `encryptedType` usa AES-256-GCM, com versão da chave e a conta como dado autenticado (ADR-006). A revogação apaga a linha.
 - `BadgeDefinition` guarda o `milestone` tipado (`dish`, `cuisine`, `n_cuisines`, `all_continents`, `set`, `total_dishes`, `evolution_level`, `adaptation_count` — RN03 a–h, ADR-016), carregado por seed.
-- `UnlockRules` (nova na v1.1) recalcula desbloqueios no servidor, só acrescentando. É pura e passa pelos mesmos vetores de teste do `UnlockCalculator` do app. Os oito tipos de marco (RN03 a–h, formalizados pelo framework 6D + Octalysis no ADR-016 e em `framework-gamificacao.md`) são tratados por `switch` sobre união discriminada, com checagem `never`.
+- `UnlockRules` (nova na v1.1) recalcula desbloqueios no servidor, só acrescentando. É pura e passa pelos mesmos vetores de teste do `UnlockCalculator` do app. Os oito tipos de marco (RN03 a–h, formalizados pelo framework 6D + Octalysis no ADR-016 e em `framework-gamificacao.md`) são tratados por `switch` sobre união discriminada, com checagem `never`. O parâmetro `state` (`UnlockState`) carrega `completedDishIds`, `adaptationRatingIds` (avaliações distintas com `changes` não vazio para o marco `adaptation_count`), `unlockedEvolutionDishIds` e `awardedBadgeIds`; a subida por `baseDishId` em `evolution_level` possui guarda anti-ciclo (`visited` + `MAX_DEPTH = 10`).
 
 ## 6. API: Identidade e Sessões
 

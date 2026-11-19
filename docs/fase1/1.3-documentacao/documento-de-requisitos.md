@@ -24,7 +24,7 @@
 
 **Declaração de visão:** Ser a principal referência em culinária internacional para cozinheiros amadores que buscam variedade e diversão na cozinha. O Panelada busca tornar o processo de cozinhar mais divertido e estimular o aprendizado de pratos novos: o usuário descobre receitas de diferentes países conforme seu perfil, organiza sua rotina de refeições (escolha do prato, data de compra dos ingredientes e data de preparo), registra avaliações e adaptações pessoais, e compartilha a experiência com amigos — com catálogo inicial alimentado por plataformas públicas de receitas.
 
-**Conceito de gamificação:** abordagem híbrida com três camadas — coleção/exploração como espinha dorsal ("Pokédex de pratos"), maestria via cadeias de evolução (prato base → versões mais complexas) e desafio social leve como consequência (sugestões entre amigos). Interação social aprofundada despriorizada nesta versão.
+**Conceito de gamificação:** estruturado metodologicamente pelo framework híbrido **6D (Werbach & Hunter) + Octalysis (Yu-kai Chou)** ([`framework-gamificacao.md`](../../fase2/framework-gamificacao.md), [ADR-016](../../fase2/adr/adr-016-framework-conceitual-gamificacao.md)), combinando quatro pilares *White Hat* não punitivos (`RNF09`): coleção/exploração cultural como espinha dorsal ("Pokédex de pratos", CD4/CD7), maestria via cadeias de evolução (prato base → versões mais complexas, CD2), autoria criativa e badges multi-dimensionais (adaptações pessoais no caderno digital e conquistas verificáveis `RN03 a–h`, CD1/CD2/CD3/CD4) e interação social colaborativa leve (sugestões entre amigos, CD5, sem ranking competitivo).
 
 **Stakeholders:**
 - **Do produto (geram requisitos):** cozinheiro/jogador (usuário principal; interesse secundário documentado: interação com amigos — se o social subir de prioridade, "amigo" volta a ser stakeholder separado); curador/admin de receitas.
@@ -81,7 +81,7 @@ Fonte modular: [lexico.md](../1.1-elicitacao/lexico.md)
 | RF12 | O sistema deve atribuir pontos por prato concluído, calculados a partir da dificuldade da receita e do ineditismo para o usuário | Escopo, R |
 | RF13 | O sistema deve manter a coleção pessoal de pratos do usuário, exibindo o progresso por país/culinária | R, M, decisão de gamificação |
 | RF14 | O sistema deve organizar pratos em cadeias de evolução, em que uma versão base desbloqueia versões mais complexas | Decisão de gamificação, todos |
-| RF15 | O sistema deve conceder badges ao atingir marcos definidos (ex.: pratos de N países distintos) | Escopo, C, R |
+| RF15 | O sistema deve conceder badges ao atingir marcos verificáveis definidos de exploração cultural, consistência, evolução em cadeia e adaptação criativa (RN03 a–h, ADR-016) | Escopo, C, R, 6D + Octalysis |
 | ~~RF16~~ | ~~O sistema deve exibir um ranking de pontos entre o usuário e seus amigos~~ — **DESCARTADO (Won't):** apenas 1 dos 5 entrevistados demonstrou interesse; social despriorizado pela dupla | Escopo, R |
 | RF17 | O sistema deve permitir sugerir um prato a um amigo | Escopo, D1, C, R |
 | RF18 | O sistema deve permitir ao curador importar e manter o catálogo de receitas (com apoio opcional de agente de IA), incluindo dificuldade, estado dos alérgenos (verificado, declarado pela fonte, não verificado) e cadeias de evolução | Decisão de fonte de conteúdo, Atributos de Qualidade A09 |
@@ -126,7 +126,7 @@ Fonte modular: [requisitos.md](../1.1-elicitacao/requisitos.md)
 | **Could** (2) | US13, US17 |
 | **Won't** (1) | Ranking entre amigos (ex-RF16): apenas 1 dos 5 entrevistados tinha interesse; social exige implementação cuidadosa; dupla optou por foco |
 
-Decisões de priorização: a identidade de gamificação é coleção (Must) → evolução (primeiro Should) → badges (Should); pontuação (US13) é Could por ser mecânica "batida". US08 (lembretes) é Must por fundamentação em computação persuasiva, desde que não irritante (RNF07).
+Decisões de priorização: a identidade de gamificação — estruturada metodologicamente pelo framework híbrido **6D (Werbach & Hunter) + Octalysis (Yu-kai Chou)** ([`framework-gamificacao.md`](../../fase2/framework-gamificacao.md), [ADR-016](../../fase2/adr/adr-016-framework-conceitual-gamificacao.md)) — prioriza motivadores *White Hat* de posse cultural, maestria e criatividade: coleção (Must, CD4) → evolução em árvore (primeiro Should, CD2) → badges multi-dimensionais (Should, CD1/CD2/CD3/CD4); pontuação extrínseca avulsa (US13) permanece Could por evitar a *PBL Fallacy*. US08 (lembretes) é Must por fundamentação em computação persuasiva e design não punitivo (RNF09), desde que não irritante (RNF07).
 
 ### Must
 
@@ -384,7 +384,7 @@ Fonte modular (fluxos alternativos e de exceção completos): [casos-de-uso.md](
 
 ## 8. Regras de negócio
 
-18 RNs ativas, 1 futura (RN19) e 1 excluída (RN20). Toda RN é rastreável a US/RF. Status das ativas: a validar na 1.4.
+20 RNs ativas (RN01–RN18, RN21, RN22), 1 futura (RN19) e 1 excluída (RN20). Toda RN é rastreável a US/RF. Status das ativas: validadas na 1.4 e retroalimentadas na Fase 2 (incluindo extensão 6D + Octalysis na RN03, ADR-016).
 
 ### Fundamentos da gamificação (6D Framework + Octalysis — ADR-016)
 

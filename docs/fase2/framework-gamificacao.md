@@ -198,27 +198,131 @@ A aplicação combinada do **6D + Octalysis** consolidou as **8 formas verificá
 | **`(d)`** | `all_continents` | *(sem parâmetros extras)* | *Significado Épico Global* (**CD1**, **CD4**) | A união dos atributos `continents` das culinárias de todos os pratos concluídos pelo usuário cobre os 5 continentes do catálogo (`americas`, `africa`, `europe`, `asia`, `oceania`). | **Rei do Mundo** *(Pratos dos 5 continentes)* |
 | **`(e)`** | `set` | `cuisineIds: UUID[] (min 2)` | *Narrativa Temática Curada* (**CD1**, **CD4**) | Para todo `cId` em `milestone.cuisineIds`, o usuário concluiu ao menos um prato pertencente à culinária `cId`. | **Grandes Civilizações** *(Egito, Grécia e Itália)* |
 | **`(f)`** | `total_dishes` | `quantity: int (>= 1)` | *Onboarding & Consistência* (**6D Progression Stair / CD2**) | A cardinalidade do conjunto de `dishId` distintos concluídos pelo usuário é $\ge$ `quantity`. | **Primeiro Fogo** (`quantity: 1`) / **Chef de Rotina** (`quantity: 5`) |
-| **`(g)`** | `evolution_level` | `minLevel: int (>= 2)` | *Maestria em Cadeia* (**6D Progression Stair / CD2**) | Existe ao menos um prato concluído pelo usuário cujo nível de profundidade na árvore de `baseDishId` do `catalogIndex` seja $\ge$ `minLevel` (onde prato raiz sem base = nível `1`, evolução direta = nível `2`, evolução de evolução = nível `3`, etc. — `RN18`). | **Além do Básico** (`minLevel: 2`) / **Mestre da Evolução** (`minLevel: 3`) |
-| **`(h)`** | `adaptation_count` | `quantity: int (>= 1)` | *Expressão Criativa & Autoria* (**Octalysis CD3**) | A quantidade de avaliações salvas pelo usuário (distintas por `rating.id`, conforme `RN06`) em que o campo `changes` (`alteracoes`) possui texto não vazio (`changes.trim().length > 0`) é $\ge$ `quantity`. | **Toque Pessoal** (`quantity: 1`) / **Alquimista da Cozinha** (`quantity: 5`) |
+| **`(g)`** | `evolution_level` | `minLevel: int (>= 2)` | *Maestria em Cadeia* (**6D Progression Stair / CD2**) | Existe ao menos um prato concluído pelo usuário cujo nível de profundidade na árvore de `baseDishId` do `catalogIndex` seja $\ge$ `minLevel` (onde prato raiz sem base = nível `1`, evolução direta = nível `2`, evolução de evolução = nível `3`, etc. — `RN18`). A subida pela árvore mantém um `visited = new Set<UUID>()` com teto `MAX_DEPTH = 10`, interrompendo com segurança caso encontre ciclo ou `baseDishId` ausente no índice. | **Além do Básico** (`minLevel: 2`) / **Mestre da Evolução** (`minLevel: 3`) |
+| **`(h)`** | `adaptation_count` | `quantity: int (>= 1)` | *Expressão Criativa & Autoria* (**Octalysis CD3**) | A quantidade de avaliações salvas pelo usuário (distintas por `rating.id`, conforme `RN06` — contando inclusive repetições do mesmo prato que tenham adaptação) em que o campo `changes` (`alteracoes`) possui texto não vazio (`changes != null && changes.trim().length > 0`) é $\ge$ `quantity`. | **Toque Pessoal** (`quantity: 1`) / **Alquimista da Cozinha** (`quantity: 5`) |
+
+### 7.3. Regra de Bloqueio de Evoluções na UI vs. Tolerância Offline no Servidor (`RN02` × `A08`)
+
+Para evitar divergência de implementação entre o App e a API sobre pratos que são evolução (`baseDishId != null`):
+1. **No App (`Sugestões`, `Busca`, `Coleção` e `Receita e Preparo`):**
+   - Enquanto `dish.baseDishId != null` e o `dish.id` não constar em `EvolutionUnlock` (isto é, o prato base `baseDishId` ainda não foi concluído), a evolução é exibida como **bloqueada** (`UC04-FA3`, *Core Drive 6: Scarcity positiva*), informando o nome do prato base necessário e mantendo os botões de *"Iniciar passo a passo"* e *"Avaliar prato"* desabilitados na interface.
+   - Nas sugestões automáticas (`UC01` / `SuggestionSearch`), evoluções cujo `baseDishId` ainda não foi concluído pelo usuário não são apresentadas como sugestão do dia.
+2. **No Servidor (`RatingApplier` na Sincronização — Resiliência `A08`):**
+   - Caso a fila offline (`SyncService`) receba as avaliações do prato base e da evolução fora de ordem ou em lotes distintos, o `RatingApplier` **não rejeita** a avaliação de um prato válido por causa da ordem de desbloqueio: ele persiste a avaliação normalmente (respeitando `A08` — *"0 avaliações perdidas"*) e recalcula `UnlockRules` de forma aditiva (`RN04`).
+3. **Invariante Anti-Ciclo no Catálogo (`PublicationGate`):**
+   - Na publicação de uma receita (`CatalogWrite.publish`), o `PublicationGate` verifica que `baseDishId !== dish.id` e que a cadeia de `baseDishId` até a raiz (`baseDishId == null`) não contém ciclos nem excede `MAX_DEPTH = 10`.
+
+### 7.4. Seed Canônico de Badges do MVP (10 Badges Exercitando `RN03 a–h`)
+
+Para garantir que nenhuma conquista do perfil seja impossível de obter no lançamento (*unachievable badge*) e que todas as **8 variantes de `Milestone` (`a..h`)** sejam demonstráveis com o catálogo inicial de 100 pratos e 10 culinárias (`A09`, incluindo ao menos 1 cadeia de evolução de 3 níveis), o seed do módulo `progress` carrega os seguintes 10 badges canônicos:
+
+| # | Nome do Badge | Descrição na UI | Alínea `RN03` | `milestone.type` | Parâmetros do Seed (`milestone`) | Fase da Jornada (Octalysis / 6D) |
+|---|---|---|---|---|---|---|
+| **1** | **Primeiro Fogo** | Concluiu seu primeiro prato no Panelada. | `(f)` | `total_dishes` | `{ "type": "total_dishes", "quantity": 1 }` | *Onboarding* (CD2) |
+| **2** | **Mini Chef** | Preparou e avaliou o clássico Ratatouille. | `(a)` | `dish` | `{ "type": "dish", "dishId": "<UUID_RATATOUILLE>" }` | *Onboarding* (CD2, CD7) |
+| **3** | **Toque Pessoal** | Registrou sua primeira adaptação criativa em uma receita. | `(h)` | `adaptation_count` | `{ "type": "adaptation_count", "quantity": 1 }` | *Onboarding / Scaffolding* (CD3) |
+| **4** | **Chegando na Arábia** | Concluiu ao menos um prato da culinária árabe. | `(b)` | `cuisine` | `{ "type": "cuisine", "cuisineId": "<UUID_ARABE>" }` | *Scaffolding* (CD4, CD7) |
+| **5** | **Além do Básico** | Desbloqueou e concluiu a primeira evolução de um prato (nível 2). | `(g)` | `evolution_level` | `{ "type": "evolution_level", "minLevel": 2 }` | *Scaffolding* (CD2, CD6) |
+| **6** | **Chef de Rotina** | Concluiu 5 pratos distintos do catálogo. | `(f)` | `total_dishes` | `{ "type": "total_dishes", "quantity": 5 }` | *Scaffolding* (CD2) |
+| **7** | **Alquimista da Cozinha** | Registrou alterações pessoais em 5 preparos. | `(h)` | `adaptation_count` | `{ "type": "adaptation_count", "quantity": 5 }` | *Scaffolding / Endgame* (CD3, CD4) |
+| **8** | **Grandes Civilizações** | Concluiu pratos das culinárias do conjunto histórico (ex.: Itália, Grécia e Egito/Árabe). | `(e)` | `set` | `{ "type": "set", "cuisineIds": ["<UUID_1>", "<UUID_2>", "<UUID_3>"] }` | *Endgame* (CD1, CD4) |
+| **9** | **Mestre da Evolução** | Concluiu o topo de uma cadeia de evolução de 3 níveis (`minLevel: 3`). | `(g)` | `evolution_level` | `{ "type": "evolution_level", "minLevel": 3 }` | *Endgame* (CD2) |
+| **10** | **Passaporte Carimbado** | Concluiu pratos de 10 culinárias distintas. | `(c)` | `n_cuisines` | `{ "type": "n_cuisines", "quantity": 10 }` | *Endgame* (CD2, CD4) |
+| **11** | **Rei do Mundo** | Concluiu ao menos um prato de cada um dos 5 continentes. | `(d)` | `all_continents` | `{ "type": "all_continents" }` | *Endgame* (CD1, CD4) |
 
 ---
 
-## 8. Isolamento Arquitetural (`A12`) e Contrato de Testes por Vetores JSON
+## 8. Isolamento Arquitetural (`A12`), Contrato de `UnlockState` e Vetores JSON
 
 Conforme estabelecido no [ADR-002](./adr/adr-002-estilo-servidor-monolito-modular.md), no [ADR-016](./adr/adr-016-framework-conceitual-gamificacao.md) e em [`padroes-de-projeto.md`](./padroes-de-projeto.md) (§5 e §9):
 
 1. **Fronteira Única de Gamificação:**
    - **No App (`apps/mobile`):** `UnlockCalculator` (em `src/features/rating-and-collection/domain/unlock-calculator.ts`), função pura que não importa banco nem bibliotecas nativas (regra `A6`).
    - **No Servidor (`apps/api`):** `UnlockRules` (em `src/modules/progress/internal/unlock-rules.ts`), função pura chamada exclusivamente por `RatingApplier` dentro do módulo `progress` (regras `S1` e `S2`).
-2. **Checagem de Exaustividade em Tempo de Compilação (`R03`):**
+2. **Assinatura Determinística de Entrada e Saída (`UnlockCalculator.calculate` e `UnlockRules.calculate`):**
+   Para que todos os 8 tipos de marco (`a..h`) — em especial `adaptation_count` (que conta preparos com `changes` não vazio, mesmo em pratos repetidos) e `evolution_level` (que sobe pela árvore de `baseDishId`) — produzam exatamente o mesmo resultado no cliente e no servidor, a assinatura pura opera sobre o seguinte contrato de tipos:
+   ```typescript
+   export interface RatingForUnlock {
+     id: string;          // opId da avaliação recém-salva
+     dishId: string;
+     score: number;       // 0..10 (meios-pontos, RN05)
+     changes?: string | null;
+   }
+
+   export interface CatalogIndexForUnlock {
+     dishes: ReadonlyArray<{
+       id: string;
+       cuisineId: string;
+       baseDishId: string | null;
+     }>;
+     cuisines: ReadonlyArray<{
+       id: string;
+       continents: ReadonlyArray<'americas' | 'africa' | 'europe' | 'asia' | 'oceania'>;
+     }>;
+     badgeDefinitions: ReadonlyArray<{
+       id: string;
+       milestone: Milestone; // união discriminada de 8 tipos (RN03 a..h)
+     }>;
+   }
+
+   export interface UnlockState {
+     completedDishIds: ReadonlyArray<string>;         // pratos distintos já concluídos antes ou até agora
+     adaptationRatingIds: ReadonlyArray<string>;      // IDs de avaliações (Rating.id) com changes.trim().length > 0
+     unlockedEvolutionDishIds: ReadonlyArray<string>; // dishIds de evoluções já desbloqueadas
+     awardedBadgeIds: ReadonlyArray<string>;          // definitionIds de badges já concedidos (RN04)
+   }
+
+   export interface UnlockCalculationResult {
+     newEvolutionUnlocks: string[]; // apenas os novos dishIds desbloqueados por esta avaliação
+     newBadgeAwards: string[];      // apenas os novos definitionIds conquistados por esta avaliação
+   }
+   ```
+3. **Checagem de Exaustividade em Tempo de Compilação (`R03`):**
    - Ambas as funções operam sobre o tipo discriminado `Milestone` via `switch (milestone.type)` com ramo `default` atribuído a `never`. Se um nono tipo de marco for adicionado ao tipo sem implementação, a compilação TypeScript falha imediatamente.
-3. **Estrutura da Suíte Compartilhada de Vetores JSON (TDD — Fase 3):**
-   - Assim como no pacote de alérgenos ([ADR-014](./adr/adr-014-regra-alergenos-compartilhada.md)), os testes de `UnlockCalculator` e `UnlockRules` lerão uma tabela única de vetores JSON cobrindo obrigatoriamente:
-     - Desbloqueio de evolução direta na 1ª avaliação do prato base e idempotência na 2ª avaliação (`RN02`);
-     - Cadeia de evolução multinível (nível 1 $\rightarrow$ nível 2 $\rightarrow$ nível 3 — `RN18` e `RN03g`);
-     - Concessão única e não revogação para cada uma das **8 variantes de `Milestone` (`a..h`)** (`RN03`, `RN04`);
-     - Nota `0` concluindo o prato normalmente (`RN01`, `RN05`);
-     - Contagem de adaptações criativas ignorando strings vazias ou compostas apenas por espaços em branco (`RN03h`).
+4. **Formato Canônico da Suíte Compartilhada de Vetores JSON (TDD — Fase 3):**
+   - Assim como no pacote de alérgenos ([ADR-014](./adr/adr-014-regra-alergenos-compartilhada.md)), os testes de `UnlockCalculator` e `UnlockRules` executam a mesma tabela JSON de vetores:
+   ```json
+   [
+     {
+       "id": "VEC-GAM-01-first-dish-and-creative-adaptation",
+       "description": "RN01, RN02, RN03(a,b,f,h), RN04: 1a avaliacao de prato base com alteracao pessoal desbloqueia evolucao direta e badges de 1o prato, culinaria e toque pessoal",
+       "input": {
+         "rating": {
+           "id": "01950000-0000-7000-8000-000000000001",
+           "dishId": "00000000-0000-4000-8000-000000000101",
+           "score": 9,
+           "changes": "Troquei manteiga por azeite extra virgem"
+         },
+         "index": {
+           "dishes": [
+             { "id": "00000000-0000-4000-8000-000000000101", "cuisineId": "00000000-0000-4000-8000-000000000201", "baseDishId": null },
+             { "id": "00000000-0000-4000-8000-000000000102", "cuisineId": "00000000-0000-4000-8000-000000000201", "baseDishId": "00000000-0000-4000-8000-000000000101" }
+           ],
+           "cuisines": [
+             { "id": "00000000-0000-4000-8000-000000000201", "continents": ["europe"] }
+           ],
+           "badgeDefinitions": [
+             { "id": "00000000-0000-4000-8000-000000000301", "milestone": { "type": "total_dishes", "quantity": 1 } },
+             { "id": "00000000-0000-4000-8000-000000000302", "milestone": { "type": "adaptation_count", "quantity": 1 } }
+           ]
+         },
+         "state": {
+           "completedDishIds": [],
+           "adaptationRatingIds": [],
+           "unlockedEvolutionDishIds": [],
+           "awardedBadgeIds": []
+         }
+       },
+       "expectedOutput": {
+         "newEvolutionUnlocks": ["00000000-0000-4000-8000-000000000102"],
+         "newBadgeAwards": [
+           "00000000-0000-4000-8000-000000000301",
+           "00000000-0000-4000-8000-000000000302"
+         ]
+       }
+     }
+   ]
+   ```
 
 ---
 
