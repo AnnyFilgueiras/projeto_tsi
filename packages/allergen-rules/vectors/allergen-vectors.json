@@ -1,0 +1,598 @@
+{
+  "version": "1.0.0",
+  "classifyRecipe": [
+    {
+      "id": "CL-01",
+      "trace": "RN16 / ADR-014",
+      "description": "user without restrictions gets compatible for verified recipe while preserving allergenState",
+      "input": {
+        "recipe": {
+          "id": "recipe-verified-milk",
+          "allergens": ["leite", "lactose"],
+          "allergenState": "verified"
+        },
+        "restrictions": []
+      },
+      "expected": {
+        "result": "compatible",
+        "allergenState": "verified",
+        "reasons": ["no_restrictions"],
+        "matchedAllergens": []
+      }
+    },
+    {
+      "id": "CL-02",
+      "trace": "RN16 / ADR-014",
+      "description": "user without restrictions gets compatible for source_declared recipe while preserving allergenState",
+      "input": {
+        "recipe": {
+          "id": "recipe-source-declared",
+          "allergens": ["ovo"],
+          "allergenState": "source_declared"
+        },
+        "restrictions": []
+      },
+      "expected": {
+        "result": "compatible",
+        "allergenState": "source_declared",
+        "reasons": ["no_restrictions"],
+        "matchedAllergens": []
+      }
+    },
+    {
+      "id": "CL-03",
+      "trace": "RN16 / RN08",
+      "description": "user without restrictions gets compatible for unverified recipe with empty allergens while preserving allergenState",
+      "input": {
+        "recipe": {
+          "id": "recipe-unverified-empty",
+          "allergens": [],
+          "allergenState": "unverified"
+        },
+        "restrictions": []
+      },
+      "expected": {
+        "result": "compatible",
+        "allergenState": "unverified",
+        "reasons": ["no_restrictions"],
+        "matchedAllergens": []
+      }
+    },
+    {
+      "id": "CL-04",
+      "trace": "RN08 / A06",
+      "description": "user with single restriction gets compatible for verified recipe without matching allergens",
+      "input": {
+        "recipe": {
+          "id": "recipe-verified-egg",
+          "allergens": ["ovo"],
+          "allergenState": "verified"
+        },
+        "restrictions": ["amendoim"]
+      },
+      "expected": {
+        "result": "compatible",
+        "allergenState": "verified",
+        "reasons": ["allergen_verified_safe"],
+        "matchedAllergens": []
+      }
+    },
+    {
+      "id": "CL-05",
+      "trace": "RN08 / ADR-014",
+      "description": "user with restriction gets compatible for verified recipe with empty allergens when confirmedAllergenFree is true",
+      "input": {
+        "recipe": {
+          "id": "recipe-verified-allergen-free",
+          "allergens": [],
+          "allergenState": "verified",
+          "confirmedAllergenFree": true
+        },
+        "restrictions": ["amendoim", "lactose"]
+      },
+      "expected": {
+        "result": "compatible",
+        "allergenState": "verified",
+        "reasons": ["allergen_verified_safe"],
+        "matchedAllergens": []
+      }
+    },
+    {
+      "id": "CL-06",
+      "trace": "RN08 / A06",
+      "description": "user with restriction gets unconfirmed for verified recipe with empty allergens when confirmedAllergenFree is absent",
+      "input": {
+        "recipe": {
+          "id": "recipe-verified-empty-unconfirmed",
+          "allergens": [],
+          "allergenState": "verified"
+        },
+        "restrictions": ["amendoim"]
+      },
+      "expected": {
+        "result": "unconfirmed",
+        "allergenState": "verified",
+        "reasons": ["empty_allergens_unconfirmed"],
+        "matchedAllergens": []
+      }
+    },
+    {
+      "id": "CL-07",
+      "trace": "RN08 / A06",
+      "description": "user with single restriction gets incompatible when verified recipe contains restricted allergen",
+      "input": {
+        "recipe": {
+          "id": "recipe-pad-thai",
+          "allergens": ["amendoim", "crustaceos", "soja"],
+          "allergenState": "verified"
+        },
+        "restrictions": ["amendoim"]
+      },
+      "expected": {
+        "result": "incompatible",
+        "allergenState": "verified",
+        "reasons": ["allergen_match"],
+        "matchedAllergens": ["amendoim"]
+      }
+    },
+    {
+      "id": "CL-08",
+      "trace": "RN08 / A06",
+      "description": "user with multiple restrictions gets incompatible with all matched allergens in canonical order",
+      "input": {
+        "recipe": {
+          "id": "recipe-quiche",
+          "allergens": ["lactose", "leite", "ovo", "trigo_centeio_cevada_aveia"],
+          "allergenState": "verified"
+        },
+        "restrictions": ["lactose", "amendoim", "ovo", "leite"]
+      },
+      "expected": {
+        "result": "incompatible",
+        "allergenState": "verified",
+        "reasons": ["allergen_match"],
+        "matchedAllergens": ["ovo", "leite", "lactose"]
+      }
+    },
+    {
+      "id": "CL-09",
+      "trace": "RN08 / A06",
+      "description": "user with multiple restrictions gets compatible for verified recipe with zero overlap",
+      "input": {
+        "recipe": {
+          "id": "recipe-verified-fish",
+          "allergens": ["peixe"],
+          "allergenState": "verified"
+        },
+        "restrictions": ["trigo_centeio_cevada_aveia", "amendoa", "castanha_caju", "latex"]
+      },
+      "expected": {
+        "result": "compatible",
+        "allergenState": "verified",
+        "reasons": ["allergen_verified_safe"],
+        "matchedAllergens": []
+      }
+    },
+    {
+      "id": "CL-10",
+      "trace": "RN08 / ADR-014",
+      "description": "lactose restriction is compatible with verified lactose-free dairy recipe containing only leite",
+      "input": {
+        "recipe": {
+          "id": "recipe-lactose-free-cheese",
+          "allergens": ["leite"],
+          "allergenState": "verified"
+        },
+        "restrictions": ["lactose"]
+      },
+      "expected": {
+        "result": "compatible",
+        "allergenState": "verified",
+        "reasons": ["allergen_verified_safe"],
+        "matchedAllergens": []
+      }
+    },
+    {
+      "id": "CL-11",
+      "trace": "RN08 / ADR-014",
+      "description": "milk allergy restriction is incompatible with verified lactose-free dairy recipe containing leite",
+      "input": {
+        "recipe": {
+          "id": "recipe-lactose-free-cheese",
+          "allergens": ["leite"],
+          "allergenState": "verified"
+        },
+        "restrictions": ["leite"]
+      },
+      "expected": {
+        "result": "incompatible",
+        "allergenState": "verified",
+        "reasons": ["allergen_match"],
+        "matchedAllergens": ["leite"]
+      }
+    },
+    {
+      "id": "CL-12",
+      "trace": "A06 / RN10 / PRIVACY",
+      "description": "user with restriction gets unconfirmed (fail-closed) for source_declared recipe without allergen overlap",
+      "input": {
+        "recipe": {
+          "id": "recipe-source-declared-milk",
+          "allergens": ["leite", "lactose"],
+          "allergenState": "source_declared"
+        },
+        "restrictions": ["amendoim"]
+      },
+      "expected": {
+        "result": "unconfirmed",
+        "allergenState": "source_declared",
+        "reasons": ["source_declared_unconfirmed"],
+        "matchedAllergens": []
+      }
+    },
+    {
+      "id": "CL-13",
+      "trace": "RN08 / A06",
+      "description": "user with restriction gets incompatible when source_declared recipe declares a matching allergen",
+      "input": {
+        "recipe": {
+          "id": "recipe-source-declared-soy",
+          "allergens": ["soja"],
+          "allergenState": "source_declared"
+        },
+        "restrictions": ["soja"]
+      },
+      "expected": {
+        "result": "incompatible",
+        "allergenState": "source_declared",
+        "reasons": ["allergen_match"],
+        "matchedAllergens": ["soja"]
+      }
+    },
+    {
+      "id": "CL-14",
+      "trace": "RN08 / A06",
+      "description": "user with restriction gets unconfirmed for source_declared recipe with empty allergens",
+      "input": {
+        "recipe": {
+          "id": "recipe-source-declared-empty",
+          "allergens": [],
+          "allergenState": "source_declared"
+        },
+        "restrictions": ["amendoim"]
+      },
+      "expected": {
+        "result": "unconfirmed",
+        "allergenState": "source_declared",
+        "reasons": ["source_declared_unconfirmed"],
+        "matchedAllergens": []
+      }
+    },
+    {
+      "id": "CL-15",
+      "trace": "RN08 / A06",
+      "description": "user with restriction gets unconfirmed for unverified recipe with empty allergens",
+      "input": {
+        "recipe": {
+          "id": "recipe-unverified-empty",
+          "allergens": [],
+          "allergenState": "unverified"
+        },
+        "restrictions": ["amendoim"]
+      },
+      "expected": {
+        "result": "unconfirmed",
+        "allergenState": "unverified",
+        "reasons": ["allergen_state_unverified"],
+        "matchedAllergens": []
+      }
+    },
+    {
+      "id": "CL-16",
+      "trace": "RN08 / A06",
+      "description": "user with restriction gets incompatible when unverified recipe already lists a matching allergen",
+      "input": {
+        "recipe": {
+          "id": "recipe-unverified-shrimp",
+          "allergens": ["crustaceos"],
+          "allergenState": "unverified"
+        },
+        "restrictions": ["crustaceos"]
+      },
+      "expected": {
+        "result": "incompatible",
+        "allergenState": "unverified",
+        "reasons": ["allergen_match"],
+        "matchedAllergens": ["crustaceos"]
+      }
+    },
+    {
+      "id": "CL-17",
+      "trace": "RN08 / A06",
+      "description": "user with restriction gets unconfirmed when unverified recipe lists only non-matching allergens",
+      "input": {
+        "recipe": {
+          "id": "recipe-unverified-egg",
+          "allergens": ["ovo"],
+          "allergenState": "unverified"
+        },
+        "restrictions": ["amendoim"]
+      },
+      "expected": {
+        "result": "unconfirmed",
+        "allergenState": "unverified",
+        "reasons": ["allergen_state_unverified"],
+        "matchedAllergens": []
+      }
+    },
+    {
+      "id": "CL-18",
+      "trace": "RN08 / A06",
+      "description": "user with restriction gets unconfirmed when verified recipe has empty allergens and confirmedAllergenFree is false",
+      "input": {
+        "recipe": {
+          "id": "recipe-verified-empty-false",
+          "allergens": [],
+          "allergenState": "verified",
+          "confirmedAllergenFree": false
+        },
+        "restrictions": ["amendoim"]
+      },
+      "expected": {
+        "result": "unconfirmed",
+        "allergenState": "verified",
+        "reasons": ["empty_allergens_unconfirmed"],
+        "matchedAllergens": []
+      }
+    },
+    {
+      "id": "CL-19",
+      "trace": "RN08 / A06",
+      "description": "duplicate allergen codes in recipe and restrictions are deduplicated in matchedAllergens",
+      "input": {
+        "recipe": {
+          "id": "recipe-duplicates",
+          "allergens": ["noz", "noz", "peca"],
+          "allergenState": "verified"
+        },
+        "restrictions": ["noz", "noz"]
+      },
+      "expected": {
+        "result": "incompatible",
+        "allergenState": "verified",
+        "reasons": ["allergen_match"],
+        "matchedAllergens": ["noz"]
+      }
+    }
+  ],
+  "filterCandidates": [
+    {
+      "id": "FC-01",
+      "trace": "RN16 / US01",
+      "description": "user without restrictions keeps recipes across all three allergen states in original order",
+      "input": {
+        "recipes": [
+          { "id": "dish-verified", "allergens": ["ovo"], "allergenState": "verified" },
+          {
+            "id": "dish-source-declared",
+            "allergens": ["leite", "lactose"],
+            "allergenState": "source_declared"
+          },
+          { "id": "dish-unverified", "allergens": [], "allergenState": "unverified" }
+        ],
+        "restrictions": []
+      },
+      "expectedIds": ["dish-verified", "dish-source-declared", "dish-unverified"]
+    },
+    {
+      "id": "FC-02",
+      "trace": "RN08 / RN10 / A06",
+      "description": "user with single restriction keeps only verified compatible recipes and excludes incompatible, source_declared, unverified, and unconfirmed empty",
+      "input": {
+        "recipes": [
+          { "id": "dish-safe-verified", "allergens": ["ovo"], "allergenState": "verified" },
+          {
+            "id": "dish-safe-free",
+            "allergens": [],
+            "allergenState": "verified",
+            "confirmedAllergenFree": true
+          },
+          {
+            "id": "dish-incompatible",
+            "allergens": ["amendoim"],
+            "allergenState": "verified"
+          },
+          {
+            "id": "dish-source-declared",
+            "allergens": ["ovo"],
+            "allergenState": "source_declared"
+          },
+          { "id": "dish-unverified", "allergens": [], "allergenState": "unverified" },
+          { "id": "dish-empty-unconfirmed", "allergens": [], "allergenState": "verified" }
+        ],
+        "restrictions": ["amendoim"]
+      },
+      "expectedIds": ["dish-safe-verified", "dish-safe-free"]
+    },
+    {
+      "id": "FC-03",
+      "trace": "RN08 / RN10 / A06",
+      "description": "user with multiple restrictions excludes any recipe matching any restriction while keeping verified lactose-free dairy for lactose-only restriction",
+      "input": {
+        "recipes": [
+          {
+            "id": "dish-lactose-free-dairy",
+            "allergens": ["leite"],
+            "allergenState": "verified"
+          },
+          {
+            "id": "dish-regular-dairy",
+            "allergens": ["leite", "lactose"],
+            "allergenState": "verified"
+          },
+          {
+            "id": "dish-gluten",
+            "allergens": ["trigo_centeio_cevada_aveia"],
+            "allergenState": "verified"
+          },
+          { "id": "dish-fish", "allergens": ["peixe"], "allergenState": "verified" }
+        ],
+        "restrictions": ["lactose", "trigo_centeio_cevada_aveia"]
+      },
+      "expectedIds": ["dish-lactose-free-dairy", "dish-fish"]
+    },
+    {
+      "id": "FC-04",
+      "trace": "US01",
+      "description": "empty candidate list returns empty array",
+      "input": {
+        "recipes": [],
+        "restrictions": ["amendoim"]
+      },
+      "expectedIds": []
+    }
+  ],
+  "isSubstituteAllowed": [
+    {
+      "id": "SUB-01",
+      "trace": "RN16 / RN22",
+      "description": "user without restrictions allows unverified substitute",
+      "input": {
+        "substitute": {
+          "id": "sub-unverified",
+          "allergens": [],
+          "allergenState": "unverified"
+        },
+        "restrictions": []
+      },
+      "expected": true
+    },
+    {
+      "id": "SUB-02",
+      "trace": "RN22 / A06",
+      "description": "user with restriction allows verified substitute without matching allergens",
+      "input": {
+        "substitute": {
+          "id": "sub-soy-milk",
+          "allergens": ["soja"],
+          "allergenState": "verified"
+        },
+        "restrictions": ["leite", "lactose"]
+      },
+      "expected": true
+    },
+    {
+      "id": "SUB-03",
+      "trace": "RN22 / RN08",
+      "description": "user with restriction allows verified substitute with empty allergens when confirmedAllergenFree is true",
+      "input": {
+        "substitute": {
+          "id": "sub-coconut-milk",
+          "allergens": [],
+          "allergenState": "verified",
+          "confirmedAllergenFree": true
+        },
+        "restrictions": ["leite", "lactose"]
+      },
+      "expected": true
+    },
+    {
+      "id": "SUB-04",
+      "trace": "RN22 / RN08 / A06",
+      "description": "user with restriction rejects verified substitute with empty allergens without confirmedAllergenFree",
+      "input": {
+        "substitute": {
+          "id": "sub-verified-empty-unconfirmed",
+          "allergens": [],
+          "allergenState": "verified"
+        },
+        "restrictions": ["amendoim"]
+      },
+      "expected": false
+    },
+    {
+      "id": "SUB-05",
+      "trace": "RN22 / A06",
+      "description": "user with restriction rejects verified substitute containing restricted allergen",
+      "input": {
+        "substitute": {
+          "id": "sub-almond-milk",
+          "allergens": ["amendoa"],
+          "allergenState": "verified"
+        },
+        "restrictions": ["amendoa"]
+      },
+      "expected": false
+    },
+    {
+      "id": "SUB-06",
+      "trace": "RN22 / A06 / PRIVACY",
+      "description": "user with restriction rejects source_declared substitute even without allergen overlap (fail-closed)",
+      "input": {
+        "substitute": {
+          "id": "sub-source-declared",
+          "allergens": ["soja"],
+          "allergenState": "source_declared"
+        },
+        "restrictions": ["leite"]
+      },
+      "expected": false
+    },
+    {
+      "id": "SUB-07",
+      "trace": "RN22 / A06",
+      "description": "user with restriction rejects unverified substitute",
+      "input": {
+        "substitute": {
+          "id": "sub-unverified",
+          "allergens": [],
+          "allergenState": "unverified"
+        },
+        "restrictions": ["ovo"]
+      },
+      "expected": false
+    },
+    {
+      "id": "SUB-08",
+      "trace": "RN22 / A06",
+      "description": "user with multiple restrictions rejects verified substitute matching any restriction",
+      "input": {
+        "substitute": {
+          "id": "sub-cashew-cream",
+          "allergens": ["castanha_caju"],
+          "allergenState": "verified"
+        },
+        "restrictions": ["leite", "castanha_caju"]
+      },
+      "expected": false
+    },
+    {
+      "id": "SUB-09",
+      "trace": "RN22 / ADR-014",
+      "description": "lactose restriction allows verified lactose-free dairy substitute declaring only leite",
+      "input": {
+        "substitute": {
+          "id": "sub-lactose-free-milk",
+          "allergens": ["leite"],
+          "allergenState": "verified"
+        },
+        "restrictions": ["lactose"]
+      },
+      "expected": true
+    },
+    {
+      "id": "SUB-10",
+      "trace": "RN22 / ADR-014",
+      "description": "milk allergy restriction rejects verified lactose-free dairy substitute declaring leite",
+      "input": {
+        "substitute": {
+          "id": "sub-lactose-free-milk",
+          "allergens": ["leite"],
+          "allergenState": "verified"
+        },
+        "restrictions": ["leite"]
+      },
+      "expected": false
+    }
+  ]
+}
