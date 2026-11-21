@@ -2,7 +2,7 @@
 
 > Fase 2.3 — Propostas arquiteturais. Papel da IA: arquiteto de software, com análise de trade-offs.
 > Destino: `/docs/fase2/propostas-arquiteturais.md`. Versão 1.2 — 06/10/2026: decisões formalizadas nos ADR-001 a ADR-014 (2.4); ajustes listados em "0. Mudanças".
-> Insumos: `briefing-passagem-2.3.md`, `briefing-fase2.md` (seções 3, 5, 7 e 8), `diario-de-bordo-fase2.md` (entradas 2.1 e 2.2), `atributos-qualidade.md` v1.1, `estilo-arquitetural.md` v1.0, `backlog.md`, `requisitos.md`; consultas pontuais a `regras-de-negocio.md`, `casos-de-uso.md` e `modelo-conceitual.md` (Fase 1) para a US10.
+> Insumos: `briefing-passagem-2.3.md`, `briefing-fase2.md` (seções 3, 5, 7 e 8), `diario_de_bordo-fase2.md` (entradas 2.1 e 2.2), `atributos-qualidade.md` v1.1, `estilo-arquitetural.md` v1.0, `backlog.md`, `requisitos.md`; consultas pontuais a `regras-de-negocio.md`, `casos-de-uso.md` e `modelo-conceitual.md` (Fase 1) para a US10.
 > Convenção: IDs A01–A14 conforme `atributos-qualidade.md`. Medidas (H) são hipóteses. Notas de 1 (atende mal) a 5 (atende bem).
 
 ## 0. Mudanças em relação à v0.1
@@ -87,7 +87,7 @@ O fluxo misto (campos estruturados vindos da fonte e IA só para alérgenos e su
 - **Troca de provedor:** o agente fica atrás de uma interface (porta e adaptador). **Provedor escolhido: Kimi K3**, por API compatível com o protocolo da OpenAI (`https://api.moonshot.ai/v1`); a documentação consultada descreve o JSON Mode (objeto JSON válido); o esquema é validado no servidor (ADR-011).
 - **Rastreabilidade:** cada item guarda origem, data e aprovador. Para a demo, é possível gravar uma execução prévia como plano B se a rede falhar.
 
-**Custo estimado (teto, todas as receitas pelo agente).** Cotações de 05/10/2026, aproximadas: 1 CNY ≈ R$ 0,75 e 1 USD ≈ R$ 5,00. Entrada ≈ R$ 15 por milhão de tokens; saída ≈ R$ 75 por milhão; entrada em cache ≈ R$ 1,50 por milhão. Hipótese: 4.000 tokens de entrada e 10.000 de saída por receita. Ver ADR-012
+**Custo estimado (teto, todas as receitas pelo agente).** Cotações de 05/10/2026, aproximadas: 1 CNY ≈ R$ 0,75 e 1 USD ≈ R$ 5,00. Entrada ≈ R$ 15 por milhão de tokens; saída ≈ R$ 75 por milhão; entrada em cache ≈ R$ 1,50 por milhão. Hipótese: 4.000 tokens de entrada e 10.000 de saída por receita. Ver ADR-013.
 
 | Cenário | Entrada | Saída | Total aproximado |
 |---|---|---|---|
@@ -117,7 +117,7 @@ O fluxo misto (campos estruturados vindos da fonte e IA só para alérgenos e su
 ### P1 — React Native + servidor TypeScript próprio
 
 - **Cliente:** React Native com TypeScript (Expo, *dev build*), por feature. SQLCipher com chave de 256 bits protegida pelo Keystore via expo-secure-store; fila de sincronização na mesma base cifrada.
-- **Servidor:** Fastify ou NestJS, monólito modular (catálogo, perfil e restrições, rotina, progresso e avaliação, importação). Endpoint de sincronização idempotente.
+- **Servidor:** Fastify (decisão formalizada no ADR-002), monólito modular (catálogo, perfil e restrições, rotina, progresso e avaliação, importação). Endpoint de sincronização idempotente.
 - **Regra de alérgenos:** pacote TypeScript único, usado no cliente e no servidor, com a mesma suíte de testes (A06), incluindo a RN22 para substitutos.
 - **Dados do servidor:** Postgres; AES-256-GCM nos campos de restrição, com chave fora do banco, para que *dumps* e backups contenham texto cifrado em qualquer provedor.
 - **Demo:** Docker Compose (API com módulo de importação + Postgres) e emulador Android.
@@ -306,6 +306,6 @@ Detalhada no artefato `issue-retroalimentacao-fase1.md` (v1.3), que é a fonte d
 | R10 | Direitos autorais e termos de uso das fontes ao traduzir e publicar receitas | Atribuição; conferência dos termos de cada fonte; preferir fontes com licença aberta (a verificar) |
 | R11 | Divergência das fontes sobre uso de dados da API da Kimi para treinamento | Enviar só texto de receita; nunca dado de usuário; revisar termos antes de ampliar o uso |
 | R12 | Conta anônima sem e-mail e sem recuperação de senha é irrecuperável se o aparelho for perdido ou a sessão encerrada; vale também a regra de um aparelho por conta (ADR-007, ADR-008) | A interface incentiva vincular e-mail; sincronização assim que houver rede; aviso claro ao criar a conta; revisão se a perda de conta virar queixa recorrente |
-| R13 | Roubo do refresh token dá acesso até a rotação, a revogação ou o fim da validade; com rotação, uma resposta de renovação perdida pode encerrar a sessão legítima (hipótese) (ADR-007)". Na coluna "Mitigação": "Token em expo-secure-store; validade máxima; revogação no servidor; revogação do aparelho anterior no login com e-mail; teste de rotação (ADR-007) |
+| R13 | Roubo do refresh token dá acesso até a rotação, a revogação ou o fim da validade; com rotação, uma resposta de renovação perdida pode encerrar a sessão legítima (hipótese, mitigada pela tolerância de 60 s — R17) (ADR-007) | Token em `expo-secure-store`; validade máxima (30 dias); revogação no servidor; revogação do aparelho anterior no login com e-mail; teste de rotação e tolerância de 60 s (ADR-007) |
 
 A criptografia da restrição alimentar continua sendo requisito, e não risco.

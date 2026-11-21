@@ -62,7 +62,7 @@ Cliente e servidor são TypeScript (ADR-002 e ADR-003), o que permite um
 
 | Alternativa | Por que não foi escolhida |
 |---|---|
-| Duas implementações (cliente e servidor), com vetores de teste comuns | É o que P2 e P3 exigiriam. A regra duplicada pode divergir, e a A06 perde um ponto na matriz [20]. Fica como saída de emergência (ver "Quando revisitar"). |
+| Duas implementações (cliente e servidor), com vetores de teste comuns | É o que P2 e P3 exigiriam. A regra duplicada pode divergir, e a A06 perde um ponto na matriz. Fica como saída de emergência (ver "Quando revisitar"). |
 | Só no servidor | Receita baixada abriria offline sem checagem, o que viola a A06 em ambiente offline. É o ponto fraco do E1. |
 | Servidor calcula a compatibilidade e a envia junto com a receita baixada | Funciona até o usuário mudar a restrição offline: o dado fica velho e sem revalidação. Reabre o risco R2. |
 | Regras como dados (tabela interpretada) | Excesso para um conjunto de regras pequeno; acrescenta uma camada de interpretação sem ganho no prazo. |
@@ -116,10 +116,10 @@ R2, R8.
 | Diabetes ou outras condições entrarem no escopo (R1) | Estender o pacote e os vetores. |
 | Incidente de divergência entre cliente e servidor | Tornar a versão mínima do pacote obrigatória na sincronização. |
 
-## Detalhamento
+## Detalhamento (2.6 — 07/10/2026 e Conferência RDC 727/2022 — 20/11/2026)
 
-- **Vocabulário v1 (19 códigos):** os 18 itens da lista da ANVISA (RDC 26/2015, consolidada pela RDC 727/2022; conferir a lista vigente) mais `lactose`. O item de cereais agrupa trigo, centeio, cevada e aveia.
-- **Assinaturas:** `classificarReceita(receita, restricoes)`, `filtrarCandidatas(receitas, restricoes)`, `substitutoPermitido(substituto, restricoes)`, constante `VERSAO_PACOTE`. A função `verificarInvariantes(receita, ingredientes)` fica em ponto de entrada separado, usado só pelo servidor.
-- **Sem restrição cadastrada:** `compativel`, com o estado dos alérgenos visível (RN16).
-- **Invariantes novas:** (a) ingrediente com `leite` e sem `lactose` só com `semLactose = true`; (b) `verificado` com lista de alérgenos vazia só com `confirmadoSemAlergenos`, afirmado pelo curador.
-- **Versão:** o app envia `X-Pacote-Alergenos-Versao` e a API responde `pacoteVersaoMinima`. O app avisa e não bloqueia (a avaliação offline não pode ser impedida).
+- **Vocabulário v1 (19 códigos — conferido em 20/11/2026):** os 18 alimentos/grupos de declaração obrigatória do **Anexo III da RDC nº 727, de 1º de julho de 2022, da ANVISA** (que consolidou e substituiu a revogada RDC 26/2015) — conferidos 1-a-1 contra a lista oficial (`trigo_centeio_cevada_aveia`, `crustaceos`, `ovo`, `peixe`, `amendoim`, `soja`, `leite`, `amendoa`, `avela`, `castanha_caju`, `castanha_brasil`, `macadamia`, `noz`, `peca`, `pistache`, `pinoli`, `castanha_castanea`, `latex`) — acrescidos do 19º código `lactose`, incluído pela dupla para cobrir intolerância à lactose (`US09`, `CT01`, `CT19`).
+- **Assinaturas canônicas (ADR-015):** `classifyRecipe(recipe, restrictions)`, `filterCandidates(recipes, restrictions)`, `isSubstituteAllowed(substitute, restrictions)`, constante `PACKAGE_VERSION` (ponto de entrada `rules`). A função `checkInvariants(recipe, ingredients)` fica no ponto de entrada separado `invariants`, importado apenas pelo servidor (regras S6 e A7).
+- **Sem restrição cadastrada:** `compatible`, com o estado dos alérgenos visível (RN16).
+- **Invariantes novas:** (a) ingrediente com `leite` e sem `lactose` só com `lactoseFree = true`; (b) `verified` com lista de alérgenos vazia só com `confirmedAllergenFree = true`, afirmado pelo curador.
+- **Versão:** o app envia `X-Allergen-Package-Version` e a API responde `minPackageVersion`. O app avisa e não bloqueia (a avaliação offline não pode ser impedida).

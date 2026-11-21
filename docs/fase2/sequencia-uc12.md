@@ -55,7 +55,7 @@ sequenceDiagram
 - O modelo nunca define estado de alérgeno nem fonte. O servidor atribui `unverified` e preenche fonte e link com o que o curador informou.
 - O controle de consumo checa o pior caso (`max_tokens`) antes da chamada. Aviso a 80% e bloqueio a 100% do teto. Os tokens são registrados mesmo quando a validação falha.
 - O texto colado é conteúdo não confiável: instruções separadas do texto, agente sem ferramentas, saída validada por esquema, limite de 20.000 caracteres (hipótese) e campos tratados como texto simples (ADR-011, item 7).
-- No FE2, a Fase 1 diz "notifica o curador e redireciona". Aqui vira resposta de erro com `manualFlowAvailable = true`, porque não há tela. Divergência para o Lote 3 (issue #31, ainda não aberta).
+- No FE2, a Fase 1 foi atualizada (Issue #31 — Lote 3, `20/11/2026`) para alinhar com a curadoria exclusiva via API (`ADR-010`): resposta de erro estruturada com `manualFlowAvailable = true`, mantendo o fluxo principal manual pela API disponível.
 - A importação é síncrona. Se estourar o tempo limite no alvo, o ADR-004 prevê torná-la assíncrona.
 - O provedor (`KimiProvider` ou `RecordedProvider`) é escolhido por `PROVEDOR_IA` na raiz de composição (P02b).
 

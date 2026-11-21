@@ -45,8 +45,8 @@ offline-first, então os lembretes devem funcionar sem rede.
 
 | Alternativa | Por que não foi escolhida |
 |---|---|
-| Push (FCM) | As datas são do usuário e já estão no aparelho. Exigiria servidor com agendador, credenciais do FCM, token de push como dado pessoal e *development build* [84]. Complexidade sem ganho. |
-| Alarmes exatos locais | Exigem acesso especial no Android 14+ e navegação do usuário até as configurações do sistema [82][87]. Excesso para lembretes de nível de dia. |
+| Push (FCM) | As datas são do usuário e já estão no aparelho. Exigiria servidor com agendador, credenciais do FCM, token de push como dado pessoal e *development build*. Complexidade sem ganho. |
+| Alarmes exatos locais | Exigem acesso especial no Android 14+ e navegação do usuário até as configurações do sistema. Excesso para lembretes de nível de dia. |
 | Lembretes só dentro do app, sem notificação do sistema | Não cumpre a intenção de lembrar quando o app está fechado (US08). Fica como degradação quando a permissão é negada. |
 | Tarefa em segundo plano própria, com módulo nativo | Mais código nativo e mais risco de prazo. Não necessário. |
 
@@ -59,7 +59,7 @@ offline-first, então os lembretes devem funcionar sem rede.
 
 **Negativas**
 - **Sem garantia de entrega:** se o usuário forçar a parada do app, ele
-  precisa reabri-lo para os lembretes voltarem [85]. Fabricantes com
+  precisa reabri-lo para os lembretes voltarem. Fabricantes com
   economia de bateria agressiva podem atrasar notificações (hipótese, não
   verificada).
 - **Permissão negada = sem notificação.** A experiência cai para o
@@ -98,5 +98,5 @@ R4.
 | A14 entrar no escopo | Reavaliar notificações de engajamento, com consentimento (RNF06) e dentro do limite (RNF07, RNF09). |
 | iOS entrar no alvo | Verificar limites e permissões no iOS. |
 
-## Detalhamento
-- As preferências de lembrete sincronizam como a operação `lembretes.definir` (campos `ativo`, `tipos`, `frequencia`). Os valores de `frequencia` são definidos na implementação; o RNF07 limita a 2 notificações por dia.
+## Detalhamento (2.6 — 07/10/2026)
+- As preferências de lembrete sincronizam como a operação `reminders.set` (campos `enabled`, `types`, `frequency` — ADR-015). Os valores de `frequency` são definidos na implementação; o RNF07 limita a 2 notificações por dia.

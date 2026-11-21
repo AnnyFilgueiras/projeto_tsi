@@ -109,3 +109,7 @@ R4, R5.
 - **Convenção `Tx`:** toda interface pública de módulo que escreve recebe `tx: Tx`. Quem abre a transação a passa adiante. Substitui um Unit of Work formal.
 - **Registro de aplicadores:** os aplicadores de operação ficam no módulo dono do tipo e são registrados na raiz de composição (`src/app.ts`).
 - **Quando revisitar:** o gatilho existente se mantém ("fronteiras violadas repetidamente"); se o lint não se sustentar, reavaliar NestJS.
+
+## Detalhamento (Higiene Lote 2 — 20/11/2026)
+
+- **Confirmação de riscos (`R18` e `R19`):** confirmados pela dupla em `20/11/2026`. `R19` (o lint de fronteiras não inspeciona SQL em string literal consultando tabela de outro módulo) permanece aceito com mitigação via checklist obrigatório de PR, convenção de nomes de tabela prefixados por módulo e revisão arquitetural (`revisao-arquitetural.md`). `R18` (duas implementações da regra de desbloqueio em `UnlockCalculator` e `UnlockRules`) permanece aceito com mitigação pela suíte única de vetores JSON na CI.

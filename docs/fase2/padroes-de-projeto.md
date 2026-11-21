@@ -1,10 +1,10 @@
 # Padrões de projeto justificados — Panelada (Fase 2.7)
 
 > Fase 2.7 — Padrões de projeto. Papel da IA: arquiteto, designer de componentes e de padrões (SOLID).
-> Destino: `/docs/fase2/padroes-de-projeto.md`. Versão 1.1 — 07/10/2026 — status: a revisar pela dupla.
-> Insumos: `briefing-passagem-2.7.md`, `briefing-fase2.md` v1.3, `diario_de_bordo-fase2.md` (entrada 2.6), `diagrama-classes.md` v1.0, `sequencia-uc10.md`, `sequencia-uc04.md`, `sequencia-uc08.md`, `sequencia-uc12.md`, `modelo-conceitual.md`, `regras-de-negocio.md`, ADR-001 a ADR-014, `c4-componentes.md` v1.1, `atributos-qualidade.md` v1.3.
+> Destino: `/docs/fase2/padroes-de-projeto.md`. Versão 1.2 — 20/11/2026 — status: fechado pela dupla.
+> Insumos: `briefing-passagem-2.7.md`, `briefing-fase2.md` v1.3, `diario_de_bordo-fase2.md` (entrada 2.6), `diagrama-classes.md` v1.0, `sequencia-uc10.md`, `sequencia-uc04.md`, `sequencia-uc08.md`, `sequencia-uc12.md`, `modelo-conceitual.md`, `regras-de-negocio.md`, ADR-001 a ADR-016, `c4-componentes.md` v1.1, `atributos-qualidade.md` v1.4.
 > Convenção de língua (ADR-015): textos em português (Brasil); **identificadores de código, pastas e contrato em inglês**. Equivalências em `glossario-identificadores.md`. Neste documento, os nomes de classe aparecem em inglês, com o nome da 2.6 entre parênteses na primeira ocorrência de cada padrão.
-> Alterações da v1.1: varredura do catálogo de padrões (seção 5.1), regra A8 (raiz de composição do app) e seção 9 (testabilidade e TDD).
+> Alterações da v1.1: varredura do catálogo de padrões (seção 5.1), regra A8 (raiz de composição do app) e seção 9 (testabilidade e TDD). Alterações da v1.2 (18/11 e 20/11/2026): porta `P02f` (`PhotoStorage`), composição em 2 estágios de `P04`, 8 marcos do `ADR-016` e fechamento das pendências da seção 11.
 
 ## 1. Critério de entrada
 
@@ -215,8 +215,9 @@ Rastreabilidade: cada caso de teste cita o UC, a RN ou o atributo (A##) de orige
 - Padrões sem motivo removidos: sim (seção 5 e 5.1).
 - Mecanismo das fronteiras fechado (pendência do ADR-002): sim (seção 6), com a prova ainda a executar na implementação.
 
-## 11. Pendências
+## 11. Pendências (Resolvidas na Frente B — 20/11/2026)
 
-- Lint do OpenAPI e execução da coleção Bruno, antes da 2.8.
-- Aplicar a renomeação em `diagrama-classes.md` v1.1, nas quatro sequências, no `openapi.yaml` v1.1 e na coleção Bruno (ADR-015, escopo B).
-- Aplicar as notas "Detalhamento (2.7)" no ADR-002 e abrir a issue #31 (Lote 3, Fase 1).
+- [x] Lint formal do OpenAPI (`@redocly/cli lint` com 0 erros) e auditoria completa das 33 requisições Bruno + fixture JPEG.
+- [x] Renomeação aplicada em `diagrama-classes.md` v1.1, nas quatro sequências v1.1, no `openapi.yaml` v1.2.0-2.8 e na coleção Bruno (`ADR-015`, escopo B).
+- [x] Nota `Detalhamento (2.7)` aplicada no `ADR-002` (com confirmação de `R18` e `R19`) e Issue #31 (`issue-31-lote-3.md`, Lote 3, Fase 1) especificada e aplicada.
+- *(Para a Fase 3 — `MVP-02`):* executar a prova prática do `eslint-plugin-boundaries` com import proibido intencional e confirmar `import/no-cycle` com o resolver TypeScript ao criar o monorepo.

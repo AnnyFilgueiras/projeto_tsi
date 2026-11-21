@@ -1,4 +1,4 @@
-# Briefing da Fase 2 — Projeto Arquitetural (Panelada) — v1.5
+# Briefing da Fase 2 — Projeto Arquitetural (Panelada) — v1.6
 
 > **Nota de Governança (v1.5 — 18/11/2026):** Com a migração para agentes de IA em CLI, o ponto de entrada obrigatório do repositório passou a ser o [`../../AGENTS.md`](../../AGENTS.md) em conjunto com o painel vivo [`../../STATE.md`](../../STATE.md) e os manuais em [`../playbooks/`](../playbooks/). Este briefing permanece como o mapa de referência das sub-etapas 2.1 a 2.9 da Fase 2.
 >
@@ -71,7 +71,7 @@ Legenda: **N** = núcleo (ler a fundo) · A = apoio · C = contexto · — = nã
 | Classes e sequências | — | — | — | — | — | — | N | A | A |
 | `revisao-arquitetural.md` | — | — | — | — | — | — | — | — | N |
 
-Toda etapa também recebe: `briefing-fase2.md`, `diario-de-bordo-fase2.md`,
+Toda etapa também recebe: `briefing-fase2.md`, `diario_de_bordo-fase2.md`,
 o briefing de passagem e o resumo de decisões da etapa anterior.
 Anexe só o que a coluna da etapa marca como N ou A.
 
@@ -99,7 +99,7 @@ Anexe só o que a coluna da etapa marca como N ou A.
   atributo; todo componente cita US/UC.
 - **Ferramentas:** apenas gratuitas, ou de pagamento único baixo, quando
   justificado em ADR.
-- **Diário:** toda conversa termina com entrada no `diario-de-bordo-fase2.md`
+- **Diário:** toda conversa termina com entrada no `diario_de_bordo-fase2.md`
   (campos da Fase 1 mais "Artefatos alterados (retroalimentação)" e
   "Riscos aceitos").
 
@@ -154,3 +154,4 @@ A dupla revisa o briefing antes de usá-lo.
 | v1.3 | 06/10/2026 | Correções editoriais: título, linha da v1.2 e fragmento órfão | Conversa 2.5 (registro de divergências) |
 | v1.4 | 07/10/2026 | Nome do diário padronizado (`diario_de_bordo-fase2.md`); referência da lista de alérgenos corrigida para RDC 727/2022 (a conferir) | Conversa 2.6 (divergências 1 e 7) |
 | v1.5 | 18/11/2026 | Governança Multi-Agente CLI (`AGENTS.md`, `STATE.md`, `docs/playbooks/`); caminhos físicos de `/docs/fase2/` alinhados à seção 6; diretrizes incrementais de MVP, deploy cloud e gamificação | Refatoração de Governança e Alinhamento Arquitetural |
+| v1.6 | 20/11/2026 | Higiene do nome do diário (`diario_de_bordo-fase2.md`), conferência oficial da RDC 727/2022 (Anexo III), incorporação de `ADR-015`/`ADR-016` e fechamento das etapas 2.8 e 2.9 | Frente B — Fechamento e Higiene da Fase 2 |

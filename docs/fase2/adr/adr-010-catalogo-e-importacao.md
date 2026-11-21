@@ -49,7 +49,7 @@ aprova (RN21); só o curador marca "verificado" (A06).
 8. **Rastreabilidade:** cada receita guarda origem (manual ou IA), data,
    aprovador, fonte e link. Na origem IA guarda também a saída bruta do
    agente e a versão do modelo e do esquema (ADR-011).
-9. **Direitos e termos de uso (R10) [CONFIRMAR]:** a fonte é sempre
+9. **Direitos e termos de uso (R10):** a fonte é sempre
    atribuída, e o curador reescreve o passo a passo com palavras próprias,
    conferindo os termos da fonte antes de aprovar. Isso não é parecer
    jurídico. Imagens seguem o ADR-012.
@@ -119,10 +119,10 @@ R8, R9, R10.
 | Usuário passar a submeter receitas | Rever moderação e fluxo de importação. |
 | Professor passar a exigir IA diante do usuário final | Reabrir a abordagem A (propostas, seção 10). |
 
-## Detalhamento
-- **Rotas:** o contrato da curadoria está no `openapi.yaml` (grupo "Curadoria"), usado pelo Bruno.
-- **Verificação:** só o curador marca "verificado", com checklist (ingredientes conferidos contra os 19 códigos; segunda fonte **recomendada**; união conferida; `semLactoseConferido`; e `confirmadoSemAlergenos` quando a lista é vazia).
-- **Portão:** bloqueia por campo da A09, fonte (RN17), foto sem atribuição e invariantes do ADR-014. Aprovar não exige "verificado".
-- **Publicação:** estados `proposto`, `aprovado` e `desativado`. Prato aprovado nunca é apagado.
+## Detalhamento (2.6 — 07/10/2026 e Higiene Lote 2 — 20/11/2026)
+- **Rotas:** o contrato da curadoria está no `openapi.yaml` (tag `Curation`, ADR-015), usado pelo Bruno.
+- **Verificação:** só o curador marca `verified`, com checklist (`checkedIngredients` contra os 19 códigos; `secondSourceChecked` **recomendada**; `unionChecked`; `lactoseFreeChecked`; e `confirmedAllergenFree` quando a lista é vazia).
+- **Portão (`PublicationGate`):** função com verificações privadas (R02); bloqueia por campo da A09, fonte (RN17), foto sem atribuição e invariantes do ADR-014. Aprovar não exige `verified`.
+- **Publicação:** estados `proposed`, `approved` e `deactivated`. Prato aprovado nunca é apagado.
 - **Curador:** conta criada por seed ou comando, com e-mail e senha (ADR-007).
-- **Pendente:** o `[CONFIRMAR]` do item 9 (R10) continua aberto.
+- **Direitos e termos de uso (R10 — confirmado em 20/11/2026):** a dupla confirmou o item 9 (atribuição obrigatória da fonte + reescrita autoral do passo a passo + conferência dos termos de cada fonte antes de aprovar), fechando o marcador `[CONFIRMAR]` e mantendo `R10` como risco aceito documentado (sem parecer jurídico).

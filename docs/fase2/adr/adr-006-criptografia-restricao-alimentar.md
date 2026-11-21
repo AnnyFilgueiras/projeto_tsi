@@ -106,8 +106,8 @@ R2, R4, R6.
 | Escolha do Azure como alvo | Verificar criptografia e backups do Azure Database for PostgreSQL. |
 | Plano B (Supabase) | Marcar como "Substituído por ADR-NNN"; a cifra de aplicação pode continuar. |
 
-## Detalhamento
-- **Catálogo de restrições:** a restrição do usuário é escolha em catálogo fixo (`TipoRestricao`, por seed), mapeada para códigos de alérgeno. O tipo escolhido (`tipoCifrado`) é o dado sensível cifrado com AES-256-GCM.
-- **Revogação:** apaga a linha da restrição, sem guardar `revogadoEm`. O prazo de 24 h conta do **recebimento pelo servidor**.
-- **Chave:** obtida por `ProvedorDeChave`, com implementação por arquivo (demo) e por Secret Manager (alvo).
+## Detalhamento (2.6 — 07/10/2026)
+- **Catálogo de restrições:** a restrição do usuário é escolha em catálogo fixo (`RestrictionType`, por seed), mapeada para códigos de alérgeno. O tipo escolhido (`encryptedType`) é o dado sensível cifrado com AES-256-GCM.
+- **Revogação:** apaga a linha da restrição, sem guardar `revokedAt`. O prazo de 24 h conta do **recebimento pelo servidor** (ver R16).
+- **Chave:** obtida por `KeyProvider` (`P02c`), com implementação por arquivo (`FileKey`, demo) e por Secret Manager / variável segura da PaaS (`SecretManagerKey`, alvo/cloud).
 - **Fila:** a restrição entra na fila cifrada pelo SQLCipher, e a carga nunca vai para log.

@@ -17,7 +17,7 @@ o dimensionamento, 350. A hospedagem do alvo ficou em aberto na 2.3.
 
 ## Decisão
 
-1. **Licenças aceitas [CONFIRMAR]:** domínio público e CC0; CC BY; CC BY-SA;
+1. **Licenças aceitas:** domínio público e CC0; CC BY; CC BY-SA;
    e foto de autoria própria da dupla. **Recusadas:** variantes NC e ND
    (ND impede redimensionar e recortar), licenças próprias de bancos de
    imagens e qualquer imagem sem licença identificada. Preferência: CC0 e
@@ -102,7 +102,7 @@ R10 (estendido às imagens).
 
 - **Alvo:** o app baixa as fotos direto do armazenamento de objetos, por URL estática com hash no nome. Na demo, o download é pela API. Se não houver opção gratuita no alvo, volta a ser pela API (item 5).
 - **Preparadas:** as já baixadas permanecem no aparelho; em instalação nova, voltam sob demanda. A política de limpeza do armazenamento local continua em aberto.
-- **Licenças:** enum do contrato `dominio_publico`, `cc0`, `cc_by`, `cc_by_sa`, `autoria_propria`. O `[CONFIRMAR]` do item 1 continua aberto até a verificação do R10.
+- **Licenças (confirmado em 20/11/2026):** enum canônico do contrato (`PhotoLicense`, ADR-015): `public_domain`, `cc0`, `cc_by`, `cc_by_sa`, `own_work`. A dupla confirmou a política de licenças abertas (recusando NC, ND e bancos proprietários), fechando o `[CONFIRMAR]` do item 1 e mantendo `R10` como risco aceito documentado.
 - **Metadados TASL:** a publicação é bloqueada sem autor, URL da fonte, licença e indicação de alteração.
 
 ## Detalhamento (Governança e Estratégia de Deploy MVP — 18/11/2026)

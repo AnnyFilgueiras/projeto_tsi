@@ -72,7 +72,7 @@ regra do ADR-008 é "uma conta, um aparelho ativo".
 - **Sem recuperação de senha:** quem esquecer a senha também perde a conta.
 - **Um aparelho:** o novo login derruba o antigo, e operações pendentes no
   aparelho antigo se perdem (ADR-008).
-- **JWT de acesso não pode ser revogado** antes de expirar [66]; a vida
+- **JWT de acesso não pode ser revogado** antes de expirar; a vida
   curta reduz a janela, mas não elimina.
 - **A dupla assume a segurança das senhas:** hash, limites de tentativa,
   rotação de tokens e correção de falhas.
@@ -102,10 +102,11 @@ R4, R6.
 | Incidente de abuso nas contas anônimas | Endurecer limites ou exigir prova de uso do app. |
 | Implantação real | Revisar vida de tokens, rotação de chaves de assinatura e retenção de contas. |
 
-## Detalhamento
-- **Valores:** JWT de acesso de **45 minutos** (carrega só `contaId` e papel). Refresh de 30 dias, opaco, de uso único, rotativo, com hash.
-- **Tolerância (R17):** reenvio do mesmo refresh dentro de 60 s do primeiro uso devolve o mesmo par (campos `usadoEm` e `sucessorId`). Reuso fora da janela revoga a família (`familiaId`).
-- **Conta e perfil:** `Usuario` e `Conta` são tabelas separadas com a mesma chave primária; a criação ocorre em uma transação.
+## Detalhamento (2.6 — 07/10/2026 e Higiene Lote 2 — 20/11/2026)
+- **Valores:** JWT de acesso de **45 minutos** (carrega só `accountId` e papel). Refresh de 30 dias, opaco, de uso único, rotativo, com hash.
+- **Tolerância (R17):** reenvio do mesmo refresh dentro de 60 s do primeiro uso devolve o mesmo par (campos `usedAt` e `successorId`). Reuso fora da janela revoga a família (`familyId`).
+- **Conta e perfil:** `User` e `Account` são tabelas separadas com a mesma chave primária; a criação ocorre em uma transação (`tx: Tx`).
 - **Retenção:** conta anônima sem sincronização por 12 meses é excluída com seus dados. Quem vinculou e-mail não é excluído por inatividade.
 - **Limites:** 5 tentativas de login por 15 minutos por conta e IP; criação de contas anônimas limitada por IP.
-- **Curador:** a conta de curador precisa ter e-mail e senha, porque o login é por `POST /v1/sessoes/entrar`. O seed ou comando define as duas coisas.
+- **Curador:** a conta de curador precisa ter e-mail e senha, porque o login é por `POST /v1/sessions/sign-in` (ADR-015). O seed ou comando define as duas coisas.
+- **Exclusão de conta (Lote 3 — 20/11/2026):** formalizada na Fase 1 em `RNF06`, `RN09` e `UC08-FA3` (Issue #31), alinhada à LGPD art. 18, VI e ao endpoint `DELETE /v1/account`.

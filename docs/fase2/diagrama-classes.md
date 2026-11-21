@@ -744,7 +744,7 @@ Pacote de Alérgenos (com `CatalogInvariants` em ponto de entrada separado), Lem
 ## 14. Pontos em aberto e hipóteses
 
 - Valores de tokens, limites da fila e espera progressiva são hipóteses a medir no protótipo (ADR-007, ADR-008).
-- A lista dos 18 itens da RDC foi lida na RDC 26/2015. A consolidação pela RDC 727/2022 vem de fonte secundária; a lista vigente precisa ser conferida (R10).
+- A lista dos 18 alérgenos da ANVISA foi conferida oficialmente contra o **Anexo III da RDC nº 727/2022** em `20/11/2026` (18/18 itens idênticos ao vocabulário controlado v1, acrescidos de `lactose` — ADR-014).
 - `reminderFrequency`: valores a definir na implementação (a Fase 1 não fixa o conjunto).
 - Verificação das fronteiras entre módulos: **fechada na 2.7** (`padroes-de-projeto.md`, seção 6).
 - Política de limpeza do armazenamento local de fotos preparadas: em aberto (ADR-012).

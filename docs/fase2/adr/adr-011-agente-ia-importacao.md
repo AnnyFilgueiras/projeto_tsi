@@ -67,7 +67,7 @@ provedor.
 
 | Alternativa | Por que não foi escolhida |
 |---|---|
-| `kimi-k2.6` (mesmo provedor) | Cerca de 3,75 vezes mais barato na saída [111]; qualidade e JSON Mode não verificados. É a primeira alternativa a testar se o K3 estourar o teto. |
+| `kimi-k2.6` (mesmo provedor) | Cerca de 3,75 vezes mais barato na saída; qualidade e JSON Mode não verificados. É a primeira alternativa a testar se o K3 estourar o teto. |
 | Outros provedores de IA | Não foram comparados formalmente na 2.3; o K3 foi escolha da dupla. A interface de provedor permite trocar. |
 | IA sob demanda no app, para o usuário final | A RN15 proíbe inventar troca, e a checagem de alérgenos exige determinismo. |
 | Agente com busca na web | Sem navegação, o escopo e a superfície de ataque ficam menores. Agrava a questão de termos de uso (R10). |
@@ -84,7 +84,7 @@ provedor.
 **Negativas**
 - **Não é custo zero:** estimativa de R$ 16 para 20 pratos (hipótese não
   medida). A margem para o teto de R$ 20 é de 25%. Os preços não incluem
-  impostos [111].
+  impostos.
 - **O JSON Mode só garante sintaxe,** não que os alérgenos estejam certos.
   Erros de tradução, alérgenos e substitutos continuam possíveis (R8).
 - **Dados saem do país:** o texto da receita vai a servidores da Moonshot.
@@ -130,8 +130,8 @@ R8, R9, R10, **R11** (novo).
 | Professor passar a exigir IA diante do usuário final | Reabrir a abordagem A (alteraria a RN15 e exigiria checagem determinística de alérgenos). |
 | Importação exceder o tempo limite da requisição | Tornar a importação assíncrona (ADR-004). |
 
-## Detalhamento
-- **Esquema de saída** (`SaidaAgente`, versão `1`, em `openapi.yaml`): sem estado de alérgenos, fonte, link nem aprovação. Código fora do vocabulário é descartado e vira incerteza.
+## Detalhamento (2.6 — 07/10/2026)
+- **Esquema de saída** (`AgentOutput`, versão `1`, em `openapi.yaml` — ADR-015): sem estado de alérgenos, fonte, link nem aprovação. Código fora do vocabulário é descartado e vira incerteza.
 - **Entrada:** limite de 20.000 caracteres (hipótese a medir com 3 a 5 receitas).
-- **Falhas:** teto de gasto retorna 402 e falha do provedor ou saída inválida retorna 502, ambos com `fluxoManualDisponivel`. Nada é gravado, e os tokens consumidos são registrados.
-- **Adaptadores:** `ProvedorKimi` e `ProvedorGravado` passam a mesma suíte de contrato. O gravado só é ativado por `PROVEDOR_IA=gravado` e marca `modelo = "gravado"`.
+- **Falhas:** teto de gasto retorna 402 e falha do provedor ou saída inválida retorna 502 (ou 504 em timeout), todos com `manualFlowAvailable: true`. Nada é gravado, e os tokens consumidos são registrados.
+- **Adaptadores:** `KimiProvider` e `RecordedProvider` (`P02b`) passam a mesma suíte de contrato. O gravado só é ativado por `PROVEDOR_IA=gravado` e marca `model = "recorded"`.

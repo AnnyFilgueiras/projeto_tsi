@@ -3,10 +3,8 @@
 > Fase 2.1 — Requisitos de qualidade. Papel da IA: arquiteto de software sênior (analista de qualidade).
 
 > Destino: `/docs/fase2/atributos-qualidade.md`.
-
-> "Versão 1.3 — 06/10/2026" e acrescentar no fim das alterações: "Alterações da v1.3: 'em preparo' (§2) e §7 atualizados (retroalimentação da 2.5)."
-
-> Insumos: `requisitos.md`, `backlog.md`, `regras-de-negocio.md`, `resumo-1.4-fechamento.md`, `briefing-fase2` (seções 3, 5, 7 e 8), `diario-de-bordo-fase2.md`.
+> Versão 1.4 — 20/11/2026 — status: fechado pela dupla. Alterações: v1.1 criptografia em A05 (2.2); v1.2 exclusão 24 h, TLS da demo e cenário de saída da IA em A09 (2.3/2.4); v1.3 "em preparo" (§2) e §7 atualizados (2.5); v1.4 higiene editorial do Lote 2 e marcação das retroalimentações da Fase 1 como aplicadas (Issues #30 e #31).
+> Insumos: `requisitos.md`, `backlog.md`, `regras-de-negocio.md`, `resumo-1.4-fechamento.md`, `briefing-fase2.md` (seções 3, 5, 7 e 8), `diario_de_bordo-fase2.md`.
 
 ## 1. Premissas e dimensionamento
 
@@ -151,19 +149,19 @@ Formato: Estímulo, Fonte do estímulo, Ambiente, Resposta, Medida.
 | R2 | Alérgenos podem estar desatualizados durante o uso offline | Data da última atualização exibida |
 | R3 | A14 fora do MVP reduz a base para decisões de engajamento | Eventos técnicos do A13 como gancho |
 
-## 7. Retroalimentação da Fase 1 (a abrir como uma issue agrupada)
+## 7. Retroalimentação da Fase 1 (Issues #30 e #31 — Aplicadas)
 
-| Artefato | Alteração proposta |
-|---|---|
-| RNF05 | Reescrever: consultar offline as receitas planejadas, em preparo (abertas no passo a passo) e preparadas; salvar avaliação sem conexão e sincronizar depois |
-| RNF novo | Ou emenda à RNF05: critérios de sincronização sem perda e sem duplicidade |
-| RN08, RN10, RN16, RF18, US09 | Introduzir o estado de alérgenos (verificado, declarado pela fonte, não verificado) e a regra "lista vazia = não verificado" |
-| US09 | Registrar que diabetes e outras condições não são verificadas na v1 |
-| US12-c1, US13 | Corrigir a redação circular de "concluído" |
-| regras-de-negocio.md | Atualizar o status das RNs ("a validar na 1.4") |
-| modelo-conceitual.md | Conferido na 2.5: estado de alérgenos presente; "em preparo" existe como status de ItemDeRotina |
-| RNF06    | Explicitar a proteção por criptografia da restrição alimentar (trânsito e repouso, no dispositivo e no servidor) |
-| Documentos da Fase 1 | Itens da 2.3 e da 2.4 estão na issue de retroalimentação (v1.4) |
+| Artefato | Alteração proposta | Status |
+|---|---|---|
+| RNF05 | Reescrever: consultar offline as receitas planejadas, em preparo (abertas no passo a passo) e preparadas; salvar avaliação sem conexão e sincronizar depois | Aplicado (Issue #30) |
+| RNF novo | Ou emenda à RNF05: critérios de sincronização sem perda e sem duplicidade | Aplicado na RNF05 (Issue #30) |
+| RN08, RN10, RN16, RF18, US09 | Introduzir o estado de alérgenos (verificado, declarado pela fonte, não verificado) e a regra "lista vazia = não verificado" (com `confirmadoSemAlergenos`) | Aplicado (Issues #30 e #31) |
+| US09 | Registrar que diabetes e outras condições não são verificadas na v1 e alinhar exemplos ao vocabulário controlado | Aplicado (Issues #30 e #31) |
+| US12-c1, US13 | Corrigir a redação circular de "concluído" | Aplicado (Issues #30 e #31) |
+| regras-de-negocio.md | Atualizar o status das RNs ("a validar na 1.4") | Aplicado (Issue #30) |
+| modelo-conceitual.md | Conferido na 2.5: estado de alérgenos presente; "em preparo" existe como status de ItemDeRotina (nota de estado local adicionada no Lote 3) | Aplicado (Issue #31) |
+| RNF06 | Explicitar a proteção por criptografia da restrição alimentar (trânsito e repouso, no dispositivo e no servidor) e exclusão completa da conta | Aplicado (Issues #30 e #31) |
+| Documentos da Fase 1 | Itens da 2.3/2.4 (Issue #30), Gamificação 6D + Octalysis (ADR-016) e Lote 3 (Issue #31) sincronizados em `documento-de-requisitos.md` e `matriz-rastreabilidade.md` | Aplicado |
 
 ## 8. Checagem da Definition of Done (briefing, seção 7)
 
