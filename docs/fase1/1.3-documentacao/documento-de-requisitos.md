@@ -1,8 +1,8 @@
-****# Documento de Requisitos — Panelada (v1.0)
+# Documento de Requisitos — Panelada (v1.2)
 
 > **Fase 1.3 — Documentação.** Este documento consolida, em texto único, os artefatos produzidos na elicitação (1.1) e na análise (1.2), **sem alteração de conteúdo** — cada seção aponta para o arquivo modular correspondente, que é a fonte de verdade.
 > Identificadores estáveis (Guia Geral, seção 6): `RF##`, `RNF##`, `US##`, `UC##`, `RN##` — nunca renumerados.
-> Consolidado em 09/09/2026.
+> Consolidado em 09/09/2026; re-sincronizado após retroalimentações da Fase 2 (Issue #30 — Lote 1, Gamificação 6D + Octalysis / ADR-016 e Issue #32 — Lote 3 em 20/11/2026).
 
 ## Sumário
 
@@ -24,7 +24,7 @@
 
 **Declaração de visão:** Ser a principal referência em culinária internacional para cozinheiros amadores que buscam variedade e diversão na cozinha. O Panelada busca tornar o processo de cozinhar mais divertido e estimular o aprendizado de pratos novos: o usuário descobre receitas de diferentes países conforme seu perfil, organiza sua rotina de refeições (escolha do prato, data de compra dos ingredientes e data de preparo), registra avaliações e adaptações pessoais, e compartilha a experiência com amigos — com catálogo inicial alimentado por plataformas públicas de receitas.
 
-**Conceito de gamificação:** abordagem híbrida com três camadas — coleção/exploração como espinha dorsal ("Pokédex de pratos"), maestria via cadeias de evolução (prato base → versões mais complexas) e desafio social leve como consequência (sugestões entre amigos). Interação social aprofundada despriorizada nesta versão.
+**Conceito de gamificação:** estruturado metodologicamente pelo framework híbrido **6D (Werbach & Hunter) + Octalysis (Yu-kai Chou)** ([`framework-gamificacao.md`](../../fase2/03-modelagem/framework-gamificacao.md), [ADR-016](../../fase2/02-adr/adr-016-framework-conceitual-gamificacao.md)), combinando quatro pilares *White Hat* não punitivos (`RNF09`): coleção/exploração cultural como espinha dorsal ("Pokédex de pratos", CD4/CD7), maestria via cadeias de evolução (prato base → versões mais complexas, CD2), autoria criativa e badges multi-dimensionais (adaptações pessoais no caderno digital e conquistas verificáveis `RN03 a–h`, CD1/CD2/CD3/CD4) e interação social colaborativa leve (sugestões entre amigos, CD5, sem ranking competitivo).
 
 **Stakeholders:**
 - **Do produto (geram requisitos):** cozinheiro/jogador (usuário principal; interesse secundário documentado: interação com amigos — se o social subir de prioridade, "amigo" volta a ser stakeholder separado); curador/admin de receitas.
@@ -61,7 +61,7 @@ Fonte modular: [lexico.md](../1.1-elicitacao/lexico.md)
 
 ## 4. Requisitos funcionais e não funcionais
 
-18 RF ativos (RF16 descartado e preservado para rastreabilidade — IDs nunca são renumerados) e 10 RNF.
+18 RF ativos (RF16 descartado e preservado para rastreabilidade — IDs nunca são renumerados) e 11 RNF (RNF01–RNF11).
 
 ### Requisitos funcionais
 
@@ -81,7 +81,7 @@ Fonte modular: [lexico.md](../1.1-elicitacao/lexico.md)
 | RF12 | O sistema deve atribuir pontos por prato concluído, calculados a partir da dificuldade da receita e do ineditismo para o usuário | Escopo, R |
 | RF13 | O sistema deve manter a coleção pessoal de pratos do usuário, exibindo o progresso por país/culinária | R, M, decisão de gamificação |
 | RF14 | O sistema deve organizar pratos em cadeias de evolução, em que uma versão base desbloqueia versões mais complexas | Decisão de gamificação, todos |
-| RF15 | O sistema deve conceder badges ao atingir marcos definidos (ex.: pratos de N países distintos) | Escopo, C, R |
+| RF15 | O sistema deve conceder badges ao atingir marcos verificáveis definidos de exploração cultural, consistência, evolução em cadeia e adaptação criativa (RN03 a–h, ADR-016) | Escopo, C, R, 6D + Octalysis |
 | ~~RF16~~ | ~~O sistema deve exibir um ranking de pontos entre o usuário e seus amigos~~ — **DESCARTADO (Won't):** apenas 1 dos 5 entrevistados demonstrou interesse; social despriorizado pela dupla | Escopo, R |
 | RF17 | O sistema deve permitir sugerir um prato a um amigo | Escopo, D1, C, R |
 | RF18 | O sistema deve permitir ao curador importar e manter o catálogo de receitas (com apoio opcional de agente de IA), incluindo dificuldade, estado dos alérgenos (verificado, declarado pela fonte, não verificado) e cadeias de evolução | Decisão de fonte de conteúdo, Atributos de Qualidade A09 |
@@ -96,12 +96,12 @@ Fonte modular: [lexico.md](../1.1-elicitacao/lexico.md)
 | RNF03 | O sistema deve responder a uma solicitação de sugestão de pratos em até 2,5 segundos | Derivado (decisão rápida, D2) |
 | RNF04 | O sistema deve permitir iniciar qualquer fluxo principal (sugestões, planejamento, registro de avaliação) em até 2 toques a partir da tela inicial | C, D1, D2 |
 | RNF05 | O sistema deve permitir consultar offline as receitas planejadas, em preparo (abertas no passo a passo) e preparadas (com avaliação salva), e salvar a avaliação sem conexão; ao restabelecer a conexão, a sincronização deve ocorrer sem perda de avaliações nem duplicação de preparos | C (cozinha/bancada) |
-| RNF06 | O sistema deve tratar dados de restrições alimentares como dados sensíveis, com consentimento explícito, conforme a LGPD, e garantindo proteção criptográfica em trânsito (TLS) e em repouso (no dispositivo, servidor, fila de sincronização e backups). Nenhum dado de usuário é enviado a provedores de IA | C, D2, Estilo Arquitetural P7 |
-| RNF07 | O sistema deve permitir cconfigurar frequência e tipos de notificação, com limite padrão de 1 notificação por evento | D2, BM-Duolingo (anti-req.) |
+| RNF06 | O sistema deve tratar dados de restrições alimentares como dados sensíveis, com consentimento explícito, conforme a LGPD (art. 18 e art. 46), garantindo proteção criptográfica em trânsito (TLS) e em repouso (no dispositivo, servidor, fila de sincronização e backups), revogação imediata no aparelho (e em até 24 h no servidor após recebimento) e exclusão completa da conta e de todos os dados associados a pedido do usuário (ADR-007). Nenhum dado de usuário é enviado a provedores de IA | C, D2, Estilo Arquitetural P7, ADR-006, ADR-007 |
+| RNF07 | O sistema deve permitir configurar frequência e tipos de notificação, com limite padrão de 1 notificação por evento (compra ou preparo) e no máximo 2 por dia | D2, BM-Duolingo (anti-req.) |
 | RNF08 | O sistema deve exibir a atribuição da fonte pública de cada receita importada; para receitas traduzidas ou adaptadas por IA, deve manter a fonte e indicar a tradução/adaptação | Stakeholder externo, Atributos de Qualidade A09 |
 | RNF09 | O sistema não deve punir o usuário por inatividade (sem perda de pontos, sequências ou progresso) | BM-Duolingo (anti-req.) |
 | RNF10 | O registro de avaliação deve ter apenas a nota como campo obrigatório; relato e alterações são opcionais | R, walkthrough da dupla |
-| RNF11 | O sistema deve oferecer ao curador apoio (opcional) de um agente de IA, via API, na importação do catálogo (tradução para português do Brasil, extração de campos, estado dos alérgenos e substituições); toda proposta da IA exige aprovação do curador antes da publicação. A importação manual permanece disponível | Decisão de Arquitetura, Atributos de Qualidade A09 
+| RNF11 | O sistema deve oferecer ao curador apoio (opcional) de um agente de IA, via API, na importação do catálogo (tradução para português do Brasil, extração de campos, estado dos alérgenos e substituições); toda proposta da IA exige aprovação do curador antes da publicação. A importação manual permanece disponível | Decisão de Arquitetura, Atributos de Qualidade A09 |
 
 ### Anti-requisitos (benchmarking dirigido)
 
@@ -126,7 +126,7 @@ Fonte modular: [requisitos.md](../1.1-elicitacao/requisitos.md)
 | **Could** (2) | US13, US17 |
 | **Won't** (1) | Ranking entre amigos (ex-RF16): apenas 1 dos 5 entrevistados tinha interesse; social exige implementação cuidadosa; dupla optou por foco |
 
-Decisões de priorização: a identidade de gamificação é coleção (Must) → evolução (primeiro Should) → badges (Should); pontuação (US13) é Could por ser mecânica "batida". US08 (lembretes) é Must por fundamentação em computação persuasiva, desde que não irritante (RNF07).
+Decisões de priorização: a identidade de gamificação — estruturada metodologicamente pelo framework híbrido **6D (Werbach & Hunter) + Octalysis (Yu-kai Chou)** ([`framework-gamificacao.md`](../../fase2/03-modelagem/framework-gamificacao.md), [ADR-016](../../fase2/02-adr/adr-016-framework-conceitual-gamificacao.md)) — prioriza motivadores *White Hat* de posse cultural, maestria e criatividade: coleção (Must, CD4) → evolução em árvore (primeiro Should, CD2) → badges multi-dimensionais (Should, CD1/CD2/CD3/CD4); pontuação extrínseca avulsa (US13) permanece Could por evitar a *PBL Fallacy*. US08 (lembretes) é Must por fundamentação em computação persuasiva e design não punitivo (RNF09), desde que não irritante (RNF07).
 
 ### Must
 
@@ -171,7 +171,7 @@ Como Cleusa, quero receber lembretes nas datas de compra e de preparo, para não
 Como Cleusa, quero cadastrar as restrições alimentares da família no perfil e ser alertada sobre alérgenos, para cozinhar com segurança.
 - Dado que cadastrei uma restrição (ex.: diabetes ou outra condição não verificada), quando navego pelo aplicativo, vejo um aviso fixo informando que apenas alérgenos são verificados.
 - Dado que cadastrei uma restrição de alérgeno (ex.: camarão), quando recebo sugestões, então pratos incompatíveis ou com estado de alérgenos "não verificado" não aparecem nas sugestões (RN08).
-- Dado que uma receita contém um alérgeno comum (ex.: glúten, lactose, amendoim) ou possui estado de "não verificado", quando a visualizo, então o alerta de "compatibilidade não confirmada" é exibido (RN16).
+- Dado que uma receita contém um alérgeno do vocabulário controlado (ex.: `trigo_centeio_cevada_aveia` para cereais com glúten, `lactose`, `leite` ou `amendoim` — ANVISA RDC 727/2022 + `lactose`, ADR-014) ou possui estado de "não verificado", quando a visualizo, então o alerta de "compatibilidade não confirmada" é exibido (RN16).
 
 #### US10 — Ver substituições sugeridas para ingredientes (Must · RF08)
 Como Cleusa, quero ver substituições sugeridas para ingredientes que não tenho ou não posso consumir, para adaptar receitas sem desistir delas.
@@ -180,7 +180,7 @@ Como Cleusa, quero ver substituições sugeridas para ingredientes que não tenh
 
 #### US12 — Registrar avaliação de prato concluído com histórico (Must · RF11)
 Como Cleusa, quero registrar nota, relato e alterações de cada prato que fiz, mantendo meu histórico, para ter meu caderno digital de receitas.
-- Dado que concluí um prato, quando registro a avaliação, então apenas a nota é obrigatória; relato e alterações são opcionais (RNF10).
+- Dado que preparei um prato, quando registro a avaliação para concluí-lo, então apenas a nota é obrigatória; relato e alterações são opcionais (RNF10).
 - Dado que tenho avaliações, quando acesso o histórico, então vejo cada preparo com data, nota e alterações.
 - Dado que repeti um prato, quando o registro é feito novamente, então o histórico guarda os dois preparos separadamente.
 
@@ -214,16 +214,16 @@ Como Rafael, quero ver os utensílios que cada receita exige e que as sugestões
 - Dado que um prato exige utensílio que não tenho, quando o visualizo, então o sistema indica qual utensílio falta antes do preparo.
 
 #### US16 — Receber badges ao atingir marcos (Should · RF15)
-Como Cleusa, quero receber badges ao atingir marcos, para ter orgulho da minha trajetória na cozinha.
-- Dado que concluí pratos de 10 culinárias distintas, quando o décimo é registrado, então recebo o badge correspondente.
+Como Cleusa, quero receber badges ao atingir marcos de exploração cultural, evolução de pratos e adaptações criativas, para ter orgulho da minha trajetória na cozinha.
+- Dado que atingi o marco verificável de um badge (seja por prato específico, culinária, N culinárias distintas, todos os continentes, conjunto temático, total de pratos concluídos, nível em cadeia de evolução ou contagem de preparos com alterações registradas — RN03 a–h), quando a avaliação que completa o marco é salva, então recebo o badge correspondente uma única vez com a data de desbloqueio (RN04).
 - Dado que abro meu perfil, quando vejo os badges, então vejo os conquistados e os critérios dos ainda não obtidos.
 
 ### Could
 
 #### US13 — Ganhar pontos por prato concluído (Could · RF12)
 Como Rafael, quero ganhar pontos por prato concluído conforme dificuldade e ineditismo, para sentir progresso real.
-- Dado que concluí e avaliei um prato, quando o registro é salvo, então recebo pontos calculados a partir da dificuldade da receita.
-- Dado que o prato é inédito para mim, quando concluo, então recebo um bônus de ineditismo; se for repetição, o bônus não se aplica.
+- Dado que avaliei um prato, quando o registro é salvo, então recebo pontos calculados a partir da dificuldade da receita.
+- Dado que o prato é inédito para mim, quando o avalio, então recebo um bônus de ineditismo; se for repetição, o bônus não se aplica.
 - Dado que recebi pontos, quando consulto meu saldo, então vejo a origem de cada pontuação.
 
 #### US17 — Sugerir prato a um amigo (Could · RF17)
@@ -342,7 +342,7 @@ classDiagram
 | Receita | Instruções de preparo de um prato | tempo de preparo; dificuldade {fácil, média, difícil}; passo a passo numerado; alérgenos, estadoAlergenos {verificado, declarado_fonte, nao_verificado}; fonte (RNF08) |
 | Sugestao | Recomendação de prato apresentada ao usuário, com ciclo de vida | data/hora; situação {apresentada, candidata, descartada} |
 | PlanoDeRotina | Conjunto de pratos candidatos com datas, em um período | período {semana, quinzena}; data de início |
-| ItemDeRotina | Prato agendado em uma data dentro do plano | data de preparo; status {planejado, em preparo, concluído} |
+| ItemDeRotina | Prato agendado em uma data dentro do plano | data de preparo; status {planejado, em preparo*, concluído} *(nota da Fase 2: "em preparo" é estado exclusivamente local no aparelho — `LocalCookingState`, ADR-005/ADR-008; o servidor persiste apenas `{planejado, concluído}`)* |
 | ListaDeCompras | Ingredientes consolidados do plano, sem duplicatas e sem quantidades (v1) | data de compra |
 | Avaliacao | Registro de um preparo concluído | nota (obrigatória, 0 a 5 em passos de 0,5 — RN05); relato (opcional); alterações (opcional); data |
 | Badge | Conquista concedida ao atingir um marco verificável (RN03) | nome; descrição; marco |
@@ -371,11 +371,11 @@ Um UC para cada US Must (12), mais UC13 para US15 (Should, registro opcional apr
 | UC05 | Montar plano de refeições | Usuario | US06 | Novo plano (semana ou quinzena); cada prato candidato é associado a uma data de preparo (item "planejado" — RN12); reagendamento substitui a data; data vencida sem avaliação não gera punição (RNF09) |
 | UC06 | Gerar lista de compras consolidada | Usuario | US07 | Consolida os ingredientes do plano sem duplicatas e sem quantidades (RN14); usuário define a data de compra e marca itens como comprados; regeneração preserva marcações |
 | UC07 | Receber lembretes de compra e preparo | Usuario (+ Tempo) | US08 | Na data de compra, notificação com a lista; na data de preparo, lembrete com o prato do dia; frequência e tipos configuráveis; desativados, nada é enviado (RN13) |
-| UC08 | Cadastrar restrições alimentares | Usuario | US09 | Cadastro com consentimento explícito (dado sensível, RN09); a restrição passa a filtrar sugestões (RN08); alerta de incompatibilidade na visualização (RN16); revogável a qualquer momento |
+| UC08 | Cadastrar restrições alimentares | Usuario | US09 | Cadastro com consentimento explícito (dado sensível, RN09); a restrição passa a filtrar sugestões (RN08); alerta de incompatibilidade na visualização (RN16); revogação imediata no aparelho (24 h no servidor) e exclusão completa da conta a qualquer momento (RNF06, ADR-007) |
 | UC09 | Consultar substituições de ingredientes | Usuario | US10 | Ingredientes faltantes ou incompatíveis são marcados; para cada um, o sistema exibe os substitutos seguros globais cadastrados; sem substituto seguro, informa explicitamente (RN15, RN22) |
 | UC10 | Registrar avaliação de prato | Usuario | US12 | Nota obrigatória (0 a 5 em passos de 0,5 — RN05), relato e alterações opcionais; ao salvar, o prato passa a constar como concluído (RN01), o preparo entra no histórico (RN06) e o sistema verifica desbloqueios de evoluções (RN02) e badges (RN03, RN04) |
 | UC11 | Consultar coleção por culinária | Usuario | US14 | Pratos concluídos (RN01) agrupados por culinária, com percentual de progresso e quantidade faltante (RN07) |
-| UC12 | Importar e manter catálogo de receitas | Curador | US18 | Curador importa receita de plataforma pública, cadastra prato e receita com todos os atributos (fonte obrigatória — RN17, RNF08) e indica exatamente um prato base se for evolução (RN18) ou curador utiliza de agente de IA para traduzir, adaptar, mapear ingredientes e só cadastra essa receita após ele mesmo revisar e aprovar |
+| UC12 | Importar e manter catálogo de receitas | Curador | US18 | Curadoria exclusiva via endpoints de API (sem tela administrativa na v1 — ADR-010): fluxo principal manual ou assistido por IA (FA2, proposta em `proposto` com alérgenos `nao_verificado`), portão de publicação (fonte obrigatória — RN17, RNF08; foto TASL; invariantes ADR-014) e resposta estruturada com `manualFlowAvailable = true` em falha/teto da IA (FE2, RNF11) |
 | UC13 | Desbloquear evolução de prato | Usuario | US15 (Should) | Ao salvar a avaliação do prato base, o sistema desbloqueia as evoluções diretas (RN02, RN18); cadeias podem ter profundidade maior que dois níveis |
 
 Fonte modular (fluxos alternativos e de exceção completos): [casos-de-uso.md](../1.2-analise/casos-de-uso.md)
@@ -384,30 +384,29 @@ Fonte modular (fluxos alternativos e de exceção completos): [casos-de-uso.md](
 
 ## 8. Regras de negócio
 
-18 RNs ativas, 1 futura (RN19) e 1 excluída (RN20). Toda RN é rastreável a US/RF. Status das ativas: a validar na 1.4.
+20 RNs ativas (RN01–RN18, RN21, RN22), 1 futura (RN19) e 1 excluída (RN20). Toda RN é rastreável a US/RF. Status das ativas: validadas na 1.4 e retroalimentadas na Fase 2 (incluindo extensão 6D + Octalysis na RN03, ADR-016).
 
-### Fundamentos da gamificação
+### Fundamentos da gamificação (6D Framework + Octalysis — ADR-016)
 
 - **RN01** — Um prato é considerado concluído por um usuário somente quando existe ao menos uma avaliação salva por ele para esse prato. Histórico, coleção, badges e desbloqueio de evolução consideram exclusivamente pratos concluídos. *(US12, US14, US15, US16; RF11, RF13, RF14, RF15)*
 - **RN02** — Uma evolução é desbloqueada quando o usuário salva a primeira avaliação do prato base correspondente; enquanto bloqueada, a evolução exibe qual prato base precisa ser avaliado. Avaliações adicionais do mesmo prato base não geram novo desbloqueio. *(US15; RF14)*
-- **RN03** — O marco de um badge é verificável e assume uma das formas: (a) avaliação de um prato específico; (b) avaliação de ao menos um prato de uma culinária; (c) avaliação de pratos de N culinárias distintas; (d) avaliação de ao menos um prato de cada continente do catálogo (América, África, Europa, Ásia e Oceania); (e) avaliação de pratos de todas as culinárias de um conjunto temático definido pelo curador. *(US16; RF15)*
+- **RN03** — O marco de um badge é verificável, definido declarativamente por seed da dupla e fundamentado no framework híbrido 6D + Octalysis (ADR-016), assumindo uma das oito formas: (a) avaliação de um prato específico; (b) avaliação de ao menos um prato de uma culinária; (c) avaliação de pratos de N culinárias distintas; (d) avaliação de ao menos um prato de cada continente do catálogo (América, África, Europa, Ásia e Oceania); (e) avaliação de pratos de todas as culinárias de um conjunto temático definido declarativamente por seed pela dupla/curador; (f) avaliação de ao menos N pratos distintos do catálogo (consistência/onboarding — 6D Progression Stair / CD2); (g) avaliação de ao menos um prato com nível de profundidade ≥ k (k ≥ 2) em uma cadeia de evolução (maestria em árvore — CD2); (h) registro de avaliação com alterações pessoais na receita (`alteracoes` não vazio) em ao menos N preparos (expressão criativa — CD3). *(US16, US12, US15; RF15, RF11, RF14; ADR-016)*
 - **RN04** — Um badge é concedido uma única vez por usuário, no momento em que seu marco passa a ser atendido, registrando a data de desbloqueio; o perfil exibe os badges conquistados e os critérios dos não obtidos; badges nunca são revogados ou perdidos. *(US16; RF15, RNF09)*
 
 ### Avaliação, histórico e coleção
 
-- **RN05** — A nota da avaliação é obrigatória e assume valores de 0 a 5, em passos de 0,5; relato e alterações são opcionais. *(US12; RF11, RNF10)*
+- **RN05** — A nota da avaliação é obrigatória e assume valores de 0 a 5, em passos de 0,5; relato e alterações são opcionais *(nota técnica da Fase 2: no contrato e na persistência, `score` é inteiro de 0 a 10 em meios-pontos)*. *(US12; RF11, RNF10)*
 - **RN06** — Cada avaliação registrada é um preparo distinto no histórico, com data própria; repetir um prato gera um novo registro, sem sobrescrever avaliações anteriores. *(US12; RF11)*
 - **RN07** — A coleção do usuário é o conjunto de pratos distintos que ele concluiu (RN01), agrupados por culinária. O progresso de uma culinária é o percentual (pratos concluídos ÷ total de pratos da culinária no catálogo); culinárias incompletas exibem quantos pratos faltam. *(US14; RF13)*
 
 ### Perfil e restrições
 
-- **RN08** — Um prato é incompatível com o usuário quando sua receita declara ao menos um alérgeno associado a alguma restrição alimentar do perfil, ou quando seu estado de alérgenos for "não verificado". A lista de alérgenos vazia significa "não verificado", nunca "sem alérgenos". Sugestões não apresentam pratos incompatíveis; na busca e na visualização, pratos incompatíveis são claramente sinalizados com aviso sobre a incompatibilidade. *(US09, US04; RF07)*
-- **RN09** — O cadastro de restrições alimentares só é persistido após consentimento explícito do usuário, com informação de que se trata de dado sensível; o usuário pode revogar o consentimento e excluir restrições a qualquer momento. *(US09; RNF06)*
+- **RN08** — Para usuário com ao menos uma restrição alimentar cadastrada, um prato é incompatível quando sua receita declara ao menos um alérgeno associado a alguma restrição do perfil, ou quando seu estado de alérgenos for "não verificado". A lista de alérgenos vazia significa "não verificado", nunca "sem alérgenos", salvo quando o curador confirma explicitamente no checklist de verificação que a receita não contém nenhum dos 19 códigos do vocabulário controlado (`confirmadoSemAlergenos = true`, ADR-014). Para usuário sem restrições cadastradas, receitas não verificadas continuam classificadas como compatíveis, exibindo seu estado de alérgenos (RN16). Sugestões não apresentam pratos incompatíveis; na busca e na visualização, pratos incompatíveis são claramente sinalizados com aviso sobre a incompatibilidade. *(US09, US04; RF07)*
+- **RN09** — O cadastro de restrições alimentares só é persistido após consentimento explícito do usuário, com informação de que se trata de dado sensível; o usuário pode revogar o consentimento e excluir restrições — bem como solicitar a exclusão completa da conta e de todos os dados pessoais e sensíveis associados (LGPD art. 18, VI; ADR-007) — a qualquer momento. *(US09; RNF06)*
 
 ### Sugestão
 
-- **RN10** — s sugestões consideram o perfil (preferências e restrições com alérgenos verificados, RN08) e o
-histórico (prato já concluído não é apresentado como novidade). Quando o usuário informa a despensa, as sugestões priorizam pratos compatíveis e destacam os ingredientes faltantes; pratos que exigem utensílios ausentes são sinalizados. *(US01, US03, US11; RF01, RF03, RF19)*
+- **RN10** — As sugestões consideram o perfil (preferências e restrições com alérgenos verificados, RN08) e o histórico (prato já concluído não é apresentado como novidade). Quando o usuário informa a despensa, as sugestões priorizam pratos compatíveis e destacam os ingredientes faltantes; pratos que exigem utensílios ausentes são sinalizados. *(US01, US03, US11; RF01, RF03, RF19)*
 - **RN11** — Aprovar uma sugestão torna-a candidata, disponível para o planejamento; descartar impede seu retorno na mesma sessão, mas ela pode reaparecer em sessões futuras. *(US02; RF02)*
 
 ### Rotina e lembretes
@@ -422,7 +421,7 @@ histórico (prato já concluído não é apresentado como novidade). Quando o us
 ### Substituições e alérgenos
 
 - **RN15** — Ao visualizar uma receita, para cada ingrediente faltante (ausente da despensa) ou incompatível com restrição do perfil, o sistema sugere os substitutos globais cadastrados (vindos de cadastro manual ou de proposta de IA aprovada pelo curador); se não houver substituto cadastrado, o sistema informa isso explicitamente, sem inventar uma troca. *(US10; RF08)*
-- **RN16** — Toda receita exibe seu estado de alérgenos (verificado, declarado pela fonte, não verificado) na visualização; caso possua alérgenos associados às restrições do usuário ou tenha o estado "não verificado", o sitema alerta com "compatibilidade não confirmada". *(US09; RF07)*
+- **RN16** — Toda receita exibe seu estado de alérgenos (verificado, declarado pela fonte, não verificado) na visualização; caso possua alérgenos associados às restrições do usuário ou tenha o estado "não verificado", o sistema alerta com "compatibilidade não confirmada". *(US09; RF07)*
 
 ### Catálogo
 
@@ -453,7 +452,7 @@ Cadeia do Guia Geral: Persona → RF/RNF → US → UC → Classe do modelo conc
 | RF05 | US07 | UC06 | Usuario, PlanoDeRotina, ListaDeCompras, Ingrediente | — |
 | RF06 | US08 | UC07 | Usuario, PlanoDeRotina, ItemDeRotina, ListaDeCompras | Ator secundário: Tempo |
 | RF07 | US09 | UC08 | Usuario, RestricaoAlimentar, Receita | — |
-| RF08 | US10 | UC09 | Usuario, Receita, Ingrediente, RestricaoAlimentar | RN15, RN22 | - |
+| RF08 | US10 | UC09 | Usuario, Receita, Ingrediente, RestricaoAlimentar | RN15, RN22 |
 | RF09 | US04 | — | — | Should sem UC nesta versão |
 | RF10 | US05 | UC04 | Usuario, Prato, Receita, Ingrediente, Utensilio, RestricaoAlimentar | — |
 | RF11 | US12 | UC10 | Usuario, Avaliacao, Prato, ItemDeRotina, Badge | — |
@@ -468,4 +467,4 @@ Cadeia do Guia Geral: Persona → RF/RNF → US → UC → Classe do modelo conc
 
 ---
 
-*Processo: este documento foi gerado na conversa 1.3 (Documentação) com IA generativa no papel de redatora técnica. Decisões, iterações e divisão de tarefas da dupla estão registradas no [diário de bordo](../../diario-de-bordo.md).*
+*Processo: este documento foi gerado na conversa 1.3 (Documentação) com IA generativa no papel de redatora técnica e mantido sincronizado com as retroalimentações da Fase 2 (Issue #30, Gamificação ADR-016 e Issue #32). Decisões e iterações estão registradas nos diários de bordo ([Fase 1](../diario_de_bordo-fase1.md) e [Fase 2](../../fase2/diario_de_bordo-fase2.md)).*

@@ -9,7 +9,7 @@
 Em caso de conflito entre textos do repositório, aplique sempre esta hierarquia:
 
 1. **Artefatos Aprovados da Fase** (ex.: `regras-de-negocio.md`, `atributos-qualidade.md`, `c4-*.md`, `diagrama-classes.md`, `openapi.yaml`, `padroes-de-projeto.md`)
-2. **ADRs vigentes** em [`../fase2/adr/`](../fase2/adr/) (incluindo suas seções finais de `Detalhamento`)
+2. **ADRs vigentes** em [`../fase2/adr/`](../fase2/02-adr/) (incluindo suas seções finais de `Detalhamento`)
 3. **Painel de Estado Vivo** ([`../../STATE.md`](../../STATE.md))
 4. **Briefing da Fase** ([`../fase2/briefing-fase2.md`](../fase2/briefing-fase2.md))
 
@@ -17,7 +17,7 @@ Em caso de conflito entre textos do repositório, aplique sempre esta hierarquia
 
 ## 2. Como Evoluir ou Alterar um ADR
 
-Os ADRs em [`../fase2/adr/adr-001..015-*.md`](../fase2/adr/) seguem a regra de **registro histórico imutável**:
+Os ADRs em [`../fase2/adr/adr-001..015-*.md`](../fase2/02-adr/) seguem a regra de **registro histórico imutável**:
 
 ### Caso A: Detalhamento, Extensão ou Estratégia de Implementação em Estágios
 Quando a decisão central do ADR continua válida, mas ganha um refinamento técnico (ex.: dividir a implementação em Estágio 1 e Estágio 2 do MVP, ou detalhar um adaptador de deploy):
@@ -31,7 +31,7 @@ Quando a decisão central do ADR continua válida, mas ganha um refinamento téc
 
 ### Caso B: Substituição de uma Decisão Central
 Quando uma decisão é revogada por completo (ex.: trocar React Native por Flutter, ou abandonar o Monólito Modular):
-1. Crie um novo arquivo `docs/fase2/adr/adr-016-<titulo>.md` com os campos obrigatórios (`Status`, `Data`, `Autores`, `Atributos`, `Rastreio`, `ADRs relacionados`, `Contexto`, `Decisão`, `Alternativas consideradas`, `Consequências`, `Riscos relacionados`, `Quando revisitar`).
+1. Crie um novo arquivo `docs/fase2/02-adr/adr-NNN-<titulo>.md` com os campos obrigatórios (`Status`, `Data`, `Autores`, `Atributos`, `Rastreio`, `ADRs relacionados`, `Contexto`, `Decisão`, `Alternativas consideradas`, `Consequências`, `Riscos relacionados`, `Quando revisitar`).
 2. No ADR antigo, altere apenas a linha `- **Status:**` para:
    `- **Status:** Substituído por ADR-016 em DD/MM/AAAA`.
 

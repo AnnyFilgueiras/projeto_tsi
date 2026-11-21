@@ -13,7 +13,7 @@
 | **Cadeia de evolução** | Sequência que liga um prato base às suas evoluções. |
 | **Ponto** | Unidade de pontuação recebida por prato concluído, calculada por dificuldade e ineditismo (prioridade Could). |
 | **Ineditismo** | Condição de um prato nunca preparado pelo usuário; gera bônus de pontuação. |
-| **Badge** | Conquista concedida ao atingir um marco definido (ex.: pratos de 10 países distintos). |
+| **Badge** | Conquista permanente concedida uma única vez ao atingir um marco verificável (RN03 a–h, RN04), cobrindo exploração cultural (prato, culinária, N culinárias, 5 continentes, conjunto temático), consistência (total de pratos), maestria em cadeia (nível de evolução) e autoria criativa (preparos com alterações registradas), segundo o framework híbrido 6D + Octalysis (ADR-016). |
 | **Despensa** | Registro dos ingredientes que o usuário declara ter em casa; base para sugestões de "cozinhar na hora". |
 | **Utensílios** | Equipamentos de cozinha que o usuário declara possuir (ex.: fogão, forno); sugestões respeitam essa disponibilidade. |
 | **Sugestão** | Prato recomendado pelo sistema com base no perfil, restrições, despensa e utensílios do usuário. |

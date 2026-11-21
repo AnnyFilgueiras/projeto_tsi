@@ -9,7 +9,7 @@
 
 **Declaração de visão:** Ser a principal referência em culinária internacional para cozinheiros amadores que buscam variedade e diversão na cozinha. O Panelada busca tornar o processo de cozinhar mais divertido e estimular o aprendizado de pratos novos: o usuário descobre receitas de diferentes países conforme seu perfil, organiza sua rotina de refeições (escolha do prato, data de compra dos ingredientes e data de preparo), registra avaliações e adaptações pessoais, e compartilha a experiência com amigos — com catálogo inicial alimentado por plataformas públicas de receitas.
 
-**Conceito de gamificação:** abordagem híbrida com três camadas — coleção/exploração como espinha dorsal ("Pokédex de pratos"), maestria via cadeias de evolução (prato base → versões mais complexas) e desafio social leve como consequência (sugestões entre amigos). Interação social aprofundada despriorizada nesta versão.
+**Conceito de gamificação:** estruturado metodologicamente pelo framework híbrido **6D (Werbach & Hunter) + Octalysis (Yu-kai Chou)** ([`framework-gamificacao.md`](../../fase2/03-modelagem/framework-gamificacao.md), [ADR-016](../../fase2/02-adr/adr-016-framework-conceitual-gamificacao.md)), combinando quatro pilares *White Hat* não punitivos (`RNF09`): coleção/exploração cultural como espinha dorsal ("Pokédex de pratos", CD4/CD7), maestria via cadeias de evolução (prato base → versões mais complexas, CD2), autoria criativa e badges multi-dimensionais (adaptações pessoais no caderno digital e conquistas verificáveis `RN03 a–h`, CD1/CD2/CD3/CD4) e interação social colaborativa leve (sugestões entre amigos, CD5, sem ranking competitivo).
 
 ## Stakeholders
 
@@ -35,7 +35,7 @@
 | RF12 | O sistema deve atribuir pontos por prato concluído, calculados a partir da dificuldade da receita e do ineditismo para o usuário | Escopo, R |
 | RF13 | O sistema deve manter a coleção pessoal de pratos do usuário, exibindo o progresso por país/culinária | R, M, decisão de gamificação |
 | RF14 | O sistema deve organizar pratos em cadeias de evolução, em que uma versão base desbloqueia versões mais complexas | Decisão de gamificação, todos |
-| RF15 | O sistema deve conceder badges ao atingir marcos definidos (ex.: pratos de N países distintos) | Escopo, C, R |
+| RF15 | O sistema deve conceder badges ao atingir marcos verificáveis definidos de exploração cultural, consistência, evolução em cadeia e adaptação criativa (RN03 a–h, ADR-016) | Escopo, C, R, 6D + Octalysis |
 | ~~RF16~~ | ~~O sistema deve exibir um ranking de pontos entre o usuário e seus amigos~~ — **DESCARTADO (Won't):** apenas 1 dos 5 entrevistados demonstrou interesse; social despriorizado pela dupla | Escopo, R |
 | RF17 | O sistema deve permitir sugerir um prato a um amigo | Escopo, D1, C, R |
 | RF18 | O sistema deve permitir ao curador importar e manter o catálogo de receitas (com apoio opcional de agente de IA), incluindo dificuldade, estado dos alérgenos (verificado, declarado pela fonte, não verificado) e cadeias de evolução | Decisão de fonte de conteúdo, Atributos de Qualidade A09 |
@@ -50,7 +50,7 @@
 | RNF03 | O sistema deve responder a uma solicitação de sugestão de pratos em até 2,5 segundos | Derivado (decisão rápida, D2) |
 | RNF04 | O sistema deve permitir iniciar qualquer fluxo principal (sugestões, planejamento, registro de avaliação) em até 2 toques a partir da tela inicial | C, D1, D2 |
 | RNF05 | O sistema deve permitir consultar offline as receitas planejadas, em preparo (abertas no passo a passo) e preparadas (com avaliação salva), e salvar a avaliação sem conexão; ao restabelecer a conexão, a sincronização deve ocorrer sem perda de avaliações nem duplicação de preparos | C (cozinha/bancada) |
-| RNF06 | O sistema deve tratar dados de restrições alimentares como dados sensíveis, com consentimento explícito, conforme a LGPD, e garantindo proteção criptográfica em trânsito (TLS) e em repouso (no dispositivo, servidor, fila de sincronização e backups). Nenhum dado de usuário é enviado a provedores de IA | C, D2, Estilo Arquitetural P7 |
+| RNF06 | O sistema deve tratar dados de restrições alimentares como dados sensíveis, com consentimento explícito, conforme a LGPD (art. 18 e art. 46), garantindo proteção criptográfica em trânsito (TLS) e em repouso (no dispositivo, servidor, fila de sincronização e backups), revogação imediata no aparelho (e em até 24 h no servidor após recebimento) e exclusão completa da conta e de todos os dados associados a pedido do usuário (ADR-007). Nenhum dado de usuário é enviado a provedores de IA | C, D2, Estilo Arquitetural P7, ADR-006, ADR-007 |
 | RNF07 | O sistema deve permitir configurar frequência e tipos de notificação, com limite padrão de 1 notificação por evento (compra ou preparo) e no máximo 2 por dia | D2, BM-Duolingo (anti-req.) |
 | RNF08 | O sistema deve exibir a atribuição da fonte pública de cada receita importada; para receitas traduzidas ou adaptadas por IA, deve manter a fonte e indicar a tradução/adaptação | Stakeholder externo, Atributos de Qualidade A09 |
 | RNF09 | O sistema não deve punir o usuário por inatividade (sem perda de pontos, sequências ou progresso) | BM-Duolingo (anti-req.) |

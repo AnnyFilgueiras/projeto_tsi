@@ -741,3 +741,93 @@ Nenhum artefato da Fase 1 foi alterado diretamente. Nenhum ADR foi marcado como 
 
 ### Pendências para a próxima sessão
 - Ver quadro consolidado na Seção 3 do `STATE.md` (Frente A: `GOV-04` workflows/skills de Issues; Frente B: fechamento da Fase 2 `F2-01` a `F2-05`; Frente C: `GAM-01`/`GAM-02` framework conceitual de gamificação; Frente D: `MVP-01` a `MVP-04`).
+
+
+
+## [18/11/2026] — Modelagem Conceitual de Gamificação (Framework Híbrido 6D + Octalysis — GAM-01 e GAM-02)
+
+- **Papel da IA:** arquiteto de software e especialista em design de sistemas gamificados (*gamification designer*).
+- **Técnicas aplicadas:** levantamento comparativo de frameworks conceituais de gamificação da literatura (*6D Framework*, *Octalysis*, *MDA*, *Hexad User Types* e *Self-Determination Theory*); análise de trade-offs entre 3 níveis de intervenção arquitetural (Nível 1 apenas documental, Nível 2 extensão declarativa de `RN03` sem novas tabelas, Nível 3 ativação de sistema de pontos extrínsecos no MVP); modelagem passo a passo pelos 6 passos do **6D (Werbach & Hunter)** combinados aos **8 Core Drives do Octalysis (Yu-kai Chou)**; verificação da fronteira modular (`A12`) e retroalimentação sincronizada entre Fase 2 e Fase 1.
+- **Prompts-chave / Contexto da sessão:**
+  1. Solicitação de levantamento dos frameworks conceituais de gamificação existentes (ex.: 6D, Octalysis), análise de pontos fortes/fracos e impacto no Panelada, escolha do framework, avaliação do impacto no que já foi consolidado, projeto das alterações no repositório e implementação.
+  2. Escolha da abordagem híbrida (**6D como estrutura de engenharia + Octalysis como lente motivacional**), orientação de trabalhar em uma branch separada registrando as decisões e pedido de aprofundamento técnico sobre o nível de intervenção funcional visando qualidade, praticidade e prevenção de refatorações custosas no futuro.
+  3. Escolha do **Nível 2 de intervenção**: formalizar o framework híbrido 6D + Octalysis e estender declarativamente a `RN03` (e `UnlockCalculator` / `UnlockRules` / schema `Milestone`) de 5 para 8 tipos de marco (`total_dishes`, `evolution_level` e `adaptation_count`), operando sobre dados já existentes em `Rating` e `Dish` sem criar novas tabelas.
+- **Insumos usados:** `STATE.md`, `AGENTS.md`, `docs/playbooks/01..02`, `regras-de-negocio.md`, `backlog.md`, `lexico.md`, `modelo-conceitual.md`, `documento-de-requisitos.md`, `matriz-rastreabilidade.md`, `atributos-qualidade.md`, `diagrama-classes.md`, `padroes-de-projeto.md`, `sequencia-uc10.md`, `openapi.yaml`, `glossario-identificadores.md`.
+- **Artefatos produzidos:** `docs/fase2/framework-gamificacao.md` v1.0, `docs/fase2/adr/adr-016-framework-conceitual-gamificacao.md` e atualizações de retroalimentação nos artefatos da Fase 1 e da Fase 2.
+
+### Decisões tomadas
+1. **Escolha do Framework Híbrido (6D + Octalysis — `ADR-016`):**
+   - O **6D Framework (Werbach & Hunter)** estrutura a engenharia de gamificação nos 6 passos (**D1** Objetivos, **D2** Comportamentos-alvo, **D3** Jogadores/Personas, **D4** Loops de atividade — *Engagement Loop* e *Progression Stair*, **D5** Diversão e ética motivacional, **D6** Ferramentas e Pirâmide **DMC** — Dinâmicas, Mecânicas e Componentes).
+   - O **Octalysis (Yu-kai Chou)** fundamenta psicologicamente os passos D2, D3 e D5 com os **8 Core Drives**, diferenciando motivação **White Hat** (*CD1 Epic Meaning*, *CD2 Accomplishment*, *CD3 Creativity*, *CD4 Ownership*) de **Black Hat** (*CD8 Loss & Avoidance*), o que justifica teoricamente a filosofia **Não Punitiva (`RNF09`, `RN04`, `RN12`)** e o descarte do ranking competitivo (`RN20`).
+2. **Nível 2 de Intervenção — Extensão Declarativa da `RN03` (`a..h`) sem Novas Tabelas:**
+   - A análise pelo 6D + Octalysis revelou que os 5 tipos originais de marco da `RN03` (`a..e`) premiavam apenas a exploração geográfica (*CD4* e *CD7*), deixando sem cobertura de conquista três dimensões cujos dados já estão persistidos em `Rating` (`changes`) e `Dish` (`baseDishId`):
+     - `(f) total_dishes` (*Onboarding e consistência — 6D Progression Stair / CD2*): concluir ao menos $N$ pratos distintos do catálogo;
+     - `(g) evolution_level` (*Maestria em árvore — 6D Progression Stair / CD2*): concluir ao menos um prato com nível de profundidade $\ge k$ ($k \ge 2$) em uma cadeia de evolução (`RN18`);
+     - `(h) adaptation_count` (*Expressão criativa e autoria — Octalysis CD3*): registrar avaliação com `alteracoes` (`changes`) não vazio em ao menos $N$ preparos (`RN05`, `US12`).
+   - Essa decisão evita refatoração futura no contrato de `UnlockCalculator` e `UnlockRules` durante a Fase 3, mantendo custo zero de banco de dados (nenhuma tabela ou coluna nova) e preservando 100% o isolamento modular no módulo `progress` (`A12`).
+3. **Manutenção de Pontuação (`US13`/`RN19`) como *Could* e Ranking (`RN20`) como *Won't*:**
+   - Fundamentado na crítica do 6D à *PBL Fallacy* (pontos extrínsecos abstratos adicionam menos valor quando já há progressão semântica em árvores de evolução e coleção cultural) e na análise *White Hat* do Octalysis.
+
+### Artefatos alterados (retroalimentação)
+- `docs/fase2/framework-gamificacao.md` *(novo)*: documento metodológico completo (passos D1 a D6, matriz dos 8 Core Drives, diagramas Mermaid dos loops e da pirâmide DMC, catálogo dos 8 tipos de marco e matriz de rastreabilidade).
+- `docs/fase2/adr/adr-016-framework-conceitual-gamificacao.md` *(novo)*: registro formal da decisão arquitetural e metodológica.
+- `docs/fase2/openapi.yaml`: schema `Milestone` (`oneOf`) expandido de 5 para 8 variantes (`total_dishes`, `evolution_level`, `adaptation_count`).
+- `docs/fase2/glossario-identificadores.md`: adicionadas as equivalências PT→EN dos 3 novos tipos de marco e do atributo `minLevel`.
+- `docs/fase2/diagrama-classes.md`, `docs/fase2/padroes-de-projeto.md` e `docs/fase2/sequencia-uc10.md`: atualizados de 5 para 8 tipos de marco no `switch` exaustivo (`R03`) de `UnlockCalculator` e `UnlockRules`, referenciando o `ADR-016` e `framework-gamificacao.md`.
+- `docs/fase1/1.2-analise/regras-de-negocio.md`, `docs/fase1/1.1-elicitacao/backlog.md`, `docs/fase1/1.1-elicitacao/lexico.md`, `docs/fase1/1.3-documentacao/documento-de-requisitos.md` e `docs/fase1/1.4-validacao/matriz-rastreabilidade.md`: retroalimentados com as alíneas `(f)`, `(g)` e `(h)` da `RN03`, atualização de `US16` e fundamentação 6D + Octalysis.
+- `AGENTS.md`, `README.md` e `STATE.md`: atualizados com os novos artefatos e conclusão de `GAM-01` e `GAM-02`.
+
+### Iterações relevantes (erros e retrabalho da IA)
+1. Na primeira pergunta sobre o nível de intervenção, as opções resumidas não deixavam claro o impacto técnico interno de adicionar novos tipos declarativos de marco nem o custo futuro de refatorar `UnlockCalculator`/`UnlockRules`; após pedido de aprofundamento da dupla, a IA detalhou a assinatura `(rating, index, state)`, os dados já existentes em `Rating` e `Dish` e comparou os 3 níveis de intervenção, permitindo a escolha fundamentada do Nível 2.
+2. Após a primeira versão da implementação, a dupla solicitou uma auditoria crítica de consistência e qualidade ("advogado do diabo"), que identificou e corrigiu 6 pontos fracos: (i) especificação explícita de `UnlockState` (incluindo `adaptationRatingIds` para suportar `adaptation_count` mesmo em pratos repetidos); (ii) guarda anti-ciclo (`visited` + `MAX_DEPTH = 10`) e invariante no `PublicationGate` para a árvore de `baseDishId` em `evolution_level`; (iii) tabela do Seed Canônico de 11 Badges do MVP e ajuste em `atributos-qualidade.md` para prever ao menos 1 cadeia de 3 níveis; (iv) regra explícita de bloqueio de evoluções na UI vs. tolerância a avaliações fora de ordem na fila offline (`RN02` × `A08`); (v) sincronização de `requisitos.md`, `documento-de-requisitos.md`, `casos-de-teste.md` (`CT31`) e `discriminator` no schema `Milestone` do `openapi.yaml`; e (vi) inclusão de exemplo canônico completo do vetor JSON em `framework-gamificacao.md`.
+
+### Divergências registradas (briefing/professor × artefatos)
+- Nenhuma divergência; a exigência extra do professor foi integrada harmoniosamente aos artefatos da Fase 1 e da Fase 2 respeitando a regra de precedência e o isolamento modular (`A12`).
+
+### Riscos aceitos
+- Mantidos `R1` a `R19`; o risco de divergência entre `UnlockCalculator` (App) e `UnlockRules` (API) para os 8 tipos de marco permanece mitigado pela suíte única de vetores JSON na CI.
+
+### Pendências para a próxima sessão
+- Ver quadro atualizado na Seção 3 do `STATE.md` (Frente A: `GOV-04`; Frente B: `F2-01` a `F2-05`; Frente D: `MVP-01` a `MVP-04`).
+
+
+
+## [20/11/2026] — Frente B: Fechamento e Higiene da Fase 2 (F2-01 a F2-05 — Etapas 2.6 a 2.9)
+
+- **Papel da IA:** revisor cético / avaliador externo simulado (*"advogado do diabo"*, etapa `2.8`) e revisor/consolidador (etapa `2.9`).
+- **Técnicas aplicadas:** retroalimentação controlada via Issue agrupada (`Issue #32` — Lote 3); higiene sistemática de ADRs e artefatos da Fase 2 (Lote 2); conferência oficial em fontes públicas da lista de alérgenos do Anexo III da **ANVISA RDC nº 727/2022**; validação formal de contrato OpenAPI 3.1 com `@redocly/cli lint` e auditoria estrutural completa das 33 requisições da coleção Bruno; revisão adversarial em 6 frentes (27 perguntas críticas); consolidação de checklist final (`DoD 2.1–2.9`) e guia de handoff para a Fase 3 + roteiro de slides.
+- **Prompts-chave / Contexto da sessão:**
+  1. Solicitação da dupla para implementar todos os passos da Frente B (`F2-01` a `F2-05`).
+  2. Confirmação explícita da dupla em três decisões pendentes antes da escrita: (a) confirmar os riscos `R18` e `R19` e fechar os `[CONFIRMAR]` de direitos/licenças em `ADR-010` item 9 e `ADR-012` item 1 mantendo `R10` como risco aceito documentado; (b) formalizar a exclusão completa da conta e de todos os dados associados em `RNF06`, `RN09` e `UC08-FA3` (LGPD art. 18, VI) sem criar nova US; (c) trabalhar na nova branch `docs/fase2-closing-frente-b` a partir de `feat/gamification-framework-6d-octalysis`, incluindo o `ADR-016` na revisão `2.8` e fechamento `2.9`.
+- **Insumos usados:** `STATE.md`, `AGENTS.md`, `docs/playbooks/01..03`, `briefing-fase2.md` v1.5, `atributos-qualidade.md`, `estilo-arquitetural.md`, `propostas-arquiteturais.md`, `adr-001` a `adr-016`, `c4-contexto.md`, `c4-containers.md`, `c4-componentes.md`, `diagrama-classes.md`, `sequencia-uc04/08/10/12.md`, `padroes-de-projeto.md`, `openapi.yaml` v1.1.0-2.7, coleção Bruno `panelada-curadoria`, `requisitos.md`, `backlog.md`, `regras-de-negocio.md`, `casos-de-uso.md`, `modelo-conceitual.md`, `casos-de-teste.md`, `documento-de-requisitos.md`, `matriz-rastreabilidade.md` e consulta pública à **ANVISA RDC nº 727/2022 (Anexo III)**.
+- **Artefatos produzidos:** `docs/fase2/retroalimentacao-fase1-lote-3.md`, `docs/fase2/revisao-arquitetural.md` v1.0, `docs/fase2/checklist-final.md` v1.0, `docs/fase2/resumo-fase2-para-fase3.md` v1.0, `docs/fase2/bruno/panelada-curadoria/fixtures/dish-example.jpg` e esta entrada.
+
+### Decisões tomadas
+1. **Conferência oficial da ANVISA RDC nº 727/2022 (Anexo III):** validada correspondência 1-a-1 dos 18 alimentos/grupos de declaração obrigatória contra os 18 primeiros códigos de `AllergenCode` (`ADR-014`), mantido o 19º código `lactose` adicionado pela dupla.
+2. **Fechamento dos `[CONFIRMAR]` (`R10`, `ADR-010`, `ADR-012`) e confirmação de `R18` e `R19`:** confirmada pela dupla a política de atribuição + reescrita autoral + conferência de termos (`ADR-010`) e licenças abertas sem NC/ND (`public_domain`, `cc0`, `cc_by`, `cc_by_sa`, `own_work` — `ADR-012`), mantendo `R10` como risco aceito documentado (sem parecer jurídico), além da confirmação formal de `R18` (duas implementações de `UnlockCalculator`/`UnlockRules` mitigadas por vetores JSON na CI) e `R19` (limitação do ESLint para SQL em string literal mitigada por prefixos de tabela e checklist de PR).
+3. **Exclusão completa de conta (`ADR-007` item 9 / `DELETE /v1/account`):** formalizada na Fase 1 em `RNF06`, `RN09` e `UC08-FA3` (LGPD art. 18, VI) via Issue #32, sem necessidade de criar nova US.
+4. **Correção estrutural do contrato `openapi.yaml` (v1.2.0-2.8):** criado schema dedicado `ProposalData` para `Proposal.data` (permitindo `allergenState: verified` nas respostas de `/verify` e `/approve`, enquanto `ProposalInput` e `ProposalEdit` continuam restringindo a entrada a `source_declared | unverified`); extraídos os 8 schemas nomeados de `Milestone` com `discriminator.mapping`; adicionadas descrições às 7 tags e removido o componente órfão `KeyReused`. Validado formalmente com `@redocly/cli lint` (**0 erros**, 1 aviso intencional de `http://localhost:3000`).
+5. **Registro de 2 novos riscos na revisão adversarial (`2.8`):** `R20` (erro humano de curadoria por equipe não nutricionista e contaminação cruzada industrial) e `R21` (pausa de 7 dias no Supabase Free Tier e cold start na Opção 4C, mitigados por paridade total com Docker Compose local).
+
+### Artefatos alterados (retroalimentação)
+- **Fase 1 (Issue #32 — Lote 3):** `requisitos.md` (`RNF06`), `backlog.md` (`US09`), `regras-de-negocio.md` (`RN03e`, `RN05`, `RN08`, `RN09`, `RN16`), `casos-de-uso.md` (`UC08` FA2/FA3, `UC12` FA2/FE2), `modelo-conceitual.md` (nota `"em preparo"` local), `casos-de-teste.md` (tabela 31 CTs, `CT01`, `CT17`, `CT19`, `CT30`), `documento-de-requisitos.md` (v1.2 re-sincronizada + correção de typos e link do diário) e `matriz-rastreabilidade.md`.
+- **ADRs (Lote 2):** `adr-002`, `adr-005`, `adr-006`, `adr-007`, `adr-009`, `adr-010`, `adr-011`, `adr-012`, `adr-014` (padronização de `Detalhamento`, remoção de marcadores soltos `[20]`/`[41]`/`[66]`/`[82]`/`[84]`/`[85]`/`[87]`/`[111]`, fechamento de `[CONFIRMAR]` e conferência RDC 727/2022).
+- **Fase 2 (Higiene e Contratos):** `atributos-qualidade.md` v1.4, `estilo-arquitetural.md`, `propostas-arquiteturais.md` (corrigidos `Ver ADR-013`, `Fastify` e linha quebrada de `R13`), `briefing-fase2.md` v1.6, `diagrama-classes.md`, `sequencia-uc12.md`, `padroes-de-projeto.md` v1.2, `openapi.yaml` v1.2.0-2.8 e coleção Bruno (`bruno.json`, `collection.bru`, `05-query/02-published-recipe.bru`, `fixtures/dish-example.jpg`).
+- **Governança:** `STATE.md`, `README.md` e `AGENTS.md`.
+
+### Iterações relevantes (erros e retrabalho da IA)
+1. Ao auditar o `openapi.yaml` contra a coleção Bruno e rodar o `@redocly/cli lint`, a verificação revelou um bug real de contrato que passara despercebido na 2.6 e 2.7: `Proposal.data` reutilizava `ProposalEdit` (cujo enum proibia `verified`), o que faria a resposta de `POST /v1/curation/proposals/{proposalId}/verify` violar o próprio schema OpenAPI, além de 16 avisos do Redocly CLI (8 schemas inline no `discriminator` de `Milestone`, 7 tags sem descrição e 1 componente órfão `KeyReused`). Todos foram corrigidos imediatamente na v1.2.0-2.8.
+2. No `CT17` (`casos-de-teste.md`), a auditoria identificou o exemplo impreciso `"Pão de queijo" (declara glúten)` (pão de queijo tradicional é feito de polvilho e não contém glúten), substituído por `"Macarrão à bolonhesa"` com o código canônico `trigo_centeio_cevada_aveia`.
+3. A dupla identificou que no GitHub Issues e PRs dividem o mesmo contador (`PR #31` já havia fechado a `Issue #30`), tornando `#32` o número real da issue do Lote 3; o arquivo foi renomeado para `retroalimentacao-fase1-lote-3.md`, as referências foram corrigidas para `#32` e o `Playbook 01` passou a proibir pré-reserva de números `#NN`.
+4. A inspeção prévia dos ADRs `005`–`014` confirmou que as notas de detalhamento da 2.6 já haviam sido parcialmente inseridas antes, evitando duplicação e direcionando o esforço para a padronização bilíngue (`ADR-015`), remoção de citações soltas e fechamento dos `[CONFIRMAR]`.
+
+### Divergências registradas (briefing/professor × artefatos)
+- Todas as divergências acumuladas desde a 2.5 (`diario-de-bordo-fase2.md` × `diario_de_bordo-fase2.md`, RDC 26/2015 × RDC 727/2022, `UC12` FA2/FE2, `RN08`, `ItemDeRotina` `"em preparo"`, exemplos de alérgenos, `score` 0–10 e exclusão de conta) foram encerradas nesta sessão.
+
+### Riscos aceitos
+- Registro mestre consolidado em [`revisao-arquitetural.md`](./05-fechamento/revisao-arquitetural.md) (§3): **`R1` a `R19` confirmados pela dupla** + **`R20` e `R21` adicionados e mitigados na revisão `2.8`**. A criptografia da restrição alimentar (`A05`, `ADR-006`) permanece requisito inegociável, não risco aceito.
+
+### Pendências para a próxima sessão
+- Fazer PR/merge de `docs/fase2-closing-frente-b` na `main` (e abrir/fechar a GitHub Issue #32 usando o texto pronto de [`docs/fase2/retroalimentacao-fase1-lote-3.md`](./05-fechamento/retroalimentacao-fase1-lote-3.md), pois o `gh` CLI local não estava autenticado nesta sessão).
+- Preparar o deck curto de slides da Fase 2 a partir do roteiro de [`resumo-fase2-para-fase3.md`](./05-fechamento/resumo-fase2-para-fase3.md) (§4).
+- Iniciar a **Frente D — Implementação do MVP (`MVP-01` a `MVP-04`)** ou **GOV-04** (workflows/skills de Issues), conforme [`STATE.md`](../../STATE.md).

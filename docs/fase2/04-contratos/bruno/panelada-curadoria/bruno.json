@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "Panelada - Curadoria (contrato 1.2.0-2.8)",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

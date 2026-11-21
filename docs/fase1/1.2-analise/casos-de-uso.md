@@ -125,7 +125,8 @@ Fluxo principal:
 
 Fluxos alternativos/exceção:
 - FA1 Consentimento negado: a restrição não é persistida (RN09).
-- FA2 Revogação: usuário exclui a restrição e a filtragem deixa de aplicá-la (RN09).
+- FA2 Revogação: usuário exclui a restrição e a filtragem deixa de aplicá-la imediatamente no aparelho; no servidor, a exclusão ocorre em até 24 h a partir do recebimento do pedido sincronizado (RN09, RNF06, ADR-006).
+- FA3 Exclusão de conta: usuário solicita a exclusão completa da conta e de todos os dados associados (perfil, restrições, rotina, progresso e operações sincronizadas), em conformidade com a LGPD (RN09, RNF06, ADR-007).
 
 ## UC09 — Consultar substituições de ingredientes
 
@@ -179,13 +180,13 @@ Fluxo principal:
 
 Fluxos alternativos/exceção:
 - FA1 Ingrediente, utensílio ou culinária inexistentes: Curador cadastra no ato (uma culinária pode existir temporariamente sem pratos — D11c).
-- FA2 Importação assistida por IA:
-    1. Curador fornece o texto da receita (em qualquer idioma).
-    2. Agente de IA traduz o texto para PT-BR, extrai os campos da receita, mapeia os ingredientes para os que já existem no catálogo, propõe alérgenos e substitutos.
-    3. Curador revisa, ajusta e aprova as propostas da IA (RN17, RNF08).
-    4. Sistema valida os campos obrigatórios e publica no catálogo.
-- FE1 Fonte ausente: sistema bloqueia a publicação (RN17, RNF08).
-- FE2 Indisponibilidade ou falha na API de IA: sistema notifica o curador e redireciona para o fluxo principal de importação manual.
+- FA2 Importação assistida por IA (via endpoints de curadoria da API, sem tela administrativa na v1 — ADR-010):
+    1. Curador envia o texto da receita (em qualquer idioma), fonte e link pela rota de importação assistida (usando cliente de API, ex.: Bruno).
+    2. Agente de IA traduz o texto para PT-BR, extrai os campos da receita, mapeia os ingredientes para os canônicos do catálogo e propõe alérgenos e substitutos; o servidor grava a proposta em estado `proposto` com alérgenos marcados como `nao_verificado` (ADR-011).
+    3. Curador revisa, edita, anexa foto com atribuição TASL, opcionalmente executa o checklist de verificação de alérgenos e aprova a proposta via endpoints de curadoria (RN17, RNF08, RN21).
+    4. Sistema executa o portão de publicação (campos obrigatórios, fonte, atribuição da foto e invariantes de alérgenos) e publica no catálogo.
+- FE1 Fonte ausente ou portão de publicação violado: sistema bloqueia a publicação e retorna a lista de violações (RN17, RNF08, ADR-010).
+- FE2 Indisponibilidade, erro de validação ou teto de custo na API de IA: sistema não grava proposta parcial e retorna resposta de erro estruturada (`application/problem+json`, códigos 402/502/504) indicando `manualFlowAvailable = true`, mantendo o fluxo principal de importação manual pela API disponível (RNF11, ADR-010, ADR-011).
 
 ## UC13 — Desbloquear evolução de prato
 

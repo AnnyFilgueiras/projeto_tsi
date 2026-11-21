@@ -67,7 +67,7 @@
 | RNF03 (≤ 2,5 s) | CT01 | Coberto por caso de teste |
 | RNF04 (≤ 2 toques) | US02 / RF02 (texto corrigido) | Coberto |
 | RNF05 (offline) | — | Sem UC — RNF de qualidade, verificação direta (modo avião); não exige cadeia RF→UC |
-| RNF06 (LGPD) | RN09, UC08 | Coberto |
+| RNF06 (LGPD: criptografia, revogação e exclusão de conta) | RN09, UC08 (FA2/FA3), ADR-006, ADR-007 (`DELETE /v1/account`) | Coberto (atualizado no Lote 3 — Issue #32) |
 | RNF07 (notificações configuráveis) | RN13, US08-c3, CT16 | Coberto (limiar definido na correção do checklist) |
 | RNF08 (atribuição de fonte) | RN17, UC12-FE1, CT26 | Coberto |
 | RNF09 (sem punição) | RN04, RN12 | Coberto |
@@ -79,7 +79,7 @@
 | Pergunta do briefing | Resposta da inspeção |
 |---|---|
 | A fórmula de pontos é calculável? | **Sim, mas fora da v1.** RN19 (futura, condicionada à US13-Could): fácil 10 / média 20 / difícil 30 + 50% de ineditismo na 1ª conclusão; repetições sem bônus; saldo com origem de cada pontuação. Valores provisórios — pendência registrada: revisar ao priorizar (D13b). |
-| A condição de cada badge é observável? | **Sim.** RN03 admite 5 formas de marco, todas função de avaliações salvas (prato específico; culinária; N culinárias; todos os continentes — usa `Culinaria.continentes`, D11f/D12; conjunto temático do curador). RN04 garante concessão única com `dataDesbloqueio` e nenhuma revogação. **[obs]** Recomendação (não bloqueia): explicitar que o atributo `Badge.marco` carrega os parâmetros verificáveis do critério (ex.: N=10; conjunto={Egito, Grécia, Itália}; prato=Ratatouille), pois o conjunto temático da forma (e) não tem associação Badge–Culinaria no modelo. |
+| A condição de cada badge é observável? | **Sim.** RN03 (estendida na modelagem 6D + Octalysis, ADR-016) admite 8 formas de marco, todas função determinística de avaliações salvas e do índice do catálogo (prato específico; culinária; N culinárias; todos os continentes — usa `Culinaria.continentes`, D11f/D12; conjunto temático; total de N pratos distintos concluídos; nível de profundidade $\ge k$ em cadeia de evolução; contagem de N preparos com `alteracoes` não vazio). RN04 garante concessão única com `dataDesbloqueio` e nenhuma revogação. **[obs]** O atributo `Badge.marco` (`BadgeDefinition.milestone` na Fase 2) carrega os parâmetros verificáveis tipados de cada critério. |
 | O ranking tem critério de desempate? | **N/A.** Ranking é Won't (RN20, ex-RF16) — o briefing 1.4 foi escrito antes dessa decisão da 1.1. Nenhuma regra ativa nesta versão; divergência briefing × artefatos já registrada. |
 | A regra de rotina atrasada está definida? | **Sim.** RN12: item cuja data passou sem avaliação permanece "planejado", pode ser reagendado ou removido, sem penalidade (coerente com RNF09). "Atrasado" é estado derivado (`dataPreparo < hoje` ∧ status = planejado), por isso não existe no enum do modelo — decisão consistente. |
 

@@ -3,7 +3,7 @@
 > Fase 1.2 — Análise. IDs estáveis (RN##); toda RN é rastreável a US/RF.
 > Destino no repositório: `/docs/fase1/1.2-analise/regras-de-negocio.md`.
 
-## Fundamentos da gamificação
+## Fundamentos da gamificação (6D Framework + Octalysis — ADR-016)
 
 RN01 — Um prato é considerado concluído por um usuário somente quando existe ao
 menos uma avaliação salva por ele para esse prato. Histórico, coleção, badges e
@@ -16,14 +16,23 @@ prato base precisa ser avaliado. Avaliações adicionais do mesmo prato base nã
 geram novo desbloqueio.
 Origem: US15; RF14 | Status: validado
 
-RN03 — O marco de um badge é verificável e assume uma das formas: (a) avaliação
-de um prato específico (ex.: Mini Chef — avaliar Ratatouille); (b) avaliação de
-ao menos um prato de uma culinária (ex.: Chegando na Arábia); (c) avaliação de
-pratos de N culinárias distintas (ex.: 10 culinárias); (d) avaliação de ao menos
-um prato de cada continente do catálogo — América, África, Europa, Ásia e Oceania
-(ex.: Rei do Mundo); (e) avaliação de pratos de todas as culinárias de um conjunto
-temático definido pelo curador (ex.: Grandes Civilizações — Egito, Grécia, Itália).
-Origem: US16; RF15 | Status: validado
+RN03 — O marco de um badge é verificável, definido declarativamente por seed da
+dupla e fundamentado no framework híbrido 6D + Octalysis (ADR-016), assumindo
+uma das oito formas: (a) avaliação de um prato específico (ex.: Mini Chef —
+avaliar Ratatouille); (b) avaliação de ao menos um prato de uma culinária (ex.:
+Chegando na Arábia); (c) avaliação de pratos de N culinárias distintas (ex.: 10
+culinárias); (d) avaliação de ao menos um prato de cada continente do catálogo —
+América, África, Europa, Ásia e Oceania (ex.: Rei do Mundo); (e) avaliação de pratos de todas as culinárias de um conjunto temático definido declarativamente por seed pela dupla/curador
+(ex.: Grandes Civilizações — Egito, Grécia, Itália); (f) avaliação de ao menos
+N pratos distintos do catálogo (ex.: Primeiro Fogo — 1 prato; Chef de Rotina —
+5 pratos; Onboarding e consistência — 6D Progression Stair / CD2); (g) avaliação
+de ao menos um prato com nível de profundidade ≥ k (k ≥ 2) em uma cadeia de
+evolução, onde o prato raiz tem nível 1, sua evolução direta nível 2 e assim
+sucessivamente (ex.: Além do Básico / Mestre da Evolução — Maestria CD2); (h)
+registro de avaliação com alterações pessoais na receita (`alteracoes` não vazio)
+em ao menos N preparos (ex.: Toque Pessoal / Alquimista da Cozinha — Expressão
+Criativa CD3).
+Origem: US16, US12, US15; RF15, RF11, RF14; ADR-016 | Status: validado (estendido na retroalimentação 6D + Octalysis)
 
 RN04 — Um badge é concedido uma única vez por usuário, no momento em que seu marco
 passa a ser atendido, registrando a data de desbloqueio; o perfil exibe os badges
@@ -33,7 +42,10 @@ Origem: US16; RF15, RNF09 | Status: validado
 ## Avaliação, histórico e coleção
 
 RN05 — A nota da avaliação é obrigatória e assume valores de 0 a 5, em passos
-de 0,5 (0; 0,5; 1; 1,5; …; 5); relato e alterações são opcionais.
+de 0,5 (0; 0,5; 1; 1,5; …; 5); relato e alterações são opcionais. Nota técnica
+(Fase 2): no contrato de API e na persistência, a nota é representada como
+inteiro `score` de 0 a 10 (meios-pontos), preservando a exibição e validação de
+0 a 5 em passos de 0,5 na interface.
 Origem: US12; RF11, RNF10 | Status: validado
 
 RN06 — Cada avaliação registrada é um preparo distinto no histórico, com data
@@ -49,16 +61,25 @@ Origem: US14; RF13 | Status: validado
 
 ## Perfil e restrições
 
-RN08 — Um prato é incompatível com o usuário quando sua receita declara ao menos
-um alérgeno associado a alguma restrição alimentar do perfil, ou quando seu estado de alérgenos for "não verificado". A lista de alérgenos vazia significa "não verificado", nunca "sem alérgenos". Sugestões não
-apresentam pratos incompatíveis; na busca e na visualização, pratos incompatíveis
-são claramente sinalizados com aviso sobre a incompatibilidade.
-Origem: US09, US04; RF07 | Status: validado
+RN08 — Para usuário com ao menos uma restrição alimentar cadastrada, um prato é
+incompatível quando sua receita declara ao menos um alérgeno associado a alguma
+restrição do perfil, ou quando seu estado de alérgenos for "não verificado". A
+lista de alérgenos vazia significa "não verificado", nunca "sem alérgenos",
+salvo quando o curador confirma explicitamente no checklist de verificação que a
+receita não contém nenhum dos 19 códigos do vocabulário controlado
+(`confirmadoSemAlergenos = true`, ADR-014). Para usuário sem restrições
+cadastradas, receitas não verificadas continuam classificadas como compatíveis,
+sempre exibindo seu estado de alérgenos (RN16). Sugestões não apresentam pratos
+incompatíveis; na busca e na visualização, pratos incompatíveis são claramente
+sinalizados com aviso sobre a incompatibilidade.
+Origem: US09, US04; RF07 | Status: validado (refinada na Fase 2 — Lote 3)
 
 RN09 — O cadastro de restrições alimentares só é persistido após consentimento
 explícito do usuário, com informação de que se trata de dado sensível; o usuário
-pode revogar o consentimento e excluir restrições a qualquer momento.
-Origem: US09; RNF06 | Status: validado
+pode revogar o consentimento e excluir restrições — bem como solicitar a
+exclusão completa da conta e de todos os dados pessoais e sensíveis associados
+(LGPD art. 18, VI; ADR-007) — a qualquer momento.
+Origem: US09; RNF06 | Status: validado (refinada na Fase 2 — Lote 3)
 
 ## Sugestão
 
@@ -106,7 +127,7 @@ informa isso explicitamente, sem inventar uma troca.
 Origem: US10; RF08 | Status: validado
 
 RN16 — Toda receita exibe seu estado de alérgenos (verificado, declarado pela fonte, não verificado) na visualização; caso possua alérgenos
-associados às restrições do usuário ou tenha o estado "não verificado", o sitema alerta com "compatibilidade não confirmada".
+associados às restrições do usuário ou tenha o estado "não verificado", o sistema alerta com "compatibilidade não confirmada".
 Origem: US09; RF07 | Status: validado
 
 RN21 — Todo substituto de ingrediente proposto por agente de IA só é cadastrado e disponibilizado no catálogo após revisão e aprovação do curador.
