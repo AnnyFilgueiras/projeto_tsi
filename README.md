@@ -10,7 +10,7 @@ Repositório do trabalho da disciplina **Tópicos em Sistemas de Informação** 
 
 - **Dupla:** Anny Filgueiras ([@AnnyFilgueiras](https://github.com/AnnyFilgueiras)) e Gabryel Souza ([@gabryelsouzz](https://github.com/gabryelsouzz))
 - **Professor(a):** Patrick Henrique
-- **Fase atual:** Fase 2 — Projeto Arquitetural (Sub-etapas 2.1 a 2.7 concluídas; preparação de Governança, Gamificação e MVP)
+- **Fase atual:** Fase 2 — Projeto Arquitetural (**Concluída — Sub-etapas 2.1 a 2.9 + Gamificação 6D + Octalysis**); preparando transição para a Fase 3 (MVP)
 
 ---
 
@@ -39,8 +39,8 @@ Este repositório é estruturado para desenvolvimento colaborativo entre a dupla
 | 2.6 Classes, Fluxos e Contratos | [Classes](./docs/fase2/diagrama-classes.md), Sequências ([UC04](./docs/fase2/sequencia-uc04.md), [UC08](./docs/fase2/sequencia-uc08.md), [UC10](./docs/fase2/sequencia-uc10.md), [UC12](./docs/fase2/sequencia-uc12.md)), [OpenAPI 3.1](./docs/fase2/openapi.yaml), [Glossário](./docs/fase2/glossario-identificadores.md) e [Coleção Bruno](./docs/fase2/bruno/panelada-curadoria/) | ✅ Concluída |
 | 2.7 Padrões de Projeto e Fronteiras | [Padrões justificados, regras `eslint-plugin-boundaries` e TDD](./docs/fase2/padroes-de-projeto.md) | ✅ Concluída |
 | Frente Transversal — Gamificação | [Modelagem Conceitual 6D + Octalysis](./docs/fase2/framework-gamificacao.md) e [ADR-016](./docs/fase2/adr/adr-016-framework-conceitual-gamificacao.md) | ✅ Concluída |
-| 2.8 Revisão Arquitetural | Revisão pesada ("advogado do diabo") | ⏳ Pendente |
-| 2.9 Fechamento da Fase 2 | Checklist final e resumo para a Fase 3 | ⏳ Pendente |
+| 2.8 Revisão Arquitetural | [Revisão pesada ("advogado do diabo") e registro de riscos R1–R21](./docs/fase2/revisao-arquitetural.md) | ✅ Concluída |
+| 2.9 Fechamento da Fase 2 | [Checklist final](./docs/fase2/checklist-final.md) e [Resumo para a Fase 3 + roteiro de slides](./docs/fase2/resumo-fase2-para-fase3.md) | ✅ Concluída |
 
 - **Documento-mestre da Fase 2:** [Briefing da Fase 2](./docs/fase2/briefing-fase2.md)
 - **Diário de Bordo da Fase 2:** [Registro incremental do processo com IA na Fase 2](./docs/fase2/diario_de_bordo-fase2.md)
@@ -91,7 +91,7 @@ Este repositório é estruturado para desenvolvimento colaborativo entre a dupla
 - [Documento de requisitos consolidado](./docs/fase1/1.3-documentacao/documento-de-requisitos.md)
 
 ### 1.4 — Validação
-- [Casos de teste (CT01–CT30)](./docs/fase1/1.4-validacao/casos-de-teste.md)
+- [Casos de teste (CT01–CT31)](./docs/fase1/1.4-validacao/casos-de-teste.md)
 - [Matriz de rastreabilidade](./docs/fase1/1.4-validacao/matriz-rastreabilidade.md)
 - [Ata de revisão](./docs/fase1/1.4-validacao/ata-revisao.md)
 - [Resumo de fechamento da 1.4](./docs/fase1/1.4-validacao/resumo-1.4-fechamento.md)
@@ -110,5 +110,5 @@ Este repositório é estruturado para desenvolvimento colaborativo entre a dupla
 └── docs/
     ├── playbooks/                   Manuais operacionais para tarefas recorrentes dos agentes
     ├── fase1/                       Artefatos da Fase 1 (1.1 a 1.4, assets e diário de bordo)
-    └── fase2/                       Artefatos da Fase 2 (2.1 a 2.7, adr/, bruno/ e diário de bordo)
+    └── fase2/                       Artefatos da Fase 2 (2.1 a 2.9, adr/, bruno/ e diário de bordo)
 ```

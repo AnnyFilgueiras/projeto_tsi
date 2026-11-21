@@ -79,6 +79,8 @@ Todo agente deve seguir estritamente este ciclo de 4 passos em cada sessão/conv
 - **2.5 Modelo C4 (Níveis 1 a 3 + Implantação):** [`c4-contexto.md`](./docs/fase2/c4-contexto.md) · [`c4-containers.md`](./docs/fase2/c4-containers.md) · [`c4-componentes.md`](./docs/fase2/c4-componentes.md)
 - **2.6 Classes, Sequências e Contratos:** [`diagrama-classes.md`](./docs/fase2/diagrama-classes.md) · [`sequencia-uc04.md`](./docs/fase2/sequencia-uc04.md) · [`sequencia-uc08.md`](./docs/fase2/sequencia-uc08.md) · [`sequencia-uc10.md`](./docs/fase2/sequencia-uc10.md) · [`sequencia-uc12.md`](./docs/fase2/sequencia-uc12.md) · [`openapi.yaml`](./docs/fase2/openapi.yaml) · [`glossario-identificadores.md`](./docs/fase2/glossario-identificadores.md) · [`./docs/fase2/bruno/panelada-curadoria/`](./docs/fase2/bruno/panelada-curadoria/)
 - **2.7 Padrões de Projeto e Fronteiras:** [`padroes-de-projeto.md`](./docs/fase2/padroes-de-projeto.md)
+- **2.8 Revisão Arquitetural ("Advogado do Diabo"):** [`revisao-arquitetural.md`](./docs/fase2/revisao-arquitetural.md)
+- **2.9 Fechamento da Fase 2:** [`checklist-final.md`](./docs/fase2/checklist-final.md) · [`resumo-fase2-para-fase3.md`](./docs/fase2/resumo-fase2-para-fase3.md) · [`issue-31-lote-3.md`](./docs/fase2/issue-31-lote-3.md)
 - **Gamificação Metodológica (6D + Octalysis):** [`framework-gamificacao.md`](./docs/fase2/framework-gamificacao.md) · [`adr-016-framework-conceitual-gamificacao.md`](./docs/fase2/adr/adr-016-framework-conceitual-gamificacao.md)
 
 ### Topologia Reservada para Implementação (Monorepo — Fase 3 / MVP)
