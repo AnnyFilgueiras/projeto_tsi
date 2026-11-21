@@ -6,15 +6,15 @@
 
 ## 1. Panorama Atual do Projeto
 
-- **Fase Acadêmica Atual:** **Fase 3 — Implementação do MVP e Deploy em Cloud Gratuita (EM ANDAMENTO — `MVP-01` concluído; backlog `#36`–`#46` publicado no Milestone `Fase 3 — MVP (Estágio 1)`)**.
-- **Branch de Integração (Fase 3):** `development` (atualizada com `GOV-04` via PR #34; entrega atual em `docs/mvp-01-scope-and-backlog`).
+- **Fase Acadêmica Atual:** **Fase 3 — Implementação do MVP e Deploy em Cloud Gratuita (EM ANDAMENTO — `MVP-01` integrado via PR #47 e `MVP-02` #36 integrado via PR #48; próximo marco: `MVP-03` #37)**.
+- **Branch de Integração (Fase 3):** `development` (atualizada com `GOV-04` via PR #34, `MVP-01` via PR #47 e `MVP-02` via PR #48).
 - **Última Atualização:** `21/11/2026`
 - **Status Geral das Fases:**
   - ✅ **Fase 1 (Engenharia de Requisitos):** Concluída (`validated-backlog--v1.0`) e sincronizada com Lote 1 (#30), Gamificação (`ADR-016`) e Lote 3 (#32).
   - ✅ **Fase 2 (Projeto Arquitetural):** Concluída integralmente (`2.1`–`2.9`, `architecture-design--v1.0`), com `ADR-001`–`ADR-016`, `openapi.yaml` v1.2.0-2.8 (0 erros Redocly CLI), coleção Bruno (33 reqs + fixture), revisão adversarial (`R1`–`R21`) e fechamento.
   - ✅ **Frente Transversal — Gamificação Metodológica:** Concluída ([`framework-gamificacao.md`](./docs/fase2/03-modelagem/framework-gamificacao.md) e [ADR-016](./docs/fase2/02-adr/adr-016-framework-conceitual-gamificacao.md)) — híbrido **6D + Octalysis**, 8 marcos declarativos (`RN03 a–h`), 0 novas tabelas (`A12`).
   - ✅ **Frente A — Governança Multi-Agente (`GOV-01` a `GOV-04`):** Concluída e integrada na `development` (PR #34).
-  - 🚧 **Fase 3 (Implementação do MVP e Deploy em Cloud Gratuita):** `MVP-01` concluído; pronto para iniciar **`MVP-02` (#36)**.
+  - 🚧 **Fase 3 (Implementação do MVP e Deploy em Cloud Gratuita):** `MVP-01` (PR #47) e `MVP-02` (#36, PR #48) integrados na `development`; pronto para iniciar **`MVP-03` (#37)**.
 
 ---
 
@@ -60,8 +60,8 @@
 - [x] **GAM-01** (`framework-gamificacao.md` + `ADR-016`) · [x] **GAM-02** (Retroalimentação Fase 1 + 8 marcos declarativos).
 
 ### Frente D — Implementação do MVP e Primeiro Deploy (Fase 3 — Milestone `Fase 3 — MVP (Estágio 1)`)
-- [x] **MVP-01:** Recorte funcional prioritário de histórias/telas para o primeiro deploy (Estágio 1 em Onda 1A + Onda 1B), baseline técnico (`Drizzle`, `Zod`, `pino` redact, `node:crypto`, `openapi-typescript`, `Expo Router` + `StyleSheet`, `Vitest`/`Jest`, `Render` + `Supabase`) e backlog executável publicado no GitHub (`#36`–`#46`) via `grilling` + `github-issue-craft`.
-- [ ] **MVP-02 (#36):** Configurar o esqueleto do monorepo (`pnpm` workspaces, TypeScript, Drizzle, Zod, `openapi-typescript`, `eslint-plugin-boundaries` com prova de falha intencional `S1`–`S8`/`A1`–`A8`, `docker-compose.yml` com Postgres dev/test + API em `0.0.0.0:3000`, trava `_test`, seed base `db:reset`, CI + `docs/dev/DATABASE.md` e `docs/dev/TESTING.md`).
+- [x] **MVP-01:** Recorte funcional prioritário de histórias/telas para o primeiro deploy (Estágio 1 em Onda 1A + Onda 1B), baseline técnico (`Drizzle`, `Zod`, `pino` redact, `node:crypto`, `openapi-typescript`, `Expo Router` + `StyleSheet`, `Vitest`/`Jest`, `Render` + `Supabase`) e backlog executável publicado no GitHub (`#36`–`#46`) via `grilling` + `github-issue-craft` (integrado via PR #47).
+- [x] **MVP-02 (#36):** Configurar o esqueleto do monorepo (`pnpm` workspaces, TypeScript, Drizzle, Zod, `openapi-typescript`, `eslint-plugin-boundaries` com prova de falha intencional `S1`–`S8`/`A1`–`A8`, `docker-compose.yml` com Postgres dev/test + API em `0.0.0.0:3000`, trava `_test`, seed base `db:reset`, CI + `docs/dev/DATABASE.md` e `docs/dev/TESTING.md`) — integrado via PR #48.
 - [ ] **MVP-03 (#37):** Implementar `packages/allergen-rules` com TDD estrito e 100% dos vetores JSON (`A06`).
 - [ ] **MVP-04 (#38 — Épico Onda 1A, Primeiro Deploy):** Implementar núcleo jogável de ponta a ponta + gamificação 6D/Octalysis e realizar o primeiro deploy em Cloud 4C (Supabase PostgreSQL TLS + Storage + Render Docker) — sub-issues `#39` (`MVP-04A`), `#40` (`MVP-04B`), `#41` (`MVP-04C`), `#42` (`MVP-04D`), `#43` (`MVP-04E`), `#44` (`MVP-04F`) e `#45` (`MVP-04G`).
 - [ ] **MVP-05 (#46 — Épico Onda 1B, Fechamento Estágio 1):** Rotina (`US06`/`US07`/`US08`), Despensa (`US03`), Busca (`US04`), Utensílios (`US11`), Conta completa (`POST /v1/account/email`, `DELETE /v1/account`) e Curadoria assistida por IA (`US18` Kimi/Recorded) — fatiamento em sub-issues após concluir `#38`.
@@ -70,17 +70,17 @@
 
 ## 4. Handoff da Última Sessão
 
-- **Data e Agente:** `21/11/2026` — Antigravity CLI (papel: Product/Tech Lead e Engenheiro de Backlog — `grilling` + `github-issue-craft`).
-- **Branch de Trabalho:** `docs/mvp-01-scope-and-backlog` (criada a partir da `development` após merge do PR #34).
+- **Data e Agente:** `21/11/2026` — Antigravity CLI (papel: Engenheiro de Plataforma/Monorepo e Revisor de Código — `solve-issue` + `code-review`).
+- **Branch de Trabalho:** `docs/mvp-02-state-and-log` (criada a partir da `development` após merge do PR #48 de `MVP-02`).
 - **O que foi feito:**
-  1. Conduzida entrevista estruturada (`grilling`) fechando as 6 decisões abertas de `MVP-01` sem reabrir ADRs consolidados.
-  2. Criado o Milestone `Fase 3 — MVP (Estágio 1)` (#4) e publicadas **11 GitHub Issues** (`#36`–`#46`) no formato canônico do Panelada (nota média `20.0/20` no `audit_issues.py`), todas adicionadas ao Project #1 (`TSI`), com sub-issues nativas (`#39`–`#45` sob `#38`) e dependências `blocked_by` encadeadas.
-  3. Iniciado o [`docs/fase3/diario_de_bordo-fase3.md`](./docs/fase3/diario_de_bordo-fase3.md) com o registro consolidado do marco `MVP-01` e atualizado este `STATE.md`.
+  1. Estruturado e integrado na `development` (PR #48) o monorepo `pnpm` (`packages/allergen-rules`, `apps/api`, `apps/mobile`) com Docker Compose (`postgres:16-alpine` `TZ=UTC` criando `panelada_dev` + `panelada_test`, API Fastify em `0.0.0.0:3000` respondendo `200 OK` em `GET /v1/health` com verificação real do banco), Drizzle ORM (`0000_baseline.sql`, `db:migrate`, `db:seed`, `db:reset` idempotente 2x), trava `_test` em `test:integration`, geração/checagem de drift OpenAPI (`openapi-typescript` + `scripts/check-contracts.mjs`), CI com *path filters* (`.github/workflows/ci.yml`) e docs vivos (`docs/dev/DATABASE.md`, `docs/dev/TESTING.md`, `AGENTS.md`).
+  2. Configurada e comprovada a fiscalização de fronteiras em `eslint.config.mjs` (`S1`–`S8`, `A1`–`A8`, `import-x/no-cycle`) com prova obrigatória de falha intencional (servidor + mobile) e zero erros/warnings após reversão dos probes.
+  3. Executado `code-review` independente em contexto limpo (pós-corte em `.plans/chore-issue-36-monorepo-foundation.md`), corrigindo sobrescrita silenciosa de regras `A5`/`A6` no ESLint 9 flat config, separando a porta `api-client.ts` do adaptador concreto `fetch-api-client-adapter.ts` (`A8`), endurecendo `pg.Pool` (`pool.on('error')`), shutdown idempotente, redação Pino em 2 níveis (`*.*.<field>`) e filtro `.npmrc` na CI; atualizados este `STATE.md` e o Diário da Fase 3.
 - **Decisões tomadas:**
-  - **Estágio 1 em 2 ondas:** **Onda 1A (`#38` — Primeiro Deploy)** entrega núcleo jogável + gamificação (`US01`, `US02`, `US05`, `US09`, `US10`, `US12`, `US14`, `US15`, `US16`, `US18` manual/seed + conta anônima) na Cloud 4C; **Onda 1B (`#46`)** fecha Rotina (`US06`/`US07`/`US08`), Despensa (`US03`), Busca (`US04`), Utensílios (`US11`), Conta/Exclusão (`A02`/`A05`) e Curadoria IA (`US18`). `Could` (`US13`, `US17`) explicitamente fora da Fase 3.
-  - **UX e ponte na Onda 1A:** Onboarding rápido + 4 abas fixas (`Descobrir`, `Cozinha`, `Coleção`, `Perfil`), usando `Cozinha → Candidatas` + `"Cozinhar agora"` (download para `SqlCipherDatabase` + `LocalCookingState` offline) antes de `US06` chegar na Onda 1B.
-  - **Baseline técnico:** `Drizzle ORM` (`pg` + `drizzle-kit`), `Zod` (`fastify-type-provider-zod`), `pino` redact, `node:crypto` (`AES-256-GCM`), `openapi-typescript`, `Expo Router` + `StyleSheet`, `Vitest` (API/pkg) + `Jest`/`jest-expo` (Mobile), `Render` (Docker) + `Supabase` (PG TLS + Storage).
-- **Arquivos criados/alterados:** `STATE.md`, `docs/fase3/diario_de_bordo-fase3.md` (e 11 GitHub Issues `#36`–`#46` + Milestone `Fase 3 — MVP (Estágio 1)`).
+  - `pnpm@10.11.0` declarado em `devDependencies` na raiz (sem instalação global obrigatória) + `.npmrc` com `node-linker=hoisted` e `manage-package-manager-versions=false` + override `react-dom: 18.3.1` (compatibilidade Expo SDK 52 + `@redocly/cli` offline).
+  - Portas configuráveis `${POSTGRES_PORT:-5432}` e `${API_PORT:-3000}` no `docker-compose.yml` para conviver com outros containers Postgres no host sem conflito.
+  - Adaptadores concretos mobile seguem padrão `*-adapter.ts` / `sqlcipher*.ts` (restritos a `src/app/composition/` por `A8`), exemplificado em `apps/mobile/src/core/network/fetch-api-client-adapter.ts`.
+- **Arquivos criados/alterados:** PR #48 (`package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`, `.npmrc`, `tsconfig.base.json`, `eslint.config.mjs`, `.prettierrc.json`, `.prettierignore`, `docker-compose.yml`, `.dockerignore`, `.env.example`, `infra/postgres/init/01-create-test-db.sql`, `.github/workflows/ci.yml`, `scripts/check-contracts.mjs`, `packages/allergen-rules/**`, `apps/api/**`, `apps/mobile/**`, `docs/dev/{DATABASE,TESTING,ARCHITECTURE}.md`, `AGENTS.md`) + registro de marco em `STATE.md` e `docs/fase3/diario_de_bordo-fase3.md`.
 - **Próximo passo recomendado:**
-  1. Abrir PR de `docs/mvp-01-scope-and-backlog` → `development` e integrar.
-  2. Iniciar **`MVP-02` (#36)** via skill `solve-issue` para montar o esqueleto do monorepo, Docker Compose, Drizzle, `openapi-typescript`, `eslint-plugin-boundaries` e CI.
+  1. Integrar `docs/mvp-02-state-and-log` na `development` (e marcar o 7º critério da issue `#36` após confirmar o workflow `.github/workflows/ci.yml` verde no GitHub Actions).
+  2. Iniciar **`MVP-03` (#37)** via skill `solve-issue` + `tdd` para implementar `packages/allergen-rules` (regras puras + invariantes + 100% dos vetores JSON compartilhados — `A06`, `ADR-014`).
