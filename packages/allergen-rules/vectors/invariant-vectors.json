@@ -1,0 +1,318 @@
+{
+  "version": "1.0.0",
+  "checkInvariants": [
+    {
+      "id": "INV-01",
+      "trace": "ADR-014 / A09",
+      "description": "valid verified recipe matching ingredient allergen union returns zero violations",
+      "input": {
+        "recipe": {
+          "id": "recipe-crepe",
+          "allergens": ["trigo_centeio_cevada_aveia", "ovo", "leite", "lactose"],
+          "allergenState": "verified"
+        },
+        "ingredients": [
+          { "id": "ing-flour", "allergens": ["trigo_centeio_cevada_aveia"] },
+          { "id": "ing-egg", "allergens": ["ovo"] },
+          { "id": "ing-milk", "allergens": ["leite", "lactose"] }
+        ]
+      },
+      "expectedCodes": []
+    },
+    {
+      "id": "INV-02",
+      "trace": "RN08 / ADR-014",
+      "description": "valid verified recipe with empty allergens and confirmedAllergenFree true returns zero violations",
+      "input": {
+        "recipe": {
+          "id": "recipe-ratatouille",
+          "allergens": [],
+          "allergenState": "verified",
+          "confirmedAllergenFree": true
+        },
+        "ingredients": [
+          { "id": "ing-eggplant", "allergens": [] },
+          { "id": "ing-tomato", "allergens": [] }
+        ]
+      },
+      "expectedCodes": []
+    },
+    {
+      "id": "INV-03",
+      "trace": "ADR-014",
+      "description": "valid verified recipe with leite only when dairy ingredient declares lactoseFree true returns zero violations",
+      "input": {
+        "recipe": {
+          "id": "recipe-lactose-free-bechamel",
+          "allergens": ["leite", "trigo_centeio_cevada_aveia"],
+          "allergenState": "verified"
+        },
+        "ingredients": [
+          { "id": "ing-lactose-free-milk", "allergens": ["leite"], "lactoseFree": true },
+          { "id": "ing-flour", "allergens": ["trigo_centeio_cevada_aveia"] }
+        ]
+      },
+      "expectedCodes": []
+    },
+    {
+      "id": "INV-04",
+      "trace": "UC12 / ADR-014",
+      "description": "unverified recipe with empty allergens is publishable with zero invariant violations",
+      "input": {
+        "recipe": {
+          "id": "recipe-unverified-draft",
+          "allergens": [],
+          "allergenState": "unverified"
+        },
+        "ingredients": [{ "id": "ing-rice", "allergens": [] }]
+      },
+      "expectedCodes": []
+    },
+    {
+      "id": "INV-05",
+      "trace": "UC12 / ADR-014",
+      "description": "source_declared recipe matching ingredient union returns zero violations",
+      "input": {
+        "recipe": {
+          "id": "recipe-source-declared",
+          "allergens": ["soja"],
+          "allergenState": "source_declared"
+        },
+        "ingredients": [{ "id": "ing-shoyu", "allergens": ["soja"] }]
+      },
+      "expectedCodes": []
+    },
+    {
+      "id": "INV-06",
+      "trace": "ADR-014",
+      "description": "allergen union check compares sets regardless of order or duplicates across ingredients",
+      "input": {
+        "recipe": {
+          "id": "recipe-unordered",
+          "allergens": ["ovo", "amendoim"],
+          "allergenState": "verified"
+        },
+        "ingredients": [
+          { "id": "ing-1", "allergens": ["amendoim"] },
+          { "id": "ing-2", "allergens": ["ovo", "amendoim"] }
+        ]
+      },
+      "expectedCodes": []
+    },
+    {
+      "id": "INV-07",
+      "trace": "A09 / ADR-014",
+      "description": "recipe with missing allergenState returns allergen_state_missing",
+      "input": {
+        "recipe": {
+          "id": "recipe-missing-state",
+          "allergens": ["ovo"],
+          "allergenState": null
+        },
+        "ingredients": [{ "id": "ing-egg", "allergens": ["ovo"] }]
+      },
+      "expectedCodes": ["allergen_state_missing"]
+    },
+    {
+      "id": "INV-08",
+      "trace": "RN08 / ADR-014",
+      "description": "verified recipe with empty allergens without confirmedAllergenFree returns invariant_verified_without_allergens",
+      "input": {
+        "recipe": {
+          "id": "recipe-verified-empty",
+          "allergens": [],
+          "allergenState": "verified"
+        },
+        "ingredients": [{ "id": "ing-carrot", "allergens": [] }]
+      },
+      "expectedCodes": ["invariant_verified_without_allergens"]
+    },
+    {
+      "id": "INV-09",
+      "trace": "ADR-014",
+      "description": "recipe missing an allergen declared on an ingredient returns invariant_allergen_union",
+      "input": {
+        "recipe": {
+          "id": "recipe-missing-allergen",
+          "allergens": ["ovo"],
+          "allergenState": "verified"
+        },
+        "ingredients": [
+          { "id": "ing-egg", "allergens": ["ovo"] },
+          { "id": "ing-peanut", "allergens": ["amendoim"] }
+        ]
+      },
+      "expectedCodes": ["invariant_allergen_union"]
+    },
+    {
+      "id": "INV-10",
+      "trace": "ADR-014",
+      "description": "recipe declaring an extra allergen absent from all ingredients returns invariant_allergen_union",
+      "input": {
+        "recipe": {
+          "id": "recipe-extra-allergen",
+          "allergens": ["ovo", "soja"],
+          "allergenState": "verified"
+        },
+        "ingredients": [{ "id": "ing-egg", "allergens": ["ovo"] }]
+      },
+      "expectedCodes": ["invariant_allergen_union"]
+    },
+    {
+      "id": "INV-11",
+      "trace": "RN22 / ADR-014",
+      "description": "verified substitute attached to ingredient with empty allergens without confirmedAllergenFree returns invariant_verified_substitute_without_allergens",
+      "input": {
+        "recipe": {
+          "id": "recipe-bad-ing-sub",
+          "allergens": ["leite", "lactose"],
+          "allergenState": "verified"
+        },
+        "ingredients": [
+          {
+            "id": "ing-milk",
+            "allergens": ["leite", "lactose"],
+            "substitutes": [
+              {
+                "id": "sub-oat-milk",
+                "allergens": [],
+                "allergenState": "verified"
+              }
+            ]
+          }
+        ]
+      },
+      "expectedCodes": ["invariant_verified_substitute_without_allergens"]
+    },
+    {
+      "id": "INV-12",
+      "trace": "RN22 / ADR-014",
+      "description": "verified substitute attached to recipe with empty allergens without confirmedAllergenFree returns invariant_verified_substitute_without_allergens",
+      "input": {
+        "recipe": {
+          "id": "recipe-bad-rec-sub",
+          "allergens": ["ovo"],
+          "allergenState": "verified",
+          "substitutes": [
+            {
+              "id": "sub-flax-egg",
+              "allergens": [],
+              "allergenState": "verified",
+              "confirmedAllergenFree": false
+            }
+          ]
+        },
+        "ingredients": [{ "id": "ing-egg", "allergens": ["ovo"] }]
+      },
+      "expectedCodes": ["invariant_verified_substitute_without_allergens"]
+    },
+    {
+      "id": "INV-13",
+      "trace": "RN22 / ADR-014",
+      "description": "verified empty substitute with confirmedAllergenFree true and unverified empty substitute return zero violations",
+      "input": {
+        "recipe": {
+          "id": "recipe-valid-subs",
+          "allergens": ["leite", "lactose"],
+          "allergenState": "verified"
+        },
+        "ingredients": [
+          {
+            "id": "ing-milk",
+            "allergens": ["leite", "lactose"],
+            "substitutes": [
+              {
+                "id": "sub-coconut-milk",
+                "allergens": [],
+                "allergenState": "verified",
+                "confirmedAllergenFree": true
+              },
+              {
+                "id": "sub-unverified-plant-milk",
+                "allergens": [],
+                "allergenState": "unverified"
+              }
+            ]
+          }
+        ]
+      },
+      "expectedCodes": []
+    },
+    {
+      "id": "INV-14",
+      "trace": "ADR-014",
+      "description": "ingredient with leite and without lactose when lactoseFree is not true returns invariant_milk_without_lactose",
+      "input": {
+        "recipe": {
+          "id": "recipe-milk-no-lactose",
+          "allergens": ["leite"],
+          "allergenState": "verified"
+        },
+        "ingredients": [{ "id": "ing-butter", "allergens": ["leite"] }]
+      },
+      "expectedCodes": ["invariant_milk_without_lactose"]
+    },
+    {
+      "id": "INV-15",
+      "trace": "ADR-014 / PublicationGateProblem",
+      "description": "returns all violations in a single call when verified empty, allergen union, substitute, and milk-without-lactose invariants fail simultaneously",
+      "input": {
+        "recipe": {
+          "id": "recipe-multi-fail-verified",
+          "allergens": [],
+          "allergenState": "verified"
+        },
+        "ingredients": [
+          {
+            "id": "ing-milk-broken",
+            "allergens": ["leite"],
+            "substitutes": [
+              {
+                "id": "sub-broken",
+                "allergens": [],
+                "allergenState": "verified"
+              }
+            ]
+          }
+        ]
+      },
+      "expectedCodes": [
+        "invariant_verified_without_allergens",
+        "invariant_allergen_union",
+        "invariant_verified_substitute_without_allergens",
+        "invariant_milk_without_lactose"
+      ]
+    },
+    {
+      "id": "INV-16",
+      "trace": "ADR-014 / PublicationGateProblem",
+      "description": "returns all violations in a single call when allergenState is missing alongside union, substitute, and milk-without-lactose failures",
+      "input": {
+        "recipe": {
+          "id": "recipe-multi-fail-missing-state",
+          "allergens": ["ovo"],
+          "allergenState": null,
+          "substitutes": [
+            {
+              "id": "sub-broken-recipe",
+              "allergens": [],
+              "allergenState": "verified"
+            }
+          ]
+        },
+        "ingredients": [
+          {
+            "id": "ing-milk-broken",
+            "allergens": ["leite"]
+          }
+        ]
+      },
+      "expectedCodes": [
+        "allergen_state_missing",
+        "invariant_allergen_union",
+        "invariant_verified_substitute_without_allergens",
+        "invariant_milk_without_lactose"
+      ]
+    }
+  ]
+}

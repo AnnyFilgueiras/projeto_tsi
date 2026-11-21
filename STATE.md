@@ -6,15 +6,15 @@
 
 ## 1. Panorama Atual do Projeto
 
-- **Fase Acadêmica Atual:** **Fase 3 — Implementação do MVP e Deploy em Cloud Gratuita (EM ANDAMENTO — `MVP-01` integrado via PR #47 e `MVP-02` #36 integrado via PR #48; próximo marco: `MVP-03` #37)**.
-- **Branch de Integração (Fase 3):** `development` (atualizada com `GOV-04` via PR #34, `MVP-01` via PR #47 e `MVP-02` via PR #48).
+- **Fase Acadêmica Atual:** **Fase 3 — Implementação do MVP e Deploy em Cloud Gratuita (EM ANDAMENTO — `MVP-01` integrado via PR #47, `MVP-02` #36 integrado via PR #48 e `MVP-03` #37 concluído em PR para `development`; próximo marco: `MVP-04` #38 / `MVP-04A` #39)**.
+- **Branch de Integração (Fase 3):** `development` (atualizada com `GOV-04` via PR #34, `MVP-01` via PR #47, `MVP-02` via PR #48 e `docs/mvp-02-state-and-log` via PR #49).
 - **Última Atualização:** `21/11/2026`
 - **Status Geral das Fases:**
   - ✅ **Fase 1 (Engenharia de Requisitos):** Concluída (`validated-backlog--v1.0`) e sincronizada com Lote 1 (#30), Gamificação (`ADR-016`) e Lote 3 (#32).
   - ✅ **Fase 2 (Projeto Arquitetural):** Concluída integralmente (`2.1`–`2.9`, `architecture-design--v1.0`), com `ADR-001`–`ADR-016`, `openapi.yaml` v1.2.0-2.8 (0 erros Redocly CLI), coleção Bruno (33 reqs + fixture), revisão adversarial (`R1`–`R21`) e fechamento.
   - ✅ **Frente Transversal — Gamificação Metodológica:** Concluída ([`framework-gamificacao.md`](./docs/fase2/03-modelagem/framework-gamificacao.md) e [ADR-016](./docs/fase2/02-adr/adr-016-framework-conceitual-gamificacao.md)) — híbrido **6D + Octalysis**, 8 marcos declarativos (`RN03 a–h`), 0 novas tabelas (`A12`).
   - ✅ **Frente A — Governança Multi-Agente (`GOV-01` a `GOV-04`):** Concluída e integrada na `development` (PR #34).
-  - 🚧 **Fase 3 (Implementação do MVP e Deploy em Cloud Gratuita):** `MVP-01` (PR #47) e `MVP-02` (#36, PR #48) integrados na `development`; pronto para iniciar **`MVP-03` (#37)**.
+  - 🚧 **Fase 3 (Implementação do MVP e Deploy em Cloud Gratuita):** `MVP-01` (PR #47), `MVP-02` (#36, PR #48) e `MVP-03` (#37, PR aberto para `development`) concluídos; pronto para iniciar **`MVP-04` (#38 — Onda 1A / sub-issue `#39` `MVP-04A`)**.
 
 ---
 
@@ -62,7 +62,7 @@
 ### Frente D — Implementação do MVP e Primeiro Deploy (Fase 3 — Milestone `Fase 3 — MVP (Estágio 1)`)
 - [x] **MVP-01:** Recorte funcional prioritário de histórias/telas para o primeiro deploy (Estágio 1 em Onda 1A + Onda 1B), baseline técnico (`Drizzle`, `Zod`, `pino` redact, `node:crypto`, `openapi-typescript`, `Expo Router` + `StyleSheet`, `Vitest`/`Jest`, `Render` + `Supabase`) e backlog executável publicado no GitHub (`#36`–`#46`) via `grilling` + `github-issue-craft` (integrado via PR #47).
 - [x] **MVP-02 (#36):** Configurar o esqueleto do monorepo (`pnpm` workspaces, TypeScript, Drizzle, Zod, `openapi-typescript`, `eslint-plugin-boundaries` com prova de falha intencional `S1`–`S8`/`A1`–`A8`, `docker-compose.yml` com Postgres dev/test + API em `0.0.0.0:3000`, trava `_test`, seed base `db:reset`, CI + `docs/dev/DATABASE.md` e `docs/dev/TESTING.md`) — integrado via PR #48.
-- [ ] **MVP-03 (#37):** Implementar `packages/allergen-rules` com TDD estrito e 100% dos vetores JSON (`A06`).
+- [x] **MVP-03 (#37):** Implementar `packages/allergen-rules` com TDD estrito e 100% dos vetores JSON (`A06`, `ADR-014` — Opção A *fail-closed* estrito, `PACKAGE_VERSION = 1.0.0`, 56 testes no pacote + 9 na API + 35 no Mobile/Jest).
 - [ ] **MVP-04 (#38 — Épico Onda 1A, Primeiro Deploy):** Implementar núcleo jogável de ponta a ponta + gamificação 6D/Octalysis e realizar o primeiro deploy em Cloud 4C (Supabase PostgreSQL TLS + Storage + Render Docker) — sub-issues `#39` (`MVP-04A`), `#40` (`MVP-04B`), `#41` (`MVP-04C`), `#42` (`MVP-04D`), `#43` (`MVP-04E`), `#44` (`MVP-04F`) e `#45` (`MVP-04G`).
 - [ ] **MVP-05 (#46 — Épico Onda 1B, Fechamento Estágio 1):** Rotina (`US06`/`US07`/`US08`), Despensa (`US03`), Busca (`US04`), Utensílios (`US11`), Conta completa (`POST /v1/account/email`, `DELETE /v1/account`) e Curadoria assistida por IA (`US18` Kimi/Recorded) — fatiamento em sub-issues após concluir `#38`.
 
@@ -70,17 +70,17 @@
 
 ## 4. Handoff da Última Sessão
 
-- **Data e Agente:** `21/11/2026` — Antigravity CLI (papel: Engenheiro de Plataforma/Monorepo e Revisor de Código — `solve-issue` + `code-review`).
-- **Branch de Trabalho:** `docs/mvp-02-state-and-log` (criada a partir da `development` após merge do PR #48 de `MVP-02`).
+- **Data e Agente:** `21/11/2026` — Antigravity CLI (papel: Engenheiro de Domínio/TDD e Revisor Independente de Código — `solve-issue` + `tdd` + `code-review`).
+- **Branch de Trabalho:** `feat/issue-37-allergen-rules` (criada a partir da `development` em `e0cede7`, com PR aberto para `development`).
 - **O que foi feito:**
-  1. Estruturado e integrado na `development` (PR #48) o monorepo `pnpm` (`packages/allergen-rules`, `apps/api`, `apps/mobile`) com Docker Compose (`postgres:16-alpine` `TZ=UTC` criando `panelada_dev` + `panelada_test`, API Fastify em `0.0.0.0:3000` respondendo `200 OK` em `GET /v1/health` com verificação real do banco), Drizzle ORM (`0000_baseline.sql`, `db:migrate`, `db:seed`, `db:reset` idempotente 2x), trava `_test` em `test:integration`, geração/checagem de drift OpenAPI (`openapi-typescript` + `scripts/check-contracts.mjs`), CI com *path filters* (`.github/workflows/ci.yml`) e docs vivos (`docs/dev/DATABASE.md`, `docs/dev/TESTING.md`, `AGENTS.md`).
-  2. Configurada e comprovada a fiscalização de fronteiras em `eslint.config.mjs` (`S1`–`S8`, `A1`–`A8`, `import-x/no-cycle`) com prova obrigatória de falha intencional (servidor + mobile) e zero erros/warnings após reversão dos probes.
-  3. Executado `code-review` independente em contexto limpo (pós-corte em `.plans/chore-issue-36-monorepo-foundation.md`), corrigindo sobrescrita silenciosa de regras `A5`/`A6` no ESLint 9 flat config, separando a porta `api-client.ts` do adaptador concreto `fetch-api-client-adapter.ts` (`A8`), endurecendo `pg.Pool` (`pool.on('error')`), shutdown idempotente, redação Pino em 2 níveis (`*.*.<field>`) e filtro `.npmrc` na CI; atualizados este `STATE.md` e o Diário da Fase 3.
+  1. Implementado integralmente `packages/allergen-rules` (`PACKAGE_VERSION = '1.0.0'`) em TDD vertical estrito (RED → GREEN → REFACTOR) com vocabulário fechado dos 19 códigos (18 ANVISA RDC nº 727/2022 Anexo III + `lactose`), entrypoint `@panelada/allergen-rules/rules` (`classifyRecipe`, `filterCandidates`, `isSubstituteAllowed`, `isAllergenCode`) e entrypoint exclusivo de servidor `@panelada/allergen-rules/invariants` (`checkInvariants` retornando todas as 5 invariantes em uma única passada com os códigos exatos de `PublicationGateProblem` no `openapi.yaml`).
+  2. Criadas as suítes de vetores JSON compartilhados (`vectors/allergen-vectors.json` e `vectors/invariant-vectors.json`) e provada a resolução/execução dos entrypoints nos dois runtimes (`apps/api` Vitest com `./rules` + `./invariants` e `apps/mobile` Jest executando 100% dos vetores via `./rules`), passando `format:check`, `typecheck`, `lint` (`S6`, `S7`, `A7`) e `TZ=UTC pnpm test` (**56** `allergen-rules` + **9** `api` + **35** `mobile`, 0 violações).
+  3. Executado `code-review` independente sobre `git diff development...HEAD`, corrigindo 2 achados confirmados no escopo (normalização de `allergenState` inválido em runtime para `'unverified'` e guarda `!Array.isArray` *fail-closed* sem `TypeError`), marcados os 5/5 critérios de aceite na `#37` e atualizados este `STATE.md` e `docs/fase3/diario_de_bordo-fase3.md`.
 - **Decisões tomadas:**
-  - `pnpm@10.11.0` declarado em `devDependencies` na raiz (sem instalação global obrigatória) + `.npmrc` com `node-linker=hoisted` e `manage-package-manager-versions=false` + override `react-dom: 18.3.1` (compatibilidade Expo SDK 52 + `@redocly/cli` offline).
-  - Portas configuráveis `${POSTGRES_PORT:-5432}` e `${API_PORT:-3000}` no `docker-compose.yml` para conviver com outros containers Postgres no host sem conflito.
-  - Adaptadores concretos mobile seguem padrão `*-adapter.ts` / `sqlcipher*.ts` (restritos a `src/app/composition/` por `A8`), exemplificado em `apps/mobile/src/core/network/fetch-api-client-adapter.ts`.
-- **Arquivos criados/alterados:** PR #48 (`package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`, `.npmrc`, `tsconfig.base.json`, `eslint.config.mjs`, `.prettierrc.json`, `.prettierignore`, `docker-compose.yml`, `.dockerignore`, `.env.example`, `infra/postgres/init/01-create-test-db.sql`, `.github/workflows/ci.yml`, `scripts/check-contracts.mjs`, `packages/allergen-rules/**`, `apps/api/**`, `apps/mobile/**`, `docs/dev/{DATABASE,TESTING,ARCHITECTURE}.md`, `AGENTS.md`) + registro de marco em `STATE.md` e `docs/fase3/diario_de_bordo-fase3.md`.
+  - **Política *fail-closed* estrita para `source_declared` (Opção A):** quando o usuário possui restrições, receitas e substitutos `source_declared` sem interseção retornam `unconfirmed` (`source_declared_unconfirmed`), ficam fora de `filterCandidates` e retornam `false` em `isSubstituteAllowed` (alinhado a `PRIVACY.md` §3.3, `RN10` e `sequencia-uc12.md:110`); havendo interseção explícita, retornam `incompatible` com `matchedAllergens` em ordem canônica.
+  - **Resolução multi-runtime (`Vitest` / `tsx` / `Metro` / `Jest`):** imports relativos internos em `packages/allergen-rules/src/` mantidos sem extensão `.js` (compatível com `moduleResolution: "Bundler"` nos 3 workspaces).
+  - **`InvariantViolation.targetId`:** mantido no retorno interno de `checkInvariants` para auditoria (`ADR-014` item 7); ao montar o HTTP 422 em `MVP-04B`/`MVP-04C`, projetar `{ code, field, message }` para respeitar `additionalProperties: false` em `openapi.yaml`.
+- **Arquivos criados/alterados:** `packages/allergen-rules/{package.json,src/types.ts,src/rules.ts,src/invariants.ts,vectors/allergen-vectors.json,vectors/invariant-vectors.json,test/rules.test.ts,test/invariants.test.ts}`, `apps/api/test/unit/allergen-rules.test.ts`, `apps/mobile/test/allergen-rules.test.ts`, `STATE.md` e `docs/fase3/diario_de_bordo-fase3.md`.
 - **Próximo passo recomendado:**
-  1. Integrar `docs/mvp-02-state-and-log` na `development` (e marcar o 7º critério da issue `#36` após confirmar o workflow `.github/workflows/ci.yml` verde no GitHub Actions).
-  2. Iniciar **`MVP-03` (#37)** via skill `solve-issue` + `tdd` para implementar `packages/allergen-rules` (regras puras + invariantes + 100% dos vetores JSON compartilhados — `A06`, `ADR-014`).
+  1. Integrar o PR de `MVP-03` (`feat/issue-37-allergen-rules` → `development`) e, em PR separado de docs/retroalimentação (opcional via issue `retroalimentacao` + `docs`), alinhar `docs/fase2/03-modelagem/diagrama-classes.md:94`, `docs/fase2/03-modelagem/sequencia-uc04.md:57` e um `Detalhamento` no `ADR-014` à Opção A.
+  2. Iniciar **`MVP-04` (#38 — Onda 1A)** pela sub-issue **`#39` (`MVP-04A`)** via `solve-issue`.
