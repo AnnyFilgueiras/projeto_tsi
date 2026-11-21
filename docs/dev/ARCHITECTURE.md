@@ -106,7 +106,7 @@ apps/mobile/src/
 | `KeyProvider` (`P02c`) | `FileKey` (dev) / fake | `SecretManagerKey` (variável/segredo fora do banco) |
 | `OperationEnqueuer` (`P04`) | `DirectOnlineOperationEnqueuer` (**Estágio 1**) | `OutboxOperationEnqueuer` + `Synchronizer` (**Estágio 2**) |
 
-### Estratégia de Containers (a configurar em `MVP-02`)
-- **No Docker (`docker-compose.yml`):** PostgreSQL (`TZ=UTC`, com bancos separados `panelada_dev` e `panelada_test`) + API Fastify escutando em `0.0.0.0:3000` + volume de fotos. Ninguém instala Postgres no host.
+### Estratégia de Containers (`docker-compose.yml`)
+- **No Docker (`docker-compose.yml`):** PostgreSQL (`postgres:16-alpine`, `TZ=UTC`, com bancos separados `panelada_dev` e `panelada_test` inicializado em `infra/postgres/init/01-create-test-db.sql`) + API Fastify escutando em `0.0.0.0:3000` (`GET /v1/health`) + volume `panelada_photos`. Ninguém instala Postgres no host. Detalhes operacionais em [`DATABASE.md`](./DATABASE.md).
 - **No host:** apenas Emulador Android + Expo/React Native (`apps/mobile`), que acessa a API no Docker via `10.0.2.2:3000` (Android emulator) ou `localhost:3000`.
-- **Nota:** Quando `MVP-02` subir a primeira fatia real, atualizar este documento com o caminho da menor fatia completa de referência na API e no Mobile ("leia essa fatia primeiro antes de criar outra").
+- **Nota:** Quando `MVP-04A` subir a primeira fatia funcional completa, atualizar este documento com o caminho da menor fatia de referência na API e no Mobile ("leia essa fatia primeiro antes de criar outra").

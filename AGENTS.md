@@ -8,13 +8,22 @@ Aplicativo mobile de culinária internacional gamificada. Sugere pratos conforme
 
 ## Setup e Comandos
 
+> **Bootstrap local sem instalar `pnpm` globalmente:** rode `npx --yes pnpm install` uma vez no clone e use `./node_modules/.bin/pnpm <comando>` (ou apenas `pnpm <comando>` se já estiver no `PATH`). PostgreSQL (`TZ=UTC`, bancos `panelada_dev` e `panelada_test`) e API Fastify (`0.0.0.0:3000`) rodam **100% em Docker (`docker-compose.yml`)** — nunca instale Postgres no host. Apenas o Emulador Android + Expo rodam no host.
+
 | Comando | O que faz |
 |---|---|
+| `npx --yes pnpm install` | Instala dependências do monorepo (inclui `pnpm` local em `node_modules/.bin/pnpm`). |
+| `docker compose up -d --build` | Sobe PostgreSQL (`panelada_dev` + `panelada_test`, `TZ=UTC`) e API (`http://localhost:3000/v1/health`). |
+| `pnpm lint` | Executa ESLint 9 + `eslint-plugin-boundaries` (`S1`–`S8`, `A1`–`A8`) + `import-x/no-cycle`. |
+| `pnpm format:check` | Verifica formatação Prettier (`pnpm format` corrige). |
+| `pnpm typecheck` | Executa `tsc --noEmit` em todos os workspaces (`packages/allergen-rules`, `apps/api`, `apps/mobile`). |
+| `TZ=UTC pnpm test` | Roda testes unitários (`allergen-rules`, `api`) e testes de componente (`mobile`). |
+| `TZ=UTC pnpm test:integration` | Roda testes de integração da API contra `panelada_test` no Docker (recusa bancos sem sufixo `_test`). |
+| `pnpm db:migrate` / `pnpm db:seed` / `pnpm db:reset` | Aplica migrations Drizzle, roda seed idempotente ou recria schema + migrations + seed (somente `*_dev`/`*_test`). |
+| `pnpm contracts:lint` | Valida `docs/fase2/04-contratos/openapi.yaml` via `@redocly/cli` (meta: 0 erros). |
+| `pnpm contracts:generate` / `pnpm contracts:check` | Gera ou verifica sincronia de `apps/api/src/shared/openapi.generated.ts` com `openapi.yaml`. |
 | `node scripts/setup-agent-skills.mjs` | Espelha `.agents/skills` em `.claude/skills` (symlink no Linux/macOS; *junction* sem admin no Windows). Rodar 1x por clone para o Claude Code. |
 | `python3 .agents/skills/github-issue-craft/scripts/audit_issues.py` | Auditoria heurística do backlog de GitHub Issues (requer `gh` autenticado). |
-| `npx @redocly/cli lint docs/fase2/04-contratos/openapi.yaml` | Valida o contrato OpenAPI 3.1 (meta: 0 erros). |
-
-> **Containers e ambiente (a ativar em `MVP-02`):** PostgreSQL (`TZ=UTC`, bancos `panelada_dev` e `panelada_test`) e API Fastify (`0.0.0.0:3000`) rodam **100% em Docker (`docker-compose.yml`)** — ninguém instala Postgres no host. Apenas o Emulador Android + Expo rodam no host. Comandos de `lint`, `format:check`, `typecheck`, `test`, `test:integration` e `db:reset` entram nesta tabela assim que `MVP-02` criar o monorepo.
 
 ---
 
@@ -56,6 +65,8 @@ Fonte única para Antigravity, Codex, Kimi e Claude Code (via `setup-agent-skill
 | [STATE.md](./STATE.md) | Iniciar qualquer sessão (estado atual, pendências e último handoff). |
 | [docs/dev/GLOSSARY.md](./docs/dev/GLOSSARY.md) | Um termo de domínio parecer ambíguo (`Dish` vs `Recipe`, `unverified` vs `unconfirmed`, `"em preparo"` local). |
 | [docs/dev/ARCHITECTURE.md](./docs/dev/ARCHITECTURE.md) | Criar módulo/feature, rota, porta, raiz de composição ou checar `S1`–`S8` e `A1`–`A8`. |
+| [docs/dev/DATABASE.md](./docs/dev/DATABASE.md) | Subir Docker Compose, rodar migrations/seed/`db:reset`, criar tabelas (`S8`) ou usar `tx: Tx`. |
+| [docs/dev/TESTING.md](./docs/dev/TESTING.md) | Rodar lint/testes/contratos, usar `pnpm` local sem instalação global ou depurar a CI. |
 | [docs/dev/PRIVACY.md](./docs/dev/PRIVACY.md) | Tocar em restrições alimentares, `FieldCipher`, SQLCipher, logs, `allergen-rules`, IA ou Supabase. |
 | [docs/playbooks/01-sessao-issues-e-diario.md](./docs/playbooks/01-sessao-issues-e-diario.md) | Criar/revisar GitHub Issues, Labels, Milestones, fechar marco no `STATE.md` ou escrever no Diário de Bordo. |
 | [docs/playbooks/02-arquitetura-adrs-e-retroalimentacao.md](./docs/playbooks/02-arquitetura-adrs-e-retroalimentacao.md) | Evoluir/substituir um ADR ou retroalimentar artefatos da Fase 1/Fase 2. |
