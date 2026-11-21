@@ -48,3 +48,52 @@
 ### Pendências para a próxima sessão
 - Integrar a branch `docs/mvp-01-scope-and-backlog` em `development` via PR.
 - Iniciar **`MVP-02` (#36)** via skill `solve-issue` (esqueleto do monorepo, Docker Compose, Drizzle, Zod, `openapi-typescript`, `eslint-plugin-boundaries` com prova de falha intencional e CI).
+
+---
+
+## [21/11/2026] — MVP-02 (#36): Fundação do Monorepo, Docker Compose, Drizzle, Fronteiras e CI
+
+- **Papel da IA:** Engenheiro de Plataforma/Monorepo e Revisor de Código (Antigravity CLI), aplicando as skills `.agents/skills/solve-issue` (com corte de contexto via `.plans/chore-issue-36-monorepo-foundation.md`) e `.agents/skills/code-review`.
+- **Técnicas aplicadas:** planejamento somente leitura com aprovação explícita antes de editar código; separação estrita de fronteiras em tempo de lint (`eslint-plugin-boundaries` + `import-x/no-cycle`) validada por prova obrigatória de falha intencional (`Playbook 03`); geração e checagem de drift de tipos OpenAPI sem sujar o working tree; trava fail-fast de banco de teste (`*_test`); execução em corte de contexto limpo do `code-review` sobre `git diff development...HEAD`.
+- **Prompts-chave / Contexto da sessão:**
+  1. Execução da issue `#36` (`MVP-02`) via `/solve-issue` com `--no-push`, seguida de aprovação do plano e opção da dupla por manter `pnpm` como `devDependency` local sem instalação global na máquina.
+  2. Retomada em contexto limpo (`/solve-issue --resume .plans/chore-issue-36-monorepo-foundation.md`) para rodar o `code-review`, corrigir achados confirmados no escopo, revalidar toda a suíte e atualizar os critérios da issue `#36`.
+  3. Solicitação de atualização do `STATE.md` e do Diário de Bordo ao fechar o marco `MVP-02`.
+- **Insumos usados:** Issue `#36`, `AGENTS.md`, `STATE.md`, `docs/dev/{ARCHITECTURE,GLOSSARY,PRIVACY}.md`, `docs/playbooks/{01-sessao-issues-e-diario,03-qualidade-fronteiras-e-contratos}.md`, `docs/fase2/04-contratos/openapi.yaml` e `.plans/chore-issue-36-monorepo-foundation.md`.
+- **Artefatos produzidos:**
+  - **Raiz e CI:** `package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`, `.npmrc`, `tsconfig.base.json`, `eslint.config.mjs`, `.prettierrc.json`, `.prettierignore`, `docker-compose.yml`, `.dockerignore`, `.env.example`, `infra/postgres/init/01-create-test-db.sql`, `scripts/check-contracts.mjs`, `.github/workflows/ci.yml`.
+  - **`packages/allergen-rules`:** `package.json`, `tsconfig.json`, `vitest.config.ts`, `src/{rules,invariants}.ts` (exports explícitos `./rules` e `./invariants` sem barrel `"."`), `test/rules.test.ts`.
+  - **`apps/api`:** `Dockerfile`, `package.json`, `tsconfig*.json`, `vitest*.config.ts`, `drizzle.config.ts`, `drizzle/0000_baseline.sql` (+ `meta/`), `src/{main,app}.ts` (`GET /v1/health` conforme OpenAPI com RFC 9457 no `503`), `src/shared/{tx,operation-applier,openapi.generated}.ts`, `src/support/technical-log/logger.ts` (`pino` redact em 1 e 2 níveis), `src/support/field-encryption/index.ts`, `src/db/{client,test-guard,migrate,seed,reset}.ts`, esqueletos de `modules/{catalog,profile,routine,progress,importer}` e `cross-cutting/{identity,sync,suggestion-search}`, e testes unitários (8) + integração (1 contra `panelada_test` em `UTC`).
+  - **`apps/mobile`:** `package.json`, `tsconfig.json`, `app.json`, `babel.config.js`, `metro.config.js` (monorepo `pnpm`), `jest.config.js` (`jest-expo`), `app/{_layout,index}.tsx`, `src/app/composition/index.ts`, `src/core/{local-db/local-database,network/api-client,network/fetch-api-client-adapter,sync/operation-enqueuer}.ts`, `src/features/suggestions/{ui/FoundationScreen,domain/index,data/index}.ts`, `src/shared/index.ts` e `test/foundation.test.tsx`.
+  - **Documentação viva:** `docs/dev/DATABASE.md`, `docs/dev/TESTING.md`, atualização de `AGENTS.md`, `docs/dev/ARCHITECTURE.md`, `STATE.md` e este Diário.
+
+### Decisões tomadas
+1. **`pnpm` local na raiz sem instalação global:** incluído `"pnpm": "10.11.0"` em `devDependencies` (além de `packageManager`) e `.npmrc` com `node-linker=hoisted` (compatibilidade Metro/Expo) e `manage-package-manager-versions=false` (execução offline via `./node_modules/.bin/pnpm`, mantendo `pnpm` padrão na CI e no Docker).
+2. **Override `react-dom: 18.3.1`:** resolvido conflito de dependências hoisted causado por `@redocly/cli` puxando `react-dom@19` junto ao `react@18.3.1` do Expo SDK 52, viabilizando `pnpm contracts:lint` 100% offline.
+3. **Portas configuráveis no Docker Compose (`${POSTGRES_PORT:-5432}`, `${API_PORT:-3000}`):** preserva `5432`/`3000` como padrão documental e permite convivência com outros bancos Docker no host sem alterar containers de terceiros.
+4. **Migration inicial baseline (`0000_baseline.sql`):** criada migration idempotente (`CREATE EXTENSION IF NOT EXISTS "pgcrypto";`) exercitando o pipeline real do Drizzle (`migrate` + `db:reset`) sem introduzir tabelas de domínio fora do escopo de `MVP-02`.
+5. **Convenção verificável para `A8` no mobile:** portas puras (`api-client.ts`, `local-database.ts`, `operation-enqueuer.ts`) separadas de adaptadores concretos (`*-adapter.ts` / `sqlcipher*.ts`), permitindo ao `eslint-plugin-boundaries` restringir instâncias concretas exclusivamente a `src/app/composition/`.
+6. **Prettier focado em código/config:** `.prettierignore` exclui markdowns históricos (`docs/`, `*.md`, `.agents/`) para evitar ruído de formatação em PRs de implementação.
+
+### Artefatos alterados (retroalimentação)
+- `AGENTS.md`: tabela de comandos atualizada com os scripts reais do monorepo e removida a nota provisória "a ativar em `MVP-02`".
+- `docs/dev/ARCHITECTURE.md`: seção de containers atualizada para refletir `docker-compose.yml` e `infra/postgres/init/01-create-test-db.sql`.
+- `docs/dev/DATABASE.md` e `docs/dev/TESTING.md`: criados documentando bootstrap sem `pnpm` global, comandos de banco/testes, trava `_test`, prova de fronteiras e jobs da CI.
+- `STATE.md` e `docs/fase3/diario_de_bordo-fase3.md`: fechamento do marco `MVP-02` e handoff para `MVP-03`.
+
+### Iterações relevantes (erros e retrabalho da IA)
+1. **Conflito de porta `5432` no host:** durante a validação do Docker Compose, a porta `5432` estava ocupada por container Postgres de outro projeto; a IA parametrizou `POSTGRES_PORT` no `docker-compose.yml` e validou o stack isoladamente na porta `5434` (`GET http://localhost:3000/v1/health` retornando `200 OK` e `test:integration` + `db:reset` 2x verdes).
+2. **Tipagem Fastify 5 e retorno de `SHOW TIME ZONE`:** anotar explicitamente `: FastifyInstance` em `buildApp` conflitou com o 4º genérico de `loggerInstance: TechnicalLogger` (corrigido mantendo retorno inferido); na integração, `SHOW TIME ZONE` retornou coluna `TimeZone`, trocado para `SELECT current_setting('TIMEZONE') AS tz`.
+3. **Achados críticos capturados pelo `code-review` em contexto limpo (pós-corte):**
+   - **Sobrescrita silenciosa de regras no ESLint 9 flat config:** dois blocos distintos usando `no-restricted-syntax` faziam o segundo bloco (`expo-notifications`) sobrescrever o primeiro (`expo-secure-store`), deixando `A5` desprotegida na maioria dos arquivos mobile; além disso, o bloco `A6` (`unlock-calculator.ts`/`reminder-scheduler.ts`) sobrescrevia `no-restricted-imports` e descartava `A05`/`A2`/`A7`. Corrigido com 3 conjuntos mutuamente disjuntos para `A5` e composição explícita dos arrays de restrição em `A6`, comprovado em nova prova intencional de falha (4/4 erros capturados).
+   - **Endurecimento de fronteira `A8` e resiliência de runtime:** `createApiClient` foi separado da porta `api-client.ts` para `fetch-api-client-adapter.ts` (bloqueado fora de `composition`), adicionado `pool.on('error')` no `pg.Pool` para evitar crash em desconexão ociosa, shutdown idempotente no `main.ts`, redação Pino em 2 níveis (`*.*.<field>`) e `.npmrc` incluído no filtro `root` da CI.
+
+### Divergências registradas (briefing/professor × artefatos)
+- Nenhuma divergência arquitetural; todas as fronteiras `S1`–`S8`, `A1`–`A8`, `ADR-002`–`ADR-004`, `ADR-014` e `ADR-015` foram preservadas integralmente.
+
+### Riscos aceitos
+- Aviso único do `@redocly/cli` (`no-server-example.com` para `http://localhost:3000` em `openapi.yaml`) segue aceito conforme Fase 2 (0 erros).
+
+### Pendências para a próxima sessão
+- Integrar a branch `docs/mvp-02-state-and-log` na `development` e confirmar o 7º critério (CI remoto) na issue `#36` após a execução do workflow `.github/workflows/ci.yml` no PR #48 / `development`.
+- Iniciar **`MVP-03` (#37)** via `solve-issue` + `tdd` (`packages/allergen-rules` com 100% dos vetores JSON compartilhados — `A06`, `ADR-014`).
