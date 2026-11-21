@@ -123,3 +123,12 @@ R2, R8.
 - **Sem restrição cadastrada:** `compatible`, com o estado dos alérgenos visível (RN16).
 - **Invariantes novas:** (a) ingrediente com `leite` e sem `lactose` só com `lactoseFree = true`; (b) `verified` com lista de alérgenos vazia só com `confirmedAllergenFree = true`, afirmado pelo curador.
 - **Versão:** o app envia `X-Allergen-Package-Version` e a API responde `minPackageVersion`. O app avisa e não bloqueia (a avaliação offline não pode ser impedida).
+
+## Detalhamento (MVP-03 — 21/11/2026)
+
+- **Política *fail-closed* estrita para `source_declared` (Opção A — `A06`, `RN08`, `RN10`, `RN16`, `RN22`):** na implementação do pacote `packages/allergen-rules` (`PACKAGE_VERSION = '1.0.0'`, issue `#37`), decidiu-se adotar a política *fail-closed* estrita para receitas e substitutos com `allergenState = 'source_declared'` quando o usuário possui ao menos uma restrição alimentar cadastrada, alinhando a documentação arquitetural ao `docs/dev/PRIVACY.md` (§3.3), à `RN10` e à `sequencia-uc12.md`:
+  - **Sem restrições cadastradas:** retorna `compatible` (`reasons: ['no_restrictions']`), preservando `allergenState` visível na interface (`RN16`).
+  - **Com restrições e interseção explícita:** retorna `incompatible` (`reasons: ['allergen_match']`) com `matchedAllergens` em ordem canônica (18 códigos da RDC nº 727/2022 + `lactose`), independentemente de `allergenState` (`verified`, `source_declared` ou `unverified`).
+  - **Com restrições e sem interseção explícita em `source_declared`:** retorna `unconfirmed` (`reasons: ['source_declared_unconfirmed']`) em `classifyRecipe`, fica excluído de `filterCandidates` (sugestões/busca segura) e retorna `false` em `isSubstituteAllowed` (`RN22`), exibindo o alerta de "compatibilidade não confirmada" na visualização (`RN16`) até verificação explícita por curador (`verified`).
+  - **Robustez em runtime (*fail-closed*):** valores de `allergenState` corrompidos ou desconhecidos são normalizados para `'unverified'`; códigos fora do vocabulário fechado de 19 códigos ou entradas não-array retornam `unconfirmed` (`reasons: ['invalid_allergen_code']`) sem lançar `TypeError`.
+- **Projeção de `InvariantViolation` na camada HTTP (`openapi.yaml`):** `checkInvariants` mantém `targetId` no retorno interno para auditoria do catálogo (item 7 deste ADR); ao serializar respostas HTTP 422 (`PublicationGateProblem`), os endpoints de curadoria projetam `{ code, field, message }` para respeitar `additionalProperties: false` no contrato OpenAPI.
