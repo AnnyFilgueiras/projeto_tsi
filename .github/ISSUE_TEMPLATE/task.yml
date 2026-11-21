@@ -1,0 +1,54 @@
+name: Tarefa Técnica / Governança / Retroalimentação
+description: Infraestrutura, CI, refactor, documentação ou retroalimentação entre fases
+title: "<ID-ESTÁVEL> — <Ação clara e objetiva>"
+labels: ["governanca"]
+body:
+  - type: textarea
+    id: contexto
+    attributes:
+      label: 1. Contexto e Rastreabilidade
+      value: |
+        - **Fase / Etapa:** 
+        - **Origem (Requisitos / Arquitetura):** 
+        - **Objetivo:** 
+    validations:
+      required: true
+
+  - type: textarea
+    id: escopo
+    attributes:
+      label: 2. Escopo e Camada
+      value: |
+        - **Camada afetada:** [ ] `docs/`  [ ] `packages/allergen-rules`  [ ] `apps/api`  [ ] `apps/mobile`
+        - **Arquivos/Módulos previstos:**
+          - 
+        - **Fora de escopo:** 
+    validations:
+      required: true
+
+  - type: textarea
+    id: decisoes
+    attributes:
+      label: Decisões Fechadas
+      description: Escolhas técnicas já acordadas (vinculante para quem executa).
+
+  - type: textarea
+    id: criterios
+    attributes:
+      label: 3. Critérios de Aceite
+      value: |
+        - [ ] 
+        - [ ] 
+    validations:
+      required: true
+
+  - type: textarea
+    id: verificacao
+    attributes:
+      label: 4. Verificação e Testes
+      value: |
+        - **Abordagem de Teste:** 
+        - **Comando / Evidência de conclusão:**
+          - ``
+    validations:
+      required: true

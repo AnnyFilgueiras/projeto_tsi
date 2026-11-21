@@ -1,0 +1,9 @@
+# Enforce LF line endings across Linux, macOS, and Windows to prevent spurious CRLF diffs.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.pdf binary

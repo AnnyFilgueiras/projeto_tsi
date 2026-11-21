@@ -1,0 +1,71 @@
+name: Bug
+description: Comportamento que viola requisito, contrato OpenAPI ou regra de negócio
+title: "BUG — <Sintoma específico e buscável>"
+labels: ["implementacao"]
+body:
+  - type: textarea
+    id: contexto
+    attributes:
+      label: 1. Contexto e Rastreabilidade
+      description: Resumo do bug, origem (RN/UC/A##/ADR ou contrato violado) e ambiente.
+      value: |
+        - **Resumo:** 
+        - **Origem (Requisitos / Arquitetura):** 
+        - **Ambiente:** (SO, branch/commit, Docker/Emulador)
+        - **Frequência:** Sempre | Intermitente
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproducao
+    attributes:
+      label: Passos para Reproduzir, Esperado vs. Obtido
+      value: |
+        **Passos:**
+        1. A partir de ...
+        2. 
+
+        **Esperado:** 
+        **Obtido:** 
+        **Evidência:** (trecho relevante do log/erro)
+    validations:
+      required: true
+
+  - type: textarea
+    id: escopo
+    attributes:
+      label: 2. Escopo e Camada
+      value: |
+        - **Camada afetada:** [ ] `packages/allergen-rules`  [ ] `apps/api`  [ ] `apps/mobile`  [ ] `docs/`
+        - **Arquivos/Símbolos suspeitos:**
+          - 
+        - **Fora de escopo:** 
+    validations:
+      required: true
+
+  - type: textarea
+    id: decisoes
+    attributes:
+      label: Decisões Fechadas
+      description: Comportamento esperado em bordas, status HTTP e efeito sobre dados existentes.
+
+  - type: textarea
+    id: criterios
+    attributes:
+      label: 3. Critérios de Aceite
+      value: |
+        - [ ] Teste de regressão falha antes da correção e passa depois
+        - [ ] 
+    validations:
+      required: true
+
+  - type: textarea
+    id: verificacao
+    attributes:
+      label: 4. Verificação e Testes
+      value: |
+        - **Abordagem de Teste:** Test-first (teste de regressão)
+        - **Comando / Evidência de conclusão:**
+          - ``
+    validations:
+      required: true
