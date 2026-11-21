@@ -1,7 +1,7 @@
 # Sequência — UC10, Registrar avaliação (com UC13 e UC11)
 
 > Fase 2.6 — Classes, sequências e contratos; revisão da 2.7. Papel da IA: arquiteto, designer de componentes e de padrões (SOLID).
-> Destino: `/docs/fase2/sequencia-uc10.md`. Versão 1.1 — 07/10/2026 — status: a revisar pela dupla.
+> Destino: `/docs/fase2/03-modelagem/sequencia-uc10.md`. Versão 1.1 — 07/10/2026 — status: a revisar pela dupla.
 > Rastreio: UC10 (fluxo principal, FA1, FA2, FE1), UC13, UC11; RN01 a RN07; US12, US14, US15, US16; A04, A08; ADR-001, ADR-005, ADR-008, ADR-015.
 > Os participantes seguem os componentes do `c4-componentes.md` v1.1 (nomes em português) e as classes do `diagrama-classes.md` v1.1 (identificadores em inglês, ADR-015).
 > Alterações da v1.1: identificadores em inglês pelo glossário, `Tx` na aplicação no servidor (T01) e `UnlockRules` no servidor.

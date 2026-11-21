@@ -12,7 +12,7 @@
 | **Could** (2) | US13, US17 |
 | **Won't** (1) | Ranking entre amigos (ex-RF16): apenas 1 dos 5 entrevistados tinha interesse; social exige implementação cuidadosa; dupla optou por foco |
 
-Decisões de priorização: a identidade de gamificação — estruturada metodologicamente pelo framework híbrido **6D (Werbach & Hunter) + Octalysis (Yu-kai Chou)** ([`framework-gamificacao.md`](../../fase2/framework-gamificacao.md), [ADR-016](../../fase2/adr/adr-016-framework-conceitual-gamificacao.md)) — prioriza motivadores *White Hat* de posse cultural, maestria e criatividade: coleção (Must, CD4) → evolução em árvore (primeiro Should, CD2) → badges multi-dimensionais (Should, CD1/CD2/CD3/CD4); pontuação extrínseca avulsa (US13) permanece Could por evitar a *PBL Fallacy*. US08 (lembretes) é Must por fundamentação em computação persuasiva e design não punitivo (RNF09), desde que não irritante (RNF07).
+Decisões de priorização: a identidade de gamificação — estruturada metodologicamente pelo framework híbrido **6D (Werbach & Hunter) + Octalysis (Yu-kai Chou)** ([`framework-gamificacao.md`](../../fase2/03-modelagem/framework-gamificacao.md), [ADR-016](../../fase2/02-adr/adr-016-framework-conceitual-gamificacao.md)) — prioriza motivadores *White Hat* de posse cultural, maestria e criatividade: coleção (Must, CD4) → evolução em árvore (primeiro Should, CD2) → badges multi-dimensionais (Should, CD1/CD2/CD3/CD4); pontuação extrínseca avulsa (US13) permanece Could por evitar a *PBL Fallacy*. US08 (lembretes) é Must por fundamentação em computação persuasiva e design não punitivo (RNF09), desde que não irritante (RNF07).
 
 ---
 

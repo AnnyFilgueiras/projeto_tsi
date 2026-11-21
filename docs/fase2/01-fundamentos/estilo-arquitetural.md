@@ -1,7 +1,7 @@
 # Estilo Arquitetural — Panelada (Fase 2.2)
 
 > Fase 2.2 — Estilo arquitetural. Papel da IA: arquiteto de software, com análise de trade-offs.
-> Destino: `/docs/fase2/estilo-arquitetural.md`. Versão 1.1 — 06/10/2026 — status: decisões formalizadas nos ADR-001 e ADR-002 (2.4). Alteração da v1.1: módulos do servidor e referências aos ADRs (retroalimentação da 2.4).
+> Destino: `/docs/fase2/01-fundamentos/estilo-arquitetural.md`. Versão 1.1 — 06/10/2026 — status: decisões formalizadas nos ADR-001 e ADR-002 (2.4). Alteração da v1.1: módulos do servidor e referências aos ADRs (retroalimentação da 2.4).
 > Insumos: `briefing-fase2.md` (seções 3, 5, 7 e 8), `briefing-passagem-2.2.md`, `diario_de_bordo-fase2.md` (com a entrada 2.1), `atributos-qualidade.md` v1.0.
 > Convenção: IDs dos atributos conforme `atributos-qualidade.md` (A01 a A14). Medidas marcadas (H) são hipóteses a revalidar na 2.3.
 

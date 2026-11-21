@@ -1,6 +1,6 @@
 # Glossário de identificadores PT→EN — Panelada (Fase 2.7)
 
-> Destino: `/docs/fase2/glossario-identificadores.md`. Versão 1.2 — 07/10/2026 — status: **aprovado pela dupla** (seções 1 a 8 aprovadas em 07/10/2026; seções 9 e 9.1 incorporadas na v1.2).
+> Destino: `/docs/fase2/04-contratos/glossario-identificadores.md`. Versão 1.2 — 07/10/2026 — status: **aprovado pela dupla** (seções 1 a 8 aprovadas em 07/10/2026; seções 9 e 9.1 incorporadas na v1.2).
 > Fonte da tradução exigida pelo ADR-015. Termos novos entram aqui antes de entrar no código. O mapa completo do contrato está em `mapa-renomeacao-openapi.md` (identificadores) e prevalece sobre a seção 7 em caso de diferença.
 
 ## 1. Domínio

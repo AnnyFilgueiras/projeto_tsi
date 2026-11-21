@@ -1,7 +1,7 @@
 # C4 Nível 2 — Containers e implantação — Panelada (Fase 2.5)
 
 > Fase 2.5 — C4 níveis 1 a 3. Papel da IA: arquiteto, modelador C4.
-> Destino: `/docs/fase2/c4-containers.md`. Versão 1.1 — 06/10/2026 — status: nível 2 fechado pela dupla.
+> Destino: `/docs/fase2/03-modelagem/c4-containers.md`. Versão 1.1 — 06/10/2026 — status: nível 2 fechado pela dupla.
 > Alterações da v1.1 (revisão do nível 3): rastreio da API e do Banco do Servidor corrigido para UC01 a UC13; US16 acrescentada ao rastreio do App Móvel.
 > Insumos: `c4-contexto.md` v1.1, ADR-001 a ADR-014, `propostas-arquiteturais.md` v1.2, `atributos-qualidade.md` v1.2.
 > Nomes herdados do nível 1: Panelada, Usuário, Curador, Bruno, Provedor de IA (Kimi K3).

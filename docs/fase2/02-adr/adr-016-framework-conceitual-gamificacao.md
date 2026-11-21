@@ -101,7 +101,7 @@ mas careciam de:
 
 **Positivas**
 - Atende integralmente à exigência acadêmica com um documento metodológico
-  completo (`/docs/fase2/framework-gamificacao.md`) e rastreabilidade ponta a
+  completo (`/docs/fase2/03-modelagem/framework-gamificacao.md`) e rastreabilidade ponta a
   ponta (`Persona → Core Drive / 6D → US → RN → Classe → Contrato OpenAPI → Vetor JSON`).
 - Torna o contrato de `UnlockCalculator` e `UnlockRules` *future-proof* para as
   4 fases da jornada do usuário (*Discovery, Onboarding, Scaffolding, Endgame*)

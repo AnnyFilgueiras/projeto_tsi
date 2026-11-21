@@ -1,7 +1,7 @@
 # Propostas Arquiteturais — Panelada (Fase 2.3)
 
 > Fase 2.3 — Propostas arquiteturais. Papel da IA: arquiteto de software, com análise de trade-offs.
-> Destino: `/docs/fase2/propostas-arquiteturais.md`. Versão 1.2 — 06/10/2026: decisões formalizadas nos ADR-001 a ADR-014 (2.4); ajustes listados em "0. Mudanças".
+> Destino: `/docs/fase2/01-fundamentos/propostas-arquiteturais.md`. Versão 1.2 — 06/10/2026: decisões formalizadas nos ADR-001 a ADR-014 (2.4); ajustes listados em "0. Mudanças".
 > Insumos: `briefing-passagem-2.3.md`, `briefing-fase2.md` (seções 3, 5, 7 e 8), `diario_de_bordo-fase2.md` (entradas 2.1 e 2.2), `atributos-qualidade.md` v1.1, `estilo-arquitetural.md` v1.0, `backlog.md`, `requisitos.md`; consultas pontuais a `regras-de-negocio.md`, `casos-de-uso.md` e `modelo-conceitual.md` (Fase 1) para a US10.
 > Convenção: IDs A01–A14 conforme `atributos-qualidade.md`. Medidas (H) são hipóteses. Notas de 1 (atende mal) a 5 (atende bem).
 

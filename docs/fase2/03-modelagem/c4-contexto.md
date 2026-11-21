@@ -1,7 +1,7 @@
 # C4 Nível 1 — Contexto do sistema — Panelada (Fase 2.5)
 
 > Fase 2.5 — C4 níveis 1 a 3. Papel da IA: arquiteto, modelador C4.
-> Destino: `/docs/fase2/c4-contexto.md`. Versão 1.1 — 06/10/2026 — status: nível 1 fechado pela dupla.
+> Destino: `/docs/fase2/03-modelagem/c4-contexto.md`. Versão 1.1 — 06/10/2026 — status: nível 1 fechado pela dupla.
 > Alteração da v1.1: US16 (badges) acrescentada ao rastreio do Usuário.
 > Insumos: `briefing-passagem-2.5.md`, `briefing-fase2.md` (v1.2), `diario_de_bordo-fase2.md` (com a entrada 2.4), `propostas-arquiteturais.md` v1.2, ADR-001 a ADR-014, `estilo-arquitetural.md` v1.1, `atributos-qualidade.md` v1.2, `casos-de-uso.md`.
 > Convenção: os nomes deste arquivo valem para os níveis 2 e 3. "Usuário" (com acento) corresponde à classe `Usuario` da Fase 1.

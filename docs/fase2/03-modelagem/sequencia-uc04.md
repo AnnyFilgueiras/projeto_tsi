@@ -1,7 +1,7 @@
 # Sequência — UC04, Visualizar receita (com UC09)
 
 > Fase 2.6 — Classes, sequências e contratos; revisão da 2.7. Papel da IA: arquiteto, designer de componentes e de padrões (SOLID).
-> Destino: `/docs/fase2/sequencia-uc04.md`. Versão 1.1 — 07/10/2026 — status: a revisar pela dupla.
+> Destino: `/docs/fase2/03-modelagem/sequencia-uc04.md`. Versão 1.1 — 07/10/2026 — status: a revisar pela dupla.
 > Rastreio: UC04 (fluxo principal, FA1, FA3), UC09; RN02, RN08, RN15, RN16, RN17, RN22; US05, US09, US10, US15; A04, A06; ADR-001, ADR-012, ADR-014, ADR-015.
 > Os participantes seguem os componentes do `c4-componentes.md` v1.1 (nomes em português) e as classes do `diagrama-classes.md` v1.1 (identificadores em inglês, ADR-015).
 > Alterações da v1.1: identificadores em inglês pelo glossário.

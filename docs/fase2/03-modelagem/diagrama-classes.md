@@ -1,7 +1,7 @@
 # Diagrama de classes de projeto — Panelada (Fase 2.6, v1.1 da 2.7)
 
 > Fase 2.6 — Classes, sequências e contratos; revisão da 2.7. Papel da IA: arquiteto, designer de componentes e de padrões (SOLID).
-> Destino: `/docs/fase2/diagrama-classes.md`. Versão 1.1 — 07/10/2026 — status: a revisar pela dupla.
+> Destino: `/docs/fase2/03-modelagem/diagrama-classes.md`. Versão 1.1 — 07/10/2026 — status: a revisar pela dupla.
 > Insumos: `c4-contexto.md` v1.1, `c4-containers.md` v1.1, `c4-componentes.md` v1.1, ADR-001 a ADR-015, `modelo-conceitual.md`, `casos-de-uso.md`, `regras-de-negocio.md`, `atributos-qualidade.md` v1.3, `propostas-arquiteturais.md` v1.2, `padroes-de-projeto.md` v1.1, `glossario-identificadores.md`.
 > Escopo: classes de projeto do **Pacote de Alérgenos**, da **API Panelada** e do **App Móvel Panelada**, rastreadas às 13 classes do modelo conceitual. Os nomes dos componentes (em português) seguem o `c4-componentes.md`; a pasta de cada um está no glossário, seção 8.
 

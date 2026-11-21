@@ -1,7 +1,7 @@
 # Sequência — UC12, Importar e manter catálogo (fluxo assistido por IA)
 
 > Fase 2.6 — Classes, sequências e contratos; revisão da 2.7. Papel da IA: arquiteto, designer de componentes e de padrões (SOLID).
-> Destino: `/docs/fase2/sequencia-uc12.md`. Versão 1.1 — 07/10/2026 — status: a revisar pela dupla.
+> Destino: `/docs/fase2/03-modelagem/sequencia-uc12.md`. Versão 1.1 — 07/10/2026 — status: a revisar pela dupla.
 > Rastreio: UC12 (FA2, FE1, FE2); RN15, RN17, RN21, RN22; RNF08, RNF11; US10, US18; A06, A09; ADR-007, ADR-010, ADR-011, ADR-012, ADR-013, ADR-014, ADR-015.
 > Os participantes seguem os componentes do `c4-componentes.md` v1.1 (nomes em português) e as classes do `diagrama-classes.md` v1.1 (identificadores em inglês, ADR-015).
 > Alterações da v1.1: identificadores em inglês pelo glossário, `Tx` nas escritas do catálogo (T01) e `PublicationGate` como função (R02).

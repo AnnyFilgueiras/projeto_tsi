@@ -2,7 +2,7 @@
 
 > Fase 2.1 — Requisitos de qualidade. Papel da IA: arquiteto de software sênior (analista de qualidade).
 
-> Destino: `/docs/fase2/atributos-qualidade.md`.
+> Destino: `/docs/fase2/01-fundamentos/atributos-qualidade.md`.
 > Versão 1.4 — 20/11/2026 — status: fechado pela dupla. Alterações: v1.1 criptografia em A05 (2.2); v1.2 exclusão 24 h, TLS da demo e cenário de saída da IA em A09 (2.3/2.4); v1.3 "em preparo" (§2) e §7 atualizados (2.5); v1.4 higiene editorial do Lote 2 e marcação das retroalimentações da Fase 1 como aplicadas (Issues #30 e #31).
 > Insumos: `requisitos.md`, `backlog.md`, `regras-de-negocio.md`, `resumo-1.4-fechamento.md`, `briefing-fase2.md` (seções 3, 5, 7 e 8), `diario_de_bordo-fase2.md`.
 

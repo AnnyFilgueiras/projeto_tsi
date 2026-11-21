@@ -1,7 +1,7 @@
 # Resumo da Fase 2 para a Fase 3 (MVP) e Roteiro de Slides — Panelada (Etapa 2.9)
 
 > **Fase 2.9 — Fechamento da Fase 2 e Handoff para Implementação.** Papel da IA: revisor e consolidador.
-> **Destino:** `/docs/fase2/resumo-fase2-para-fase3.md`. Versão 1.0 — `20/11/2026`.
+> **Destino:** `/docs/fase2/05-fechamento/resumo-fase2-para-fase3.md`. Versão 1.0 — `20/11/2026`.
 > **Público-alvo:** Dupla de desenvolvimento (execução da Fase 3 / MVP), agentes de IA que atuarão no código (via `AGENTS.md` + `STATE.md`) e base direta para os slides de apresentação da Fase 2 exigidos pelo professor.
 
 ---
@@ -56,7 +56,7 @@ projeto_tsi/
 
 ### Etapa 1 — Recorte Funcional do Primeiro Deploy (`MVP-01`)
 Definir o conjunto mínimo demonstrável de ponta a ponta (Estágio 1 do `ADR-008`):
-1. **Fluxo Curador (API + Bruno):** seed de curador + ~20 pratos verificados (cobrindo 5 continentes e ao menos 1 cadeia de evolução com 3 níveis para exercitar os 8 marcos do `ADR-016`), executando a coleção `docs/fase2/bruno/panelada-curadoria/` com 100% de aprovação (manual + assistido via `KimiProvider`/`RecordedProvider`).
+1. **Fluxo Curador (API + Bruno):** seed de curador + ~20 pratos verificados (cobrindo 5 continentes e ao menos 1 cadeia de evolução com 3 níveis para exercitar os 8 marcos do `ADR-016`), executando a coleção `docs/fase2/04-contratos/bruno/panelada-curadoria/` com 100% de aprovação (manual + assistido via `KimiProvider`/`RecordedProvider`).
 2. **Fluxo Cozinheiro/Jogador (App + API):** conta anônima (`A02`) → cadastro de restrição com consentimento (`A05`/`A06`) → sugestões filtradas (`US01`/`US02`) → visualização da receita baixada offline no SQLCipher com passo a passo e substituições seguras (`US05`/`US10`) → avaliação e desbloqueio de coleção, evolução e badges 6D + Octalysis (`US12`/`US14`/`US15`/`US16`).
 3. **Rotina e Lembretes:** plano semanal/quinzenal, lista de compras consolidada e agendador local de lembretes $\le 2$/dia (`US06`/`US07`/`US08`).
 

@@ -1,7 +1,7 @@
 # Revisão Arquitetural ("Advogado do Diabo") — Panelada (Fase 2.8)
 
 > **Fase 2.8 — Revisão Arquitetural.** Papel da IA: revisor cético / avaliador externo simulado (*"advogado do diabo"*).
-> **Destino:** `/docs/fase2/revisao-arquitetural.md`. Versão 1.0 — `20/11/2026` — status: concluída e refletida nos artefatos.
+> **Destino:** `/docs/fase2/05-fechamento/revisao-arquitetural.md`. Versão 1.0 — `20/11/2026` — status: concluída e refletida nos artefatos.
 > **Insumos auditados:** `briefing-fase2.md` v1.6, `atributos-qualidade.md` v1.4, `estilo-arquitetural.md` v1.1, `propostas-arquiteturais.md` v1.2, `adr-001` a `adr-016`, `c4-contexto.md` v1.1, `c4-containers.md` v1.1, `c4-componentes.md` v1.1, `diagrama-classes.md` v1.1, `sequencia-uc04/08/10/12.md` v1.1, `padroes-de-projeto.md` v1.1, `framework-gamificacao.md` v1.0, `openapi.yaml` v1.2.0-2.8, coleção Bruno `panelada-curadoria` e artefatos da Fase 1 (pós-Issues #30 e #31).
 
 ---

@@ -1,7 +1,7 @@
 # C4 Nível 3 — Componentes — Panelada (Fase 2.5)
 
 > Fase 2.5 — C4 níveis 1 a 3. Papel da IA: arquiteto, modelador C4.
-> Destino: `/docs/fase2/c4-componentes.md`. Versão 1.1 — 07/10/2026 — status: nível 3 aprovado pela dupla.
+> Destino: `/docs/fase2/03-modelagem/c4-componentes.md`. Versão 1.1 — 07/10/2026 — status: nível 3 aprovado pela dupla.
 > Alteração da v1.1: os diagramas do nível 3 foram trocados do Mermaid C4 nativo (`C4Component`), ilegível com 14 e 11 elementos, por **fluxogramas Mermaid com a convenção C4**, divididos por assunto. Tabelas, decisões e rastreio da v1.0 não mudaram.
 > Insumos: `c4-contexto.md` v1.1, `c4-containers.md` v1.1, ADR-001 a ADR-014, `casos-de-uso.md`, `modelo-conceitual.md`, `regras-de-negocio.md`.
 > Escopo: componentes do **App Móvel Panelada** e da **API Panelada**. Os demais containers são armazenamento e não têm nível 3.

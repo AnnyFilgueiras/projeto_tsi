@@ -44,7 +44,7 @@
 | 2.1 | Atributos de qualidade como cenários mensuráveis e priorizados | `atributos-qualidade.md` | 2.2, 2.3, 2.8 | Artefatos da Fase 1 (via issue) |
 | 2.2 | Estilo arquitetural com trade-offs | `estilo-arquitetural.md` | 2.3, 2.4 | 2.1 |
 | 2.3 | Pelo menos 2 propostas de MVP, matriz com critérios e escolha | `propostas-arquiteturais.md` | 2.4, 2.5 | 2.1, 2.2 |
-| 2.4 | Registro das decisões (ADR) | `/docs/fase2/adr/adr-NNN-*.md` | 2.5 a 2.9 | 2.2, 2.3 |
+| 2.4 | Registro das decisões (ADR) | `/docs/fase2/02-adr/adr-NNN-*.md` | 2.5 a 2.9 | 2.2, 2.3 |
 | 2.5 | C4 níveis 1 a 3 (nível 4 só onde fizer sentido) | `c4-contexto.md`, `c4-containers.md`, `c4-componentes.md` | 2.6 | ADRs |
 | 2.6 | Classes, sequências e contratos | `diagrama-classes.md`, `sequencia-*.md`, `openapi.yaml`, coleção Bruno | 2.7 | C4, ADRs |
 | 2.7 | Padrões de projeto justificados | `padroes-de-projeto.md` | 2.8 | 2.6 |
@@ -87,7 +87,7 @@ Anexe só o que a coluna da etapa marca como N ou A.
 | 2.9 | Revisor e consolidador |
 
 ## 6. Convenções
-- **Repositório:** `/docs/fase2/` para artefatos; `/docs/fase2/adr/` para ADRs.
+- **Repositório:** `/docs/fase2/` para artefatos; `/docs/fase2/02-adr/` para ADRs.
 - **Diagramas como código** (Mermaid; PlantUML se o C4 exigir); Draw.io só
   para acabamento de slide. Imagens exportadas em `/assets`.
 - **ADR:** Markdown, um arquivo por decisão, numerado. Campos: status, data,

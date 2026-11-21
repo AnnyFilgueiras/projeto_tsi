@@ -1,7 +1,7 @@
 # Padrões de projeto justificados — Panelada (Fase 2.7)
 
 > Fase 2.7 — Padrões de projeto. Papel da IA: arquiteto, designer de componentes e de padrões (SOLID).
-> Destino: `/docs/fase2/padroes-de-projeto.md`. Versão 1.2 — 20/11/2026 — status: fechado pela dupla.
+> Destino: `/docs/fase2/03-modelagem/padroes-de-projeto.md`. Versão 1.2 — 20/11/2026 — status: fechado pela dupla.
 > Insumos: `briefing-passagem-2.7.md`, `briefing-fase2.md` v1.3, `diario_de_bordo-fase2.md` (entrada 2.6), `diagrama-classes.md` v1.0, `sequencia-uc10.md`, `sequencia-uc04.md`, `sequencia-uc08.md`, `sequencia-uc12.md`, `modelo-conceitual.md`, `regras-de-negocio.md`, ADR-001 a ADR-016, `c4-componentes.md` v1.1, `atributos-qualidade.md` v1.4.
 > Convenção de língua (ADR-015): textos em português (Brasil); **identificadores de código, pastas e contrato em inglês**. Equivalências em `glossario-identificadores.md`. Neste documento, os nomes de classe aparecem em inglês, com o nome da 2.6 entre parênteses na primeira ocorrência de cada padrão.
 > Alterações da v1.1: varredura do catálogo de padrões (seção 5.1), regra A8 (raiz de composição do app) e seção 9 (testabilidade e TDD). Alterações da v1.2 (18/11 e 20/11/2026): porta `P02f` (`PhotoStorage`), composição em 2 estágios de `P04`, 8 marcos do `ADR-016` e fechamento das pendências da seção 11.

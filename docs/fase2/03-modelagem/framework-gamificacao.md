@@ -1,13 +1,13 @@
 # Modelagem Conceitual de Gamificação — Framework Híbrido 6D + Octalysis (Panelada)
 
 > **Fase Transversal (Requisitos & Arquitetura) — Fundamentação Metodológica de Gamificação.**
-> **Destino:** `/docs/fase2/framework-gamificacao.md`. **Versão:** 1.0 — 18/11/2026 — **Status:** Aprovado pela dupla.
+> **Destino:** `/docs/fase2/03-modelagem/framework-gamificacao.md`. **Versão:** 1.0 — 18/11/2026 — **Status:** Aprovado pela dupla.
 > **Insumos:** `personas.md`, `requisitos.md`, `backlog.md`, `regras-de-negocio.md`, `modelo-conceitual.md`, `atributos-qualidade.md`, `diagrama-classes.md`, `padroes-de-projeto.md`, `sequencia-uc10.md`, `openapi.yaml` e `ADR-016`.
-> **Convenção Bilíngue ([ADR-015](./adr/adr-015-idioma-dos-identificadores.md)):** conceitos metodológicos, dinâmicas e regras de negócio em português (Brasil); identificadores de classes, métodos e tipos do contrato (`UnlockCalculator`, `UnlockRules`, `Milestone`, `BadgeDefinition`) em inglês.
+> **Convenção Bilíngue ([ADR-015](../02-adr/adr-015-idioma-dos-identificadores.md)):** conceitos metodológicos, dinâmicas e regras de negócio em português (Brasil); identificadores de classes, métodos e tipos do contrato (`UnlockCalculator`, `UnlockRules`, `Milestone`, `BadgeDefinition`) em inglês.
 
 ---
 
-## 1. Visão Geral e Escolha Metodológica ([ADR-016](./adr/adr-016-framework-conceitual-gamificacao.md))
+## 1. Visão Geral e Escolha Metodológica ([ADR-016](../02-adr/adr-016-framework-conceitual-gamificacao.md))
 
 Para atender à exigência de estruturar a gamificação do **Panelada** sobre um referencial teórico consolidado, avaliamos cinco frameworks da literatura (*6D Framework*, *Octalysis*, *MDA*, *Hexad User Types* e *Self-Determination Theory*).
 
@@ -26,7 +26,7 @@ Adotamos o **6D Framework (Werbach & Hunter)** como **espinha dorsal de engenhar
 
 Essa combinação garante:
 1. **Rigor psicológico (*Octalysis*):** justifica teoricamente a filosofia **White Hat / Não Punitiva** do Panelada (`RNF09`, `RN04`, `RN12`, `RN20`) e garante que todas as três personas (`Marina`, `Rafael`, `Cleusa`) tenham seus *Core Drives* atendidos em todas as fases da jornada.
-2. **Rigor de arquitetura de software (*6D + SOLID*):** traduz cada elemento motivacional em regras determinísticas e declarativas encapsuladas em `UnlockCalculator` (App) e `UnlockRules` (API, módulo `progress`), mantendo o isolamento modular (`A12` e [ADR-002](./adr/adr-002-estilo-servidor-monolito-modular.md)).
+2. **Rigor de arquitetura de software (*6D + SOLID*):** traduz cada elemento motivacional em regras determinísticas e declarativas encapsuladas em `UnlockCalculator` (App) e `UnlockRules` (API, módulo `progress`), mantendo o isolamento modular (`A12` e [ADR-002](../02-adr/adr-002-estilo-servidor-monolito-modular.md)).
 
 ---
 
@@ -62,7 +62,7 @@ O segundo passo do 6D exige especificar **ações concretas e observáveis** que
 
 ## 4. Passo D3 — Descrever os Jogadores (*Describe Your Players*: Personas × Octalysis)
 
-Em vez de tratar todos os usuários como um jogador genérico, cruzamos as **3 Personas da Fase 1** ([`personas.md`](../fase1/1.1-elicitacao/personas.md)) com a tipologia motivacional e os **Core Drives do Octalysis**:
+Em vez de tratar todos os usuários como um jogador genérico, cruzamos as **3 Personas da Fase 1** ([`personas.md`](../../fase1/1.1-elicitacao/personas.md)) com a tipologia motivacional e os **Core Drives do Octalysis**:
 
 | Persona (Fase 1.1) | Perfil e Contexto | Arquétipo de Jogador (Hexad / Bartle) | Core Drives Dominantes (Octalysis) | O que Engaja no Panelada | O que Afastaria (Anti-Padrões Evitados) |
 |---|---|---|---|---|---|
@@ -149,7 +149,7 @@ O passo D5 do 6D alerta que um sistema pode ter regras perfeitas e ainda assim f
 
 ## 7. Passo D6 — Implantar as Ferramentas Apropriadas (*Deploy Appropriate Tools*: Pirâmide DMC e Arquitetura)
 
-O último passo do 6D traduz o design conceitual na **Pirâmide DMC** (**D**ynamics $\rightarrow$ **M**echanics $\rightarrow$ **C**omponents) e a conecta diretamente aos componentes e classes da Fase 2 ([`diagrama-classes.md`](./diagrama-classes.md), [`padroes-de-projeto.md`](./padroes-de-projeto.md) e [`openapi.yaml`](./openapi.yaml)).
+O último passo do 6D traduz o design conceitual na **Pirâmide DMC** (**D**ynamics $\rightarrow$ **M**echanics $\rightarrow$ **C**omponents) e a conecta diretamente aos componentes e classes da Fase 2 ([`diagrama-classes.md`](./diagrama-classes.md), [`padroes-de-projeto.md`](./padroes-de-projeto.md) e [`openapi.yaml`](../04-contratos/openapi.yaml)).
 
 ### 7.1. Pirâmide DMC do Panelada Mapeada para a Arquitetura (Fase 2)
 
@@ -234,7 +234,7 @@ Para garantir que nenhuma conquista do perfil seja impossível de obter no lanç
 
 ## 8. Isolamento Arquitetural (`A12`), Contrato de `UnlockState` e Vetores JSON
 
-Conforme estabelecido no [ADR-002](./adr/adr-002-estilo-servidor-monolito-modular.md), no [ADR-016](./adr/adr-016-framework-conceitual-gamificacao.md) e em [`padroes-de-projeto.md`](./padroes-de-projeto.md) (§5 e §9):
+Conforme estabelecido no [ADR-002](../02-adr/adr-002-estilo-servidor-monolito-modular.md), no [ADR-016](../02-adr/adr-016-framework-conceitual-gamificacao.md) e em [`padroes-de-projeto.md`](./padroes-de-projeto.md) (§5 e §9):
 
 1. **Fronteira Única de Gamificação:**
    - **No App (`apps/mobile`):** `UnlockCalculator` (em `src/features/rating-and-collection/domain/unlock-calculator.ts`), função pura que não importa banco nem bibliotecas nativas (regra `A6`).
@@ -280,7 +280,7 @@ Conforme estabelecido no [ADR-002](./adr/adr-002-estilo-servidor-monolito-modula
 3. **Checagem de Exaustividade em Tempo de Compilação (`R03`):**
    - Ambas as funções operam sobre o tipo discriminado `Milestone` via `switch (milestone.type)` com ramo `default` atribuído a `never`. Se um nono tipo de marco for adicionado ao tipo sem implementação, a compilação TypeScript falha imediatamente.
 4. **Formato Canônico da Suíte Compartilhada de Vetores JSON (TDD — Fase 3):**
-   - Assim como no pacote de alérgenos ([ADR-014](./adr/adr-014-regra-alergenos-compartilhada.md)), os testes de `UnlockCalculator` e `UnlockRules` executam a mesma tabela JSON de vetores:
+   - Assim como no pacote de alérgenos ([ADR-014](../02-adr/adr-014-regra-alergenos-compartilhada.md)), os testes de `UnlockCalculator` e `UnlockRules` executam a mesma tabela JSON de vetores:
    ```json
    [
      {
@@ -334,7 +334,7 @@ Esta matriz comprova que nenhum elemento do framework ficou desconectado dos req
 |---|---|---|---|---|---|
 | **D1 / D4** (*Micro-loop de Descoberta*) | **CD7** (*Curiosity*) | Marina, Rafael | `US01`, `US02`, `US03`, `US11`; `RF01`–`RF03`, `RF19`; `RNF02`–`RNF04` | `RN10`, `RN11` | `SuggestionSearch`, `RoutinePublic`, `Suggestion` |
 | **D2 / D5** (*Rotina White Hat sem Punição*) | **White Hat Design** (Rejeição ao **CD8** *Loss*) | Marina, Cleusa | `US06`, `US07`, `US08`; `RF04`–`RF06`; `RNF07`, `RNF09` | `RN12`, `RN13`, `RN14` | `RoutinePlan`, `RoutineItem`, `ReminderScheduler`, `NotificationAdapter` (`P02d`) |
-| **D3 / D5** (*Segurança e Adaptação Criativa*) | **CD3** (*Creativity & Feedback*) | Cleusa | `US09`, `US10`, `US12`; `RF07`, `RF08`, `RF11`; `RNF06`, `RNF10` | `RN05`, `RN08`, `RN09`, `RN15`, `RN16`, `RN22`, **`RN03h`** | `AllergenRules` ([ADR-014](./adr/adr-014-regra-alergenos-compartilhada.md)), `ResolveSubstitutions`, `Rating.changes`, `Milestone(adaptation_count)` |
+| **D3 / D5** (*Segurança e Adaptação Criativa*) | **CD3** (*Creativity & Feedback*) | Cleusa | `US09`, `US10`, `US12`; `RF07`, `RF08`, `RF11`; `RNF06`, `RNF10` | `RN05`, `RN08`, `RN09`, `RN15`, `RN16`, `RN22`, **`RN03h`** | `AllergenRules` ([ADR-014](../02-adr/adr-014-regra-alergenos-compartilhada.md)), `ResolveSubstitutions`, `Rating.changes`, `Milestone(adaptation_count)` |
 | **D4 / D6** (*Gatilho Mestre e Coleção Cultural*) | **CD4** (*Ownership & Possession*) + **CD1** (*Epic Meaning*) | Rafael, Marina, Cleusa | `US12`, `US14`, `US16`; `RF11`, `RF13`, `RF15`; `RNF05` (`A04`), `A08` | `RN01`, `RN04`, `RN06`, `RN07`, **`RN03a–f`** | `RegisterRating`, `RatingApplier`, `UnlockCalculator`, `UnlockRules`, `BadgeAward`, `Milestone(dish, cuisine, n_cuisines, all_continents, set, total_dishes)` |
 | **D4 / D6** (*Escada de Progressão em Árvore*) | **CD2** (*Development & Accomplishment*) + **CD6** (*Desejo de Desbloqueio*) | Rafael | `US15`, `US16`, `US18`; `RF14`, `RF15`, `RF18` | `RN02`, `RN18`, **`RN03g`** | `Dish.baseDishId`, `EvolutionUnlock`, `UnlockCalculator`, `UnlockRules`, `Milestone(evolution_level)` |
 | **D5** (*Social Colaborativo vs. Competitivo*) | **CD5** (*Social Influence — Colaborativo*) | Cleusa | `US17` (*Could*), ex-`RF16` (*Won't*) | `RN20` (*Excluída*) | Fora do escopo do MVP v1 (decisão fundamentada pelo perfil das personas e foco White Hat) |

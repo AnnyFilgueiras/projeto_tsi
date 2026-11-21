@@ -6,7 +6,7 @@
 
 ## 1. Fiscalização de Fronteiras Modulares (`eslint-plugin-boundaries`)
 
-O estilo Monólito Modular no servidor ([ADR-002](../fase2/adr/adr-002-estilo-servidor-monolito-modular.md)) e a organização *Feature-First* no app são garantidos por regras automáticas de lint documentadas na Seção 6 de [`../fase2/padroes-de-projeto.md`](../fase2/padroes-de-projeto.md).
+O estilo Monólito Modular no servidor ([ADR-002](../fase2/02-adr/adr-002-estilo-servidor-monolito-modular.md)) e a organização *Feature-First* no app são garantidos por regras automáticas de lint documentadas na Seção 6 de [`../fase2/padroes-de-projeto.md`](../fase2/03-modelagem/padroes-de-projeto.md).
 
 ### Regras Críticas do Servidor (`apps/api` — `S1` a `S8`)
 - **`S1`:** Nenhum módulo importa `internal/` de outro módulo; apenas `public/`.
@@ -33,7 +33,7 @@ O estilo Monólito Modular no servidor ([ADR-002](../fase2/adr/adr-002-estilo-se
 
 ## 2. Estratégia Incremental do MVP (2 Estágios) e Portas Plugáveis
 
-Conforme detalhado no [ADR-008](../fase2/adr/adr-008-estrategia-offline-e-sincronizacao.md), no [ADR-004](../fase2/adr/adr-004-demonstracao-docker-e-alvo.md) e em [`../fase2/padroes-de-projeto.md`](../fase2/padroes-de-projeto.md):
+Conforme detalhado no [ADR-008](../fase2/02-adr/adr-008-estrategia-offline-e-sincronizacao.md), no [ADR-004](../fase2/02-adr/adr-004-demonstracao-docker-e-alvo.md) e em [`../fase2/padroes-de-projeto.md`](../fase2/03-modelagem/padroes-de-projeto.md):
 
 1. **Nunca pule as Portas nos Casos de Uso:**
    - No App, casos de uso que alteram estado (`RegisterRating`, `Routine`, `Profile`) chamam sempre a interface `OperationEnqueuer` (`P04`).
@@ -49,17 +49,17 @@ Conforme detalhado no [ADR-008](../fase2/adr/adr-008-estrategia-offline-e-sincro
 
 ## 3. Contratos de API (`openapi.yaml`) e Coleção Bruno
 
-- **Fonte da Verdade:** [`../fase2/openapi.yaml`](../fase2/openapi.yaml) (OpenAPI 3.1, identificadores e rotas em inglês conforme [ADR-015](../fase2/adr/adr-015-idioma-dos-identificadores.md)).
+- **Fonte da Verdade:** [`../fase2/04-contratos/openapi.yaml`](../fase2/04-contratos/openapi.yaml) (OpenAPI 3.1, identificadores e rotas em inglês conforme [ADR-015](../fase2/02-adr/adr-015-idioma-dos-identificadores.md)).
 - **Validação de Lint do Contrato:**
-  - Sempre que editar `docs/fase2/openapi.yaml`, valide a sintaxe YAML/OpenAPI (ex.: via `npx @redocly/cli lint docs/fase2/openapi.yaml` ou script Python/Node de verificação de `$ref`).
+  - Sempre que editar `docs/fase2/04-contratos/openapi.yaml`, valide a sintaxe YAML/OpenAPI (ex.: via `npx @redocly/cli lint docs/fase2/04-contratos/openapi.yaml` ou script Python/Node de verificação de `$ref`).
 - **Sincronia com o Bruno:**
-  - Qualquer alteração nas rotas de curadoria/importação (`/v1/curation/...`) ou autenticação (`/v1/auth/...`) em `openapi.yaml` deve ser refletida imediatamente na coleção [`../fase2/bruno/panelada-curadoria/`](../fase2/bruno/panelada-curadoria/).
+  - Qualquer alteração nas rotas de curadoria/importação (`/v1/curation/...`) ou autenticação (`/v1/sessions/...`) em `openapi.yaml` deve ser refletida imediatamente na coleção [`../fase2/04-contratos/bruno/panelada-curadoria/`](../fase2/04-contratos/bruno/panelada-curadoria/).
 
 ---
 
 ## 4. Matriz de Testes e TDD
 
-Siga a política de testes aprovada na Seção 9 de [`../fase2/padroes-de-projeto.md`](../fase2/padroes-de-projeto.md):
+Siga a política de testes aprovada na Seção 9 de [`../fase2/padroes-de-projeto.md`](../fase2/03-modelagem/padroes-de-projeto.md):
 
 | Prática | Componentes Alvo | Regra de Execução |
 |---|---|---|

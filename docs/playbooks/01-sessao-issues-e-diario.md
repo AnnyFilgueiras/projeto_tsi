@@ -16,7 +16,7 @@
 
 ## 2. Template Canônico de GitHub Issue
 
-Toda Issue criada no repositório (manualmente ou via workflow/skill de criação de Issues) deve seguir estritamente esta estrutura em **português (Brasil)** ([ADR-015](../fase2/adr/adr-015-idioma-dos-identificadores.md)) para que qualquer agente implementador tenha contexto determinístico:
+Toda Issue criada no repositório (manualmente ou via workflow/skill de criação de Issues) deve seguir estritamente esta estrutura em **português (Brasil)** ([ADR-015](../fase2/02-adr/adr-015-idioma-dos-identificadores.md)) para que qualquer agente implementador tenha contexto determinístico:
 
 ```markdown
 ## 1. Contexto e Rastreabilidade
@@ -45,9 +45,9 @@ Toda Issue criada no repositório (manualmente ou via workflow/skill de criaçã
 ## 3. Fluxo de Implementação de uma Issue
 
 1. **Preparar branch (se solicitado):** Nomes de branch em inglês (`feat/issue-NN-short-name`, `docs/issue-NN-short-name`, `fix/issue-NN-short-name`).
-2. **Seguir TDD onde aplicável:** Conforme [`../fase2/padroes-de-projeto.md`](../fase2/padroes-de-projeto.md) (§9), regras puras (`allergen-rules`, `UnlockCalculator`, `UnlockRules`, `ReminderScheduler`, `PublicationGate`) e serviços de atributos críticos (`A05`, `A06`, `A07`, `A08`) exigem que o teste seja escrito e falhe **antes** da implementação.
+2. **Seguir TDD onde aplicável:** Conforme [`../fase2/padroes-de-projeto.md`](../fase2/03-modelagem/padroes-de-projeto.md) (§9), regras puras (`allergen-rules`, `UnlockCalculator`, `UnlockRules`, `ReminderScheduler`, `PublicationGate`) e serviços de atributos críticos (`A05`, `A06`, `A07`, `A08`) exigem que o teste seja escrito e falhe **antes** da implementação.
 3. **Respeitar Fronteiras e Idioma:**
-   - Código, identificadores, rotas e commits em **inglês** ([ADR-015](../fase2/adr/adr-015-idioma-dos-identificadores.md)).
+   - Código, identificadores, rotas e commits em **inglês** ([ADR-015](../fase2/02-adr/adr-015-idioma-dos-identificadores.md)).
    - Documentação e comentários na Issue/PR em **português (Brasil)**.
 4. **Rodar Verificação:** Executar os comandos definidos na Seção 4 da Issue e confirmar que nenhum link ou fronteira modular quebrou (ver [Playbook 03](./03-qualidade-fronteiras-e-contratos.md)).
 

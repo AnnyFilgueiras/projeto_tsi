@@ -1,7 +1,7 @@
 # Checklist Final da Fase 2 — Projeto Arquitetural (Panelada — Etapa 2.9)
 
 > **Fase 2.9 — Fechamento da Fase 2.** Papel da IA: revisor e consolidador.
-> **Destino:** `/docs/fase2/checklist-final.md`. Versão 1.0 — `20/11/2026` — status: Fase 2 pronta para fechamento e transição para a Fase 3 (MVP).
+> **Destino:** `/docs/fase2/05-fechamento/checklist-final.md`. Versão 1.0 — `20/11/2026` — status: Fase 2 pronta para fechamento e transição para a Fase 3 (MVP).
 > **Base:** `briefing-fase2.md` v1.6 (seção 7 — DoD 2.1 a 2.9), `revisao-arquitetural.md` v1.0, `ADR-001` a `ADR-016`, `openapi.yaml` v1.2.0-2.8 e `matriz-rastreabilidade.md`.
 
 ---
@@ -10,7 +10,7 @@
 
 | Critério (Briefing §7 — 2.9) | Status | Evidência objetiva no repositório |
 |---|---|---|
-| **1. Justificativa das decisões** | ✅ Aprovado | 16 ADRs versionados em `/docs/fase2/adr/` (`ADR-001` a `ADR-016`), todos contendo contexto, alternativas reais descartadas, consequências negativas honestas, riscos relacionados e gatilhos de revisão. Nenhum marcador `[CONFIRMAR]` em aberto. |
+| **1. Justificativa das decisões** | ✅ Aprovado | 16 ADRs versionados em `/docs/fase2/02-adr/` (`ADR-001` a `ADR-016`), todos contendo contexto, alternativas reais descartadas, consequências negativas honestas, riscos relacionados e gatilhos de revisão. Nenhum marcador `[CONFIRMAR]` em aberto. |
 | **2. Simplicidade (sem over-engineering)** | ✅ Aprovado | Monólito modular em processo único (`ADR-002`); notificações locais sem servidor push (`ADR-009`); curadoria via API + Bruno sem tela admin (`ADR-010`); 3 padrões rejeitados por simplicidade (`R01` UoW → `T01` `Tx`; `R02` regras do `PublicationGate` → função; `R03` Strategy de marcos → `switch` exaustivo); varredura GoF rejeitando Singleton, Visitor, Observer, State, Decorator e Iterator (`padroes-de-projeto.md` §5.1); offline incremental em 2 estágios (`ADR-008` Opção 3C). |
 | **3. Coerência com SOLID e fronteiras** | ✅ Aprovado | 12 ajustes de SOLID aplicados na 2.6 (`diagrama-classes.md` §13); 16 regras de fronteira automatizáveis via `eslint-plugin-boundaries` + `import/no-cycle` (`S1`–`S8` no servidor e `A1`–`A8` no app, `padroes-de-projeto.md` §6); limitação de SQL em string literal registrada e confirmada como `R19`. |
 | **4. Consistência entre diagramas, ADRs e contratos** | ✅ Aprovado | Nomes consistentes nos C4 níveis 1–3 (`c4-contexto.md`, `c4-containers.md`, `c4-componentes.md`); mapeamento PT↔EN formalizado no `glossario-identificadores.md` (`ADR-015`); 13/13 classes conceituais rastreadas em `diagrama-classes.md`; 4 sequências críticas (`UC04`, `UC08`, `UC10`, `UC12`) coerentes com C4 e `Tx`; `openapi.yaml` v1.2.0-2.8 validado pelo `@redocly/cli lint` (**0 erros**, 1 aviso intencional de `localhost` da demo); 33 requisições Bruno + fixture JPEG validadas com **0 erros**; gamificação 6D + Octalysis sincronizada em 8 marcos (`ADR-016`, `framework-gamificacao.md`, `openapi.yaml`, `RN03 a–h`). |
@@ -46,14 +46,14 @@
 
 | Sub-etapa | Artefato(s) canônico(s) | DoD atendido? |
 |---|---|---|
-| **2.1 Atributos de Qualidade** | [`atributos-qualidade.md`](./atributos-qualidade.md) v1.4 | ✅ Cenários `A01`–`A14` mensuráveis, priorizados, com conflitos e "prato concluído" conferido |
-| **2.2 Estilo Arquitetural** | [`estilo-arquitetural.md`](./estilo-arquitetural.md) v1.1 | ✅ 4 estilos de sistema + 3 de servidor comparados; trade-offs e gatilhos registrados |
-| **2.3 Propostas Arquiteturais** | [`propostas-arquiteturais.md`](./propostas-arquiteturais.md) v1.2 | ✅ 3 propostas (`P1`–`P3`) + sensibilidade; `P1` escolhida com agente de IA na curadoria |
-| **2.4 ADRs** | [`adr/adr-001`](./adr/adr-001-estilo-sistema-offline-first.md) a [`adr-016`](./adr/adr-016-framework-conceitual-gamificacao.md) | ✅ 16 ADRs completos, sem `[CONFIRMAR]`, RDC 727/2022 conferida, `R18`/`R19`/`R10` confirmados |
-| **2.5 Modelo C4** | [`c4-contexto.md`](./c4-contexto.md), [`c4-containers.md`](./c4-containers.md), [`c4-componentes.md`](./c4-componentes.md) | ✅ Níveis 1 a 3 + 3 vistas de implantação (Demo, Alvo e Cloud Gratuita Opção 4C) |
-| **2.6 Classes, Sequências e Contratos** | [`diagrama-classes.md`](./diagrama-classes.md), `sequencia-uc04/08/10/12.md`, [`openapi.yaml`](./openapi.yaml) v1.2.0-2.8, [`bruno/panelada-curadoria/`](./bruno/panelada-curadoria/) | ✅ 13/13 classes rastreadas, 4 sequências, SOLID conferido, Redocly CLI **0 erros**, Bruno 33 requisições + fixture validados |
-| **2.7 Padrões de Projeto** | [`padroes-de-projeto.md`](./padroes-de-projeto.md) v1.2, [`glossario-identificadores.md`](./glossario-identificadores.md) | ✅ Padrões `P01`–`P06`, `T01`, removidos `R01`–`R03`, regras `S1`–`S8` e `A1`–`A8`, política de TDD |
-| **Transversal — Gamificação** | [`framework-gamificacao.md`](./framework-gamificacao.md) v1.0, [`adr-016`](./adr/adr-016-framework-conceitual-gamificacao.md) | ✅ Framework híbrido **6D + Octalysis**, 8 marcos `RN03 a–h`, 0 novas tabelas (`A12`) |
+| **2.1 Atributos de Qualidade** | [`atributos-qualidade.md`](../01-fundamentos/atributos-qualidade.md) v1.4 | ✅ Cenários `A01`–`A14` mensuráveis, priorizados, com conflitos e "prato concluído" conferido |
+| **2.2 Estilo Arquitetural** | [`estilo-arquitetural.md`](../01-fundamentos/estilo-arquitetural.md) v1.1 | ✅ 4 estilos de sistema + 3 de servidor comparados; trade-offs e gatilhos registrados |
+| **2.3 Propostas Arquiteturais** | [`propostas-arquiteturais.md`](../01-fundamentos/propostas-arquiteturais.md) v1.2 | ✅ 3 propostas (`P1`–`P3`) + sensibilidade; `P1` escolhida com agente de IA na curadoria |
+| **2.4 ADRs** | [`adr/adr-001`](../02-adr/adr-001-estilo-sistema-offline-first.md) a [`adr-016`](../02-adr/adr-016-framework-conceitual-gamificacao.md) | ✅ 16 ADRs completos, sem `[CONFIRMAR]`, RDC 727/2022 conferida, `R18`/`R19`/`R10` confirmados |
+| **2.5 Modelo C4** | [`c4-contexto.md`](../03-modelagem/c4-contexto.md), [`c4-containers.md`](../03-modelagem/c4-containers.md), [`c4-componentes.md`](../03-modelagem/c4-componentes.md) | ✅ Níveis 1 a 3 + 3 vistas de implantação (Demo, Alvo e Cloud Gratuita Opção 4C) |
+| **2.6 Classes, Sequências e Contratos** | [`diagrama-classes.md`](../03-modelagem/diagrama-classes.md), `sequencia-uc04/08/10/12.md`, [`openapi.yaml`](../04-contratos/openapi.yaml) v1.2.0-2.8, [`bruno/panelada-curadoria/`](../04-contratos/bruno/panelada-curadoria/) | ✅ 13/13 classes rastreadas, 4 sequências, SOLID conferido, Redocly CLI **0 erros**, Bruno 33 requisições + fixture validados |
+| **2.7 Padrões de Projeto** | [`padroes-de-projeto.md`](../03-modelagem/padroes-de-projeto.md) v1.2, [`glossario-identificadores.md`](../04-contratos/glossario-identificadores.md) | ✅ Padrões `P01`–`P06`, `T01`, removidos `R01`–`R03`, regras `S1`–`S8` e `A1`–`A8`, política de TDD |
+| **Transversal — Gamificação** | [`framework-gamificacao.md`](../03-modelagem/framework-gamificacao.md) v1.0, [`adr-016`](../02-adr/adr-016-framework-conceitual-gamificacao.md) | ✅ Framework híbrido **6D + Octalysis**, 8 marcos `RN03 a–h`, 0 novas tabelas (`A12`) |
 | **2.8 Revisão Arquitetural** | [`revisao-arquitetural.md`](./revisao-arquitetural.md) v1.0 | ✅ 27 perguntas críticas em 6 frentes, 5 defeitos reais corrigidos, riscos `R1`–`R21` consolidados |
 | **2.9 Fechamento** | [`checklist-final.md`](./checklist-final.md) v1.0, [`resumo-fase2-para-fase3.md`](./resumo-fase2-para-fase3.md) v1.0 | ✅ Checklist aprovado e handoff executivo pronto para a Fase 3 |
 

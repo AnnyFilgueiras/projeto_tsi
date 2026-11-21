@@ -824,9 +824,9 @@ Nenhum artefato da Fase 1 foi alterado diretamente. Nenhum ADR foi marcado como 
 - Todas as divergências acumuladas desde a 2.5 (`diario-de-bordo-fase2.md` × `diario_de_bordo-fase2.md`, RDC 26/2015 × RDC 727/2022, `UC12` FA2/FE2, `RN08`, `ItemDeRotina` `"em preparo"`, exemplos de alérgenos, `score` 0–10 e exclusão de conta) foram encerradas nesta sessão.
 
 ### Riscos aceitos
-- Registro mestre consolidado em [`revisao-arquitetural.md`](./revisao-arquitetural.md) (§3): **`R1` a `R19` confirmados pela dupla** + **`R20` e `R21` adicionados e mitigados na revisão `2.8`**. A criptografia da restrição alimentar (`A05`, `ADR-006`) permanece requisito inegociável, não risco aceito.
+- Registro mestre consolidado em [`revisao-arquitetural.md`](./05-fechamento/revisao-arquitetural.md) (§3): **`R1` a `R19` confirmados pela dupla** + **`R20` e `R21` adicionados e mitigados na revisão `2.8`**. A criptografia da restrição alimentar (`A05`, `ADR-006`) permanece requisito inegociável, não risco aceito.
 
 ### Pendências para a próxima sessão
-- Fazer PR/merge de `docs/fase2-closing-frente-b` na `main` (e abrir/fechar a GitHub Issue #31 usando o texto pronto de [`docs/fase2/issue-31-lote-3.md`](./issue-31-lote-3.md), pois o `gh` CLI local não estava autenticado nesta sessão).
-- Preparar o deck curto de slides da Fase 2 a partir do roteiro de [`resumo-fase2-para-fase3.md`](./resumo-fase2-para-fase3.md) (§4).
+- Fazer PR/merge de `docs/fase2-closing-frente-b` na `main` (e abrir/fechar a GitHub Issue #31 usando o texto pronto de [`docs/fase2/issue-31-lote-3.md`](./05-fechamento/issue-31-lote-3.md), pois o `gh` CLI local não estava autenticado nesta sessão).
+- Preparar o deck curto de slides da Fase 2 a partir do roteiro de [`resumo-fase2-para-fase3.md`](./05-fechamento/resumo-fase2-para-fase3.md) (§4).
 - Iniciar a **Frente D — Implementação do MVP (`MVP-01` a `MVP-04`)** ou **GOV-04** (workflows/skills de Issues), conforme [`STATE.md`](../../STATE.md).
