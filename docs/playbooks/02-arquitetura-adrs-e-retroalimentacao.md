@@ -8,16 +8,17 @@
 
 Em caso de conflito entre textos do repositório, aplique sempre esta hierarquia:
 
-1. **Artefatos Aprovados da Fase** (ex.: `regras-de-negocio.md`, `atributos-qualidade.md`, `c4-*.md`, `diagrama-classes.md`, `openapi.yaml`, `padroes-de-projeto.md`)
-2. **ADRs vigentes** em [`../fase2/adr/`](../fase2/02-adr/) (incluindo suas seções finais de `Detalhamento`)
-3. **Painel de Estado Vivo** ([`../../STATE.md`](../../STATE.md))
-4. **Briefing da Fase** ([`../fase2/briefing-fase2.md`](../fase2/briefing-fase2.md))
+1. **Artefatos Aprovados da Fase / Código em Produção** (ex.: `regras-de-negocio.md`, `atributos-qualidade.md`, `c4-*.md`, `diagrama-classes.md`, `openapi.yaml`, `padroes-de-projeto.md`)
+2. **ADRs vigentes** em [`../fase2/02-adr/`](../fase2/02-adr/) (incluindo suas seções finais de `Detalhamento`)
+3. **Documentação operacional de engenharia** em [`../dev/`](../dev/)
+4. **Painel de Estado Vivo** ([`../../STATE.md`](../../STATE.md))
+5. **Briefing da Fase** ([`../fase2/briefing-fase2.md`](../fase2/briefing-fase2.md))
 
 ---
 
 ## 2. Como Evoluir ou Alterar um ADR
 
-Os ADRs em [`../fase2/adr/adr-001..015-*.md`](../fase2/02-adr/) seguem a regra de **registro histórico imutável**:
+Os ADRs em [`../fase2/02-adr/adr-001..016-*.md`](../fase2/02-adr/) seguem a regra de **registro histórico imutável**:
 
 ### Caso A: Detalhamento, Extensão ou Estratégia de Implementação em Estágios
 Quando a decisão central do ADR continua válida, mas ganha um refinamento técnico (ex.: dividir a implementação em Estágio 1 e Estágio 2 do MVP, ou detalhar um adaptador de deploy):

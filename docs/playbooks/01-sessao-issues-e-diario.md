@@ -6,11 +6,12 @@
 
 ## 1. Checklist de Início de Sessão
 
-1. **Ler [`../../STATE.md`](../../STATE.md):** Identificar a fase atual, o bloco *Handoff da Última Sessão* e a tarefa/Issue alvo.
-2. **Sincronizar com GitHub Issues (quando aplicável):**
+1. **Ler [`../../AGENTS.md`](../../AGENTS.md) e [`../../STATE.md`](../../STATE.md):** Identificar a fase atual, o bloco *Handoff da Última Sessão* e a tarefa/Issue alvo.
+2. **Sincronizar com GitHub Issues e branch `development` (quando aplicável):**
+   - Garantir base atualizada: `git switch development && git pull`
    - Listar issues abertas: `gh issue list --state open`
    - Ler detalhes da issue alvo: `gh issue view <NUMERO>`
-3. **Carregar somente os artefatos necessários:** Seguir a **Matriz de Leitura (Seção 5 do [`../../AGENTS.md`](../../AGENTS.md))**.
+3. **Carregar somente os artefatos necessários:** Seguir a tabela **"Leia Quando"** do [`../../AGENTS.md`](../../AGENTS.md). Para criar/auditar issues use a skill `.agents/skills/github-issue-craft`; para implementar ponta a ponta use `.agents/skills/solve-issue`.
 
 ---
 
@@ -78,6 +79,9 @@ Toda Issue criada no repositório (manualmente ou via workflow/skill de criaçã
   - `caminho/do/arquivo`
 - **Fora de escopo:** [O que NÃO deve ser alterado nesta Issue]
 
+## Decisões Fechadas
+- [Regras de negócio, contrato, códigos de erro e comportamento em bordas já decididos — vinculante para quem implementa; pendências reais entram como `> ❓ A confirmar: ...`]
+
 ## 3. Critérios de Aceite
 - [ ] Critério 1 (ou cenário `Dado / Quando / Então`)
 - [ ] Critério 2
@@ -88,24 +92,32 @@ Toda Issue criada no repositório (manualmente ou via workflow/skill de criaçã
   - `[comando exato ou checagem verificável]`
 ```
 
----
-
-## 3. Fluxo de Implementação de uma Issue
-
-1. **Preparar branch (se solicitado):** Nomes de branch em inglês (`feat/issue-NN-short-name`, `docs/issue-NN-short-name`, `fix/issue-NN-short-name`).
-2. **Seguir TDD onde aplicável:** Conforme [`../fase2/padroes-de-projeto.md`](../fase2/03-modelagem/padroes-de-projeto.md) (§9), regras puras (`allergen-rules`, `UnlockCalculator`, `UnlockRules`, `ReminderScheduler`, `PublicationGate`) e serviços de atributos críticos (`A05`, `A06`, `A07`, `A08`) exigem que o teste seja escrito e falhe **antes** da implementação.
-3. **Respeitar Fronteiras e Idioma:**
-   - Código, identificadores, rotas e commits em **inglês** ([ADR-015](../fase2/02-adr/adr-015-idioma-dos-identificadores.md)).
-   - Documentação e comentários na Issue/PR em **português (Brasil)**.
-4. **Rodar Verificação:** Executar os comandos definidos na Seção 4 da Issue e confirmar que nenhum link ou fronteira modular quebrou (ver [Playbook 03](./03-qualidade-fronteiras-e-contratos.md)).
+*(Os formulários correspondentes estão instalados em `.github/ISSUE_TEMPLATE/`.)*
 
 ---
 
-## 4. Registro Obrigatório no Diário de Bordo
+## 3. Fluxo de Implementação de uma Issue (`solve-issue`)
 
-O Diário de Bordo ([Fase 1](../fase1/diario_de_bordo-fase1.md) / [Fase 2](../fase2/diario_de_bordo-fase2.md)) é a **evidência acadêmica central** avaliada pelo professor e o insumo direto para os slides de fechamento de cada fase.
+1. **Fluxo de branches em mão única (`development` → `main`):**
+   - Toda branch de trabalho (`feat/issue-NN-short-name`, `fix/issue-NN-short-name`, `docs/issue-NN-short-name`, `chore/issue-NN-short-name`) sai de **`development`** atualizada e abre PR para **`development`**.
+   - Mudanças de regra de negócio/docs e features de código entram em **PRs separados** na `development`.
+   - `main` recebe apenas promoções estáveis de `development` (marcos/deploys semanais ou por fatia concluída). Nunca commite direto na `main`.
+2. **Planos visíveis em `.plans/`:** salve planos de trabalho e cortes de contexto em `.plans/<branch>.md` (ignorado no `.gitignore`).
+3. **Seguir TDD onde aplicável:** Conforme [`../fase2/03-modelagem/padroes-de-projeto.md`](../fase2/03-modelagem/padroes-de-projeto.md) (§9) e a skill `.agents/skills/tdd`, regras puras e serviços de atributos críticos (`A05`, `A06`, `A07`, `A08`) exigem RED → GREEN → REFACTOR vertical.
+4. **Respeitar Fronteiras, Idioma e Política de IA:**
+   - Código, identificadores, comentários, branches e commits em **inglês** ([ADR-015](../fase2/02-adr/adr-015-idioma-dos-identificadores.md)); **zero** atribuição de IA (`Co-Authored-By` ou rodapés) em commits, código e PRs.
+   - Documentação, Issues e PRs em **português (Brasil)**.
+5. **Rodar Verificação e `code-review`:** Executar os comandos definidos na Seção 4 da Issue, confirmar fronteiras modulares e SQL (`S8`), e rodar revisão em contexto limpo (ver [Playbook 03](./03-qualidade-fronteiras-e-contratos.md)).
 
-Sempre que uma sessão concluir uma sub-etapa, refatoração relevante ou tomada de decisão arquitetural/de requisitos, adicione ao final do diário da fase vigente uma entrada com este formato:
+---
+
+## 4. Registro Obrigatório no Diário de Bordo e Cadência na Fase 3
+
+O Diário de Bordo ([Fase 1](../fase1/diario_de_bordo-fase1.md) / [Fase 2](../fase2/diario_de_bordo-fase2.md) / futura Fase 3) é a **evidência acadêmica central** avaliada pelo professor e o único lugar (junto com o `STATE.md`) onde o uso de IA é registrado explicitamente.
+
+- **Cadência sustentável na Fase 3:** para evitar burocracia e conflitos de merge em PRs paralelos, **não** atualize o Diário nem o `STATE.md` em micro-PRs triviais. Faça uma entrada consolidada ao concluir cada **marco/fatia relevante** (`GOV-##`, `MVP-01`–`MVP-04`, mudança de ADR) ou na **promoção semanal `development` → `main`**.
+
+Sempre que registrar uma entrada, adicione ao final do diário da fase vigente com este formato:
 
 ```markdown
 ## [DD/MM/AAAA] — <Identificador e Título da Etapa ou Tarefa>

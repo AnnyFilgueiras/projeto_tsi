@@ -6,7 +6,7 @@
 
 ## 1. Fiscalização de Fronteiras Modulares (`eslint-plugin-boundaries`)
 
-O estilo Monólito Modular no servidor ([ADR-002](../fase2/02-adr/adr-002-estilo-servidor-monolito-modular.md)) e a organização *Feature-First* no app são garantidos por regras automáticas de lint documentadas na Seção 6 de [`../fase2/padroes-de-projeto.md`](../fase2/03-modelagem/padroes-de-projeto.md).
+O estilo Monólito Modular no servidor ([ADR-002](../fase2/02-adr/adr-002-estilo-servidor-monolito-modular.md)) e a organização *Feature-First* no app são garantidos por regras automáticas de lint documentadas em [`../dev/ARCHITECTURE.md`](../dev/ARCHITECTURE.md) e na Seção 6 de [`../fase2/03-modelagem/padroes-de-projeto.md`](../fase2/03-modelagem/padroes-de-projeto.md).
 
 ### Regras Críticas do Servidor (`apps/api` — `S1` a `S8`)
 - **`S1`:** Nenhum módulo importa `internal/` de outro módulo; apenas `public/`.
@@ -33,7 +33,7 @@ O estilo Monólito Modular no servidor ([ADR-002](../fase2/02-adr/adr-002-estilo
 
 ## 2. Estratégia Incremental do MVP (2 Estágios) e Portas Plugáveis
 
-Conforme detalhado no [ADR-008](../fase2/02-adr/adr-008-estrategia-offline-e-sincronizacao.md), no [ADR-004](../fase2/02-adr/adr-004-demonstracao-docker-e-alvo.md) e em [`../fase2/padroes-de-projeto.md`](../fase2/03-modelagem/padroes-de-projeto.md):
+Conforme detalhado no [ADR-008](../fase2/02-adr/adr-008-estrategia-offline-e-sincronizacao.md), no [ADR-004](../fase2/02-adr/adr-004-demonstracao-docker-e-alvo.md) e em [`../fase2/03-modelagem/padroes-de-projeto.md`](../fase2/03-modelagem/padroes-de-projeto.md):
 
 1. **Nunca pule as Portas nos Casos de Uso:**
    - No App, casos de uso que alteram estado (`RegisterRating`, `Routine`, `Profile`) chamam sempre a interface `OperationEnqueuer` (`P04`).
@@ -57,13 +57,19 @@ Conforme detalhado no [ADR-008](../fase2/02-adr/adr-008-estrategia-offline-e-sin
 
 ---
 
-## 4. Matriz de Testes e TDD
+## 4. Matriz de Testes, TDD, Containers e Seed Vivo
 
-Siga a política de testes aprovada na Seção 9 de [`../fase2/padroes-de-projeto.md`](../fase2/03-modelagem/padroes-de-projeto.md):
+Siga a política de testes aprovada na Seção 9 de [`../fase2/03-modelagem/padroes-de-projeto.md`](../fase2/03-modelagem/padroes-de-projeto.md) e a skill `.agents/skills/tdd`:
 
 | Prática | Componentes Alvo | Regra de Execução |
 |---|---|---|
-| **Test-First (TDD Estrito)** | `AllergenRules` e `CatalogInvariants` (`A06`), `UnlockCalculator` e `UnlockRules` (`RN03`/`RN04`), `ReminderScheduler` (`A07`), `PublicationGate` (`A09`), registro de `OperationApplier`, `SyncService` + `ProcessedOperation` (`A08`), `SessionService`, `FieldCipher` (`A05`), `RegisterRating` | Escrever o teste (e os vetores JSON compartilhados) primeiro, vê-lo falhar (RED), implementar o código mínimo (GREEN) e refatorar. Cada teste deve citar no `describe`/`it` o ID do `UC`, `RN` ou atributo `A##`. |
-| **Teste de Contrato** | `KimiProvider` e `RecordedProvider` (`P02b`) | Ambos os adaptadores devem passar exatamente na mesma suíte de validação de esquema JSON. |
+| **Test-First (TDD Estrito)** | `AllergenRules` e `CatalogInvariants` (`A06`), `UnlockCalculator` e `UnlockRules` (`RN03`/`RN04`), `ReminderScheduler` (`A07`), `PublicationGate` (`A09`), registro de `OperationApplier`, `SyncService` + `ProcessedOperation` (`A08`), `SessionService`, `FieldCipher` (`A05`), `RegisterRating` | Escrever um teste por vez (RED → GREEN → REFACTOR vertical; vetores JSON compartilhados para alérgenos e desbloqueios). Cada teste deve citar no `describe`/`it` o ID do `UC`, `RN` ou atributo `A##`. |
+| **Teste de Contrato** | `KimiProvider` e `RecordedProvider` (`P02b`), `LocalDiskPhotoStorage` e `SupabasePhotoStorage` (`P02f`) | Ambos os adaptadores devem passar exatamente na mesma suíte de contrato. |
 | **Teste Depois** | Telas React Native e fluxos visuais | Testes de componente após o fechamento do layout da feature. |
 | **Medição Empírica (`H`)** | Abertura offline em $\le 2\text{ s}$ com SQLCipher (`A04`), tamanho do conjunto baixado e consumo de tokens da IA (`ADR-011`) | Medir no emulador de referência (Android, 4 GB RAM) ou script de benchmark e registrar no Diário de Bordo. |
+
+### Diretrizes de Ambiente e CI (a implementar em `MVP-02`)
+1. **Containers (`docker-compose.yml`):** PostgreSQL (`TZ=UTC`, bancos `panelada_dev` e `panelada_test`) + API Fastify (`0.0.0.0:3000`) + volume de fotos. Apenas Emulador Android/Expo rodam no host.
+2. **Trava de segurança de integração:** a suíte de integração recusa iniciar se `DATABASE_URL` não terminar em `_test` (impedindo destruir `panelada_dev`).
+3. **Seed vivo (`db:reset`):** toda feature visível em tela estende o seed determinístico/idempotente no mesmo PR; a CI roda `db:migrate` + `db:seed` + `db:reset` em todo PR que tocar `apps/api`.
+4. **CI com *path filters*:** rodar suítes apenas das camadas alteradas no PR (`docs/`, `packages/`, `apps/api/`, `apps/mobile/`).
