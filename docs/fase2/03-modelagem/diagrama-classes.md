@@ -91,7 +91,7 @@ classDiagram
 ```
 
 - As funções são puras: sem banco, rede, disco nem log (ADR-014, itens 2, 6 e 9).
-- Receita sem restrição cadastrada classifica como `compatible`; o estado dos alérgenos continua visível (RN16). Com restrição, vale a RN08 completa. "Declarado pela fonte" é `compatible` quando não há alérgeno da restrição, sempre com o aviso "compatibilidade não confirmada".
+- Receita sem restrição cadastrada classifica como `compatible`; o estado dos alérgenos continua visível (RN16). Com restrição, vale a política *fail-closed* estrita (Opção A — ADR-014, RN08, RN10, A06): havendo interseção explícita com restrição do perfil, classifica como `incompatible` em qualquer estado; sem interseção, `source_declared` ("declarado pela fonte") e `unverified` classificam como `unconfirmed`, ficam fora de `filterCandidates`, retornam `false` em `isSubstituteAllowed` (RN22) e exibem o aviso "compatibilidade não confirmada" na visualização (RN16). Apenas `verified` sem interseção (e com `confirmedAllergenFree = true` quando a lista é vazia) classifica como `compatible`.
 - `CatalogInvariants` é um ponto de entrada separado, para o app não carregar o que só o servidor usa (regra A7). Invariantes: estado de alérgenos presente; `verified` com lista vazia só com `confirmedAllergenFree`; união dos alérgenos dos ingredientes igual à da receita; substituto sem alérgenos nunca `verified`; ingrediente com `leite` e sem `lactose` só com `lactoseFree = true`.
 - A versão do pacote é exposta por cliente e servidor. O app envia a versão no cabeçalho `X-Allergen-Package-Version`, e a API responde `minPackageVersion`. O app avisa e não bloqueia.
 

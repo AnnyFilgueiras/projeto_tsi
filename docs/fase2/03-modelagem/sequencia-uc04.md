@@ -54,7 +54,7 @@ sequenceDiagram
 
 - A classificação roda **no aparelho**, também para candidata. O servidor não recebe a restrição nessa consulta (RNF06, A05). A mesma `AllergenRules` roda nos dois lados, com a mesma suíte de vetores (ADR-014).
 - `LoadRecipe` recebe a fonte (`LocalRecipeSource` ou `RemoteRecipeSource`) por injeção, montada na raiz de composição (P02e, regra A8).
-- Sem restrição cadastrada, o resultado é `compatible` e o estado dos alérgenos fica visível (RN16). Com restrição, vale a RN08 completa. Estado `source_declared` é `compatible` quando não há alérgeno da restrição, sempre com o aviso "compatibilidade não confirmada".
+- Sem restrição cadastrada, o resultado é `compatible` e o estado dos alérgenos fica visível (RN16). Com restrição, vale a política *fail-closed* estrita (Opção A — ADR-014, RN08, RN10, A06): interseção explícita com restrição do perfil retorna `incompatible` em qualquer estado; sem interseção, `source_declared` e `unverified` retornam `unconfirmed` (motivos `source_declared_unconfirmed` / `allergen_state_unverified`), exibindo o alerta destacado de "compatibilidade não confirmada" (FA1, RN16), ficando fora de `filterCandidates` e bloqueando o uso como substituto em `isSubstituteAllowed` (RN22).
 - Receita sem estado de alérgenos ou com lista vazia, sem confirmação, classifica como `unconfirmed`.
 - Sem rede e sem receita baixada, a tela diz isso. A preparada de instalação nova volta quando o usuário abre com rede (R15).
 - Medida (H): abrir offline em até 2 s com SQLCipher no emulador de referência (A04).
