@@ -1,0 +1,60 @@
+name: Funcionalidade (Feature)
+description: Nova capacidade de produto ou fatia vertical do MVP (Fase 3)
+title: "<ID-ESTÁVEL> — <Ação clara e objetiva>"
+labels: ["implementacao"]
+body:
+  - type: textarea
+    id: contexto
+    attributes:
+      label: 1. Contexto e Rastreabilidade
+      description: Fase/etapa, IDs de origem (US, UC, RN, RNF, A##, ADR) e objetivo em 1–2 frases.
+      value: |
+        - **Fase / Etapa:** Fase 3 (MVP — Estágio 1)
+        - **Origem (Requisitos / Arquitetura):** US##, UC##, RN##, A##, ADR-###
+        - **Objetivo:** 
+    validations:
+      required: true
+
+  - type: textarea
+    id: escopo
+    attributes:
+      label: 2. Escopo e Camada
+      description: Camada afetada, arquivos/módulos previstos e o que fica explicitamente fora de escopo.
+      value: |
+        - **Camada afetada:** [ ] `docs/`  [ ] `packages/allergen-rules`  [ ] `apps/api`  [ ] `apps/mobile`
+        - **Arquivos/Módulos previstos:**
+          - `caminho/do/arquivo`
+        - **Fora de escopo:** 
+    validations:
+      required: true
+
+  - type: textarea
+    id: decisoes
+    attributes:
+      label: Decisões Fechadas
+      description: Regras de negócio, contrato, códigos de erro e casos de borda já definidos (vinculante para quem implementa).
+      value: |
+        - 
+
+  - type: textarea
+    id: criterios
+    attributes:
+      label: 3. Critérios de Aceite
+      description: Critérios verificáveis (caminho feliz, limites e erro).
+      value: |
+        - [ ] 
+        - [ ] 
+    validations:
+      required: true
+
+  - type: textarea
+    id: verificacao
+    attributes:
+      label: 4. Verificação e Testes
+      description: Abordagem (TDD estrito, contrato, teste depois) e comando/evidência exata.
+      value: |
+        - **Abordagem de Teste:** Test-first (TDD)
+        - **Comando / Evidência de conclusão:**
+          - ``
+    validations:
+      required: true
