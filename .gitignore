@@ -1,0 +1,38 @@
+# Local agent working state (visible in the workspace, never committed)
+.plans/
+.pending-issues/
+.claude/skills
+
+# Node / Monorepo
+node_modules/
+dist/
+build/
+coverage/
+.turbo/
+*.tsbuildinfo
+
+# Expo / React Native
+.expo/
+.expo-shared/
+android/
+ios/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# Environment & local secrets
+.env
+.env.local
+.env.test
+.env.*.local
+
+# OS & editor junk
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*

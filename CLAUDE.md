@@ -1,11 +1,9 @@
-# CLAUDE.md — Inicialização Rápida para Agentes CLI (Panelada)
+# CLAUDE.md — Ponto de Entrada para Claude Code (Panelada)
 
-Antes de executar qualquer tarefa neste repositório, siga obrigatoriamente estas instruções:
+Este repositório usa [`AGENTS.md`](./AGENTS.md) como fonte única de instruções para todos os agentes (Claude Code, Codex, Kimi e Antigravity).
 
-1. **Leia [`./AGENTS.md`](./AGENTS.md):** Contém o protocolo obrigatório de sessão, a ordem de precedência documental, as convenções de idioma ([ADR-015](./docs/fase2/adr/adr-015-idioma-dos-identificadores.md)), o mapa completo do repositório e a matriz de leitura por tipo de tarefa.
-2. **Leia [`./STATE.md`](./STATE.md):** Contém o estado atual do projeto, as decisões estratégicas vigentes para o MVP/Deploy/Gamificação, o quadro de Issues/pendências e o *Handoff da Última Sessão*.
-3. **Consulte o playbook aplicável em [`./docs/playbooks/`](./docs/playbooks/):**
-   - [`01-sessao-issues-e-diario.md`](./docs/playbooks/01-sessao-issues-e-diario.md)
-   - [`02-arquitetura-adrs-e-retroalimentacao.md`](./docs/playbooks/02-arquitetura-adrs-e-retroalimentacao.md)
-   - [`03-qualidade-fronteiras-e-contratos.md`](./docs/playbooks/03-qualidade-fronteiras-e-contratos.md)
-4. **Ao finalizar sua tarefa:** Atualize o [`./STATE.md`](./STATE.md) (e o `diario_de_bordo` da fase, se aplicável) antes de encerrar.
+1. Leia [`./AGENTS.md`](./AGENTS.md) e [`./STATE.md`](./STATE.md) antes de iniciar qualquer tarefa.
+2. **Skills compartilhadas:** as skills do projeto vivem em `.agents/skills/`. Se `.claude/skills` ainda não existir nesta máquina, rode uma vez `node scripts/setup-agent-skills.mjs` (cria symlink no Linux/macOS ou *junction* sem admin no Windows).
+3. Consulte a tabela **"Leia Quando"** no [`./AGENTS.md`](./AGENTS.md) para abrir apenas o documento necessário (`docs/dev/`, `docs/playbooks/`, ou referências pontuais de `docs/fase1/` e `docs/fase2/`).
+4. **Planos locais** ficam em `.plans/` (dentro do workspace, ignorado pelo `.gitignore`) — nunca em `~/.claude/plans/`.
+5. Ao concluir um marco/etapa relevante, atualize [`./STATE.md`](./STATE.md) e o diário de bordo da fase vigente.

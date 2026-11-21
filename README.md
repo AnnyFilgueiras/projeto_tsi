@@ -14,16 +14,30 @@ Repositório do trabalho da disciplina **Tópicos em Sistemas de Informação** 
 
 ---
 
-## Governança Multi-Agente e Continuidade
+## Governança Multi-Agente e Setup Local
 
-Este repositório é estruturado para desenvolvimento colaborativo entre a dupla e múltiplos agentes de IA (via CLI e Web), garantindo rastreabilidade e passagem de contexto sem perda de histórico:
+Este repositório é estruturado para desenvolvimento colaborativo entre a dupla e múltiplos agentes de IA (**Antigravity, Claude Code, Codex e Kimi**), em **Linux, macOS e Windows**:
 
-- **[`AGENTS.md`](./AGENTS.md):** Guia mestre e ponto de entrada obrigatório para qualquer agente de IA (mapa do repositório, regras de precedência, convenção bilíngue do [ADR-015](./docs/fase2/02-adr/adr-015-idioma-dos-identificadores.md) e matriz de leitura).
-- **[`STATE.md`](./STATE.md):** Painel vivo de progresso do projeto, diretrizes estratégicas de MVP/Deploy/Gamificação, quadro de Issues ativas e *Handoff* entre sessões.
-- **[`docs/playbooks/`](./docs/playbooks/):** Manuais operacionais objetivos para tarefas recorrentes:
-  - [01 — Ciclo de Sessão, GitHub Issues e Diário de Bordo](./docs/playbooks/01-sessao-issues-e-diario.md)
-  - [02 — Evolução Arquitetural, ADRs e Retroalimentação](./docs/playbooks/02-arquitetura-adrs-e-retroalimentacao.md)
-  - [03 — Qualidade, Fronteiras Modulares, Contratos e TDD](./docs/playbooks/03-qualidade-fronteiras-e-contratos.md)
+- **[`AGENTS.md`](./AGENTS.md):** Guia enxuto de engenharia e ponto de entrada único para todos os agentes (comandos, arquitetura, regras com o porquê e tabela *"Leia Quando"*).
+- **[`CLAUDE.md`](./CLAUDE.md):** Ponteiro enxuto para Claude Code apontando para `AGENTS.md`, `STATE.md` e `.agents/skills/`.
+- **[`STATE.md`](./STATE.md):** Painel vivo de progresso, decisões estratégicas vigentes, backlog ativo e *Handoff* entre marcos.
+- **[`.agents/skills/`](./.agents/skills/):** Fonte única das skills do projeto (`grilling`, `github-issue-craft`, `solve-issue`, `code-review`, `tdd`, `codebase-design`, `code-comments`).
+- **[`docs/dev/`](./docs/dev/):** Documentação operacional viva para codificação (*"1 pergunta por página"*): [`GLOSSARY.md`](./docs/dev/GLOSSARY.md), [`ARCHITECTURE.md`](./docs/dev/ARCHITECTURE.md) e [`PRIVACY.md`](./docs/dev/PRIVACY.md) (`DATABASE.md` e `TESTING.md` entram em `MVP-02`).
+- **[`docs/playbooks/`](./docs/playbooks/):** Manuais operacionais de processo ([`01`](./docs/playbooks/01-sessao-issues-e-diario.md), [`02`](./docs/playbooks/02-arquitetura-adrs-e-retroalimentacao.md), [`03`](./docs/playbooks/03-qualidade-fronteiras-e-contratos.md)).
+
+### Setup de Skills por Clone (Claude Code em Linux/Windows)
+Antigravity, Codex e Kimi descobrem `.agents/skills/` automaticamente. Para o **Claude Code**, rode uma vez após clonar o repositório:
+
+```bash
+node scripts/setup-agent-skills.mjs
+```
+
+O script cria um symlink relativo em Linux/macOS ou uma *directory junction* em Windows (sem precisar de privilégio de administrador nem Developer Mode) ligando `.claude/skills` a `.agents/skills`.
+
+### Fluxo de Branches (Fase 3)
+- Toda tarefa (`feat/*`, `fix/*`, `docs/*`, `chore/*`) sai de **`development`** atualizada e abre PR para **`development`**.
+- **`main`** recebe apenas promoções estáveis de `development` (marcos e deploys). Nunca commite diretamente na `main`.
+- Planos de trabalho dos agentes ficam visíveis em `.plans/` (ignorado pelo `.gitignore`).
 
 ---
 
@@ -103,12 +117,16 @@ Este repositório é estruturado para desenvolvimento colaborativo entre a dupla
 
 ```text
 /
-├── AGENTS.md                        Guia mestre para agentes de IA (ponto de entrada)
-├── CLAUDE.md                        Ponteiro de inicialização para agentes CLI
-├── STATE.md                         Painel vivo de progresso, issues, decisões e handoff
+├── AGENTS.md                        Guia enxuto de engenharia e governança (fonte única multi-agente)
+├── CLAUDE.md                        Ponteiro enxuto para Claude Code
+├── STATE.md                         Painel vivo de progresso, decisões, backlog e handoff
 ├── README.md                        Este arquivo
+├── .agents/skills/                  Skills versionadas (Antigravity, Codex, Kimi + Claude via script)
+├── .github/ISSUE_TEMPLATE/          Formulários YAML de Issues (Playbook 01)
+├── scripts/setup-agent-skills.mjs   Espelha `.agents/skills` -> `.claude/skills` (Linux/Windows)
 └── docs/
-    ├── playbooks/                   Manuais operacionais para tarefas recorrentes dos agentes
-    ├── fase1/                       Artefatos da Fase 1 (1.1 a 1.4, assets e diário de bordo)
-    └── fase2/                       Artefatos da Fase 2 (01-fundamentos/, 02-adr/, 03-modelagem/, 04-contratos/, 05-fechamento/, briefing e diário)
+    ├── dev/                         Docs operacionais vivos de código (GLOSSARY, ARCHITECTURE, PRIVACY)
+    ├── playbooks/                   Manuais operacionais (sessão/issues/diário, ADRs, qualidade/TDD)
+    ├── fase1/                       [Referência] Artefatos da Fase 1 (1.1 a 1.4, assets e diário)
+    └── fase2/                       [Referência] Artefatos da Fase 2 (ADRs, C4, OpenAPI, Bruno e diário)
 ```
