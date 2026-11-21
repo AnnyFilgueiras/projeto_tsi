@@ -124,7 +124,7 @@ Convenções do diagrama: atributos sem tipos e sem parênteses (nível conceitu
 | Receita | Instruções de preparo de um prato | tempo de preparo; dificuldade {fácil, média, difícil}; passo a passo numerado; alérgenos; estadoAlergenos {verificado, declarado_fonte, nao_verificado}; fonte (RNF08) | detalha 1 Prato; usa 1..* Ingrediente; exige 0..* Utensilio |
 | Sugestao | Recomendação de prato apresentada ao usuário, com ciclo de vida | data/hora; situação {apresentada, candidata, descartada} | recebida por 1 Usuario; refere-se a 1 Prato |
 | PlanoDeRotina | Conjunto de pratos candidatos com datas, em um período | período {semana, quinzena}; data de início | montado por 1 Usuario; contém 1..* ItemDeRotina; gera 0..1 ListaDeCompras |
-| ItemDeRotina | Prato agendado em uma data dentro do plano | data de preparo; status {planejado, em preparo, concluído} | pertence a 1 PlanoDeRotina; agenda 1 Prato |
+| ItemDeRotina | Prato agendado em uma data dentro do plano | data de preparo; status {planejado, em preparo*, concluído} *(nota da Fase 2: "em preparo" é estado exclusivamente local no aparelho — `LocalCookingState`, ADR-005/ADR-008; o servidor persiste apenas `{planejado, concluído}`)* | pertence a 1 PlanoDeRotina; agenda 1 Prato |
 | ListaDeCompras | Ingredientes consolidados do plano, sem duplicatas e sem quantidades (v1) | data de compra | gerada por 1 PlanoDeRotina; consolida 1..* Ingrediente (marcação "comprado" na associação) |
 | Avaliacao | Registro de um preparo concluído | nota (obrigatória, 0 a 5 em passos de 0,5 — RN05); relato (opcional); alterações (opcional); data | registrada por 1 Usuario; avalia 1 Prato |
 | Badge | Conquista concedida ao atingir um marco verificável (RN03) | nome; descrição; marco (critério verificável) | conquistado por 0..* Usuario (data de desbloqueio na associação) |
@@ -151,6 +151,7 @@ Convenções do diagrama: atributos sem tipos e sem parênteses (nível conceitu
 1. **Briefing 1.2 × artefatos da 1.1:** a lista-semente do briefing previa `Pontuacao`, `Amizade` e `Ranking` no modelo e RNs ativas de pontuação e ranking. A 1.1 fechou ranking como Won't e pontuação/social como Could. Prevaleceram os artefatos aprovados da 1.1 (convenção de divergências do Guia Geral); pontuação virou RN futura (RN19) e ranking virou nota de exclusão (RN20).
 2. **Avaliacao → Prato, não Receita (D11a):** o exemplo de formato do briefing ligava Avaliacao a Receita; o léxico define avaliação como registro de preparo, e coleção, evolução e badges operam sobre pratos. A ligação com Receita existe via Prato 1–1.
 3. **Refinamentos durante a escrita das RNs (D12):** `Culinaria.continentes` (multivalorado — culinárias de região cruzam continentes, ex.: árabe → {Ásia, África}) e `RestricaoAlimentar.alergenosAssociados` foram adicionados para tornar RN03 e RN08 testáveis.
+4. **Retroalimentação da Fase 2 (Issue #31 — Lote 3):** No nível de projeto (`ADR-005`, `ADR-008`, `diagrama-classes.md`), o status `"em preparo"` de `ItemDeRotina` é mantido exclusivamente como marca local no aparelho (`LocalCookingState`, sem sincronização com o servidor, que conhece apenas `planejado` e `concluído`). Os alérgenos de `Ingrediente` e `Receita` adotam o vocabulário controlado de 19 códigos (18 itens do Anexo III da ANVISA RDC 727/2022 + `lactose`, `ADR-014`).
 
 ## 8. Rastreabilidade (verificação bidirecional)
 

@@ -1,6 +1,6 @@
 # Casos de Teste Derivados — Panelada
 
-> Fase 1.4 — Validação. Um caso de teste (CT##) por critério de aceite das 12 histórias Must (27 critérios → 27 CTs), derivados do formato Given/When/Then, conforme o briefing 1.4.
+> Fase 1.4 — Validação. Casos de teste derivados do formato Given/When/Then: 27 CTs originais das 12 histórias Must mais 4 CTs de retroalimentação da Fase 2 (`CT28`–`CT30` do Lote 1 / IA e RN21–RN22; `CT31` da extensão 6D + Octalysis / ADR-016), totalizando 31 CTs.
 > CTs de critérios corrigidos na inspeção usam o **texto corrigido e aprovado** (ver `checklist.md`), provando que a correção restaura a testabilidade.
 > Convenção de resultado: como ainda não há implementação, "Passa" significa que o critério gera um resultado esperado determinístico e verificável na especificação (teste de papel contra os artefatos). A execução contra o software ocorrerá nas fases seguintes, reutilizando estes mesmos CTs.
 
@@ -16,23 +16,24 @@
 | US07 | RF05 | CT12, CT13 | 2/2 passam |
 | US08 | RF06 | CT14, CT15, CT16 | 3/3 passam |
 | US09 | RF07 | CT17, CT18 | 2/2 passam |
-| US10 | RF08 | CT19, CT20 | 2/2 passam |
-| US12 | RF11 | CT21, CT22, CT23 | 3/3 passam |
+| US10 | RF08 | CT19, CT20, CT29 | 3/3 passam |
+| US12 | RF11 | CT21, CT22, CT23, CT31 *(com US15/US16)* | 4/4 passam |
 | US14 | RF13 | CT24, CT25 | 2/2 passam |
-| US18 | RF18 | CT26, CT27 | 2/2 passam |
+| US18 | RF18 | CT26, CT27, CT28, CT30 | 4/4 passam |
 
-Cobertura adicional de RNF exercitada pelos CTs: RNF03 (CT01), RNF07 (CT16), RNF10/RN05 (CT21), RNF08/RN17 (CT26).
+Cobertura adicional de RNF exercitada pelos CTs: RNF03 (CT01), RNF07 (CT16), RNF10/RN05 (CT21), RNF08/RN17 (CT26), RNF11/RN21 (CT28, CT30), RN22 (CT29), ADR-016/RN03 a–h (CT31).
 
 ---
 
 ## US01 — Sugestões alinhadas ao perfil
 
 ```
-CT01 — Origem: US01 (critério 1, texto corrigido)
-Dado que meu perfil declara a restrição "intolerância à lactose" (alérgeno
-associado: lactose) e a preferência "culinária italiana",
-e o catálogo contém "Risoto" (italiano, declara lactose), "Espaguete ao
-pomodoro" (italiano, sem lactose) e "Feijoada" (brasileira, sem lactose),
+CT01 — Origem: US01 (critério 1, texto corrigido; vocabulário controlado ADR-014)
+Dado que meu perfil declara a restrição "intolerância à lactose" (código do
+vocabulário controlado: `lactose`) e a preferência "culinária italiana",
+e o catálogo contém "Risoto" (italiano, verificado, declara `leite` e `lactose`),
+"Espaguete ao pomodoro" (italiano, verificado, sem `lactose`) e "Feijoada"
+(brasileira, verificada, sem `lactose`),
 quando abro as sugestões,
 então "Risoto" nunca é apresentado (RN08), as sugestões exibidas respeitam
 minha preferência por culinária italiana (RN10) e a resposta chega em até
@@ -185,12 +186,14 @@ Resultado: [x] Passa  [ ] Falha → motivo:
 ## US09 — Restrições alimentares e alertas
 
 ```
-CT17 — Origem: US09 (critério 1, texto corrigido)
-Dado que cadastrei a restrição "doença celíaca" (alérgeno associado: glúten)
+CT17 — Origem: US09 (critério 1, texto corrigido; vocabulário controlado ADR-014)
+Dado que cadastrei a restrição "doença celíaca" (código do vocabulário
+controlado: `trigo_centeio_cevada_aveia`, conforme ANVISA RDC 727/2022)
 com consentimento explícito (RN09),
 quando recebo sugestões,
-então nenhum prato que declara glúten é apresentado; e, ao buscar ou
-visualizar "Pão de queijo" (declara glúten), ele aparece claramente
+então nenhum prato que declara `trigo_centeio_cevada_aveia` (ou com estado
+"não verificado") é apresentado; e, ao buscar ou visualizar "Macarrão à
+bolonhesa" (declara `trigo_centeio_cevada_aveia`), ele aparece claramente
 sinalizado como incompatível (RN08).
 Resultado: [x] Passa  [ ] Falha → motivo:
 ```
@@ -207,12 +210,13 @@ Resultado: [x] Passa  [ ] Falha → motivo:
 ## US10 — Substituições de ingredientes
 
 ```
-CT19 — Origem: US10 (critério 1)
-Dado que a receita de "Bechamel" usa leite, que o leite é incompatível com a
-minha restrição (lactose) e que "leite → leite de aveia" está cadastrado com
-alérgenos verificados sem lactose,
+CT19 — Origem: US10 (critério 1; vocabulário controlado ADR-014)
+Dado que a receita de "Bechamel" usa leite (declara `leite` e `lactose`), que
+o leite é incompatível com a minha restrição (`lactose`) e que "leite → leite
+de aveia" está cadastrado com alérgenos verificados sem `lactose` (declara
+`trigo_centeio_cevada_aveia`, compatível com o perfil),
 quando visualizo a receita,
-então vejo "leite de aveia" como substituição segura sugerida para o leite (RN15).
+então vejo "leite de aveia" como substituição segura sugerida para o leite (RN15, RN22).
 Resultado: [x] Passa  [ ] Falha → motivo:
 ```
 
@@ -326,10 +330,10 @@ Resultado: [x] Passa  [ ] Falha → motivo:
 ```
 
 ```
-CT30 — Origem: RNF11
-Dado que o curador tenta importar uma receita com o apoio do agente de IA e a API do provedor falha ou fica indisponível,
+CT30 — Origem: RNF11, UC12-FE2 (curadoria via API — ADR-010, ADR-011)
+Dado que o curador tenta importar uma receita com o apoio do agente de IA via API (`POST /v1/curation/imports`) e a API do provedor falha, estoura o teto de gasto ou fica indisponível,
 quando ocorre a falha,
-então o sistema exibe um aviso de indisponibilidade e disponibiliza a interface de importação manual completa (UC12-FE2, RNF11).
+então o sistema não grava proposta parcial e retorna resposta de erro estruturada (`application/problem+json`, códigos 402/502/504) com `manualFlowAvailable = true`, mantendo o fluxo principal de importação manual pela API (`POST /v1/curation/recipes`) disponível (UC12-FE2, RNF11).
 Resultado: [x] Passa  [ ] Falha → motivo:
 ```
 

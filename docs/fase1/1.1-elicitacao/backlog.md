@@ -109,8 +109,7 @@ Origem: RF07 | Prioridade: Must
 Critérios de aceite:
 - Dado que cadastrei uma restrição (ex.: diabetes ou outra condição não verificada), quando navego pelo aplicativo, vejo um aviso fixo informando que apenas alérgenos são verificados.
 - Dado que cadastrei uma restrição de alérgeno (ex.: camarão), quando recebo sugestões, então pratos incompatíveis ou com estado de alérgenos "não verificado" não aparecem nas sugestões (RN08).
-- Dado que uma receita contém um alérgeno comum (ex.: glúten, lactose,
-  amendoim) ou possui estado de "não verificado", quando a visualizo, então o alerta de "compatibilidade não confirmada" é exibido (RN16).
+- Dado que uma receita contém um alérgeno do vocabulário controlado (ex.: `trigo_centeio_cevada_aveia` para cereais com glúten, `lactose`, `leite` ou `amendoim` — ANVISA RDC 727/2022 + `lactose`, ADR-014) ou possui estado de "não verificado", quando a visualizo, então o alerta de "compatibilidade não confirmada" é exibido (RN16).
 ```
 
 ```
