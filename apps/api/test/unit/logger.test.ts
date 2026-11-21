@@ -1,0 +1,57 @@
+import { Writable } from 'node:stream';
+import { describe, expect, it } from 'vitest';
+import {
+  createTechnicalLogger,
+  REDACTED_LOG_PATHS,
+} from '../../src/support/technical-log/logger.js';
+
+describe('technical logger redaction (A13, A05)', () => {
+  it('redacts dietary restrictions, credentials, tokens, and encryption material from log output', () => {
+    const chunks: string[] = [];
+    const destination = new Writable({
+      write(chunk, _encoding, callback) {
+        chunks.push(String(chunk));
+        callback();
+      },
+    });
+
+    const logger = createTechnicalLogger('info', destination);
+    logger.info(
+      {
+        req: { headers: { authorization: 'Bearer super-secret-jwt' } },
+        password: 'my-password-123',
+        refreshToken: 'refresh-secret',
+        restrictions: ['amendoim', 'lactose'],
+        payload: {
+          restrictions: ['leite'],
+          ciphertext: 'enc-bytes',
+          encryptionKey: 'raw-aes-key',
+        },
+        reqBody: {
+          nested: {
+            restrictions: ['soja'],
+            password: 'nested-password',
+          },
+        },
+        safeField: 'visible-value',
+      },
+      'sanitization check',
+    );
+
+    const output = chunks.join('');
+    expect(output).toContain('visible-value');
+    expect(output).toContain('[REDACTED]');
+    expect(output).not.toContain('super-secret-jwt');
+    expect(output).not.toContain('my-password-123');
+    expect(output).not.toContain('refresh-secret');
+    expect(output).not.toContain('amendoim');
+    expect(output).not.toContain('lactose');
+    expect(output).not.toContain('leite');
+    expect(output).not.toContain('soja');
+    expect(output).not.toContain('nested-password');
+    expect(output).not.toContain('enc-bytes');
+    expect(output).not.toContain('raw-aes-key');
+    expect(REDACTED_LOG_PATHS).toContain('restrictions');
+    expect(REDACTED_LOG_PATHS).toContain('req.headers.authorization');
+  });
+});
