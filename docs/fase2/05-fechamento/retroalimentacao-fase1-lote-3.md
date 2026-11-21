@@ -1,9 +1,9 @@
-# Issue #31 — Retroalimentação da Fase 1 (Lote 3: Fechamento da Fase 2)
+# Lote 3 — Retroalimentação da Fase 2 para a Fase 1 (Issue #32)
 
-> Artefato canônico de especificação da GitHub Issue #31 (Playbook 01), consolidando os itens de retroalimentação acumulados das etapas `2.5`, `2.6` e `2.7` para os artefatos da Fase 1.
+> Artefato canônico de especificação da GitHub Issue #32 ([Playbook 01](../../playbooks/01-sessao-issues-e-diario.md)), consolidando os itens de retroalimentação acumulados das etapas `2.5`, `2.6` e `2.7` para os artefatos da Fase 1. *(Nota: o placeholder histórico `#31` foi consumido pelo PR da Issue `#30`, portanto a issue do Lote 3 corresponde à `#32`.)*
 
 ## 1. Contexto e Rastreabilidade
-- **Fase / Etapa:** Fase 2 (Fechamento — Frente B / `F2-01`, retroalimentação para a baseline `backlog-validado-v1.0` da Fase 1)
+- **Fase / Etapa:** Fase 2 (Fechamento — Frente B / `F2-01`, retroalimentação para a baseline `validated-backlog--v1.0` da Fase 1)
 - **Origem (Requisitos / Arquitetura):** `UC08`, `UC10`, `UC12` (FA2/FE2); `RN03e`, `RN05`, `RN08`, `RN09`, `RN16`; `RNF06`, `RNF11`; `US09`, `US12`, `US18`; `CT01`, `CT17`, `CT19`, `CT30`; `A05`, `A06`, `A09`; `ADR-005`, `ADR-007`, `ADR-008`, `ADR-010`, `ADR-011`, `ADR-014`, `ADR-015`
 - **Objetivo:** Sincronizar os artefatos da Fase 1 com as decisões fechadas na Fase 2 (curadoria exclusiva via API, vocabulário controlado de 19 códigos de alérgenos baseado na ANVISA RDC 727/2022 + `lactose`, regra `confirmadoSemAlergenos`, status local `"em preparo"`, exclusão completa de conta pela LGPD e representação da nota `0..10` no contrato), mantendo `documento-de-requisitos.md` e `matriz-rastreabilidade.md` íntegros.
 

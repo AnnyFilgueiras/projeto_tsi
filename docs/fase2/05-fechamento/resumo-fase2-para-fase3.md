@@ -29,7 +29,7 @@ O **Panelada** foi projetado para equilibrar **segurança de saúde (`A06`)**, *
 
 ```text
 projeto_tsi/
-├── docs/                          # Fase 1 (baseline + Issues #30/#31), Fase 2 (fechada) e playbooks
+├── docs/                          # Fase 1 (baseline + Issues #30/#32), Fase 2 (fechada) e playbooks
 ├── packages/
 │   └── allergen-rules/            # Pacote TS 100% puro (ADR-014): rules + invariants + vetores JSON
 ├── apps/
@@ -87,7 +87,7 @@ O `briefing-fase2.md` (§1) prevê um conjunto curto de slides após a 2.9 cobri
 | Slide | Título | Conteúdo-chave e diagrama fonte |
 |---|---|---|
 | **1** | Capa e Visão do Produto | Panelada: culinária internacional gamificada; dupla, disciplina e recorte do MVP (12 US Must, 4 Should; 1,5 mês; custo zero) |
-| **2** | Processo Assistido por IA (2.1 a 2.9) | Evolução iterativa documentada no Diário de Bordo, governança multi-agente (`AGENTS.md`/`STATE.md`), retroalimentação controlada para a Fase 1 (Issues #30 e #31) |
+| **2** | Processo Assistido por IA (2.1 a 2.9) | Evolução iterativa documentada no Diário de Bordo, governança multi-agente (`AGENTS.md`/`STATE.md`), retroalimentação controlada para a Fase 1 (Issues #30 e #32) |
 | **3** | Atributos de Qualidade e Trade-offs (`2.1`) | Priorização: Críticos (`A06` Alérgenos, `A05` LGPD, `A08` Integridade/Sync, `A04` Offline) e conflitos principais (`A04 × A06`, `A05 × A04`, `A13 × A05`) |
 | **4** | Estilo e Proposta Escolhida (`2.2`–`2.3`) | Offline-first parcial + Monólito Modular (`P1` vencendo `P2` Supabase e `P3` Flutter nos 4 cenários de sensibilidade); por que não microsserviços nem BaaS direto |
 | **5** | Arquitetura em C4 — Contexto e Containers (`2.5`) | Diagramas de `c4-contexto.md` e `c4-containers.md` (App + SQLCipher, API Fastify, Postgres, Fotos, Bruno e Kimi K3) + paridade Docker Local × Cloud Gratuita (Opção 4C) |

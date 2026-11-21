@@ -67,7 +67,7 @@
 | RNF03 (≤ 2,5 s) | CT01 | Coberto por caso de teste |
 | RNF04 (≤ 2 toques) | US02 / RF02 (texto corrigido) | Coberto |
 | RNF05 (offline) | — | Sem UC — RNF de qualidade, verificação direta (modo avião); não exige cadeia RF→UC |
-| RNF06 (LGPD: criptografia, revogação e exclusão de conta) | RN09, UC08 (FA2/FA3), ADR-006, ADR-007 (`DELETE /v1/account`) | Coberto (atualizado no Lote 3 — Issue #31) |
+| RNF06 (LGPD: criptografia, revogação e exclusão de conta) | RN09, UC08 (FA2/FA3), ADR-006, ADR-007 (`DELETE /v1/account`) | Coberto (atualizado no Lote 3 — Issue #32) |
 | RNF07 (notificações configuráveis) | RN13, US08-c3, CT16 | Coberto (limiar definido na correção do checklist) |
 | RNF08 (atribuição de fonte) | RN17, UC12-FE1, CT26 | Coberto |
 | RNF09 (sem punição) | RN04, RN12 | Coberto |

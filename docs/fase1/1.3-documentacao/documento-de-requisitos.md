@@ -2,7 +2,7 @@
 
 > **Fase 1.3 — Documentação.** Este documento consolida, em texto único, os artefatos produzidos na elicitação (1.1) e na análise (1.2), **sem alteração de conteúdo** — cada seção aponta para o arquivo modular correspondente, que é a fonte de verdade.
 > Identificadores estáveis (Guia Geral, seção 6): `RF##`, `RNF##`, `US##`, `UC##`, `RN##` — nunca renumerados.
-> Consolidado em 09/09/2026; re-sincronizado após retroalimentações da Fase 2 (Issue #30 — Lote 1, Gamificação 6D + Octalysis / ADR-016 e Issue #31 — Lote 3 em 20/11/2026).
+> Consolidado em 09/09/2026; re-sincronizado após retroalimentações da Fase 2 (Issue #30 — Lote 1, Gamificação 6D + Octalysis / ADR-016 e Issue #32 — Lote 3 em 20/11/2026).
 
 ## Sumário
 
@@ -467,4 +467,4 @@ Cadeia do Guia Geral: Persona → RF/RNF → US → UC → Classe do modelo conc
 
 ---
 
-*Processo: este documento foi gerado na conversa 1.3 (Documentação) com IA generativa no papel de redatora técnica e mantido sincronizado com as retroalimentações da Fase 2 (Issue #30, Gamificação ADR-016 e Issue #31). Decisões e iterações estão registradas nos diários de bordo ([Fase 1](../diario_de_bordo-fase1.md) e [Fase 2](../../fase2/diario_de_bordo-fase2.md)).*
+*Processo: este documento foi gerado na conversa 1.3 (Documentação) com IA generativa no papel de redatora técnica e mantido sincronizado com as retroalimentações da Fase 2 (Issue #30, Gamificação ADR-016 e Issue #32). Decisões e iterações estão registradas nos diários de bordo ([Fase 1](../diario_de_bordo-fase1.md) e [Fase 2](../../fase2/diario_de_bordo-fase2.md)).*

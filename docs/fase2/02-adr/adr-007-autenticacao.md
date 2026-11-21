@@ -109,4 +109,4 @@ R4, R6.
 - **Retenção:** conta anônima sem sincronização por 12 meses é excluída com seus dados. Quem vinculou e-mail não é excluído por inatividade.
 - **Limites:** 5 tentativas de login por 15 minutos por conta e IP; criação de contas anônimas limitada por IP.
 - **Curador:** a conta de curador precisa ter e-mail e senha, porque o login é por `POST /v1/sessions/sign-in` (ADR-015). O seed ou comando define as duas coisas.
-- **Exclusão de conta (Lote 3 — 20/11/2026):** formalizada na Fase 1 em `RNF06`, `RN09` e `UC08-FA3` (Issue #31), alinhada à LGPD art. 18, VI e ao endpoint `DELETE /v1/account`.
+- **Exclusão de conta (Lote 3 — 20/11/2026):** formalizada na Fase 1 em `RNF06`, `RN09` e `UC08-FA3` (Issue #32), alinhada à LGPD art. 18, VI e ao endpoint `DELETE /v1/account`.

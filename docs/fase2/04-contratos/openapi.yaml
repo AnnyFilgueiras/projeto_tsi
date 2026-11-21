@@ -264,7 +264,7 @@ paths:
       operationId: deleteAccount
       summary: Exclui a conta e todos os dados do usuário
       description: 'Orquestra a exclusão em todos os módulos e remove as operações processadas. Formalizada na Fase 1
-        em RNF06, RN09 e UC08-FA3 (Issue #31 — Lote 3).
+        em RNF06, RN09 e UC08-FA3 (Issue #32 — Lote 3).
 
 
         Rastreio: LGPD (art. 18, VI); RNF06, RN09; ADR-007 item 9'

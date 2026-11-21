@@ -219,5 +219,5 @@ Rastreabilidade: cada caso de teste cita o UC, a RN ou o atributo (A##) de orige
 
 - [x] Lint formal do OpenAPI (`@redocly/cli lint` com 0 erros) e auditoria completa das 33 requisições Bruno + fixture JPEG.
 - [x] Renomeação aplicada em `diagrama-classes.md` v1.1, nas quatro sequências v1.1, no `openapi.yaml` v1.2.0-2.8 e na coleção Bruno (`ADR-015`, escopo B).
-- [x] Nota `Detalhamento (2.7)` aplicada no `ADR-002` (com confirmação de `R18` e `R19`) e Issue #31 (`issue-31-lote-3.md`, Lote 3, Fase 1) especificada e aplicada.
+- [x] Nota `Detalhamento (2.7)` aplicada no `ADR-002` (com confirmação de `R18` e `R19`) e Issue #32 (`retroalimentacao-fase1-lote-3.md`, Lote 3, Fase 1) especificada e aplicada.
 - *(Para a Fase 3 — `MVP-02`):* executar a prova prática do `eslint-plugin-boundaries` com import proibido intencional e confirmar `import/no-cycle` com o resolver TypeScript ao criar o monorepo.

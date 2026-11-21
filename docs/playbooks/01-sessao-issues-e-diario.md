@@ -14,7 +14,55 @@
 
 ---
 
-## 2. Template Canônico de GitHub Issue
+## 2. Governança de GitHub Issues, Labels, Milestones, Project e Tags
+
+### 2.1. Regra de Numeração Compartilhada (Issues × PRs)
+- No GitHub, **Issues e Pull Requests compartilham a mesma sequência numérica** (`#28` Issue → `#29` PR → `#30` Issue → `#31` PR → `#32` Issue).
+- **Regra obrigatória:** **nunca pré-reserve um número `#NN` do GitHub** na documentação antes de a issue existir de fato. Nos artefatos e no [`STATE.md`](../../STATE.md), use sempre o **ID estável da tarefa** (`US##`, `F2-##`, `Lote N`, `GOV-##`, `MVP-##`) e vincule `#NN` somente após a criação.
+
+### 2.2. Convenção de Títulos (sem prefixos de label)
+- **Idioma:** português (Brasil) ([ADR-015](../fase2/02-adr/adr-015-idioma-dos-identificadores.md)).
+- **Formato:** `<ID-ESTÁVEL> — <Ação clara e objetiva>` (nunca colocar `[docs]` ou `[bug]` no título; isso pertence às **Labels**).
+  - Exemplos:
+    - `US01 — Receber sugestões de pratos alinhadas ao perfil`
+    - `Lote 3 — Retroalimentação da Fase 2 para a Fase 1 (curadoria API, alérgenos e exclusão de conta)`
+    - `GOV-04 — Criar workflows/skills de geração e execução de Issues`
+    - `MVP-02 — Configurar monorepo, TypeScript e eslint-plugin-boundaries`
+
+### 2.3. Taxonomia Oficial de Labels (máx. 2–3 labels por Issue)
+Toda issue recebe **1 label de Tipo** + **1 label de Camada** (+ prioridade MoSCoW quando aplicável):
+
+| Grupo | Label | Cor | Descrição |
+|---|---|---|---|
+| **Prioridade (Fase 1)** | `must` | `#B60205` | Prioridade Must — MoSCoW |
+| **Prioridade (Fase 1)** | `should` | `#FBCA04` | Prioridade Should — MoSCoW |
+| **Prioridade (Fase 1)** | `could` | `#0E8A16` | Prioridade Could — MoSCoW |
+| **Etapa (Fase 1 — histórico)** | `elicitacao` | `#1D76DB` | Artefato da sub-etapa 1.1 — Elicitação |
+| **Etapa (Fase 1 — histórico)** | `analise` | `#5319E7` | Artefato da sub-etapa 1.2 — Análise |
+| **Etapa (Fase 1 — histórico)** | `validacao` | `#F9D0C4` | Artefato da sub-etapa 1.4 — Validação |
+| **Tipo de trabalho** | `arquitetura` | `#0052CC` | Decisões arquiteturais, ADRs, C4, contratos e revisões |
+| **Tipo de trabalho** | `retroalimentacao` | `#D93F0B` | Ajustes de retroalimentação entre fases (ex.: Fase 2 → Fase 1) |
+| **Tipo de trabalho** | `governanca` | `#5319E7` | Processos, playbooks, CI, automação e workflows/skills |
+| **Tipo de trabalho** | `implementacao` | `#0E8A16` | Desenvolvimento de funcionalidades e testes (Fase 3 / MVP) |
+| **Camada técnica** | `docs` | `#0075CA` | Documentação em `docs/`, `README.md`, `STATE.md` e `AGENTS.md` |
+| **Camada técnica** | `allergen-rules` | `#E99695` | Pacote compartilhado `packages/allergen-rules` |
+| **Camada técnica** | `api` | `#1D76DB` | Servidor Fastify em `apps/api` |
+| **Camada técnica** | `mobile` | `#006B75` | App React Native/Expo em `apps/mobile` |
+
+### 2.4. Milestones, GitHub Project e Tags de Baseline
+- **Milestones (um por marco de entrega):**
+  - `Fase 1 — Engenharia de Requisitos` *(fechado)*
+  - `Fase 2 — Projeto Arquitetural` *(fechar após merge do PR da Frente B)*
+  - `Fase 3 — MVP (Estágio 1)` *(primeiro deploy com leitura offline + escrita online)*
+  - `Fase 3 — Offline Completo (Estágio 2)` *(Outbox + Synchronizer + 100 ciclos)*
+- **GitHub Project:** manter **um único Project** para todo o repositório com visões separadas por fase (filtro `is:issue` para não misturar PRs nos cards; colunas na Fase 3: `Backlog | Em andamento | Em revisão | Concluído`).
+- **Vínculo Issue ↔ PR (evidência):** todo PR que resolve uma issue deve conter `Closes #<NN>` no corpo (ou `Refs #<NN>` para entrega parcial), criando rastreabilidade automática no GitHub.
+- **Tags de Baseline (na `main`, após merge):**
+  - Fase 1: `validated-backlog--v1.0` *(criada)*
+  - Fase 2: `architecture-design--v1.0` *(criar após merge do PR da Fase 2)*
+  - Fase 3: `mvp-stage1--v1.0` *(futuro primeiro deploy)*
+
+### 2.5. Template Canônico de GitHub Issue
 
 Toda Issue criada no repositório (manualmente ou via workflow/skill de criação de Issues) deve seguir estritamente esta estrutura em **português (Brasil)** ([ADR-015](../fase2/02-adr/adr-015-idioma-dos-identificadores.md)) para que qualquer agente implementador tenha contexto determinístico:
 
