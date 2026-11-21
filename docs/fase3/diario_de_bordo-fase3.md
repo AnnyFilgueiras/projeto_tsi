@@ -97,3 +97,45 @@
 ### Pendências para a próxima sessão
 - Integrar a branch `docs/mvp-02-state-and-log` na `development` e confirmar o 7º critério (CI remoto) na issue `#36` após a execução do workflow `.github/workflows/ci.yml` no PR #48 / `development`.
 - Iniciar **`MVP-03` (#37)** via `solve-issue` + `tdd` (`packages/allergen-rules` com 100% dos vetores JSON compartilhados — `A06`, `ADR-014`).
+
+---
+
+## [21/11/2026] — MVP-03 (#37): Pacote Compartilhado `allergen-rules` com TDD Estrito e Vetores JSON
+
+- **Papel da IA:** Engenheiro de Domínio/TDD e Revisor Independente de Código (Antigravity CLI), aplicando as skills `.agents/skills/solve-issue`, `.agents/skills/tdd`, `.agents/skills/code-comments` e `.agents/skills/code-review` (executada em subagente independente de leitura sobre `git diff development...HEAD`).
+- **Técnicas aplicadas:** pré-checagem documental com detecção de contradição antes do plano; TDD vertical estrito (`RED → GREEN → REFACTOR`) orientado a tabelas de vetores JSON compartilhados; execução da mesma suíte de vetores em dois runtimes distintos (Node/Vitest e Mobile/Jest); revisão de código independente focada em risco de segurança alimentar (`A06`), privacidade (`A05`/`A13`) e fronteiras (`S6`/`A7`).
+- **Prompts-chave / Contexto da sessão:**
+  1. Invocação de `/solve-issue --no-push #37`, seguida de limpeza de working tree e 7 branches locais já integradas na `development`.
+  2. Pedido da dupla de explicação comparativa das 3 opções de semântica para receitas `source_declared` diante de usuário com restrições, com aprovação explícita da **Opção A (*fail-closed* estrito)** e do plano em `.plans/feat-issue-37-allergen-rules.md` (seguindo sem cortes manuais).
+  3. Pergunta conceitual da dupla sobre o papel de `invariants` e dos arquivos `vectors/*.json` com exemplos práticos no Panelada, seguida de instrução para registrar o marco no `STATE.md` e no Diário, fazer push e abrir o PR para `development`.
+- **Insumos usados:** Issue `#37`, `AGENTS.md`, `STATE.md`, `docs/dev/{ARCHITECTURE,GLOSSARY,PRIVACY}.md`, `docs/playbooks/{01,02,03}-*.md`, `docs/fase1/1.2-analise/regras-de-negocio.md`, `docs/fase2/02-adr/adr-014-regra-alergenos-compartilhada.md`, `docs/fase2/03-modelagem/{diagrama-classes,sequencia-uc04,sequencia-uc12}.md`, `docs/fase2/04-contratos/openapi.yaml` e `.plans/feat-issue-37-allergen-rules.md`.
+- **Artefatos produzidos:**
+  - **`packages/allergen-rules`:** `package.json` (`1.0.0`, exports `./rules` e `./invariants`), `src/types.ts` (vocabulário fechado dos 19 códigos ANVISA RDC nº 727/2022 Anexo III + `lactose`, `isAllergenCode`, `AllergenState`, `CompatibilityResult`, `Classification`, tipos de `InvariantViolation`), `src/rules.ts` (`PACKAGE_VERSION`, `classifyRecipe`, `filterCandidates`, `isSubstituteAllowed`), `src/invariants.ts` (`INVARIANTS_PACKAGE_VERSION`, `checkInvariants`), `vectors/allergen-vectors.json` (33 vetores), `vectors/invariant-vectors.json` (16 vetores), `test/rules.test.ts` (38 testes) e `test/invariants.test.ts` (18 testes).
+  - **Provas multi-runtime:** `apps/api/test/unit/allergen-rules.test.ts` (resolução de `./rules` e `./invariants` em Node/Vitest) e `apps/mobile/test/allergen-rules.test.ts` (execução de 100% de `allergen-vectors.json` via `@panelada/allergen-rules/rules` no Jest/React Native, preservando `A7`).
+  - **Governança e Registro:** atualização dos 5/5 critérios de aceite na issue `#37`, atualização de `STATE.md` e desta entrada no Diário de Bordo.
+
+### Decisões tomadas
+1. **Opção A (*fail-closed* estrito) para `source_declared`:** quando o usuário declarou restrições alimentares, receitas e substitutos com `allergenState: 'source_declared'` sem interseção de alérgenos retornam `unconfirmed` (`reasons: ['source_declared_unconfirmed']`), são excluídos de `filterCandidates` e retornam `false` em `isSubstituteAllowed` (alinhado a `PRIVACY.md` §3.3, `RN10` e `sequencia-uc12.md:110`). Quando há interseção explícita com uma restrição, retornam `incompatible` com `matchedAllergens` em ordem canônica.
+2. **Versionamento da regra (`PACKAGE_VERSION = '1.0.0'`):** promovido do stub `0.1.0` (`MVP-02`) para `1.0.0` (sincronizado com `package.json`), seguindo `PRIVACY.md` §3.3 e `ADR-014`.
+3. **Imports relativos sem extensão `.js` em `packages/allergen-rules/src/`:** mantidos extensionless (compatível com `"moduleResolution": "Bundler"` nos 3 `tsconfig.json`, Vitest, `tsx`, Metro e `jest-expo`), evitando quebra do `moduleNameMapper` do Jest mobile.
+4. **Retorno de `targetId` em `InvariantViolation`:** incluído para rastreabilidade de auditoria interna de receita/ingrediente/substituto (`ADR-014` item 7), sem qualquer dado de usuário (`A05`/`A13`).
+
+### Artefatos alterados (retroalimentação)
+- `STATE.md`: conclusão de `MVP-03` (#37) na Frente D e handoff para `MVP-04` (#38 / `#39`).
+- `docs/fase3/diario_de_bordo-fase3.md`: registro consolidado do marco `MVP-03`.
+
+### Iterações relevantes (erros e retrabalho da IA)
+1. **Detecção antecipada de contradição documental (`source_declared`):** na leitura de pré-planejamento, a IA identificou divergência real entre `diagrama-classes.md:94`/`sequencia-uc04.md:57` (`compatible` com aviso) e `PRIVACY.md:40`/`RN10`/`sequencia-uc12.md:110` (bloqueio de `allergenState !== 'verified'`), escalando as 3 opções à dupla antes de escrever qualquer código.
+2. **Achados confirmados pelo `code-review` independente em subagente:**
+   - `classifyRecipe` propagava `recipe.allergenState` sem normalização quando recebia um estado corrompido em runtime (ex.: cache offline SQLite malformado) e lançava `TypeError` se `restrictions` ou `recipe.allergens` chegassem como `null`/`undefined`. Corrigido com normalização prévia para `'unverified'`, guardas `!Array.isArray(...)` *fail-closed* e simplificação de `isSubstituteAllowed` delegando diretamente a `classifyRecipe`, acompanhados de testes de regressão em TDD (RED → GREEN) e revalidação completa (`format:check`, `typecheck`, `lint`, 100/100 testes verdes no monorepo).
+
+### Divergências registradas (briefing/professor × artefatos)
+- **Divergência interna de documentação da Fase 2 sobre `source_declared`:** `docs/fase2/03-modelagem/diagrama-classes.md:94` e `docs/fase2/03-modelagem/sequencia-uc04.md:57` ainda descrevem `source_declared` como `compatible` com aviso, enquanto `docs/dev/PRIVACY.md:40`, `RN10` e `docs/fase2/03-modelagem/sequencia-uc12.md:110` exigem `verified` para usuários com restrições. Resolvida pela dupla em favor da **Opção A (*fail-closed* estrito)**; a retroalimentação documental na Fase 2 (`diagrama-classes.md`, `sequencia-uc04.md` e `Detalhamento` no `ADR-014`) fica registrada como pendência de PR separado de docs (`AGENTS.md` e `Playbook 02` §2 Caso A).
+
+### Riscos aceitos
+- `InvariantViolation` inclui `targetId?: string` para auditoria interna, enquanto `PublicationGateProblem.violations[]` em `openapi.yaml` define `additionalProperties: false`: ao ligar `checkInvariants` nas rotas HTTP de curadoria (`MVP-04B`/`MVP-04C`), a API deve projetar apenas `{ code, field, message }` na resposta 422.
+- Pontos de design classificados como duvidosos no `code-review` (precedência entre `invalid_allergen_code` e `allergen_match` em entradas mistas corrompidas; eventual re-export de `isAllergenState` em `./rules`; vetor extra explícito de `confirmedAllergenFree: true` em receitas não verificadas) permanecem documentados para ajuste futuro se necessário.
+
+### Pendências para a próxima sessão
+- **Retroalimentação documental (PR separado de docs na `development`):** alinhar `docs/fase2/03-modelagem/diagrama-classes.md:94`, `docs/fase2/03-modelagem/sequencia-uc04.md:57` e adicionar seção `## Detalhamento (MVP-03 — 21/11/2026)` em `docs/fase2/02-adr/adr-014-regra-alergenos-compartilhada.md` consolidando a Opção A (*fail-closed* estrito para `source_declared`).
+- Iniciar **`MVP-04` (#38 — Épico Onda 1A)** pela sub-issue **`#39` (`MVP-04A`)** via `solve-issue`.
