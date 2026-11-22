@@ -139,3 +139,54 @@
 ### Pendências para a próxima sessão
 - **Retroalimentação documental (PR separado de docs na `development`):** alinhar `docs/fase2/03-modelagem/diagrama-classes.md:94`, `docs/fase2/03-modelagem/sequencia-uc04.md:57` e adicionar seção `## Detalhamento (MVP-03 — 21/11/2026)` em `docs/fase2/02-adr/adr-014-regra-alergenos-compartilhada.md` consolidando a Opção A (*fail-closed* estrito para `source_declared`).
 - Iniciar **`MVP-04` (#38 — Épico Onda 1A)** pela sub-issue **`#39` (`MVP-04A`)** via `solve-issue`.
+
+
+---
+
+## [21/11/2026] — MVP-04A (#39): API — Conta Anônima, FieldCipher AES-256-GCM, Perfil Cifrado e Base de Sync Idempotente
+
+- **Papel da IA:** Engenheiro Backend/Segurança/TDD e Revisor Independente de Código (Antigravity CLI), aplicando as skills `.agents/skills/solve-issue`, `.agents/skills/tdd`, `.agents/skills/code-comments` e `.agents/skills/code-review` (em subagente independente de leitura).
+- **Técnicas aplicadas:** conferência prévia entre issue e artefatos aprovados da Fase 2 antes do código (alinhamento de `role` `user | curator`, semântica de lote em `POST /v1/sync/operations` e estratégia de Argon2id compatível com `node:22-alpine`); TDD vertical estrito (`RED → GREEN → REFACTOR`) para `FieldCipher`/`KeyProvider`, `SessionService`/`AccountService`/`Hs256TokenIssuer`, `SyncService`/`OperationApplierRegistry` e `ProfileApplier`/`ProfileService`; testes de integração HTTP (`fastify.inject()`) contra PostgreSQL 16 real (`panelada_test`) com inspeção SQL de ausência de texto claro (`A05`), exclusão física (`RN09`) e prova de redação de logs (`A13`); revisão independente focada em concorrência, segurança e fronteiras modulares (`S1`–`S8`).
+- **Prompts-chave / Contexto da sessão:**
+  1. Invocação de `/solve-issue --no-push #39`, com apresentação do plano somente leitura em `.plans/feat-issue-39-identity-field-cipher-profile.md` e 3 pontos de alinhamento.
+  2. Questionamentos técnicos da dupla sobre (a) por que `POST /v1/sync/operations` retorna HTTP `200` com `error.status: 422` (`key-reused`) por item em vez de HTTP `422` no lote inteiro (`ADR-008` item 10 — falha parcial sem bloquear a fila) e (b) impacto do `node:22-alpine` na escolha de `@noble/hashes` (Argon2id pure JS) vs. alternativas nativas e eventual issue futura de baixa prioridade para migrar para `node:24-alpine` + `node:crypto.argon2`.
+  3. Aprovação do plano com `--no-cut`, execução completa com `code-review` independente, pedido de explicação abstrata e classificação de gravidade (baixa/média/alta) dos achados duvidosos/fora de escopo, além de atualização de `STATE.md`, Diário de Bordo, commit e push.
+- **Insumos usados:** Issue `#39`, `AGENTS.md`, `STATE.md`, `docs/dev/{ARCHITECTURE,GLOSSARY,PRIVACY,DATABASE,TESTING}.md`, `docs/playbooks/03-qualidade-fronteiras-e-contratos.md`, `docs/fase1/1.2-analise/regras-de-negocio.md` (`RN09`), `docs/fase2/02-adr/adr-{006,007,008}-*.md`, `docs/fase2/03-modelagem/{diagrama-classes,padroes-de-projeto,sequencia-uc08}.md`, `docs/fase2/04-contratos/{openapi.yaml,glossario-identificadores.md,bruno/panelada-curadoria/00-session/*}` e `.plans/feat-issue-39-identity-field-cipher-profile.md`.
+- **Artefatos produzidos:**
+  - **Shared & Logs (`A13`, `S2`, `ADR-007`):** `apps/api/src/shared/{auth,password-hash,problem,operation-applier}.ts` e ampliação de `REDACTED_LOG_PATHS` em `apps/api/src/support/technical-log/logger.ts`.
+  - **Criptografia (`ADR-006`, `A05`, `S5`, `P02c`):** `apps/api/src/support/field-encryption/{index,key-provider,aes-gcm-field-cipher}.ts`.
+  - **Identidade (`ADR-007`, `ADR-008`, `T01`):** `apps/api/src/cross-cutting/identity/{index,internal/{schema,token-issuer,repository,session-service,account-service,rate-limiter,auth-guard,routes}}.ts`.
+  - **Perfil Cifrado (`RN09`, `A05`, `S1`/`S3`/`S5`/`S8`, `P06`):** `apps/api/src/modules/profile/{public/{index,profile-lifecycle,profile-query,restrictions-for-filter},internal/{schema,repository,service,applier,routes}}.ts`.
+  - **Sync Idempotente (`ADR-008`, `P01`, `P05`):** `apps/api/src/cross-cutting/sync/{index,internal/{schema,canonical-hash,applier-registry,repository,sync-service,routes}}.ts`.
+  - **Composição, Banco e Ambiente:** `apps/api/src/{app,main}.ts`, `apps/api/drizzle/0001_identity_profile_sync.sql` (+ `meta/`), `apps/api/src/db/seed.ts` (19 `profile_restriction_types` + conta curadora), `apps/api/package.json` (`@noble/hashes`), `pnpm-lock.yaml`, `.env.example`, `docker-compose.yml`, `docs/dev/ARCHITECTURE.md`.
+  - **Suítes de Teste:** `apps/api/test/unit/{field-cipher,session-service,sync-service,profile-applier,logger}.test.ts` (24 testes unitários na API) e `apps/api/test/integration/identity-profile-sync.integration.test.ts` (3 testes de integração contra `panelada_test`).
+
+### Decisões tomadas
+1. **Precedência do contrato aprovado sobre texto da issue (`ADR-015`):** adotado `role: 'user' | 'curator'` (no lugar de `cook | curator`) e resposta HTTP `200` por lote em `POST /v1/sync/operations` com `results[i].error = { type: 'key-reused', status: 422 }` (em vez de HTTP `422` global / `chave-reutilizada`), preservando falha parcial sem bloquear a fila (`ADR-008` item 10).
+2. **Argon2id portável em formato PHC (`@noble/hashes/argon2.js` — `argon2idAsync`):** implementa parâmetros OWASP (`19 MiB`, `t=2`, `p=1`) sem binário C++ em `node:22-alpine` e isolado em `src/shared/password-hash.ts` para permitir troca transparente futura por `node:crypto.argon2` nativo (quando o projeto migrar para `node:24-alpine`).
+3. **JWT HS256 atrás de `TokenIssuer`:** implementado via `node:crypto` (`createHmac` + `timingSafeEqual`, claims estritamente `sub`, `role`, `iat`, `exp`, 45 min), sem dependência adicional e 100% testável com `clock` injetável.
+4. **Desacoplamento de guarda JWT (`S2`):** interface `AuthGuard` colocada em `src/shared/auth.ts` e injetada via `src/app.ts` em `modules/profile` e `cross-cutting/sync`, mantendo 0 violações no `eslint-plugin-boundaries` sem alterar `eslint.config.mjs`.
+5. **Unicidade e exclusão física sem texto claro nem blind-index (`A05`, `RN09`):** `ProfileService` serializa escritas do usuário via `SELECT ... FOR UPDATE` em `profile_users`, decifra as ≤ 19 linhas da conta em memória e realiza upsert com novo IV (`register`) ou `DELETE` físico (`revoke`).
+
+### Artefatos alterados (retroalimentação)
+- `docs/dev/ARCHITECTURE.md`: registrada `apps/api/src/modules/profile/` como primeira fatia vertical de referência na API (`MVP-04A`).
+- `.env.example` e `docker-compose.yml`: adicionados defaults apenas de desenvolvimento para `JWT_SECRET`, `FIELD_ENCRYPTION_KEY`, `CURATOR_EMAIL` e `CURATOR_PASSWORD`.
+- `STATE.md` e `docs/fase3/diario_de_bordo-fase3.md`: fechamento de `MVP-04A` (#39) e handoff para `MVP-04B` (#40).
+
+### Iterações relevantes (erros e retrabalho da IA)
+1. **Genérico de logger no Fastify 5 (`tsc`):** `Fastify({ loggerInstance: logger })` inferia `TechnicalLogger` incompatível com `FastifyInstance` padrão nos plugins `registerRoutes`; corrigido parametrizando `Fastify<RawServerDefault, RawRequestDefaultExpression, RawReplyDefaultExpression, FastifyBaseLogger>`.
+2. **Achados críticos capturados pelo `code-review` independente em subagente (todos corrigidos e revalidados com testes de regressão):**
+   - **Concorrência na janela de 60 s do `SessionService.refresh`:** `graceCache.set` rodava após o `COMMIT` e `now` era capturado antes do `FOR UPDATE`, podendo causar revogação indevida da família sob duas requisições simultâneas; corrigido movendo `now` para após o lock e populando `graceCache` antes do `COMMIT` (com limpeza em `catch`).
+   - **Corrida `PG 23505` em `SyncService.processSingle`:** dois reenvios concorrentes de um mesmo `(accountId, opId)` inédito colidiam na PK e devolviam 500; corrigido capturando `23505` fora da transação abortada para resolver idempotência (`repeated: true` ou `422 key-reused`).
+   - **Isolamento de erro por item no lote sync:** `ProblemError(404)` em `ProfileService.registerRestriction` escapava de `ProfileApplier` e derrubava o lote inteiro; corrigido convertendo para `{ status: 'rejected', error }`.
+   - **Base64/Base64URL estrito (`A05`), rate limiter limitado e `JWT_SECRET` fail-fast:** adicionada validação estrita contra caracteres inválidos silenciosamente descartados por `Buffer.from(..., 'base64')`, teto de buckets + limite por IP em `sign-in`, e rejeição imediata de `JWT_SECRET` explícito curto ou fallback fora de `development`/`test`.
+
+### Divergências registradas (briefing/professor × artefatos)
+- Pequenas divergências textuais no corpo da issue `#39` (`cook` vs `user`, `chave-reutilizada` vs `key-reused`) resolvidas em favor do contrato OpenAPI v1.2.0-2.8 e `ADR-015`.
+
+### Riscos aceitos
+- Pontos classificados como duvidosos/baixa-média gravidade no `code-review` (índice/leitura de `sync_processed_operations.expires_at` após 90 dias; limite de tamanho do `graceCache` em memória ociosa; comportamento de código decifrado desconhecido em `getActiveRestrictionCodes` a endurecer ao ligar `MVP-04C`; mapeamento 4xx nativo do Fastify como `415`; e futura migração `node:22-alpine` → `node:24-alpine` com `node:crypto.argon2` nativo) permanecem documentados para acompanhamento nas próximas fatias.
+
+### Pendências para a próxima sessão
+- Integrar a branch `feat/issue-39-identity-field-cipher-profile` em `development` via PR (`Closes #39`).
+- Iniciar **`MVP-04B` (#40)** via `solve-issue` (módulos `catalog` + `importer`, `PublicationGate`, `PhotoStorage` e seed dos ~20 pratos verificados).
