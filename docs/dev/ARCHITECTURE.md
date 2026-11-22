@@ -101,10 +101,15 @@ apps/mobile/src/
 
 | Porta | Adaptador Local / Teste | Adaptador Produção (Cloud 4C) |
 |---|---|---|
-| `PhotoStorage` (`P02f`) | `LocalDiskPhotoStorage` (volume Docker) / fake | `SupabasePhotoStorage` (Object Storage, sem SDK BaaS no cliente) |
+| `PhotoStorage` (`P02f`) | `LocalDiskPhotoStorage` (volume Docker) / fake | `SupabasePhotoStorage` (Object Storage via REST HTTP, sem SDK BaaS no cliente) |
 | `AiProvider` (`P02b`) | `RecordedProvider` (zero custo em dev/testes) | `KimiProvider` (teto R$ 20, aprovação humana obrigatória) |
 | `KeyProvider` (`P02c`) | `FileKey` (dev) / fake | `SecretManagerKey` (variável/segredo fora do banco) |
 | `OperationEnqueuer` (`P04`) | `DirectOnlineOperationEnqueuer` (**Estágio 1**) | `OutboxOperationEnqueuer` + `Synchronizer` (**Estágio 2**) |
+
+### Padronização de Fotos do Catálogo (`ADR-012`, `MVP-04B`)
+- **Tipos de entrada aceitos na curadoria (`PUT /v1/curation/proposals/{id}/photo`):** `image/webp`, `image/jpeg` e `image/png` (validados por *magic bytes*; outros formatos retornam `415`).
+- **Teto de upload:** `5 MiB` (acima retorna `413`).
+- **Normalização de saída:** sempre **`image/webp`** (qualidade `82`, rotação EXIF aplicada e metadados EXIF removidos), dimensão máxima **`1024 × 1024` px** (`fit: 'inside'`, `withoutEnlargement: true`, preservando a proporção original sem cortes — proporção recomendada na curadoria: `4:3` ou `16:9` para cards mobile), nomeada por **SHA-256** do conteúdo e servida com `Cache-Control: public, max-age=31536000, immutable`.
 
 ### Estratégia de Containers (`docker-compose.yml`)
 - **No Docker (`docker-compose.yml`):** PostgreSQL (`postgres:16-alpine`, `TZ=UTC`, com bancos separados `panelada_dev` e `panelada_test` inicializado em `infra/postgres/init/01-create-test-db.sql`) + API Fastify escutando em `0.0.0.0:3000` (`GET /v1/health`) + volume `panelada_photos`. Ninguém instala Postgres no host. Detalhes operacionais em [`DATABASE.md`](./DATABASE.md).

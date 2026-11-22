@@ -3,6 +3,9 @@
 .pending-issues/
 .claude/skills
 
+# Local runtime data (e.g. host-side photo storage fallback)
+.data/
+
 # Node / Monorepo
 node_modules/
 dist/

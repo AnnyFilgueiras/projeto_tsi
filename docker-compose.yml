@@ -39,6 +39,7 @@ services:
       FIELD_ENCRYPTION_KEY_VERSION: ${FIELD_ENCRYPTION_KEY_VERSION:-1}
       CURATOR_EMAIL: ${CURATOR_EMAIL:-curador@panelada.local}
       CURATOR_PASSWORD: ${CURATOR_PASSWORD:-panelada-curador-dev}
+      PHOTO_STORAGE_DRIVER: ${PHOTO_STORAGE_DRIVER:-local}
       PHOTO_STORAGE_DIR: /data/photos
       LOG_LEVEL: ${LOG_LEVEL:-info}
     ports:
