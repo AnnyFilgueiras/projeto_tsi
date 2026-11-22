@@ -34,6 +34,11 @@ services:
       HOST: 0.0.0.0
       PORT: 3000
       DATABASE_URL: postgresql://${POSTGRES_USER:-panelada}:${POSTGRES_PASSWORD:-panelada}@postgres:5432/${POSTGRES_DB:-panelada_dev}
+      JWT_SECRET: ${JWT_SECRET:-panelada-dev-only-jwt-secret-change-in-prod-0001}
+      FIELD_ENCRYPTION_KEY: ${FIELD_ENCRYPTION_KEY:-QkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkI=}
+      FIELD_ENCRYPTION_KEY_VERSION: ${FIELD_ENCRYPTION_KEY_VERSION:-1}
+      CURATOR_EMAIL: ${CURATOR_EMAIL:-curador@panelada.local}
+      CURATOR_PASSWORD: ${CURATOR_PASSWORD:-panelada-curador-dev}
       PHOTO_STORAGE_DIR: /data/photos
       LOG_LEVEL: ${LOG_LEVEL:-info}
     ports:
