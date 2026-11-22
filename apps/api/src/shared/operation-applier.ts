@@ -1,3 +1,4 @@
+import type { ProblemDetails } from './problem.js';
 import type { Tx } from './tx.js';
 
 /**
@@ -22,7 +23,7 @@ export interface OperationEnvelope<
 > {
   readonly opId: string;
   readonly type: TType;
-  readonly occurredAt: string;
+  readonly createdAt: string;
   readonly payload: TPayload;
 }
 
@@ -39,12 +40,7 @@ export interface OperationApplyUnlocks {
 export interface OperationApplyResult {
   readonly status: 'confirmed' | 'rejected';
   readonly unlocks?: OperationApplyUnlocks;
-  readonly problem?: {
-    readonly type: string;
-    readonly title: string;
-    readonly status: number;
-    readonly detail?: string;
-  };
+  readonly error?: ProblemDetails;
 }
 
 /**

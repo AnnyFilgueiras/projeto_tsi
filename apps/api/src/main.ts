@@ -10,6 +10,7 @@ const logger = createTechnicalLogger();
 const dbClient = createDatabaseClient(databaseUrl, logger);
 const app = buildApp({
   checkDatabaseHealth: dbClient.checkHealth,
+  dbClient,
   logger,
 });
 
