@@ -9,6 +9,22 @@ export interface ProblemFieldError {
   readonly message: string;
 }
 
+export type PublicationGateViolationCode =
+  | 'missing_field'
+  | 'source_missing'
+  | 'photo_without_attribution'
+  | 'allergen_state_missing'
+  | 'invariant_verified_without_allergens'
+  | 'invariant_allergen_union'
+  | 'invariant_verified_substitute_without_allergens'
+  | 'invariant_milk_without_lactose';
+
+export interface PublicationGateViolation {
+  readonly code: PublicationGateViolationCode;
+  readonly field?: string;
+  readonly message: string;
+}
+
 export interface ProblemDetails {
   readonly type: string;
   readonly title: string;
@@ -16,6 +32,7 @@ export interface ProblemDetails {
   readonly detail?: string;
   readonly instance?: string;
   readonly errors?: readonly ProblemFieldError[];
+  readonly violations?: readonly PublicationGateViolation[];
   readonly manualFlowAvailable?: boolean;
 }
 
@@ -121,6 +138,52 @@ export function keyReusedProblem(
     title: 'Chave de idempotência reutilizada com conteúdo diferente',
     status: 422,
     detail,
+  };
+}
+
+export function inProgressProblem(
+  detail = 'Requisição com a mesma Idempotency-Key ainda está em processamento.',
+): ProblemDetails {
+  return {
+    type: 'in-progress',
+    title: 'Requisição em processamento',
+    status: 409,
+    detail,
+  };
+}
+
+export function payloadTooLargeProblem(
+  detail = 'O conteúdo enviado excede o tamanho máximo permitido.',
+): ProblemDetails {
+  return {
+    type: 'payload-too-large',
+    title: 'Conteúdo acima do limite permitido',
+    status: 413,
+    detail,
+  };
+}
+
+export function unsupportedMediaTypeProblem(
+  detail = 'Formato de mídia ou imagem não suportado.',
+): ProblemDetails {
+  return {
+    type: 'unsupported-media-type',
+    title: 'Tipo de mídia não suportado',
+    status: 415,
+    detail,
+  };
+}
+
+export function publicationGateProblem(
+  violations: readonly PublicationGateViolation[],
+  detail = 'A proposta não atende aos requisitos mínimos do portão de publicação.',
+): ProblemDetails {
+  return {
+    type: 'publication-gate',
+    title: 'Publicação bloqueada pelo portão de qualidade',
+    status: 422,
+    detail,
+    violations,
   };
 }
 
