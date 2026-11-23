@@ -190,3 +190,57 @@
 ### Pendências para a próxima sessão
 - Integrar a branch `feat/issue-39-identity-field-cipher-profile` em `development` via PR (`Closes #39`).
 - Iniciar **`MVP-04B` (#40)** via `solve-issue` (módulos `catalog` + `importer`, `PublicationGate`, `PhotoStorage` e seed dos ~20 pratos verificados).
+
+---
+
+## [22/11/2026] — MVP-04B (#40): API — Catálogo, Curadoria Manual, Fotos WebP, Error Handler 4xx e Seed Inicial
+
+- **Papel da IA:** Engenheiro Backend/Catálogo/TDD e Revisor Independente de Código (Antigravity CLI), aplicando as skills `.agents/skills/solve-issue`, `.agents/skills/tdd`, `.agents/skills/code-comments` e `.agents/skills/code-review` (em subagente independente de leitura sobre o diff completo).
+- **Técnicas aplicadas:** validação prévia de pré-requisitos e número de issue antes de criar branch; planejamento somente leitura em `.plans/feat-issue-40-catalog-curation-photos-seed.md` com aprovação explícita; TDD vertical (`RED → GREEN → REFACTOR`) para `PublicationGate` cumulativo (`R02`), `PhotoProcessor` + suíte de contrato compartilhada de `PhotoStorage` (`InMemoryPhotoStorage`, `LocalDiskPhotoStorage` e `SupabasePhotoStorage` via mock de `fetch`) e `setErrorHandler` global para erros 4xx nativos do Fastify (`415`/`413`, `A13`); testes de integração HTTP (`fastify.inject()`) em PostgreSQL 16 (`panelada_test`) cobrindo o fluxo completo da coleção Bruno manual + idempotência `runSeed` 2×; revisão de código independente focada em segurança alimentar (`A06`/`RN22`), concorrência de pool/idempotência e convenção bilíngue (`ADR-015`).
+- **Prompts-chave / Contexto da sessão:**
+  1. Invocação inicial com `#49` (identificada pela IA como PR #49 já merged, corrigida pela dupla para `/solve-issue #40 --no-cut --no-push`).
+  2. Aprovação do plano acompanhada da observação crítica da dupla de que o projeto ainda não tinha padronização explícita dos tipos de entrada (`webp`, `jpeg`, `png`), dimensões máximas e proporção das imagens, incorporada ao `PhotoProcessor` e documentada em `docs/dev/ARCHITECTURE.md`.
+  3. Solicitação explícita de atualização do `STATE.md` e do Diário de Bordo com commit local na branch.
+- **Insumos usados:** Issue `#40`, `AGENTS.md`, `STATE.md`, `docs/dev/{ARCHITECTURE,GLOSSARY,DATABASE,TESTING}.md`, `docs/fase2/02-adr/adr-012-fotos.md`, `docs/fase2/03-modelagem/{diagrama-classes,framework-gamificacao}.md`, `docs/fase2/04-contratos/{openapi.yaml,bruno/panelada-curadoria/**/*}`, `eslint.config.mjs`, `packages/allergen-rules/src/{types,invariants}.ts` e `.plans/feat-issue-40-catalog-curation-photos-seed.md`.
+- **Artefatos produzidos:**
+  - **Módulo `catalog` (`S1`, `S4`, `S8`, `P02f`, `P06`, `T01`):** `apps/api/src/modules/catalog/{internal/{schema,repository,photo-storage,routes},public/{index,catalog-read,catalog-write,photo-storage}}.ts` (9 tabelas `catalog_*`, fachadas `CatalogReadPort`/`CatalogWritePort`, adaptadores `LocalDiskPhotoStorage`, `SupabasePhotoStorage` e `InMemoryPhotoStorage`, rotas `GET /v1/photos/{hash}` e `GET /v1/recipes/{dishId}`).
+  - **Módulo `importer` (`R02`, `RN17`, `RN18`, `RN21`, `RN22`, `P05`):** `apps/api/src/modules/importer/{internal/{schema,publication-gate,photo-processor,repository,service,routes},public/index}.ts` (2 tabelas `importer_*`, `PublicationGate` cumulativo integrado a `@panelada/allergen-rules/invariants`, `PhotoProcessor` com `@fastify/multipart` + `sharp`, e todas as rotas manuais `/v1/curation/*` protegidas por `curator`).
+  - **Módulo `progress` (tabela de badges para o seed `S8`):** `apps/api/src/modules/progress/internal/schema.ts` (`progress_badge_definitions`).
+  - **Shared, Composição, Migration e Seed:** `apps/api/src/shared/{canonical-hash,problem}.ts`, `apps/api/src/cross-cutting/sync/internal/canonical-hash.ts`, `apps/api/src/app.ts` (`@fastify/multipart` + `setErrorHandler` 4xx RFC 9457), `apps/api/drizzle/0002_catalog_importer_badges.sql` (+ `meta/`), `apps/api/src/db/{seed,seed-catalog-data}.ts` (10 culinárias nos 5 continentes, 20 pratos verificados com cadeia de evolução de 3 níveis, 7 substituições seguras/inseguras, 11 badges `RN03 a–h` e fotos WebP), `apps/api/package.json` (`@fastify/multipart`, `sharp`), `pnpm-lock.yaml`, `.env.example`, `.gitignore`, `docker-compose.yml` e correção da fixture `docs/fase2/04-contratos/bruno/panelada-curadoria/fixtures/dish-example.jpg`.
+  - **Suítes de Teste:** `apps/api/test/unit/{publication-gate,photo-storage,error-handler}.test.ts` (41 testes unitários totais na API) e `apps/api/test/integration/catalog-curation.integration.test.ts` (3/3 suítes de integração, 5/5 testes verdes em `panelada_test`).
+
+### Decisões tomadas
+1. **Padronização de imagens do catálogo (`ADR-012`):** definidos tipos de entrada aceitos por *magic bytes* (`image/webp`, `image/jpeg`, `image/png`; outros → `415`), teto de upload de `5 MiB` (`413`), saída sempre normalizada em **`image/webp`** (qualidade `82`, rotação EXIF aplicada e metadados/EXIF removidos), dimensão máxima **`1024 × 1024` px** (`fit: 'inside'`, `withoutEnlargement: true`, preservando a proporção original sem cortes — recomendada `4:3` ou `16:9` na curadoria), hash SHA-256 e `Cache-Control: public, max-age=31536000, immutable`.
+2. **Idempotência própria na curadoria (`S2`, `P05`):** mantida a tabela `importer_idempotency_keys` no módulo `importer` com lock transacional `pg_advisory_xact_lock` por `(accountId, idempotencyKey)` e helper puro `src/shared/canonical-hash.ts` (preservando formato `{ type, payload }` retrocompatível com `sync_processed_operations`), evitando importar `cross-cutting/sync`.
+3. **Exposição de `GET /v1/recipes/{dishId}` já em `MVP-04B`:** incluída no módulo `catalog` (sem restrições de usuário, apenas pratos `approved`) para validar de ponta a ponta o passo final da coleção Bruno (`05-query/02-published-recipe.bru`) e o isolamento de `CatalogRead`.
+4. **Alinhamento ao contrato OpenAPI (`ADR-015`):** mantidos papel `'user' | 'curator'` (em vez de `cook` no texto da issue) e continente `'america'` (em vez de `americas` em trechos de prosa do `framework-gamificacao.md`).
+
+### Artefatos alterados (retroalimentação)
+- `docs/dev/ARCHITECTURE.md`: documentada a padronização oficial de tipos, dimensões, teto de tamanho e normalização WebP das fotos do catálogo (`ADR-012`, `MVP-04B`).
+- `docs/fase2/04-contratos/bruno/panelada-curadoria/fixtures/dish-example.jpg`: substituída fixture JPEG corrompida da Fase 2.7 (sem marcador SOS) por JPEG válido 64×48 px.
+- `.env.example`, `docker-compose.yml` e `.gitignore`: adicionados `PHOTO_STORAGE_DRIVER` / variáveis opcionais do Supabase Storage e `.data/` no `.gitignore` para fallback local no host.
+- `STATE.md` e `docs/fase3/diario_de_bordo-fase3.md`: fechamento de `MVP-04B` (#40) e handoff para `MVP-04C` (#41).
+
+### Iterações relevantes (erros e retrabalho da IA)
+1. **Colisão de snapshots Drizzle (`0000_snapshot.json` × `0001_snapshot.json`):** `drizzle-kit generate` falhou inicialmente porque `0000_snapshot.json` tinha `id === prevId === 00000000-...`, colidindo com `0001_snapshot.json`; corrigido normalizando `0000_snapshot.json.id` e `0001_snapshot.json.prevId` para `00000000-0000-4000-8000-000000000000` sem alterar nenhuma migration SQL anterior.
+2. **Fixture JPEG corrompida no Bruno (`dish-example.jpg`):** o teste TDD do `PhotoProcessor` revelou que a fixture da Fase 2.7 falhava no `libvips`/`sharp` por faltar marcador SOS (`0xFF 0xDA`); a fixture foi regenerada e o teste passou a validar a conversão real JPEG → WebP.
+3. **8 achados confirmados capturados pelo `code-review` independente em subagente (todos corrigidos e revalidados):**
+   - **`A06`/`RN22` em `registerSubstitution`:** bloqueio explícito (`422`) caso `substituteAllergens` omita qualquer alérgeno já declarado no ingrediente canônico substituto (evitando *fail-open*).
+   - **Prevenção de *pool starvation* / deadlock em transações:** `CatalogReadPort` passou a aceitar `tx?: Tx` opcional, repassado por `CurationService` em leituras dentro de `withTransaction`.
+   - **Corrida na idempotência concorrente (`P05`):** adicionado `pg_advisory_xact_lock` por `(accountId, idempotencyKey)` antes da checagem/execução para evitar falso `422 business-rule` em índices `UNIQUE`.
+   - **Preservação de `allergens_updated_at` em `attachPhoto`:** criado método focado `CatalogWritePort.updatePublishedDishPhoto` em vez de reescrever a receita publicada inteira.
+   - **Consistência em `markVerified`:** bloqueio (`422`) quando `confirmedAllergenFree: true` é enviado em receita com alérgenos declarados.
+   - **Profundidade total em reparentamento (`RN18`):** `getBaseDishChain` passou a calcular também `descendantDepth` (via `WITH RECURSIVE` em `catalog_dishes`) validando `depthFromRoot + 1 + descendantDepth <= 10`.
+   - **Convenção bilíngue (`ADR-015`):** chaves TypeScript de `seed-catalog-data.ts` renomeadas de português para inglês, preservando textos de UI e os 19 códigos ANVISA em PT-BR.
+   - **Retrocompatibilidade do hash canônico no `sync`:** restaurado formato `{ type, payload }` em `shared/canonical-hash.ts` para não invalidar hashes existentes em `sync_processed_operations`.
+
+### Divergências registradas (briefing/professor × artefatos)
+- Divergências textuais menores (`cook` na issue `#40` vs. `user` no `openapi.yaml`; `americas` em prosa do `framework-gamificacao.md` vs. `america` no `openapi.yaml`) mantidas estritamente alinhadas ao contrato OpenAPI v1.2.0-2.8 (`ADR-015`).
+
+### Riscos aceitos
+- Achados fora de escopo/duvidosos registrados no `code-review` para acompanhamento em fatias futuras: (a) `runSeed` grava fotos WebP apenas em disco local (na etapa Cloud 4C `MVP-04G` será necessário sincronizar as fotos do seed com o bucket Supabase); (b) pratos do seed são inseridos direto em `catalog_*` sem criar linhas espelho em `importer_proposals`; (c) `extractValidationErrors` (`MVP-04A`) ainda repassa mensagem padrão do Zod em `invalid_enum_value` (sanitização `A13` em follow-up); (d) validar em `MVP-04G` se a versão alvo do Supabase Storage retorna HTTP `404` (ou `400` legado) e avaliar `AbortSignal.timeout` no `SupabasePhotoStorage`; (e) confirmar build Docker do `sharp` em `node:22-alpine`.
+- Caso a dupla deseje formalizar a padronização de fotos também como `## Detalhamento` no `ADR-012`, deve entrar em PR separado de docs conforme `AGENTS.md`.
+
+### Pendências para a próxima sessão
+- Enviar `feat/issue-40-catalog-curation-photos-seed` ao remoto, validar `docker compose up -d --build` com `sharp` e integrar PR → `development` (`Closes #40`).
+- Iniciar **`MVP-04C` (#41)** via `solve-issue` (sugestões filtradas por restrições/alérgenos, avaliações via sync, `UnlockRules` pura com vetores JSON compartilhados, coleção e badges).
