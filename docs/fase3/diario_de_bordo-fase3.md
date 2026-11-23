@@ -244,3 +244,55 @@
 ### Pendências para a próxima sessão
 - Enviar `feat/issue-40-catalog-curation-photos-seed` ao remoto, validar `docker compose up -d --build` com `sharp` e integrar PR → `development` (`Closes #40`).
 - Iniciar **`MVP-04C` (#41)** via `solve-issue` (sugestões filtradas por restrições/alérgenos, avaliações via sync, `UnlockRules` pura com vetores JSON compartilhados, coleção e badges).
+
+
+---
+
+## [23/11/2026] — MVP-04C (#41): API — Sugestões Filtradas, Receitas com Substituições, Avaliações, Gamificação 6D/Octalysis e Download-Set
+
+- **Papel da IA:** Engenheiro Backend/Gamificação/TDD e Revisor Independente de Código (Antigravity CLI), aplicando as skills `.agents/skills/solve-issue`, `.agents/skills/tdd`, `.agents/skills/codebase-design`, `.agents/skills/code-comments` e `.agents/skills/code-review` (em subagente independente de leitura sobre o diff completo).
+- **Técnicas aplicadas:** planejamento somente leitura em `.plans/feat-issue-41-suggestions-progress-sync.md` com revisão crítica de Clean Code / Deep Modules antes de iniciar código; TDD vertical (`RED → GREEN → REFACTOR`) para endurecimento *fail-closed* de `ProfileService.getActiveRestrictionCodes` (`A06`/D3), função pura `UnlockRules` sobre suíte compartilhada de 13 vetores JSON (`tests/vectors/unlock-vectors.json` cobrindo `RN03 a–h`), `RatingApplier` (`P01`, `T01`) e `SuggestionService` (`S3`, `RN08`, `RN10`, `RN11`, `A13 × A05`); prova prática de fronteiras `eslint-plugin-boundaries` com imports proibidos intencionais revertidos; testes de integração HTTP (`fastify.inject()`) em PostgreSQL 16 (`panelada_test`) + `db:reset` 2×; revisão independente de código focada em determinismo HTTP 304, isolamento multi-tenant, concorrência de transições e segurança de grafos de evolução.
+- **Prompts-chave / Contexto da sessão:**
+  1. Invocação de `/solve-issue #41 --no-cut --no-push` acompanhada da solicitação de criar um arquivo em `docs/` descrevendo a arquitetura implementada e a responsabilidade de cada arquivo.
+  2. Questionamento da dupla sobre aderência do plano aos padrões de Clean Code — levando a 3 refinamentos antes da codificação (eliminação de `service.ts` raso em `progress`, extração DRY de `shared/http-idempotency.ts` preservando `S8` e isolamento de helpers puros de ranking/versão/índice).
+  3. Solicitação explícita de atualização de `STATE.md` e Diário de Bordo com commit e `git push` da branch.
+- **Insumos usados:** Issue `#41`, `AGENTS.md`, `STATE.md`, `docs/dev/{ARCHITECTURE,GLOSSARY,PRIVACY,DATABASE,TESTING}.md`, `docs/fase1/1.2-analise/regras-de-negocio.md`, `docs/fase2/02-adr/{adr-014,adr-016}.md`, `docs/fase2/03-modelagem/{diagrama-classes,padroes-de-projeto,framework-gamificacao,sequencia-uc10}.md`, `docs/fase2/04-contratos/openapi.yaml`, `eslint.config.mjs` e `.plans/feat-issue-41-suggestions-progress-sync.md`.
+- **Artefatos produzidos:**
+  - **Vetores compartilhados (`ADR-016`, `A12`):** `tests/vectors/unlock-vectors.json` (13 cenários cobrindo todos os 8 tipos de marco `RN03 a–h`, `RN02`, `RN04`, `RN06`, guarda anti-ciclo e sincronização fora de ordem `A08`, reutilizável pelo `UnlockCalculator` mobile em `MVP-04F`).
+  - **Módulo `progress` (`S1`, `S2`, `S8`, `P01`, `P06`, `R03`, `T01`):** `apps/api/src/modules/progress/{public/{index,progress-public},internal/{schema,unlock-rules,repository,rating-applier}}.ts` (`progress_ratings` com PK composta `(user_id, id)`, `progress_evolution_unlocks`, `progress_badge_awards`, `calculateUnlocks` pura com `switch` exaustivo/`assertNever` e `RatingApplier`).
+  - **Módulo `routine` — ciclo `Suggestion` (`RN11`, `P05`, `P06`, `S8`):** `apps/api/src/modules/routine/{public/{index,routine-public},internal/{schema,repository,service}}.ts` (`routine_suggestions` com índice único parcial de candidata + `routine_idempotency_keys` + `FOR UPDATE` nas transições `approve`/`discard`).
+  - **Cross-cutting `suggestion-search` e `sync` (`S3`, `A05`, `A06`, `A13`):** `apps/api/src/cross-cutting/suggestion-search/{index,internal/{service,routes}}.ts` (`GET /v1/suggestions`, `POST /v1/suggestions/:suggestionId/approve|discard`) e `apps/api/src/cross-cutting/sync/{index,internal/{routes,download-set-builder}}.ts` (`GET /v1/sync/download-set` `200`/`304`).
+  - **Endurecimento `profile`, paridade `catalog`, shared e migration:** `apps/api/src/modules/profile/{public/{index,profile-query,restrictions-for-owner-sync},internal/{repository,service}}.ts`, `apps/api/src/modules/catalog/{public/catalog-read,internal/repository}.ts`, `apps/api/src/shared/http-idempotency.ts`, `apps/api/src/app.ts`, `apps/api/drizzle/0003_progress_and_suggestions.sql` (+ `meta/`) e `eslint.config.mjs`.
+  - **Contrato OpenAPI e documentação de arquitetura:** `docs/fase2/04-contratos/openapi.yaml`, `apps/api/src/shared/openapi.generated.ts` e `docs/fase3/arquitetura-implementacao-mvp-04c.md`.
+  - **Suítes de Teste:** `apps/api/test/unit/{profile-applier,unlock-rules,rating-applier,suggestion-service}.test.ts` (62 testes unitários na API; 153 no monorepo) e `apps/api/test/integration/suggestions-progress-sync.integration.test.ts` (4/4 suítes / 6/6 testes verdes em `panelada_test`).
+
+### Decisões tomadas
+1. **Isolamento dedicado de restrições para `DownloadSet` (`A05`, `S3`):** criada a porta estreita `modules/profile/public/restrictions-for-owner-sync.ts` permitida no `eslint.config.mjs` exclusivamente para `cross-cutting/sync` e `app.ts`, mantendo `S3` (`restrictions-for-filter.ts` → apenas `suggestion-search`) intacta e bloqueando acesso por módulos de domínio ou `identity`.
+2. **Dono do ciclo `Suggestion` em `modules/routine` (`diagrama-classes.md` §3/§5 + `S2`):** `routine_suggestions` e `routine_idempotency_keys` residem em `modules/routine` atrás de `RoutinePublicPort` para que `suggestion-search` e `sync` (`DownloadSetBuilder`) leiam candidatas sem acoplamento proibido entre componentes transversais, mantendo `/v1/plans` e lista de compras fora de escopo para `MVP-05`.
+3. **Refinamentos de Clean Code / Deep Modules:** eliminado `service.ts` pass-through em `modules/progress`; extraído `apps/api/src/shared/http-idempotency.ts` (DRY sem quebrar `S8`); derivação de `sessionKey` por SHA-256 irreversível do token Bearer normalizado sem alterar os claims mínimos do JWT (`ADR-007`).
+4. **Sincronização do contrato OpenAPI:** adicionados `X-Allergen-Package-Version` + `minPackageVersion` em `GET /v1/suggestions`, `candidates` em `DownloadSet` e `confirmedAllergenFree` em `Recipe`/`IngredientSubstitution` (garantindo paridade online/offline em `classifyRecipe` e `isSubstituteAllowed` para pratos/substitutos verificados sem alérgenos).
+
+### Artefatos alterados (retroalimentação)
+- `docs/fase2/04-contratos/openapi.yaml` e `apps/api/src/shared/openapi.generated.ts`: sincronizados com os requisitos verificados da Issue `#41` e paridade de `confirmedAllergenFree` (`0` erros no `@redocly/cli lint`).
+- `eslint.config.mjs`: adicionada fronteira `api-profile-restrictions-owner-sync-port`, validada com prova de falha intencional revertida.
+- `docs/fase3/arquitetura-implementacao-mvp-04c.md`: documentação completa da arquitetura da implementação `MVP-04C` e responsabilidade de cada arquivo.
+- `STATE.md` e `docs/fase3/diario_de_bordo-fase3.md`: fechamento de `MVP-04C` (#41) e handoff para `MVP-04D` (#42).
+
+### Iterações relevantes (erros e retrabalho da IA)
+1. **Regressão capturada em `session-service.test.ts` ao adicionar `issuedAt` em `AuthenticatedPrincipal`:** a tentativa inicial de expor `iat` em `AuthenticatedPrincipal` quebrou asserções de igualdade estrita de `TokenIssuer.verify()` (`ADR-007`); revertida integralmente em favor do hash SHA-256 do token Bearer em `suggestion-search/internal/routes.ts` (zero alterações em `identity` e melhor isolamento de rotação no mesmo segundo).
+2. **Assinatura de `hashCanonicalPayload`:** `typecheck` sinalizou chamada com 1 argumento em `http-idempotency.ts` e `download-set-builder.ts`; ajustada para o contrato canônico de 2 argumentos `(type, payload)` preservado da `MVP-04B`.
+3. **4 achados confirmados capturados pelo `code-review` independente em subagente (todos corrigidos e revalidados):**
+   - **`C1` — Determinismo do hash `304` em `DownloadSet`:** adicionada ordenação canônica por `restrictionType` em `getDecryptedRestrictionsWithConsent` (e `ORDER BY created_at, id` em `listRestrictions`) + desempate `asc(catalogDishes.id)` em `listApprovedDishes`.
+   - **`C2` — Colisão cross-tenant de `opId` em `progress_ratings`:** alterada PK de `progress_ratings` para composta `(user_id, id)` + `ON CONFLICT DO NOTHING` em `insertRating` (regeração limpa da migration `0003`) e adicionado teste de integração comprovando envio do mesmo `opId` por duas contas distintas sem HTTP 500.
+   - **`C3` — Corrida em `approve`/`discard` e duplicação de candidatas entre sessões:** adicionado `.for('update')` em `findSuggestionByIdForUser(tx)`, verificação de candidata existente por `(userId, dishId)` em `approveSuggestion` e índice único parcial `routine_suggestions_user_dish_candidate_uidx` (`WHERE status = 'candidate'`).
+   - **`C4` — Inflação de profundidade em ciclos de `baseDishId` em `UnlockRules`:** `computeDishDepth` passou a retornar `0` ao detectar ciclo (`visited.has(currentId)`) e `VEC-GAM-12` foi endurecido para verificar também `minLevel: 2`.
+
+### Divergências registradas (briefing/professor × artefatos)
+- Mantida a convenção `'america'` (singular) de `openapi.yaml` e `catalog_cuisines` em `UnlockRules` e `tests/vectors/unlock-vectors.json` (em vez de `'americas'` em prosa do `framework-gamificacao.md`).
+
+### Riscos aceitos
+- Achados fora de escopo registrados no `code-review` para acompanhamento em ondas futuras: (a) cascata de exclusão de conta (`DELETE /v1/account`) na Onda 1B deverá invocar `progressModule.publicPort.deleteData` e `routineModule.publicPort.deleteData` (ambos já implementados e obrigatórios nas portas públicas); (b) `usePantry`, `missingIngredients` e `missingUtensils` permanecem vazios até `MVP-05` (Onda 1B); (c) migração futura do `importer` para o helper `shared/http-idempotency.ts` em PR separado de refactor.
+
+### Pendências para a próxima sessão
+- Abrir e integrar PR de `feat/issue-41-suggestions-progress-sync` → `development` (`Closes #41`).
+- Iniciar **`MVP-04D` (#42)** via `solve-issue` (fundação do app mobile: SQLCipher, `HttpClient`, auth/sessão anônima e `OperationEnqueuer` Estágio 1).

@@ -8,6 +8,7 @@ import {
   unauthenticatedProblem,
   validationProblem,
 } from '../../../shared/problem.js';
+import type { DownloadSetBuilder } from './download-set-builder.js';
 import type { SyncService } from './sync-service.js';
 
 export const MAX_SYNC_BATCH_SIZE = 100;
@@ -27,8 +28,13 @@ const syncBodyEnvelopeSchema = z
   })
   .strict();
 
+const downloadSetQuerySchema = z.object({
+  version: z.string().min(1).max(128).optional(),
+});
+
 export interface SyncRoutesDeps {
   readonly syncService: SyncService;
+  readonly downloadSetBuilder?: DownloadSetBuilder;
   readonly authGuard: AuthGuard;
 }
 
@@ -84,4 +90,39 @@ export function registerSyncRoutes(app: FastifyInstance, deps: SyncRoutesDeps): 
       return reply.code(200).send(response);
     },
   );
+
+  if (deps.downloadSetBuilder) {
+    const downloadSetBuilder = deps.downloadSetBuilder;
+
+    app.get(
+      '/v1/sync/download-set',
+      {
+        preHandler: deps.authGuard.requireAuth,
+      },
+      async (request, reply) => {
+        const principal = request.auth;
+        if (!principal) {
+          throw new ProblemError(unauthenticatedProblem());
+        }
+
+        const parsedQuery = downloadSetQuerySchema.safeParse(request.query);
+        if (!parsedQuery.success) {
+          throw new ProblemError(
+            validationProblem('Parâmetro `version` inválido para o conjunto baixado.'),
+          );
+        }
+
+        const outcome = await downloadSetBuilder.build(
+          principal.accountId,
+          parsedQuery.data.version,
+        );
+
+        if (outcome.notModified) {
+          return reply.code(304).send();
+        }
+
+        return reply.code(200).send(outcome.data);
+      },
+    );
+  }
 }

@@ -1,0 +1,710 @@
+[
+  {
+    "id": "VEC-GAM-01-first-dish-and-adaptation",
+    "description": "RN01, RN02, RN03(a,b,f,h), RN04: first rating of a base dish with non-empty changes unlocks its direct evolution and awards dish, cuisine, total_dishes(1), and adaptation_count(1) badges",
+    "input": {
+      "rating": {
+        "id": "01950000-0000-7000-8000-000000000001",
+        "dishId": "00000000-0000-4000-8000-000000000101",
+        "score": 9,
+        "changes": "Troquei manteiga por azeite extra virgem"
+      },
+      "index": {
+        "dishes": [
+          {
+            "id": "00000000-0000-4000-8000-000000000101",
+            "cuisineId": "00000000-0000-4000-8000-000000000201",
+            "baseDishId": null
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000102",
+            "cuisineId": "00000000-0000-4000-8000-000000000201",
+            "baseDishId": "00000000-0000-4000-8000-000000000101"
+          }
+        ],
+        "cuisines": [
+          {
+            "id": "00000000-0000-4000-8000-000000000201",
+            "continents": ["europe"]
+          }
+        ],
+        "badgeDefinitions": [
+          {
+            "id": "00000000-0000-4000-8000-000000000301",
+            "milestone": { "type": "dish", "dishId": "00000000-0000-4000-8000-000000000101" }
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000302",
+            "milestone": { "type": "cuisine", "cuisineId": "00000000-0000-4000-8000-000000000201" }
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000303",
+            "milestone": { "type": "total_dishes", "quantity": 1 }
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000304",
+            "milestone": { "type": "adaptation_count", "quantity": 1 }
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000305",
+            "milestone": { "type": "total_dishes", "quantity": 2 }
+          }
+        ]
+      },
+      "state": {
+        "completedDishIds": [],
+        "adaptationRatingIds": [],
+        "unlockedEvolutionDishIds": [],
+        "awardedBadgeIds": []
+      }
+    },
+    "expectedOutput": {
+      "newEvolutionUnlocks": ["00000000-0000-4000-8000-000000000102"],
+      "newBadgeAwards": [
+        "00000000-0000-4000-8000-000000000301",
+        "00000000-0000-4000-8000-000000000302",
+        "00000000-0000-4000-8000-000000000303",
+        "00000000-0000-4000-8000-000000000304"
+      ]
+    }
+  },
+  {
+    "id": "VEC-GAM-02-multiple-direct-evolutions-not-grandchildren",
+    "description": "RN02, RN18: rating a base dish unlocks all direct child evolutions without unlocking level-3 grandchildren",
+    "input": {
+      "rating": {
+        "id": "01950000-0000-7000-8000-000000000002",
+        "dishId": "00000000-0000-4000-8000-000000000101",
+        "score": 8
+      },
+      "index": {
+        "dishes": [
+          {
+            "id": "00000000-0000-4000-8000-000000000101",
+            "cuisineId": "00000000-0000-4000-8000-000000000201",
+            "baseDishId": null
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000102",
+            "cuisineId": "00000000-0000-4000-8000-000000000201",
+            "baseDishId": "00000000-0000-4000-8000-000000000101"
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000103",
+            "cuisineId": "00000000-0000-4000-8000-000000000201",
+            "baseDishId": "00000000-0000-4000-8000-000000000101"
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000104",
+            "cuisineId": "00000000-0000-4000-8000-000000000201",
+            "baseDishId": "00000000-0000-4000-8000-000000000102"
+          }
+        ],
+        "cuisines": [
+          {
+            "id": "00000000-0000-4000-8000-000000000201",
+            "continents": ["europe"]
+          }
+        ],
+        "badgeDefinitions": []
+      },
+      "state": {
+        "completedDishIds": [],
+        "adaptationRatingIds": [],
+        "unlockedEvolutionDishIds": [],
+        "awardedBadgeIds": []
+      }
+    },
+    "expectedOutput": {
+      "newEvolutionUnlocks": [
+        "00000000-0000-4000-8000-000000000102",
+        "00000000-0000-4000-8000-000000000103"
+      ],
+      "newBadgeAwards": []
+    }
+  },
+  {
+    "id": "VEC-GAM-03-repeat-dish-no-duplicate-unlock-or-total-increment",
+    "description": "RN02, RN04, RN06: repeating an already completed base dish does not re-unlock evolutions, does not re-award badges, and does not increment total_dishes",
+    "input": {
+      "rating": {
+        "id": "01950000-0000-7000-8000-000000000003",
+        "dishId": "00000000-0000-4000-8000-000000000101",
+        "score": 10,
+        "changes": null
+      },
+      "index": {
+        "dishes": [
+          {
+            "id": "00000000-0000-4000-8000-000000000101",
+            "cuisineId": "00000000-0000-4000-8000-000000000201",
+            "baseDishId": null
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000102",
+            "cuisineId": "00000000-0000-4000-8000-000000000201",
+            "baseDishId": "00000000-0000-4000-8000-000000000101"
+          }
+        ],
+        "cuisines": [
+          {
+            "id": "00000000-0000-4000-8000-000000000201",
+            "continents": ["europe"]
+          }
+        ],
+        "badgeDefinitions": [
+          {
+            "id": "00000000-0000-4000-8000-000000000301",
+            "milestone": { "type": "total_dishes", "quantity": 1 }
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000302",
+            "milestone": { "type": "total_dishes", "quantity": 2 }
+          }
+        ]
+      },
+      "state": {
+        "completedDishIds": ["00000000-0000-4000-8000-000000000101"],
+        "adaptationRatingIds": [],
+        "unlockedEvolutionDishIds": ["00000000-0000-4000-8000-000000000102"],
+        "awardedBadgeIds": ["00000000-0000-4000-8000-000000000301"]
+      }
+    },
+    "expectedOutput": {
+      "newEvolutionUnlocks": [],
+      "newBadgeAwards": []
+    }
+  },
+  {
+    "id": "VEC-GAM-04-repeat-dish-counts-distinct-adaptation-ratings",
+    "description": "RN03(h), RN06: repeating the same dish with a new rating id and non-empty changes increments adaptation_count across preparations",
+    "input": {
+      "rating": {
+        "id": "01950000-0000-7000-8000-000000000004",
+        "dishId": "00000000-0000-4000-8000-000000000101",
+        "score": 8,
+        "changes": "Adicionei raspas de limão siciliano"
+      },
+      "index": {
+        "dishes": [
+          {
+            "id": "00000000-0000-4000-8000-000000000101",
+            "cuisineId": "00000000-0000-4000-8000-000000000201",
+            "baseDishId": null
+          }
+        ],
+        "cuisines": [
+          {
+            "id": "00000000-0000-4000-8000-000000000201",
+            "continents": ["europe"]
+          }
+        ],
+        "badgeDefinitions": [
+          {
+            "id": "00000000-0000-4000-8000-000000000301",
+            "milestone": { "type": "adaptation_count", "quantity": 1 }
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000302",
+            "milestone": { "type": "adaptation_count", "quantity": 2 }
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000303",
+            "milestone": { "type": "total_dishes", "quantity": 2 }
+          }
+        ]
+      },
+      "state": {
+        "completedDishIds": ["00000000-0000-4000-8000-000000000101"],
+        "adaptationRatingIds": ["01950000-0000-7000-8000-000000000001"],
+        "unlockedEvolutionDishIds": [],
+        "awardedBadgeIds": ["00000000-0000-4000-8000-000000000301"]
+      }
+    },
+    "expectedOutput": {
+      "newEvolutionUnlocks": [],
+      "newBadgeAwards": ["00000000-0000-4000-8000-000000000302"]
+    }
+  },
+  {
+    "id": "VEC-GAM-05-whitespace-only-changes-do-not-count",
+    "description": "RN03(h): whitespace-only changes string is ignored and does not unlock adaptation_count",
+    "input": {
+      "rating": {
+        "id": "01950000-0000-7000-8000-000000000005",
+        "dishId": "00000000-0000-4000-8000-000000000101",
+        "score": 7,
+        "changes": "   \n\t  "
+      },
+      "index": {
+        "dishes": [
+          {
+            "id": "00000000-0000-4000-8000-000000000101",
+            "cuisineId": "00000000-0000-4000-8000-000000000201",
+            "baseDishId": null
+          }
+        ],
+        "cuisines": [
+          {
+            "id": "00000000-0000-4000-8000-000000000201",
+            "continents": ["europe"]
+          }
+        ],
+        "badgeDefinitions": [
+          {
+            "id": "00000000-0000-4000-8000-000000000301",
+            "milestone": { "type": "adaptation_count", "quantity": 1 }
+          }
+        ]
+      },
+      "state": {
+        "completedDishIds": [],
+        "adaptationRatingIds": [],
+        "unlockedEvolutionDishIds": [],
+        "awardedBadgeIds": []
+      }
+    },
+    "expectedOutput": {
+      "newEvolutionUnlocks": [],
+      "newBadgeAwards": []
+    }
+  },
+  {
+    "id": "VEC-GAM-06-n-cuisines-distinct-threshold",
+    "description": "RN03(c): completing dishes across 3 distinct cuisines unlocks n_cuisines(3) but not n_cuisines(4)",
+    "input": {
+      "rating": {
+        "id": "01950000-0000-7000-8000-000000000006",
+        "dishId": "00000000-0000-4000-8000-000000000103",
+        "score": 8
+      },
+      "index": {
+        "dishes": [
+          {
+            "id": "00000000-0000-4000-8000-000000000101",
+            "cuisineId": "00000000-0000-4000-8000-000000000201",
+            "baseDishId": null
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000102",
+            "cuisineId": "00000000-0000-4000-8000-000000000202",
+            "baseDishId": null
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000103",
+            "cuisineId": "00000000-0000-4000-8000-000000000203",
+            "baseDishId": null
+          }
+        ],
+        "cuisines": [
+          { "id": "00000000-0000-4000-8000-000000000201", "continents": ["europe"] },
+          { "id": "00000000-0000-4000-8000-000000000202", "continents": ["asia"] },
+          { "id": "00000000-0000-4000-8000-000000000203", "continents": ["america"] }
+        ],
+        "badgeDefinitions": [
+          {
+            "id": "00000000-0000-4000-8000-000000000301",
+            "milestone": { "type": "n_cuisines", "quantity": 3 }
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000302",
+            "milestone": { "type": "n_cuisines", "quantity": 4 }
+          }
+        ]
+      },
+      "state": {
+        "completedDishIds": [
+          "00000000-0000-4000-8000-000000000101",
+          "00000000-0000-4000-8000-000000000102"
+        ],
+        "adaptationRatingIds": [],
+        "unlockedEvolutionDishIds": [],
+        "awardedBadgeIds": []
+      }
+    },
+    "expectedOutput": {
+      "newEvolutionUnlocks": [],
+      "newBadgeAwards": ["00000000-0000-4000-8000-000000000301"]
+    }
+  },
+  {
+    "id": "VEC-GAM-07-all-continents-covered-including-transcontinental",
+    "description": "RN03(d): union of continents across completed cuisines covering america, africa, europe, asia, and oceania unlocks all_continents",
+    "input": {
+      "rating": {
+        "id": "01950000-0000-7000-8000-000000000007",
+        "dishId": "00000000-0000-4000-8000-000000000104",
+        "score": 9
+      },
+      "index": {
+        "dishes": [
+          {
+            "id": "00000000-0000-4000-8000-000000000101",
+            "cuisineId": "00000000-0000-4000-8000-000000000201",
+            "baseDishId": null
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000102",
+            "cuisineId": "00000000-0000-4000-8000-000000000202",
+            "baseDishId": null
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000103",
+            "cuisineId": "00000000-0000-4000-8000-000000000203",
+            "baseDishId": null
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000104",
+            "cuisineId": "00000000-0000-4000-8000-000000000204",
+            "baseDishId": null
+          }
+        ],
+        "cuisines": [
+          { "id": "00000000-0000-4000-8000-000000000201", "continents": ["america"] },
+          { "id": "00000000-0000-4000-8000-000000000202", "continents": ["africa"] },
+          { "id": "00000000-0000-4000-8000-000000000203", "continents": ["europe", "asia"] },
+          { "id": "00000000-0000-4000-8000-000000000204", "continents": ["oceania"] }
+        ],
+        "badgeDefinitions": [
+          {
+            "id": "00000000-0000-4000-8000-000000000301",
+            "milestone": { "type": "all_continents" }
+          }
+        ]
+      },
+      "state": {
+        "completedDishIds": [
+          "00000000-0000-4000-8000-000000000101",
+          "00000000-0000-4000-8000-000000000102",
+          "00000000-0000-4000-8000-000000000103"
+        ],
+        "adaptationRatingIds": [],
+        "unlockedEvolutionDishIds": [],
+        "awardedBadgeIds": []
+      }
+    },
+    "expectedOutput": {
+      "newEvolutionUnlocks": [],
+      "newBadgeAwards": ["00000000-0000-4000-8000-000000000301"]
+    }
+  },
+  {
+    "id": "VEC-GAM-08-all-continents-incomplete",
+    "description": "RN03(d): covering 4 of 5 continents does not unlock all_continents",
+    "input": {
+      "rating": {
+        "id": "01950000-0000-7000-8000-000000000008",
+        "dishId": "00000000-0000-4000-8000-000000000103",
+        "score": 9
+      },
+      "index": {
+        "dishes": [
+          {
+            "id": "00000000-0000-4000-8000-000000000101",
+            "cuisineId": "00000000-0000-4000-8000-000000000201",
+            "baseDishId": null
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000102",
+            "cuisineId": "00000000-0000-4000-8000-000000000202",
+            "baseDishId": null
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000103",
+            "cuisineId": "00000000-0000-4000-8000-000000000203",
+            "baseDishId": null
+          }
+        ],
+        "cuisines": [
+          { "id": "00000000-0000-4000-8000-000000000201", "continents": ["america"] },
+          { "id": "00000000-0000-4000-8000-000000000202", "continents": ["africa"] },
+          { "id": "00000000-0000-4000-8000-000000000203", "continents": ["europe", "asia"] }
+        ],
+        "badgeDefinitions": [
+          {
+            "id": "00000000-0000-4000-8000-000000000301",
+            "milestone": { "type": "all_continents" }
+          }
+        ]
+      },
+      "state": {
+        "completedDishIds": [
+          "00000000-0000-4000-8000-000000000101",
+          "00000000-0000-4000-8000-000000000102"
+        ],
+        "adaptationRatingIds": [],
+        "unlockedEvolutionDishIds": [],
+        "awardedBadgeIds": []
+      }
+    },
+    "expectedOutput": {
+      "newEvolutionUnlocks": [],
+      "newBadgeAwards": []
+    }
+  },
+  {
+    "id": "VEC-GAM-09-thematic-set-complete-vs-partial",
+    "description": "RN03(e): completing every cuisine in a thematic set unlocks that set badge while incomplete sets stay locked",
+    "input": {
+      "rating": {
+        "id": "01950000-0000-7000-8000-000000000009",
+        "dishId": "00000000-0000-4000-8000-000000000103",
+        "score": 8
+      },
+      "index": {
+        "dishes": [
+          {
+            "id": "00000000-0000-4000-8000-000000000101",
+            "cuisineId": "00000000-0000-4000-8000-000000000201",
+            "baseDishId": null
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000102",
+            "cuisineId": "00000000-0000-4000-8000-000000000202",
+            "baseDishId": null
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000103",
+            "cuisineId": "00000000-0000-4000-8000-000000000203",
+            "baseDishId": null
+          }
+        ],
+        "cuisines": [
+          { "id": "00000000-0000-4000-8000-000000000201", "continents": ["europe"] },
+          { "id": "00000000-0000-4000-8000-000000000202", "continents": ["europe"] },
+          { "id": "00000000-0000-4000-8000-000000000203", "continents": ["asia", "africa"] },
+          { "id": "00000000-0000-4000-8000-000000000204", "continents": ["asia"] }
+        ],
+        "badgeDefinitions": [
+          {
+            "id": "00000000-0000-4000-8000-000000000301",
+            "milestone": {
+              "type": "set",
+              "cuisineIds": [
+                "00000000-0000-4000-8000-000000000201",
+                "00000000-0000-4000-8000-000000000202",
+                "00000000-0000-4000-8000-000000000203"
+              ]
+            }
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000302",
+            "milestone": {
+              "type": "set",
+              "cuisineIds": [
+                "00000000-0000-4000-8000-000000000201",
+                "00000000-0000-4000-8000-000000000204"
+              ]
+            }
+          }
+        ]
+      },
+      "state": {
+        "completedDishIds": [
+          "00000000-0000-4000-8000-000000000101",
+          "00000000-0000-4000-8000-000000000102"
+        ],
+        "adaptationRatingIds": [],
+        "unlockedEvolutionDishIds": [],
+        "awardedBadgeIds": []
+      }
+    },
+    "expectedOutput": {
+      "newEvolutionUnlocks": [],
+      "newBadgeAwards": ["00000000-0000-4000-8000-000000000301"]
+    }
+  },
+  {
+    "id": "VEC-GAM-10-evolution-level-2-unlocks-level-3-dish-and-level-2-badge",
+    "description": "RN02, RN03(g), RN18: rating a level-2 evolution dish unlocks its level-3 child and awards evolution_level(2) but not evolution_level(3)",
+    "input": {
+      "rating": {
+        "id": "01950000-0000-7000-8000-000000000010",
+        "dishId": "00000000-0000-4000-8000-000000000102",
+        "score": 9
+      },
+      "index": {
+        "dishes": [
+          {
+            "id": "00000000-0000-4000-8000-000000000101",
+            "cuisineId": "00000000-0000-4000-8000-000000000201",
+            "baseDishId": null
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000102",
+            "cuisineId": "00000000-0000-4000-8000-000000000201",
+            "baseDishId": "00000000-0000-4000-8000-000000000101"
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000103",
+            "cuisineId": "00000000-0000-4000-8000-000000000201",
+            "baseDishId": "00000000-0000-4000-8000-000000000102"
+          }
+        ],
+        "cuisines": [{ "id": "00000000-0000-4000-8000-000000000201", "continents": ["europe"] }],
+        "badgeDefinitions": [
+          {
+            "id": "00000000-0000-4000-8000-000000000301",
+            "milestone": { "type": "evolution_level", "minLevel": 2 }
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000302",
+            "milestone": { "type": "evolution_level", "minLevel": 3 }
+          }
+        ]
+      },
+      "state": {
+        "completedDishIds": ["00000000-0000-4000-8000-000000000101"],
+        "adaptationRatingIds": [],
+        "unlockedEvolutionDishIds": ["00000000-0000-4000-8000-000000000102"],
+        "awardedBadgeIds": []
+      }
+    },
+    "expectedOutput": {
+      "newEvolutionUnlocks": ["00000000-0000-4000-8000-000000000103"],
+      "newBadgeAwards": ["00000000-0000-4000-8000-000000000301"]
+    }
+  },
+  {
+    "id": "VEC-GAM-11-evolution-level-3-out-of-order-sync",
+    "description": "A08, RN03(g), RN18: rating a level-3 dish even before prior levels are present awards evolution_level(2) and evolution_level(3)",
+    "input": {
+      "rating": {
+        "id": "01950000-0000-7000-8000-000000000011",
+        "dishId": "00000000-0000-4000-8000-000000000103",
+        "score": 10
+      },
+      "index": {
+        "dishes": [
+          {
+            "id": "00000000-0000-4000-8000-000000000101",
+            "cuisineId": "00000000-0000-4000-8000-000000000201",
+            "baseDishId": null
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000102",
+            "cuisineId": "00000000-0000-4000-8000-000000000201",
+            "baseDishId": "00000000-0000-4000-8000-000000000101"
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000103",
+            "cuisineId": "00000000-0000-4000-8000-000000000201",
+            "baseDishId": "00000000-0000-4000-8000-000000000102"
+          }
+        ],
+        "cuisines": [{ "id": "00000000-0000-4000-8000-000000000201", "continents": ["europe"] }],
+        "badgeDefinitions": [
+          {
+            "id": "00000000-0000-4000-8000-000000000301",
+            "milestone": { "type": "evolution_level", "minLevel": 2 }
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000302",
+            "milestone": { "type": "evolution_level", "minLevel": 3 }
+          }
+        ]
+      },
+      "state": {
+        "completedDishIds": [],
+        "adaptationRatingIds": [],
+        "unlockedEvolutionDishIds": [],
+        "awardedBadgeIds": []
+      }
+    },
+    "expectedOutput": {
+      "newEvolutionUnlocks": [],
+      "newBadgeAwards": [
+        "00000000-0000-4000-8000-000000000301",
+        "00000000-0000-4000-8000-000000000302"
+      ]
+    }
+  },
+  {
+    "id": "VEC-GAM-12-cycle-and-dangling-base-guard",
+    "description": "RN18, ADR-016: cyclic baseDishId pointers and missing ancestors terminate safely without infinite loops or inflated depth",
+    "input": {
+      "rating": {
+        "id": "01950000-0000-7000-8000-000000000012",
+        "dishId": "00000000-0000-4000-8000-000000000101",
+        "score": 8
+      },
+      "index": {
+        "dishes": [
+          {
+            "id": "00000000-0000-4000-8000-000000000101",
+            "cuisineId": "00000000-0000-4000-8000-000000000201",
+            "baseDishId": "00000000-0000-4000-8000-000000000102"
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000102",
+            "cuisineId": "00000000-0000-4000-8000-000000000201",
+            "baseDishId": "00000000-0000-4000-8000-000000000101"
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000103",
+            "cuisineId": "00000000-0000-4000-8000-000000000201",
+            "baseDishId": "00000000-0000-4000-8000-000000000999"
+          }
+        ],
+        "cuisines": [{ "id": "00000000-0000-4000-8000-000000000201", "continents": ["europe"] }],
+        "badgeDefinitions": [
+          {
+            "id": "00000000-0000-4000-8000-000000000301",
+            "milestone": { "type": "evolution_level", "minLevel": 2 }
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000302",
+            "milestone": { "type": "evolution_level", "minLevel": 3 }
+          }
+        ]
+      },
+      "state": {
+        "completedDishIds": ["00000000-0000-4000-8000-000000000103"],
+        "adaptationRatingIds": [],
+        "unlockedEvolutionDishIds": [],
+        "awardedBadgeIds": []
+      }
+    },
+    "expectedOutput": {
+      "newEvolutionUnlocks": ["00000000-0000-4000-8000-000000000102"],
+      "newBadgeAwards": []
+    }
+  },
+  {
+    "id": "VEC-GAM-13-unknown-dish-in-index-safe-noop",
+    "description": "RN01, RN04: rating a dishId absent from catalog index does not throw or award catalog-backed badges",
+    "input": {
+      "rating": {
+        "id": "01950000-0000-7000-8000-000000000013",
+        "dishId": "00000000-0000-4000-8000-000000000999",
+        "score": 6
+      },
+      "index": {
+        "dishes": [
+          {
+            "id": "00000000-0000-4000-8000-000000000101",
+            "cuisineId": "00000000-0000-4000-8000-000000000201",
+            "baseDishId": null
+          }
+        ],
+        "cuisines": [{ "id": "00000000-0000-4000-8000-000000000201", "continents": ["europe"] }],
+        "badgeDefinitions": [
+          {
+            "id": "00000000-0000-4000-8000-000000000301",
+            "milestone": { "type": "total_dishes", "quantity": 1 }
+          }
+        ]
+      },
+      "state": {
+        "completedDishIds": [],
+        "adaptationRatingIds": [],
+        "unlockedEvolutionDishIds": [],
+        "awardedBadgeIds": []
+      }
+    },
+    "expectedOutput": {
+      "newEvolutionUnlocks": [],
+      "newBadgeAwards": []
+    }
+  }
+]

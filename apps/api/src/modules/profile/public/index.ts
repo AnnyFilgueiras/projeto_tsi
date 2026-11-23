@@ -10,6 +10,7 @@ import { ProfileService } from '../internal/service.js';
 import type { ProfileLifecyclePort } from './profile-lifecycle.js';
 import type { ProfileQueryPort } from './profile-query.js';
 import type { RestrictionsForFilterPort } from './restrictions-for-filter.js';
+import type { RestrictionsForOwnerSyncPort } from './restrictions-for-owner-sync.js';
 
 export interface CreateProfileModuleDeps {
   readonly db: NodePgDatabase;
@@ -22,6 +23,7 @@ export interface ProfileModule {
   readonly lifecycle: ProfileLifecyclePort;
   readonly query: ProfileQueryPort;
   readonly restrictionsForFilter: RestrictionsForFilterPort;
+  readonly restrictionsForOwnerSync: RestrictionsForOwnerSyncPort;
   readonly appliers: readonly OperationApplier[];
   registerRoutes(app: FastifyInstance): void;
 }
@@ -41,6 +43,7 @@ export function createProfileModule(deps: CreateProfileModuleDeps): ProfileModul
     lifecycle: service,
     query: service,
     restrictionsForFilter: service,
+    restrictionsForOwnerSync: service,
     appliers: createProfileAppliers(service),
     registerRoutes(app: FastifyInstance): void {
       registerProfileRoutes(app, {

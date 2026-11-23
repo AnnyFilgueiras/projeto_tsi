@@ -124,6 +124,7 @@ export class DrizzleCatalogRepository implements CatalogReadPort, CatalogWritePo
       steps: recipe.steps,
       allergens: recipe.allergens,
       allergenState: recipe.allergenState,
+      confirmedAllergenFree: recipe.confirmedAllergenFree,
       allergensUpdatedAt: recipe.allergensUpdatedAt.toISOString(),
       sourceName: recipe.sourceName,
       sourceUrl: recipe.sourceUrl,
@@ -135,14 +136,16 @@ export class DrizzleCatalogRepository implements CatalogReadPort, CatalogWritePo
         substituteName: item.substituteName,
         substituteAllergens: item.substituteAllergens,
         allergenState: item.allergenState,
+        confirmedAllergenFree: item.confirmedAllergenFree,
         origin: item.origin,
       })),
       updatedAt: recipe.updatedAt.toISOString(),
     };
   }
 
-  async listApprovedDishes(): Promise<readonly CatalogDishSummaryDto[]> {
-    const rows = await this.db
+  async listApprovedDishes(tx?: Tx): Promise<readonly CatalogDishSummaryDto[]> {
+    const executor = tx ? asDb(tx) : this.db;
+    const rows = await executor
       .select({
         dishId: catalogDishes.id,
         name: catalogDishes.name,
@@ -154,12 +157,13 @@ export class DrizzleCatalogRepository implements CatalogReadPort, CatalogWritePo
         allergenState: catalogRecipes.allergenState,
         confirmedAllergenFree: catalogRecipes.confirmedAllergenFree,
         photoHash: catalogDishPhotos.fileHash,
+        updatedAt: catalogRecipes.updatedAt,
       })
       .from(catalogDishes)
       .innerJoin(catalogRecipes, eq(catalogDishes.id, catalogRecipes.dishId))
       .leftJoin(catalogDishPhotos, eq(catalogDishes.id, catalogDishPhotos.dishId))
       .where(eq(catalogDishes.publicationState, 'approved'))
-      .orderBy(asc(catalogDishes.name));
+      .orderBy(asc(catalogDishes.name), asc(catalogDishes.id));
 
     return rows.map((row) => ({
       dishId: row.dishId,
@@ -172,6 +176,7 @@ export class DrizzleCatalogRepository implements CatalogReadPort, CatalogWritePo
       allergenState: row.allergenState,
       confirmedAllergenFree: row.confirmedAllergenFree,
       photoHash: row.photoHash ?? null,
+      updatedAt: row.updatedAt.toISOString(),
     }));
   }
 
@@ -354,13 +359,14 @@ export class DrizzleCatalogRepository implements CatalogReadPort, CatalogWritePo
     return { exists: true, depthFromRoot: depth, hasCycle: false, descendantDepth };
   }
 
-  async getCatalogIndex(): Promise<{
+  async getCatalogIndex(tx?: Tx): Promise<{
     readonly dishes: readonly CatalogDishSummaryDto[];
     readonly cuisines: readonly CuisineDto[];
   }> {
+    const executor = tx ? asDb(tx) : this.db;
     const [dishes, cuisineRows] = await Promise.all([
-      this.listApprovedDishes(),
-      this.db.select().from(catalogCuisines).orderBy(asc(catalogCuisines.name)),
+      this.listApprovedDishes(tx),
+      executor.select().from(catalogCuisines).orderBy(asc(catalogCuisines.name)),
     ]);
 
     return {

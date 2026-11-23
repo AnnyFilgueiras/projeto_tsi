@@ -544,6 +544,7 @@ paths:
 
         Rastreio: UC01, UC03; RN08, RN10, RN11; A01, A06'
       parameters:
+      - $ref: '#/components/parameters/PackageVersion'
       - name: limit
         in: query
         schema:
@@ -570,9 +571,12 @@ paths:
                       $ref: '#/components/schemas/SuggestionItem'
                   noResult:
                     type: boolean
+                  minPackageVersion:
+                    type: string
                 required:
                 - suggestions
                 - noResult
+                - minPackageVersion
                 additionalProperties: false
         '400':
           $ref: '#/components/responses/InvalidRequest'
@@ -2308,6 +2312,9 @@ components:
             $ref: '#/components/schemas/AllergenCode'
         allergenState:
           $ref: '#/components/schemas/AllergenState'
+        confirmedAllergenFree:
+          type: boolean
+          description: Confirmação explícita do curador quando `substituteAllergens` é vazia (RN08, RN22, ADR-014).
         origin:
           type: string
           enum:
@@ -2414,6 +2421,9 @@ components:
             $ref: '#/components/schemas/AllergenCode'
         allergenState:
           $ref: '#/components/schemas/AllergenState'
+        confirmedAllergenFree:
+          type: boolean
+          description: Confirmação explícita do curador quando `allergens` é vazia (RN08, ADR-014).
         allergensUpdatedAt:
           type: string
           format: date-time
@@ -2745,6 +2755,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RoutinePlan'
+        candidates:
+          type: array
+          items:
+            $ref: '#/components/schemas/SuggestionItem'
+          description: Sugestões aprovadas pelo usuário (status `candidate`, RN11).
         ratings:
           type: array
           items:
@@ -2856,6 +2871,7 @@ components:
       - pantry
       - utensils
       - plans
+      - candidates
       - ratings
       - badgeAwards
       - evolutionUnlocks

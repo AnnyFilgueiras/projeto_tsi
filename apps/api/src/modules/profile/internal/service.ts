@@ -4,8 +4,17 @@ import { notFoundProblem, ProblemError } from '../../../shared/problem.js';
 import type { Tx } from '../../../shared/tx.js';
 import type { FieldCipher } from '../../../support/field-encryption/index.js';
 import type { ProfileLifecyclePort } from '../public/profile-lifecycle.js';
-import type { ProfilePantryAndUtensils, ProfileQueryPort } from '../public/profile-query.js';
+import type {
+  ProfilePantryAndUtensils,
+  ProfileQueryPort,
+  ProfileSummaryDto,
+  RestrictionTypeDto,
+} from '../public/profile-query.js';
 import type { RestrictionsForFilterPort } from '../public/restrictions-for-filter.js';
+import type {
+  DecryptedRestrictionWithConsent,
+  RestrictionsForOwnerSyncPort,
+} from '../public/restrictions-for-owner-sync.js';
 
 export interface StoredUserRestriction {
   readonly id: string;
@@ -24,6 +33,8 @@ export interface ProfileStore {
   lockUserForUpdate(accountId: string, tx: Tx): Promise<boolean>;
   updatePreferences(accountId: string, cuisineIds: readonly string[]): Promise<boolean>;
   getPreferences(accountId: string): Promise<readonly string[]>;
+  getProfileSummary(accountId: string): Promise<ProfileSummaryDto>;
+  listRestrictionTypes(): Promise<readonly RestrictionTypeDto[]>;
   listRestrictions(accountId: string, tx?: Tx): Promise<readonly StoredUserRestriction[]>;
   insertRestriction(record: StoredUserRestriction, tx: Tx): Promise<void>;
   updateRestriction(record: StoredUserRestriction, tx: Tx): Promise<void>;
@@ -40,8 +51,23 @@ export interface ProfileServiceDeps {
   readonly clock?: () => Date;
 }
 
+/**
+ * Raised when a persisted encrypted restriction decrypts outside the closed 19-code
+ * allergen vocabulary (A06 fail-closed). Message is static to prevent leakage (A13).
+ */
+export class CorruptedRestrictionRecordError extends Error {
+  constructor() {
+    super('Stored dietary restriction failed controlled vocabulary validation.');
+    this.name = 'CorruptedRestrictionRecordError';
+  }
+}
+
 export class ProfileService
-  implements ProfileLifecyclePort, ProfileQueryPort, RestrictionsForFilterPort
+  implements
+    ProfileLifecyclePort,
+    ProfileQueryPort,
+    RestrictionsForFilterPort,
+    RestrictionsForOwnerSyncPort
 {
   private readonly store: ProfileStore;
   private readonly cipher: FieldCipher;
@@ -71,6 +97,14 @@ export class ProfileService
 
   async getPreferences(accountId: string): Promise<readonly string[]> {
     return this.store.getPreferences(accountId);
+  }
+
+  async getProfileSummary(accountId: string): Promise<ProfileSummaryDto> {
+    return this.store.getProfileSummary(accountId);
+  }
+
+  async listRestrictionTypes(): Promise<readonly RestrictionTypeDto[]> {
+    return this.store.listRestrictionTypes();
   }
 
   async getPantryAndUtensils(_accountId: string): Promise<ProfilePantryAndUtensils> {
@@ -166,22 +200,59 @@ export class ProfileService
     const seen = new Set<AllergenCode>();
 
     for (const row of rows) {
-      const decrypted = await this.cipher.decrypt(
-        {
-          ciphertext: row.encryptedType,
-          iv: row.iv,
-          authTag: row.authTag,
-          keyVersion: row.keyVersion,
-        },
-        accountId,
-      );
-      if (isAllergenCode(decrypted) && !seen.has(decrypted)) {
-        seen.add(decrypted);
-        codes.push(decrypted);
+      const code = await this.decryptValidatedRestrictionCode(row, accountId);
+      if (!seen.has(code)) {
+        seen.add(code);
+        codes.push(code);
       }
     }
 
     return codes;
+  }
+
+  async getDecryptedRestrictionsWithConsent(
+    accountId: string,
+  ): Promise<readonly DecryptedRestrictionWithConsent[]> {
+    const rows = await this.store.listRestrictions(accountId);
+    const result: DecryptedRestrictionWithConsent[] = [];
+    const seen = new Set<AllergenCode>();
+
+    for (const row of rows) {
+      const code = await this.decryptValidatedRestrictionCode(row, accountId);
+      if (!seen.has(code)) {
+        seen.add(code);
+        result.push({
+          restrictionType: code,
+          consentAt: row.consentAt.toISOString(),
+        });
+      }
+    }
+
+    // Deterministic order keeps DownloadSet content-hash stable for HTTP 304 checks.
+    result.sort((left, right) => left.restrictionType.localeCompare(right.restrictionType));
+    return result;
+  }
+
+  private async decryptValidatedRestrictionCode(
+    row: StoredUserRestriction,
+    accountId: string,
+  ): Promise<AllergenCode> {
+    const decrypted = await this.cipher.decrypt(
+      {
+        ciphertext: row.encryptedType,
+        iv: row.iv,
+        authTag: row.authTag,
+        keyVersion: row.keyVersion,
+      },
+      accountId,
+    );
+
+    // A06 / A13: Fail closed without exposing decrypted plaintext or accountId.
+    if (!isAllergenCode(decrypted)) {
+      throw new CorruptedRestrictionRecordError();
+    }
+
+    return decrypted;
   }
 
   private async findRowByRestrictionCode(
