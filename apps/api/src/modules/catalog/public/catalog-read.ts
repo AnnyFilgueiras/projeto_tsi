@@ -66,6 +66,7 @@ export interface ApprovedRecipeDto {
   readonly steps: readonly string[];
   readonly allergens: readonly AllergenCode[];
   readonly allergenState: AllergenState;
+  readonly confirmedAllergenFree: boolean;
   readonly allergensUpdatedAt: string;
   readonly sourceName: string;
   readonly sourceUrl: string;
@@ -77,6 +78,7 @@ export interface ApprovedRecipeDto {
     readonly substituteName: string;
     readonly substituteAllergens: readonly AllergenCode[];
     readonly allergenState: AllergenState;
+    readonly confirmedAllergenFree: boolean;
     readonly origin: CatalogOrigin;
   }[];
   readonly updatedAt: string;
@@ -93,6 +95,7 @@ export interface CatalogDishSummaryDto {
   readonly allergenState: AllergenState;
   readonly confirmedAllergenFree: boolean;
   readonly photoHash: string | null;
+  readonly updatedAt: string;
 }
 
 export interface BaseDishChainInfo {
@@ -110,7 +113,7 @@ export interface BaseDishChainInfo {
  */
 export interface CatalogReadPort {
   getApprovedRecipe(dishId: string): Promise<ApprovedRecipeDto | null>;
-  listApprovedDishes(): Promise<readonly CatalogDishSummaryDto[]>;
+  listApprovedDishes(tx?: Tx): Promise<readonly CatalogDishSummaryDto[]>;
   getCuisineById(cuisineId: string, tx?: Tx): Promise<CuisineDto | null>;
   getIngredientsByIds(ids: readonly string[], tx?: Tx): Promise<ReadonlyMap<string, IngredientDto>>;
   getUtensilsByIds(ids: readonly string[], tx?: Tx): Promise<ReadonlyMap<string, UtensilDto>>;
@@ -124,7 +127,7 @@ export interface CatalogReadPort {
     maxDepth?: number,
     tx?: Tx,
   ): Promise<BaseDishChainInfo>;
-  getCatalogIndex(): Promise<{
+  getCatalogIndex(tx?: Tx): Promise<{
     readonly dishes: readonly CatalogDishSummaryDto[];
     readonly cuisines: readonly CuisineDto[];
   }>;

@@ -45,6 +45,16 @@ class InMemoryProfileStore implements ProfileStore {
     return this.users.get(accountId)?.culinaryPreferences ?? [];
   }
 
+  async getProfileSummary(accountId: string) {
+    return {
+      culinaryPreferences: this.users.get(accountId)?.culinaryPreferences ?? [],
+    };
+  }
+
+  async listRestrictionTypes() {
+    return [];
+  }
+
   async listRestrictions(accountId: string, _tx?: Tx): Promise<readonly StoredUserRestriction[]> {
     return [...(this.restrictions.get(accountId) ?? [])];
   }
@@ -196,5 +206,43 @@ describe('ProfileApplier and ProfileService (RN09, A05, ADR-006)', () => {
       status: 'rejected',
       error: { type: 'not-found', status: 404 },
     });
+  });
+
+  it('A06 / A13 (D3): fails closed with explicit error without leaking sensitive values when persisted restriction decrypts outside ALLERGEN_CODES', async () => {
+    const store = new InMemoryProfileStore();
+    const cipher = new AesGcmFieldCipher(
+      new InMemoryKeyProvider({ currentVersion: 1, keys: { 1: randomBytes(32) } }),
+    );
+    const service = new ProfileService({ store, cipher });
+    const accountId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+    await service.createProfile(accountId, FAKE_TX);
+
+    const corruptedCode = 'alergia_corrompida_fora_do_vocabulario';
+    const encrypted = await cipher.encrypt(corruptedCode, accountId);
+    await store.insertRestriction(
+      {
+        id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+        userId: accountId,
+        encryptedType: encrypted.ciphertext,
+        iv: encrypted.iv,
+        authTag: encrypted.authTag,
+        keyVersion: encrypted.keyVersion,
+        consentAt: new Date('2026-11-23T10:00:00.000Z'),
+        createdAt: new Date('2026-11-23T10:00:00.000Z'),
+      },
+      FAKE_TX,
+    );
+
+    let thrown: unknown;
+    try {
+      await service.getActiveRestrictionCodes(accountId);
+    } catch (error: unknown) {
+      thrown = error;
+    }
+
+    expect(thrown).toBeInstanceOf(Error);
+    const message = thrown instanceof Error ? thrown.message : String(thrown);
+    expect(message).not.toContain(corruptedCode);
+    expect(message).not.toContain(accountId);
   });
 });

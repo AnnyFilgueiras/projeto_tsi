@@ -1,8 +1,18 @@
-import { and, eq, inArray } from 'drizzle-orm';
+import { isAllergenCode } from '@panelada/allergen-rules/rules';
+import { and, asc, eq, inArray } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import type { Tx } from '../../../shared/tx.js';
-import { profileRestrictions, profileUsers } from './schema.js';
+import type {
+  ProfileSummaryDto,
+  ReminderType,
+  RestrictionTypeDto,
+} from '../public/profile-query.js';
+import { profileRestrictions, profileRestrictionTypes, profileUsers } from './schema.js';
 import type { ProfileStore, StoredUserRestriction } from './service.js';
+
+function isReminderType(value: string): value is ReminderType {
+  return value === 'purchase' || value === 'preparation';
+}
 
 /**
  * Drizzle repository strictly scoped to `profile_*` tables (S8, T01).
@@ -54,6 +64,53 @@ export class DrizzleProfileRepository implements ProfileStore {
     return rows[0]?.culinaryPreferences ?? [];
   }
 
+  async getProfileSummary(accountId: string): Promise<ProfileSummaryDto> {
+    const [row] = await this.db
+      .select({
+        name: profileUsers.name,
+        culinaryPreferences: profileUsers.culinaryPreferences,
+        reminderActive: profileUsers.reminderActive,
+        reminderTypes: profileUsers.reminderTypes,
+        reminderFrequency: profileUsers.reminderFrequency,
+      })
+      .from(profileUsers)
+      .where(eq(profileUsers.id, accountId))
+      .limit(1);
+
+    if (!row) {
+      return { culinaryPreferences: [] };
+    }
+
+    return {
+      ...(row.name !== null ? { name: row.name } : {}),
+      culinaryPreferences: row.culinaryPreferences,
+      reminders: {
+        active: row.reminderActive,
+        types: row.reminderTypes.filter(isReminderType),
+        ...(row.reminderFrequency !== null ? { frequency: row.reminderFrequency } : {}),
+      },
+    };
+  }
+
+  async listRestrictionTypes(): Promise<readonly RestrictionTypeDto[]> {
+    const rows = await this.db
+      .select({
+        code: profileRestrictionTypes.code,
+        name: profileRestrictionTypes.name,
+        associatedAllergens: profileRestrictionTypes.associatedAllergens,
+      })
+      .from(profileRestrictionTypes)
+      .orderBy(asc(profileRestrictionTypes.code));
+
+    return rows
+      .filter((row) => isAllergenCode(row.code))
+      .map((row) => ({
+        code: row.code as RestrictionTypeDto['code'],
+        name: row.name,
+        associatedAllergens: row.associatedAllergens,
+      }));
+  }
+
   async listRestrictions(accountId: string, tx?: Tx): Promise<readonly StoredUserRestriction[]> {
     const executor = tx ?? this.db;
     const rows = await executor
@@ -68,7 +125,8 @@ export class DrizzleProfileRepository implements ProfileStore {
         createdAt: profileRestrictions.createdAt,
       })
       .from(profileRestrictions)
-      .where(eq(profileRestrictions.userId, accountId));
+      .where(eq(profileRestrictions.userId, accountId))
+      .orderBy(asc(profileRestrictions.createdAt), asc(profileRestrictions.id));
 
     return rows;
   }

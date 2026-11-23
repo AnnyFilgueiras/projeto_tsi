@@ -21,12 +21,15 @@ import {
   type IdentityRateLimitConfig,
   type TokenIssuer,
 } from './cross-cutting/identity/index.js';
+import { createSuggestionSearchModule } from './cross-cutting/suggestion-search/index.js';
 import { createSyncModule } from './cross-cutting/sync/index.js';
 import type { DatabaseClient } from './db/client.js';
 import { createCatalogModule } from './modules/catalog/public/index.js';
 import type { PhotoStorage } from './modules/catalog/public/photo-storage.js';
 import { createImporterModule } from './modules/importer/public/index.js';
 import { createProfileModule } from './modules/profile/public/index.js';
+import { createProgressModule } from './modules/progress/public/index.js';
+import { createRoutineModule } from './modules/routine/public/index.js';
 import {
   notFoundProblem,
   payloadTooLargeProblem,
@@ -336,17 +339,45 @@ export function buildApp(deps: BuildAppDeps) {
       rateLimitConfig: deps.rateLimitConfig,
     });
 
-    const syncModule = createSyncModule({
-      dbClient: deps.dbClient,
-      authGuard,
-      appliers: [...profileModule.appliers],
-      clock: deps.clock,
-    });
-
     const catalogModule = createCatalogModule({
       db: deps.dbClient.db,
       authGuard,
       photoStorage: deps.photoStorage,
+    });
+
+    const progressModule = createProgressModule({
+      db: deps.dbClient.db,
+      catalogRead: catalogModule.read,
+      clock: deps.clock,
+    });
+
+    const routineModule = createRoutineModule({
+      dbClient: deps.dbClient,
+      clock: deps.clock,
+    });
+
+    const syncModule = createSyncModule({
+      dbClient: deps.dbClient,
+      authGuard,
+      appliers: [...profileModule.appliers, ...progressModule.appliers],
+      downloadSetPorts: {
+        profileQuery: profileModule.query,
+        restrictionsForOwnerSync: profileModule.restrictionsForOwnerSync,
+        catalogRead: catalogModule.read,
+        progressPublic: progressModule.publicPort,
+        routinePublic: routineModule.publicPort,
+      },
+      clock: deps.clock,
+    });
+
+    const suggestionSearchModule = createSuggestionSearchModule({
+      catalogRead: catalogModule.read,
+      restrictionsForFilter: profileModule.restrictionsForFilter,
+      profileQuery: profileModule.query,
+      progressPublic: progressModule.publicPort,
+      routinePublic: routineModule.publicPort,
+      authGuard,
+      logger,
     });
 
     const importerModule = createImporterModule({
@@ -362,6 +393,7 @@ export function buildApp(deps: BuildAppDeps) {
     profileModule.registerRoutes(app);
     syncModule.registerRoutes(app);
     catalogModule.registerRoutes(app);
+    suggestionSearchModule.registerRoutes(app);
     importerModule.registerRoutes(app);
   }
 

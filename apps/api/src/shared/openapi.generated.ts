@@ -1096,6 +1096,8 @@ export interface components {
       substituteName?: string;
       substituteAllergens: components['schemas']['AllergenCode'][];
       allergenState: components['schemas']['AllergenState'];
+      /** @description Confirmação explícita do curador quando `substituteAllergens` é vazia (RN08, RN22, ADR-014). */
+      confirmedAllergenFree?: boolean;
       /** @enum {string} */
       origin?: 'manual' | 'ai';
     };
@@ -1133,6 +1135,8 @@ export interface components {
       steps: string[];
       allergens: components['schemas']['AllergenCode'][];
       allergenState: components['schemas']['AllergenState'];
+      /** @description Confirmação explícita do curador quando `allergens` é vazia (RN08, ADR-014). */
+      confirmedAllergenFree?: boolean;
       /** Format: date-time */
       allergensUpdatedAt: string;
       sourceName: string;
@@ -1285,6 +1289,8 @@ export interface components {
       pantry: string[];
       utensils: string[];
       plans: components['schemas']['RoutinePlan'][];
+      /** @description Sugestões aprovadas pelo usuário (status `candidate`, RN11). */
+      candidates: components['schemas']['SuggestionItem'][];
       ratings: components['schemas']['Rating'][];
       badgeAwards: {
         /** Format: uuid */
@@ -1997,7 +2003,10 @@ export interface operations {
         limit?: number;
         usePantry?: boolean;
       };
-      header?: never;
+      header?: {
+        /** @description Versão do pacote de alérgenos em uso no app. A resposta traz minPackageVersion; o app avisa, mas não bloqueia. */
+        'X-Allergen-Package-Version'?: components['parameters']['PackageVersion'];
+      };
       path?: never;
       cookie?: never;
     };
@@ -2012,6 +2021,7 @@ export interface operations {
           'application/json': {
             suggestions: components['schemas']['SuggestionItem'][];
             noResult: boolean;
+            minPackageVersion: string;
           };
         };
       };

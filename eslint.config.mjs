@@ -66,6 +66,11 @@ const BOUNDARY_ELEMENTS = [
     mode: 'full',
   },
   {
+    type: 'api-profile-restrictions-owner-sync-port',
+    pattern: 'apps/api/src/modules/profile/public/restrictions-for-owner-sync.ts',
+    mode: 'full',
+  },
+  {
     type: 'api-catalog-write-port',
     pattern: 'apps/api/src/modules/catalog/public/catalog-write.ts',
     mode: 'full',
@@ -241,6 +246,7 @@ const BOUNDARY_RULES = [
       ['api-module-public', { module: 'profile' }],
       ['api-module-internal', { module: 'profile' }],
       'api-profile-restrictions-port',
+      'api-profile-restrictions-owner-sync-port',
       // S5: only modules/profile imports support/field-encryption.
       'api-field-encryption',
       'api-shared',
@@ -308,6 +314,15 @@ const BOUNDARY_RULES = [
     ],
   },
   {
+    from: ['api-profile-restrictions-owner-sync-port'],
+    allow: [
+      ['api-module-internal', { module: 'profile' }],
+      ['api-module-public', { module: 'profile' }],
+      'api-shared',
+      'allergen-rules-entry',
+    ],
+  },
+  {
     from: ['api-catalog-write-port'],
     allow: [
       ['api-module-internal', { module: 'catalog' }],
@@ -332,12 +347,22 @@ const BOUNDARY_RULES = [
     ],
   },
   {
-    from: [
-      ['api-cross-cutting', { component: 'sync' }],
-      ['api-cross-cutting', { component: 'identity' }],
-    ],
+    from: [['api-cross-cutting', { component: 'sync' }]],
     allow: [
-      ['api-cross-cutting', { component: '${from.component}' }],
+      ['api-cross-cutting', { component: 'sync' }],
+      'api-module-public',
+      // A05: only sync may read owner restrictions+consent to build GET /v1/sync/download-set.
+      'api-profile-restrictions-owner-sync-port',
+      'api-shared',
+      'api-db',
+      'api-technical-log',
+      'allergen-rules-entry',
+    ],
+  },
+  {
+    from: [['api-cross-cutting', { component: 'identity' }]],
+    allow: [
+      ['api-cross-cutting', { component: 'identity' }],
       'api-module-public',
       'api-shared',
       'api-db',
@@ -367,6 +392,7 @@ const BOUNDARY_RULES = [
       'api-composition',
       'api-module-public',
       'api-profile-restrictions-port',
+      'api-profile-restrictions-owner-sync-port',
       'api-catalog-write-port',
       'api-cross-cutting',
       'api-field-encryption',
