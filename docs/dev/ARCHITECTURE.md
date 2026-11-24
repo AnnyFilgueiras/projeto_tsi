@@ -94,6 +94,22 @@ apps/mobile/src/
 - `A6`: `UnlockCalculator` e `ReminderScheduler` são 100% puros (zero imports de React Native ou `core/`).
 - `A7`: O app importa apenas o entrypoint `rules` de `packages/allergen-rules` (nunca `invariants`).
 - `A8`: `src/app/composition/` é o único ponto que instancia adaptadores concretos e os injeta nas features (sem construtor com `?? new ConcreteAdapter()` dentro de features).
+- **Contrato gerado (`mobile-api-contract`):** `core/network/openapi.generated.ts` (tipos do `openapi.yaml`) pode ser importado — só como tipo — por `core/network`, `core/sync`, pelos adaptadores, pela composição e por `features/<f>/{domain,data}`; nunca por `ui/`.
+
+### Núcleo do app (`src/core/` — `MVP-04D`)
+
+| Área | Porta (o que features/composição enxergam) | Adaptador concreto (só a composição cria) |
+|---|---|---|
+| `local-db` | `LocalDatabase` (`execute`/`query`/`transaction`) | `openSqlCipherDatabase` (`expo-sqlite` + SQLCipher, chave de 256 bits do `DatabaseKeyStore` no `expo-secure-store`) |
+| `local-db` | `runMigrations` + `LOCAL_MIGRATIONS` (versão em `PRAGMA user_version`, uma transação por migration, idempotente) | — |
+| `network` | `HttpClient.call(operationId, …)` tipado pelo `openapi.yaml`; sempre envia `X-Allergen-Package-Version`; renova o token (refresh rotativo, uma renovação compartilhada entre chamadas concorrentes) | `createFetchHttpClient`, `createSecureStoreTokenStore`, `createSessionGate` (conta anônima na primeira abertura) |
+| `sync` | `OperationEnqueuer.enqueue(request)` → `confirmed` \| `rejected` \| `unavailable` (reenviar a `operation` devolvida, mesmo `opId` UUID v7) \| `queued` (Estágio 2) | `createDirectOnlineOperationEnqueuer` (Estágio 1), `createDownloadSetSync` |
+| `photos` | `PhotoManager` (WebP por SHA-256 em `documentDirectory/photos/`, verificação de integridade, `prune`) | `createFileSystemPhotoManager` (`expo-file-system`) |
+
+- **Transações locais serializadas:** `LocalDatabase` usa uma única conexão com fila FIFO (`serialized-database.ts`); uma instrução fora da transação espera a transação aberta terminar. Não use `withExclusiveTransactionAsync` do `expo-sqlite`: ele abre outra conexão sem `PRAGMA key`.
+- **Estágio 1 (`ADR-008`):** o `DirectOnlineOperationEnqueuer` só grava a cópia local **depois** da confirmação do servidor, via *projetores* por tipo de operação (`LocalOperationProjectors`), registrados pela camada `data/` da feature dona na composição. Offline, `5xx` ou rejeição não tocam o banco local.
+- **Troca para o Estágio 2:** substituir a criação do enqueuer em `src/app/composition/index.ts` pelo `OutboxOperationEnqueuer` + `Synchronizer`. Features e telas não mudam (o tipo de resultado já prevê `queued`).
+- **Navegação (`MVP-01`):** `app/_layout.tsx` monta o `DependenciesProvider` (grafo criado uma vez, sem singletons); `app/(tabs)/_layout.tsx` redireciona para `/onboarding` até `profile_local.onboarded_at` existir; as rotas só montam telas de `src/features/<f>/ui/` e repassam portas por props.
 
 ---
 
