@@ -101,7 +101,7 @@ apps/mobile/src/
 | Área | Porta (o que features/composição enxergam) | Adaptador concreto (só a composição cria) |
 |---|---|---|
 | `local-db` | `LocalDatabase` (`execute`/`query`/`transaction`) | `openSqlCipherDatabase` (`expo-sqlite` + SQLCipher, chave de 256 bits do `DatabaseKeyStore` no `expo-secure-store`) |
-| `local-db` | `runMigrations` + `LOCAL_MIGRATIONS` (versão em `PRAGMA user_version`, uma transação por migration, idempotente) | — |
+| `local-db` | `runMigrations` + `LOCAL_MIGRATIONS` (versão em `PRAGMA user_version`, uma transação por migration, idempotente, *append-only*; v2 `stage-1-onda-1a` — `MVP-04E2`) | — |
 | `network` | `HttpClient.call(operationId, …)` tipado pelo `openapi.yaml`; sempre envia `X-Allergen-Package-Version`; renova o token (refresh rotativo, uma renovação compartilhada entre chamadas concorrentes) | `createFetchHttpClient`, `createSecureStoreTokenStore`, `createSessionGate` (conta anônima na primeira abertura) |
 | `sync` | `OperationEnqueuer.enqueue(request)` → `confirmed` \| `rejected` \| `unavailable` (reenviar a `operation` devolvida, mesmo `opId` UUID v7) \| `queued` (Estágio 2) | `createDirectOnlineOperationEnqueuer` (Estágio 1), `createDownloadSetSync` |
 | `photos` | `PhotoManager` (WebP por SHA-256 em `documentDirectory/photos/`, verificação de integridade, `prune`) | `createFileSystemPhotoManager` (`expo-file-system`) |
@@ -110,6 +110,20 @@ apps/mobile/src/
 - **Estágio 1 (`ADR-008`):** o `DirectOnlineOperationEnqueuer` só grava a cópia local **depois** da confirmação do servidor, via *projetores* por tipo de operação (`LocalOperationProjectors`), registrados pela camada `data/` da feature dona na composição. Offline, `5xx` ou rejeição não tocam o banco local.
 - **Troca para o Estágio 2:** substituir a criação do enqueuer em `src/app/composition/index.ts` pelo `OutboxOperationEnqueuer` + `Synchronizer`. Features e telas não mudam (o tipo de resultado já prevê `queued`).
 - **Navegação (`MVP-01`):** `app/_layout.tsx` monta o `DependenciesProvider` (grafo criado uma vez, sem singletons); `app/(tabs)/_layout.tsx` redireciona para `/onboarding` até `profile_local.onboarded_at` existir; as rotas só montam telas de `src/features/<f>/ui/` e repassam portas por props.
+
+### Dono das tabelas locais (`A1`, `A3`, `A8` — `MVP-04E2`)
+
+- **Escreve** numa tabela local só a camada `data/` da feature dona e o `DownloadSetSync` (que substitui a cópia da camada 1 numa única transação).
+- **Lê** qualquer `features/<f>/data/` (`A3`); telas e `domain/` nunca leem SQL direto.
+- Uma feature que precise **escrever** na tabela de outra recebe uma porta injetada pela raiz de composição (`A1`, `A8`) — nunca importa o repositório da outra feature.
+
+| Dono | Tabelas | Observação |
+|---|---|---|
+| `profile` | `profile_local`, `restrictions_local` | `onboarded_at` é só do aparelho; o download-set não o sobrescreve. |
+| `suggestions` | `candidates_local` | |
+| `recipe` | `recipes_local`, `local_cooking_state` | `local_cooking_state` é **por prato** (`dish_id`, `started_at`, `current_step`), existe só no aparelho e o `DownloadSetSync` nunca a toca (GLOSSARY). |
+| `progress` | `ratings_local`, `unlocks_local` | Desbloqueios só acumulam (`RN04`). |
+| `core/sync` | `catalog_index_local`, `meta_sync` | `catalog_index_local` é linha única (`id = 1`) com o JSON do `catalogIndex` e o `generatedAt` do download-set; base do `UnlockCalculator` (Coleção, cadeias de evolução, badges). |
 
 ---
 

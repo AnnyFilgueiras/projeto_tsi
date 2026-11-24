@@ -64,4 +64,27 @@ export const LOCAL_MIGRATIONS: readonly Migration[] = [
       )`,
     ],
   },
+  {
+    version: 2,
+    name: 'stage-1-onda-1a',
+    statements: [
+      // Single row holding the download-set `catalogIndex` (dishes with baseDishId, cuisines with
+      // totalDishes/continents, badge definitions): the Collection, evolution chains and pending
+      // badges are computed from it offline (UnlockCalculator, US14–US16, RN07).
+      `CREATE TABLE catalog_index_local (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        data TEXT NOT NULL,
+        generated_at TEXT NOT NULL
+      )`,
+      // "em preparo" becomes per dish with the current step: Onda 1A has no RoutineItem (the Plan
+      // arrives in Onda 1B, which may add the column back). Dropping is safe because nothing
+      // wrote to the v1 table before this version shipped.
+      'DROP TABLE local_cooking_state',
+      `CREATE TABLE local_cooking_state (
+        dish_id TEXT PRIMARY KEY,
+        started_at TEXT NOT NULL,
+        current_step INTEGER NOT NULL DEFAULT 0
+      )`,
+    ],
+  },
 ];

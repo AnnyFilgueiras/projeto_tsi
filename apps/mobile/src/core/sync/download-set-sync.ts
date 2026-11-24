@@ -109,6 +109,14 @@ export function createDownloadSetSync(deps: DownloadSetSyncDeps): DownloadSetSyn
 }
 
 async function writeLayerOne(tx: SqlExecutor, set: DownloadSet): Promise<void> {
+  // Single row (CHECK id = 1) replaced inside this same transaction, so a failure further down
+  // never leaves a fresh catalog next to stale ratings and unlocks.
+  await tx.execute(
+    `INSERT INTO catalog_index_local (id, data, generated_at) VALUES (1, ?, ?)
+     ON CONFLICT (id) DO UPDATE SET data = excluded.data, generated_at = excluded.generated_at`,
+    [JSON.stringify(set.catalogIndex), set.generatedAt],
+  );
+
   // onboarded_at is device-only state, so the upsert must not overwrite it.
   await tx.execute(
     `INSERT INTO profile_local (id, name, culinary_preferences, reminders, updated_at)

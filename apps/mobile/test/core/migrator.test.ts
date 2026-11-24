@@ -12,6 +12,9 @@ const tableNames = (db: FakeLocalDatabase) =>
     )
     .map((row) => row.name);
 
+const columnNames = (db: FakeLocalDatabase, table: string) =>
+  db.rows<{ name: string }>(`PRAGMA table_info(${table})`).map((row) => row.name);
+
 describe('Migrator (ADR-005, ADR-008 local schema)', () => {
   let db: FakeLocalDatabase;
 
@@ -26,6 +29,7 @@ describe('Migrator (ADR-005, ADR-008 local schema)', () => {
 
     expect(tableNames(db)).toEqual([
       'candidates_local',
+      'catalog_index_local',
       'local_cooking_state',
       'meta_sync',
       'profile_local',
@@ -36,6 +40,60 @@ describe('Migrator (ADR-005, ADR-008 local schema)', () => {
     ]);
     expect(outcome).toEqual({ from: 0, to: LOCAL_MIGRATIONS.length });
     expect(userVersion(db)).toBe(LOCAL_MIGRATIONS.length);
+  });
+
+  it('keeps "em preparo" per dish with the current step (v2, Onda 1A has no RoutineItem)', async () => {
+    await runMigrations(db, LOCAL_MIGRATIONS);
+
+    expect(columnNames(db, 'local_cooking_state')).toEqual([
+      'dish_id',
+      'started_at',
+      'current_step',
+    ]);
+    await db.execute(
+      "INSERT INTO local_cooking_state (dish_id, started_at) VALUES ('d1', '2026-11-24')",
+    );
+    expect(db.rows('SELECT current_step FROM local_cooking_state')).toEqual([{ current_step: 0 }]);
+  });
+
+  it('upgrades a v1 database with data to v2 without losing rows, then is a no-op', async () => {
+    await runMigrations(db, LOCAL_MIGRATIONS.slice(0, 1));
+    const seed: [string, string][] = [
+      ['profile_local', "INSERT INTO profile_local (id, name) VALUES (1, 'Ana')"],
+      [
+        'restrictions_local',
+        "INSERT INTO restrictions_local (restriction_type, consent_at) VALUES ('leite', 'x')",
+      ],
+      [
+        'candidates_local',
+        "INSERT INTO candidates_local (suggestion_id, dish_id, data) VALUES ('s1', 'd1', '{}')",
+      ],
+      [
+        'recipes_local',
+        "INSERT INTO recipes_local (dish_id, updated_at, data, downloaded_at) VALUES ('d1', 'x', '{}', 'x')",
+      ],
+      [
+        'ratings_local',
+        "INSERT INTO ratings_local (id, dish_id, data, rated_on) VALUES ('r1', 'd1', '{}', 'x')",
+      ],
+      ['unlocks_local', "INSERT INTO unlocks_local (kind, target_id) VALUES ('badge', 'b1')"],
+      ['meta_sync', "INSERT INTO meta_sync (key, value) VALUES ('lastSyncAt', 'x')"],
+    ];
+    for (const [, insert] of seed) {
+      await db.execute(insert);
+    }
+    const snapshot = () =>
+      Object.fromEntries(seed.map(([table]) => [table, db.rows(`SELECT * FROM ${table}`)]));
+    const before = snapshot();
+
+    const upgrade = await runMigrations(db, LOCAL_MIGRATIONS);
+    const rerun = await runMigrations(db, LOCAL_MIGRATIONS);
+
+    expect(upgrade).toEqual({ from: 1, to: 2 });
+    expect(rerun).toEqual({ from: 2, to: 2 });
+    expect(userVersion(db)).toBe(2);
+    expect(snapshot()).toEqual(before);
+    expect(db.rows('SELECT * FROM catalog_index_local')).toEqual([]);
   });
 
   it('is idempotent: a second run applies nothing and keeps existing rows', async () => {
