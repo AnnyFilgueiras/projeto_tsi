@@ -1,12 +1,13 @@
 openapi: 3.1.0
 info:
   title: API Panelada
-  version: 1.2.0-2.8
+  version: 1.3.0
   summary: Contrato da API do Panelada (fonte da verdade, validado na Fase 2.8)
   description: 'Contrato de sessão e contas, sincronização, conjunto baixado, sugestão e busca, rotas de curadoria,
     erros e idempotência. Gerado na 2.6; v1.1 na 2.7 (identificadores em inglês, ADR-015; marcos de badge estendidos
     para 8 variantes conforme framework 6D + Octalysis, ADR-016); v1.2 na validação formal da 2.8 (`ProposalData`
-    permitindo `verified` em respostas, RDC 727/2022 conferida e higiene de descrições).
+    permitindo `verified` em respostas, RDC 727/2022 conferida e higiene de descrições); v1.3 na Fase 3 (`DishSummary`
+    passa a expor `allergenState` obrigatório, MVP-04C1).
 
 
     **Convenções.** JSON em UTF-8. Erros em `application/problem+json` (RFC 9457). Identificadores UUID. Datas em
@@ -2475,12 +2476,15 @@ components:
           $ref: '#/components/schemas/Difficulty'
         photoHash:
           type: string
+        allergenState:
+          $ref: '#/components/schemas/AllergenState'
       required:
       - dishId
       - name
       - cuisineId
       - prepTimeMinutes
       - difficulty
+      - allergenState
       additionalProperties: false
     SuggestionItem:
       type: object

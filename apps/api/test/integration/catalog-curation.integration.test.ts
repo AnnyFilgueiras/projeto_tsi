@@ -538,7 +538,7 @@ describe('MVP-04B integration: catalog, manual curation, PublicationGate, WebP p
     }
   });
 
-  it('MVP-04B seed idempotency: running runSeed twice produces zero duplicates, covers 5 continents, 20 verified dishes, 3-level evolution chain, safe/unsafe substitutions, 11 badges (RN03 a-h), and valid WebP photos', async () => {
+  it('MVP-04B seed idempotency: running runSeed twice produces zero duplicates, covers 5 continents, 20 dishes in every AllergenState (18/1/1), 3-level evolution chain, safe/unsafe substitutions, 11 badges (RN03 a-h), and valid WebP photos', async () => {
     // Run seed a second time on the already-seeded test database to confirm idempotency.
     await runSeed(databaseUrl, { photoStorageDir: seedPhotoDir });
 
@@ -575,7 +575,12 @@ describe('MVP-04B integration: catalog, manual curation, PublicationGate, WebP p
     expect(continents).toEqual(new Set(['america', 'africa', 'europe', 'asia', 'oceania']));
 
     expect(dishesRes.rows).toHaveLength(20);
-    expect(dishesRes.rows.every((d) => d.allergen_state === 'verified')).toBe(true);
+    // MVP-04C1: Seed keeps one dish per non-verified state so every AllergenState reaches the UI.
+    const stateCounts = dishesRes.rows.reduce<Record<string, number>>((acc, d) => {
+      acc[d.allergen_state] = (acc[d.allergen_state] ?? 0) + 1;
+      return acc;
+    }, {});
+    expect(stateCounts).toEqual({ verified: 18, source_declared: 1, unverified: 1 });
     expect(dishesRes.rows.some((d) => d.allergens.length === 0 && d.confirmed_allergen_free)).toBe(
       true,
     );

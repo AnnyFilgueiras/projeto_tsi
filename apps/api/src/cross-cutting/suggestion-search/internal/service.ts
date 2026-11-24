@@ -1,4 +1,5 @@
 import { classifyRecipe, filterCandidates, PACKAGE_VERSION } from '@panelada/allergen-rules/rules';
+import type { AllergenState } from '@panelada/allergen-rules/rules';
 import type {
   CatalogDishSummaryDto,
   CatalogReadPort,
@@ -24,6 +25,8 @@ export interface DishSummaryDto {
   readonly prepTimeMinutes: number;
   readonly difficulty: Difficulty;
   readonly photoHash?: string;
+  // MVP-04C1: Describes the dish's catalog verification state, never the user's restrictions (A05).
+  readonly allergenState: AllergenState;
 }
 
 export interface SuggestionItemDto {
@@ -69,6 +72,7 @@ function toDishSummary(dish: CatalogDishSummaryDto): DishSummaryDto {
     prepTimeMinutes: dish.prepTimeMinutes,
     difficulty: dish.difficulty,
     ...(dish.photoHash !== null ? { photoHash: dish.photoHash } : {}),
+    allergenState: dish.allergenState,
   };
 }
 
