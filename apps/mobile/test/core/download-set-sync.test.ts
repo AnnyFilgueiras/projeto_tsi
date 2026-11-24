@@ -12,6 +12,16 @@ const NOW = new Date('2026-11-23T12:00:00.000Z');
 const DISH_A = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const DISH_B = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
 
+const CUISINE = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';
+const CATALOG_INDEX = {
+  dishes: [
+    { id: DISH_A, name: 'Moqueca', cuisineId: CUISINE, baseDishId: null },
+    { id: DISH_B, name: 'Moqueca de banana', cuisineId: CUISINE, baseDishId: DISH_A },
+  ],
+  cuisines: [{ id: CUISINE, name: 'Baiana', continents: ['america'], totalDishes: 2 }],
+  badgeDefinitions: [],
+};
+
 function downloadSet(overrides: Record<string, unknown> = {}) {
   return {
     version: 'v2',
@@ -26,7 +36,7 @@ function downloadSet(overrides: Record<string, unknown> = {}) {
     ratings: [{ id: 'r1', dishId: DISH_A, score: 4, date: '2026-11-20' }],
     badgeAwards: [{ definitionId: 'b1', unlockedAt: '2026-11-20T00:00:00.000Z' }],
     evolutionUnlocks: ['e1'],
-    catalogIndex: { dishes: [], cuisines: [], badgeDefinitions: [] },
+    catalogIndex: CATALOG_INDEX,
     restrictionTypes: [],
     recipesToDownload: [
       { dishId: DISH_A, updatedAt: '2026-11-22T00:00:00.000Z', photoHash: 'h-a' },
@@ -114,6 +124,93 @@ describe('DownloadSetSync (ADR-008 layer 1, UC10, A05)', () => {
     ]);
     expect(photos).toEqual([['h-a']]);
     expect(meta()).toEqual({ downloadSetVersion: 'v2', lastSyncAt: NOW.toISOString() });
+  });
+
+  const catalogRows = () =>
+    db.rows<{ id: number; data: string; generated_at: string }>(
+      'SELECT id, data, generated_at FROM catalog_index_local',
+    );
+
+  it('stores the received catalogIndex for offline Collection, evolutions and badges', async () => {
+    const { downloader } = sync({
+      'GET /v1/sync/download-set': () => ({
+        status: 200,
+        body: downloadSet({ recipesToDownload: [] }),
+      }),
+    });
+
+    await downloader.pull();
+
+    const rows = catalogRows();
+    expect(rows).toHaveLength(1);
+    expect(rows[0]?.id).toBe(1);
+    expect(JSON.parse(rows[0]?.data ?? 'null')).toEqual(CATALOG_INDEX);
+    expect(rows[0]?.generated_at).toBe(NOW.toISOString());
+  });
+
+  it('replaces the catalogIndex row on the next download instead of duplicating it', async () => {
+    const next = { ...CATALOG_INDEX, dishes: CATALOG_INDEX.dishes.slice(0, 1) };
+    let call = 0;
+    const { downloader } = sync({
+      'GET /v1/sync/download-set': () => {
+        call += 1;
+        return call === 1
+          ? { status: 200, body: downloadSet({ recipesToDownload: [] }) }
+          : {
+              status: 200,
+              body: downloadSet({
+                version: 'v3',
+                generatedAt: '2026-11-24T00:00:00.000Z',
+                catalogIndex: next,
+                recipesToDownload: [],
+              }),
+            };
+      },
+    });
+
+    await downloader.pull();
+    await downloader.pull();
+
+    const rows = catalogRows();
+    expect(rows).toHaveLength(1);
+    expect(JSON.parse(rows[0]?.data ?? 'null')).toEqual(next);
+    expect(rows[0]?.generated_at).toBe('2026-11-24T00:00:00.000Z');
+  });
+
+  it('does not leave the catalogIndex updated alone when layer 1 fails midway', async () => {
+    // Two candidates with the same id violate the candidates_local primary key after the
+    // catalog row was already written in the same transaction.
+    const duplicated = downloadSet({ recipesToDownload: [] }).candidates;
+    const { downloader } = sync({
+      'GET /v1/sync/download-set': () => ({
+        status: 200,
+        body: downloadSet({ candidates: [...duplicated, ...duplicated], recipesToDownload: [] }),
+      }),
+    });
+
+    await expect(downloader.pull()).rejects.toThrow();
+
+    expect(catalogRows()).toEqual([]);
+    expect(db.rows('SELECT * FROM restrictions_local')).toEqual([]);
+  });
+
+  it('never touches the device-only cooking state (GLOSSARY: "em preparo" is local)', async () => {
+    await db.execute(
+      "INSERT INTO local_cooking_state (dish_id, started_at, current_step) VALUES (?, '2026-11-23', 3)",
+      [DISH_A],
+    );
+    const { downloader } = sync({
+      'GET /v1/sync/download-set': () => ({
+        status: 200,
+        body: downloadSet({ recipesToDownload: [] }),
+      }),
+    });
+
+    await downloader.pull();
+
+    expect(db.rows('SELECT dish_id, started_at, current_step FROM local_cooking_state')).toEqual([
+      { dish_id: DISH_A, started_at: '2026-11-23', current_step: 3 },
+    ]);
   });
 
   it('deletes a revoked restriction locally (RN09: revocation removes the row)', async () => {
