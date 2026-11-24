@@ -296,3 +296,46 @@
 ### Pendências para a próxima sessão
 - Abrir e integrar PR de `feat/issue-41-suggestions-progress-sync` → `development` (`Closes #41`).
 - Iniciar **`MVP-04D` (#42)** via `solve-issue` (fundação do app mobile: SQLCipher, `HttpClient`, auth/sessão anônima e `OperationEnqueuer` Estágio 1).
+
+---
+
+## [23/11/2026] — UX-01 (#60–#68) e UX-02 (#69): Estratégia de UX, Decisões Transversais e Backlog de Protótipo Inicial da Onda 1A
+
+- **Papel da IA:** Product/UX Strategist e Engenheiro de Backlog (Antigravity CLI), aplicando a skill `.agents/skills/github-issue-craft` e o `docs/playbooks/01-sessao-issues-e-diario.md`.
+- **Técnicas aplicadas:** análise de escopo técnico vs. visual das issues mobile abertas (`#42`, `#43`, `#44`); mapeamento das 8 telas da Onda 1A sobre o framework híbrido 6D + Octalysis (`framework-gamificacao.md`) e requisitos de segurança alimentar (`A06`) / offline (`ADR-008`); avaliação crítica de boas práticas de engenharia de software sobre reabertura de issues fechadas vs. issues de evolução v2; publicação estruturada com hierarquia nativa de sub-issues e dependências `blocked_by`.
+- **Prompts-chave / Contexto da sessão:**
+  1. Levantamento pela dupla da ausência de design/Figma e de detalhamento de fluxos de UX (usabilidade prática e *nudges* de gamificação) antes das issues mobile `#42`, `#43` e `#44`, questionando se `#42` também precisaria ser bloqueada e propondo um protótipo inicial simples seguido de refinamento ao fim do MVP.
+  2. Discussão sobre subdividir o trabalho pré-`#43`/`#44` em 1 issue pai + 8 sub-issues (1 por tela) e análise de se seria boa prática a issue de encerramento pós-MVP reabrir as issues das telas para aprofundamento ou abrir novas issues referenciando a v1.
+  3. Alinhamento da dupla para ignorar o antigo teto de 1,5 mês (focar em executar o quanto antes com qualidade para a apresentação), aprovar o protótipo navegável em HTML/CSS (importável no Figma), criar as issues deixando explícitas as decisões transversais na issue pai sem iniciar implementação, e registrar tudo no Diário de Bordo e `STATE.md` diretamente na `development`.
+- **Insumos usados:** Issues `#38`, `#42`, `#43`, `#44`, `STATE.md`, `docs/dev/ARCHITECTURE.md`, `docs/playbooks/01-sessao-issues-e-diario.md`, `docs/fase2/03-modelagem/framework-gamificacao.md` e `docs/fase2/05-fechamento/resumo-fase2-para-fase3.md`.
+- **Artefatos produzidos:**
+  - **10 GitHub Issues publicadas** no milestone `Fase 3 — MVP (Estágio 1)`:
+    - Issue pai **`#60` (`UX-01`)** — UX, decisões transversais e protótipo inicial da Onda 1A (`arquitetura`, `mobile`, `Must`).
+    - **8 sub-issues nativas** vinculadas a `#60`: `#61` (`UX-01A` Onboarding), `#62` (`UX-01B` Descobrir), `#63` (`UX-01C` Cozinha), `#64` (`UX-01D` Receita Offline), `#65` (`UX-01E` Avaliação), `#66` (`UX-01F` Feedback Celebratório), `#67` (`UX-01G` Coleção) e `#68` (`UX-01H` Perfil).
+    - Issue de refinamento pós-MVP **`#69` (`UX-02`)** — Refinamento visual (*UI polish*) e revisão heurística pós-MVP (`arquitetura`, `mobile`, `Should`).
+  - **Relações nativas registradas:** `sub_issues` (`#61`–`#68` → `#60`) e `blocked_by` (`#43` e `#44` bloqueadas por `#60`; `#69` bloqueada por `#60`, `#43` e `#44`; `#42` mantida livre).
+  - Atualização de `STATE.md` e desta entrada no `docs/fase3/diario_de_bordo-fase3.md`.
+
+### Decisões tomadas
+1. **`#42` (`MVP-04D`) não bloqueada por UX/design:** como ~90% da `#42` é fundação arquitetural de risco alto (SQLCipher, `expo-secure-store`, `HttpClient`, `OperationEnqueuer` Estágio 1, Metro com `@panelada/allergen-rules` e raiz de composição `A8`), ela segue livre usando tokens semânticos provisórios em `src/shared/theme/` e o shell de 4 abas já definido na `#38`.
+2. **Fatiamento `UX-01` pai + 8 sub-issues com 6 decisões transversais obrigatórias:** a issue pai `#60` fixa o contrato comum de (1) arquitetura de informação/navegação, (2) design tokens semânticos, (3) tom *White Hat* (`ADR-016`, `RNF09`), (4) hierarquia visual de segurança alimentar (`A06`/`RN16`), (5) padrão de estados e offline no Estágio 1 (`ADR-008`) e (6) usabilidade prática/acessibilidade na cozinha, evitando fragmentação visual entre as 8 telas (`#61`–`#68`).
+3. **Novas issues de refinamento (`UX-02` `#69`) em vez de reabrir issues fechadas:** descartada a reabertura de `#60`–`#68` após o MVP por violar a definição de pronto, distorcer milestones e poluir a linha do tempo de PRs/contexto de agentes; a rodada v2 abrirá novas sub-issues referenciando `UX-01A`–`UX-01H` (`Refs #NN`).
+4. **Protótipo navegável em HTML/CSS como entregável inicial:** permite validação interativa imediata das 8 telas em proporção mobile no navegador e importação opcional para o Figma (`html.to.design` ou reprodução de frames), fechando `#60`–`#68` sem depender de integração Figma MCP.
+5. **Diretriz de ritmo:** o teto anterior de 1,5 mês deixa de ser usado como restrição de planejamento; o foco passa a ser concluir o quanto antes com qualidade para a apresentação.
+
+### Artefatos alterados (retroalimentação)
+- `STATE.md`: atualizado com a integração de `MVP-04C` (#41, PR #59) na `development`, inclusão de `UX-01` (`#60`–`#68`) e `UX-02` (`#69`) na Frente D e novo handoff.
+- `docs/fase3/diario_de_bordo-fase3.md`: registro consolidado da estratégia e backlog de UX da Onda 1A.
+
+### Iterações relevantes (erros e retrabalho da IA)
+1. **Incompatibilidade de `gh issue view` padrão com Projects (classic):** a chamada inicial `gh issue view 42` falhou por tentar consultar o campo depreciado `projectCards`; contorno imediato com `--json number,title,state,labels,body` permitiu leitura limpa de `#38`, `#42`, `#43` e `#44`.
+2. **Refinamento da proposta inicial pela dupla:** a proposta inicial da IA era uma única issue `UX-01`; a dupla optou por maior granularidade (1 pai + 8 sub-issues por tela) com destaque explícito das decisões transversais na issue pai para facilitar revisão humana tela a tela.
+
+### Divergências registradas (briefing/professor × artefatos)
+- Nenhuma divergência arquitetural; o prazo de 1,5 mês mencionado em artefatos anteriores (`STATE.md`, `resumo-fase2-para-fase3.md`) deixa de ser tratado como restrição operacional ativa por decisão da dupla, priorizando entrega rápida e qualidade para a apresentação.
+
+### Riscos aceitos
+- Manter `#42` desbloqueada com tokens semânticos provisórios exige que `#42` nomeie os tokens semanticamente (`surface`, `primary`, `textMuted`, etc.) para que os valores finais de `UX-01` (`#60`) entrem em `src/shared/theme/` sem retrabalho estrutural.
+
+### Pendências para a próxima sessão
+- Executar **`MVP-04D` (#42)** via `solve-issue` (desbloqueada) e/ou iniciar o desenho de **`UX-01` (#60–#68)** (decisões transversais + 8 telas + protótipo HTML) para desbloquear `#43` e `#44`.
