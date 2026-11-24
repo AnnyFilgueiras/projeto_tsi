@@ -1,22 +1,132 @@
+import { PACKAGE_VERSION } from '@panelada/allergen-rules/rules';
+import { getRandomBytes } from 'expo-crypto';
 import type { LocalDatabase } from '../../core/local-db/local-database';
-import type { ApiClient } from '../../core/network/api-client';
-import { createFetchApiClient } from '../../core/network/fetch-api-client-adapter';
+import { LOCAL_MIGRATIONS } from '../../core/local-db/migrations';
+import { runMigrations } from '../../core/local-db/migrator';
+import { createSecureStoreDatabaseKeyStore } from '../../core/local-db/secure-store-database-key-adapter';
+import {
+  deleteSqlCipherDatabase,
+  LocalDatabaseUnreadableError,
+  openSqlCipherDatabase,
+} from '../../core/local-db/sqlcipher-database';
+import { createFetchHttpClient } from '../../core/network/fetch-http-client-adapter';
+import type { HttpClient } from '../../core/network/http-client';
+import { createSecureStoreTokenStore } from '../../core/network/secure-store-token-adapter';
+import { createSessionGate, type SessionGate } from '../../core/network/session';
+import { createFileSystemPhotoManager } from '../../core/photos/file-system-photo-manager-adapter';
+import type { PhotoManager } from '../../core/photos/photo-manager';
+import { createDirectOnlineOperationEnqueuer } from '../../core/sync/direct-online-operation-enqueuer-adapter';
+import { createDownloadSetSync, type DownloadSetSync } from '../../core/sync/download-set-sync';
+import { createUuidV7Generator } from '../../core/sync/id-generator';
 import type { OperationEnqueuer } from '../../core/sync/operation-enqueuer';
+import {
+  createOnboardingRepository,
+  type OnboardingRepository,
+} from '../../features/profile/data/onboarding-repository';
+import { readMobileConfig, type MobileConfig } from './config';
 
 /**
- * Single composition root for the mobile application (A8).
+ * Single composition root for the mobile app (A8): the only place that instantiates concrete
+ * adapters. Features receive ports through props or the dependencies context, never `new`.
  *
- * Concrete adapters (SqlCipherDatabase, DirectOnlineOperationEnqueuer in Stage 1,
- * OutboxOperationEnqueuer + Synchronizer in Stage 2) are instantiated here only.
+ * Stage 1 → Stage 2 (ADR-008): replace `createDirectOnlineOperationEnqueuer` below with the
+ * Outbox enqueuer + Synchronizer. Nothing in `features/` changes.
  */
 export interface MobileDependencies {
-  readonly apiClient: ApiClient;
-  readonly localDatabase?: LocalDatabase;
-  readonly operationEnqueuer?: OperationEnqueuer;
+  readonly http: HttpClient;
+  readonly sessions: SessionGate;
+  readonly localDatabase: LocalDatabase;
+  readonly operationEnqueuer: OperationEnqueuer;
+  readonly downloadSet: DownloadSetSync;
+  readonly photos: PhotoManager;
+  readonly onboarding: OnboardingRepository;
+  /** Health probe used by the Profile shell. */
+  readonly checkApi: () => Promise<boolean>;
+  /** Best-effort background refresh of the offline copy; never throws (offline is normal). */
+  readonly syncInBackground: () => Promise<void>;
 }
 
-export function createMobileDependencies(baseUrl = 'http://10.0.2.2:3000'): MobileDependencies {
+export async function createMobileDependencies(
+  config: MobileConfig = readMobileConfig(),
+): Promise<MobileDependencies> {
+  const now = () => new Date();
+  const localDatabase = await openLocalDatabase(config.databaseName);
+  await runMigrations(localDatabase, LOCAL_MIGRATIONS);
+
+  const tokenStore = createSecureStoreTokenStore();
+  const http = createFetchHttpClient({
+    baseUrl: config.apiBaseUrl,
+    fetch: (input, init) => fetch(input, init),
+    tokenStore,
+    packageVersion: PACKAGE_VERSION,
+    now,
+  });
+  const sessions = createSessionGate(http, tokenStore);
+
+  // Demo/local: photos are served by the API (ADR-012 item 5). The cloud target swaps this
+  // resolver for the Storage static URL without touching PhotoManager.
+  const photos = createFileSystemPhotoManager(
+    (hash) => `${config.apiBaseUrl.replace(/\/$/, '')}/v1/photos/${hash}`,
+  );
+
+  const downloadSet = createDownloadSetSync({
+    http,
+    localDatabase,
+    ensurePhotos: async (hashes) => {
+      await photos.ensureDownloaded(hashes);
+    },
+    now,
+  });
+
+  const operationEnqueuer = createDirectOnlineOperationEnqueuer({
+    http,
+    localDatabase,
+    // Feature projectors are registered here as features land (MVP-04E/F).
+    projectors: {},
+    newOperationId: createUuidV7Generator({ randomBytes: getRandomBytes, now: Date.now }),
+    now,
+  });
+
   return {
-    apiClient: createFetchApiClient(baseUrl),
+    http,
+    sessions,
+    localDatabase,
+    operationEnqueuer,
+    downloadSet,
+    photos,
+    onboarding: createOnboardingRepository(localDatabase),
+    checkApi: async () => {
+      try {
+        await http.call('checkHealth', {});
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    syncInBackground: async () => {
+      try {
+        await sessions.ensureSession();
+        await downloadSet.pull();
+      } catch (error) {
+        // Error names only: messages could echo payloads, and restrictions never go to logs (A13).
+        if (__DEV__) console.warn('Background sync skipped:', (error as Error).name);
+      }
+    },
   };
+}
+
+async function openLocalDatabase(databaseName: string): Promise<LocalDatabase> {
+  const keyHex = await createSecureStoreDatabaseKeyStore().getOrCreateKey();
+  try {
+    return await openSqlCipherDatabase({ databaseName, keyHex });
+  } catch (error) {
+    // Only a key mismatch resets the copy; a build without SQLCipher (SqlCipherUnavailableError)
+    // must stop here (A05) — deleting the file would destroy data without fixing anything.
+    if (!(error instanceof LocalDatabaseUnreadableError)) throw error;
+    // The key no longer matches the file (e.g. secure storage was wiped). Stage 1 keeps the
+    // server as source of truth, so start an empty copy and let the download set refill it;
+    // only the device-only "em preparo" state is lost.
+    await deleteSqlCipherDatabase(databaseName);
+    return openSqlCipherDatabase({ databaseName, keyHex });
+  }
 }

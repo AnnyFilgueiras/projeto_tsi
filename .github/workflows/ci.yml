@@ -48,7 +48,8 @@ jobs:
 
   contracts:
     needs: changes
-    if: needs.changes.outputs.root == 'true' || needs.changes.outputs.docs == 'true' || needs.changes.outputs.api == 'true'
+    # mobile: apps/mobile/src/core/network/openapi.generated.ts must not drift from openapi.yaml either.
+    if: needs.changes.outputs.root == 'true' || needs.changes.outputs.docs == 'true' || needs.changes.outputs.api == 'true' || needs.changes.outputs.mobile == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

@@ -1,5 +1,5 @@
-import { FoundationScreen } from '../src/features/suggestions/ui/FoundationScreen';
+import { Redirect } from 'expo-router';
 
-export default function HomeRoute() {
-  return <FoundationScreen />;
+export default function IndexRoute() {
+  return <Redirect href="/discover" />;
 }

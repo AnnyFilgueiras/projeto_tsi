@@ -6,15 +6,15 @@
 
 ## 1. Panorama Atual do Projeto
 
-- **Fase Acadêmica Atual:** **Fase 3 — Implementação do MVP e Deploy em Cloud Gratuita (EM ANDAMENTO — `MVP-01` PR #47, `MVP-02` #36 PR #48, `MVP-03` #37 PR #51, `MVP-04A` #39 PR #53, `MVP-04B` #40 PR #55, `MVP-04C` #41 PR #59 e `DOCS-01` #58 PR #70 integrados na `development`; backlog de UX/protótipo da Onda 1A `UX-01` `#60`–`#68` e refinamento pós-MVP `UX-02` `#69` publicados; próximos passos: `MVP-04D` #42 e/ou `UX-01` #60–#68)**.
-- **Branch de Integração (Fase 3):** `development` (atualizada em `d1a52f8` com `GOV-04`, `using-git-worktree`, `MVP-01`, `MVP-02`, `MVP-03`, `MVP-04A`, `MVP-04B`, `MVP-04C`, `DOCS-01` e retroalimentação Opção A do `ADR-014`).
+- **Fase Acadêmica Atual:** **Fase 3 — Implementação do MVP e Deploy em Cloud Gratuita (EM ANDAMENTO — `MVP-01` PR #47, `MVP-02` #36 PR #48, `MVP-03` #37 PR #51, `MVP-04A` #39 PR #53, `MVP-04B` #40 PR #55, `MVP-04C` #41 PR #59, `DOCS-01` #58 PR #70 e `MVP-04D` #42 PR #71 integrados na `development`; backlog de UX/protótipo da Onda 1A `UX-01` `#60`–`#68` e refinamento pós-MVP `UX-02` `#69` publicados; próximos passos: `UX-01` #60–#68 (desbloqueia `MVP-04E` #43 e `MVP-04F` #44) e `MVP-04G` #45)**.
+- **Branch de Integração (Fase 3):** `development` (com `GOV-04`, `using-git-worktree`, `MVP-01`, `MVP-02`, `MVP-03`, `MVP-04A`, `MVP-04B`, `MVP-04C`, `DOCS-01`, `MVP-04D` (PR #71) e retroalimentação Opção A do `ADR-014`).
 - **Última Atualização:** `23/11/2026`
 - **Status Geral das Fases:**
   - ✅ **Fase 1 (Engenharia de Requisitos):** Concluída (`validated-backlog--v1.0`) e sincronizada com Lote 1 (#30), Gamificação (`ADR-016`) e Lote 3 (#32).
   - ✅ **Fase 2 (Projeto Arquitetural):** Concluída integralmente (`2.1`–`2.9`, `architecture-design--v1.0`), com `ADR-001`–`ADR-016`, `openapi.yaml` v1.2.0-2.8 (0 erros Redocly CLI), coleção Bruno (33 reqs + fixture), revisão adversarial (`R1`–`R21`) e fechamento.
   - ✅ **Frente Transversal — Gamificação Metodológica:** Concluída ([`framework-gamificacao.md`](./docs/fase2/03-modelagem/framework-gamificacao.md) e [ADR-016](./docs/fase2/02-adr/adr-016-framework-conceitual-gamificacao.md)) — híbrido **6D + Octalysis**, 8 marcos declarativos (`RN03 a–h`), 0 novas tabelas (`A12`).
   - ✅ **Frente A — Governança Multi-Agente (`GOV-01` a `GOV-04`):** Concluída e integrada na `development` (PR #34).
-  - 🚧 **Fase 3 (Implementação do MVP e Deploy em Cloud Gratuita):** `MVP-01` (PR #47), `MVP-02` (#36, PR #48), `MVP-03` (#37, PR #51), `MVP-04A` (#39, PR #53), `MVP-04B` (#40, PR #55) e `MVP-04C` (#41, PR #59) integrados na `development`; em andamento **`MVP-04` (#38 — Onda 1A)** com frente de UX/protótipo **`UX-01` (#60–#68)** bloqueando `#43` e `#44` (sem bloquear `#42`).
+  - 🚧 **Fase 3 (Implementação do MVP e Deploy em Cloud Gratuita):** `MVP-01` (PR #47), `MVP-02` (#36, PR #48), `MVP-03` (#37, PR #51), `MVP-04A` (#39, PR #53), `MVP-04B` (#40, PR #55), `MVP-04C` (#41, PR #59) e `MVP-04D` (#42, PR #71) integrados na `development`; em andamento **`MVP-04` (#38 — Onda 1A)** com frente de UX/protótipo **`UX-01` (#60–#68)** bloqueando `#43` e `#44`.
 
 ---
 
@@ -64,8 +64,9 @@
 - [x] **MVP-02 (#36):** Configurar o esqueleto do monorepo (`pnpm` workspaces, TypeScript, Drizzle, Zod, `openapi-typescript`, `eslint-plugin-boundaries` com prova de falha intencional `S1`–`S8`/`A1`–`A8`, `docker-compose.yml` com Postgres dev/test + API em `0.0.0.0:3000`, trava `_test`, seed base `db:reset`, CI + `docs/dev/DATABASE.md` e `docs/dev/TESTING.md`) — integrado via PR #48.
 - [x] **MVP-03 (#37):** Implementar `packages/allergen-rules` com TDD estrito e 100% dos vetores JSON (`A06`, `ADR-014` — Opção A *fail-closed* estrito, `PACKAGE_VERSION = 1.0.0`, 56 testes no pacote + 9 na API + 35 no Mobile/Jest).
 - [x] **DOCS-01 (#58):** Formalizar no `ADR-012` (`## Detalhamento`) a padronização de fotos do catálogo adotada em `MVP-04B` (entrada `image/webp`/`jpeg`/`png` por *magic bytes*, teto `5 MiB`, saída WebP q82 sem EXIF, dimensões máximas `1024 × 1024` px sem recorte, proporção recomendada `4:3`/`16:9` e cache imutável por SHA-256) — integrado via PR #70.
+- [x] **MVP-04D (#42):** Fundação do app mobile — Expo Router (Onboarding + 4 abas `Descobrir`/`Cozinha`/`Coleção`/`Perfil` + `recipe/[dishId]`), `SqlCipherDatabase` com chave de 256 bits no `expo-secure-store` e verificação *fail-closed* de `PRAGMA cipher_version` (`A05`), `Migrator` idempotente por `PRAGMA user_version` (8 tabelas locais), `HttpClient` tipado por `openapi-typescript` (`X-Allergen-Package-Version` em toda chamada, refresh rotativo único entre chamadas concorrentes), `OperationEnqueuer` com `DirectOnlineOperationEnqueuer` (Estágio 1, `opId` UUID v7, cópia local só após confirmação), `DownloadSetSync`, `PhotoManager` (`ADR-012`), raiz de composição única (`A8`) e elemento de fronteira `mobile-api-contract`; 84 testes Jest com `node:sqlite` + verificação no emulador (arquivo do banco ilegível sem a chave) — integrado via PR #71.
 - [ ] **UX-01 (#60 — UX e Protótipo Inicial da Onda 1A):** Definir decisões transversais (tokens semânticos, navegação, tom *White Hat*, padrão visual de alérgenos `A06`, estados/offline Estágio 1, acessibilidade na cozinha) e protótipo HTML/CSS navegável (importável no Figma) em 8 sub-issues nativas por tela: `#61` (`UX-01A` Onboarding), `#62` (`UX-01B` Descobrir), `#63` (`UX-01C` Cozinha), `#64` (`UX-01D` Receita Offline), `#65` (`UX-01E` Avaliação), `#66` (`UX-01F` Celebração), `#67` (`UX-01G` Coleção) e `#68` (`UX-01H` Perfil). **Não bloqueia `#42`; bloqueia `#43` e `#44`.**
-- [ ] **MVP-04 (#38 — Épico Onda 1A, Primeiro Deploy):** Implementar núcleo jogável de ponta a ponta + gamificação 6D/Octalysis e realizar o primeiro deploy em Cloud 4C (Supabase PostgreSQL TLS + Storage + Render Docker) — sub-issues: `#39` (`MVP-04A` — PR #53), `#40` (`MVP-04B` — PR #55), `#41` (`MVP-04C` — PR #59), `#42` (`MVP-04D` — desbloqueada), `#43` (`MVP-04E` — bloqueada por `#60`), `#44` (`MVP-04F` — bloqueada por `#60`) e `#45` (`MVP-04G`).
+- [ ] **MVP-04 (#38 — Épico Onda 1A, Primeiro Deploy):** Implementar núcleo jogável de ponta a ponta + gamificação 6D/Octalysis e realizar o primeiro deploy em Cloud 4C (Supabase PostgreSQL TLS + Storage + Render Docker) — sub-issues: `#39` (`MVP-04A` — PR #53), `#40` (`MVP-04B` — PR #55), `#41` (`MVP-04C` — PR #59), `#42` (`MVP-04D` — PR #71), `#43` (`MVP-04E` — bloqueada por `#60`), `#44` (`MVP-04F` — bloqueada por `#60`) e `#45` (`MVP-04G`).
 - [ ] **UX-02 (#69 — Refinamento Visual e Revisão Heurística Pós-MVP):** Rodada de *UI polish* e revisão heurística com o app rodando no emulador (bloqueada por `#60`, `#43` e `#44`), desdobrada em novas sub-issues referenciando `UX-01A`–`UX-01H` (sem reabrir as issues fechadas da v1).
 - [ ] **MVP-05 (#46 — Épico Onda 1B, Fechamento Estágio 1):** Rotina (`US06`/`US07`/`US08`), Despensa (`US03`), Busca (`US04`), Utensílios (`US11`), Conta completa (`POST /v1/account/email`, `DELETE /v1/account`) e Curadoria assistida por IA (`US18` Kimi/Recorded) — fatiamento em sub-issues após concluir `#38`.
 
@@ -73,14 +74,19 @@
 
 ## 4. Handoff da Última Sessão
 
-- **Data e Agente:** `23/11/2026` — Antigravity CLI (papel: Engenheiro de Arquitetura / Documentação).
-- **Branch de Trabalho:** `development` (PR #70 integrado em `d1a52f8`; `STATE.md` e Diário atualizados direto na `development`).
-- **O que foi feito (`DOCS-01` #58 — Retroalimentação do `ADR-012` via `/solve-issue --use-worktree --no-cut --no-plan`):**
-  1. Validado em produção o fluxo `/solve-issue --use-worktree` (Perfil A — docs, sem `pnpm install`) em `.worktrees/docs-issue-58-adr-012-photo-standard` sobre `origin/development`.
-  2. Conferida coerência 100% entre `apps/api/src/modules/importer/internal/photo-processor.ts`, `routes.ts`, `apps/api/src/shared/problem.ts`, `apps/api/src/modules/catalog/internal/{routes,photo-storage}.ts` e `docs/dev/ARCHITECTURE.md`.
-  3. Adicionada ao final de `docs/fase2/02-adr/adr-012-fotos.md` a seção `## Detalhamento (Padronização de Tipos e Formatos de Imagem — 23/11/2026)` preservando integralmente o texto histórico (Playbook 02 §2 Caso A), com PR #70 integrado na `development` e critérios verificados marcados na issue `#58`.
+- **Data e Agente:** `23/11/2026` — Claude Code (papel: Engenheiro Mobile / Plataforma Offline e Revisor de Código).
+- **Branch de Trabalho:** `feat/issue-42-mobile-foundation` → PR #71 para `development` (`STATE.md` e Diário incluídos no mesmo PR).
+- **O que foi feito (`MVP-04D` #42 via `/solve-issue #42 --no-cut`):**
+  1. Núcleo `apps/mobile/src/core/`: `local-db` (`SqlCipherDatabase`, `DatabaseKeyStore` no SecureStore, fila FIFO de conexão única, `Migrator`), `network` (`HttpClient` tipado, `SessionGate` com conta anônima, erros tipados), `sync` (`OperationEnqueuer` revisado, `DirectOnlineOperationEnqueuer`, `DownloadSetSync`, gerador UUID v7) e `photos` (`PhotoManager`).
+  2. Navegação Expo Router com telas provisórias por feature, tokens de tema provisórios (`shared/theme`) e raiz de composição única exposta por `DependenciesProvider`.
+  3. Contratos: `contracts:generate`/`contracts:check` cobrindo o `openapi.generated.ts` do mobile e job `contracts` da CI disparado também por `apps/mobile/**`.
+  4. Verificação: lint/format/typecheck/contratos verdes, `TZ=UTC pnpm test` (56 + 62 + 84) e *development build* no emulador Android (Onboarding → 4 abas, regras 1.0.0 via Metro, conta anônima `201`, `download-set` `200`, `sqlite3` → `file is not a database (26)` no arquivo puxado do aparelho).
 - **Decisões tomadas:**
-  - **`openapi.yaml` mantido inalterado (item opcional na `#58`):** alterar a `description` da rota de foto exigiria regenerar `apps/api/src/shared/openapi.generated.ts`, violando o escopo exclusivo de documentação (`apps/api` fora de escopo).
-- **Arquivos criados/alterados:** `docs/fase2/02-adr/adr-012-fotos.md` (PR #70), `STATE.md` e `docs/fase3/diario_de_bordo-fase3.md`.
+  - **Fake de banco sobre `node:sqlite`:** testes do mobile executam SQL real; só a cifra fica para o emulador (exige Node ≥ 22.13).
+  - **Estágio 1 grava a cópia local só após `confirmed`:** offline/`5xx`/rejeição não tocam o banco; o resultado `unavailable` devolve a operação para reenvio com o mesmo `opId`.
+  - **Reset do banco local só com chave divergente:** build sem SQLCipher falha fechado sem apagar nada.
+  - **`PhotoManager` em `documentDirectory`** (não no cache), WebP nomeado por SHA-256 com checagem de integridade (`ADR-012` atualizado em #70).
+- **Arquivos criados/alterados:** `apps/mobile/{app,src,test}/**`, `apps/mobile/{app.json,package.json}`, `pnpm-lock.yaml`, `package.json`, `scripts/check-contracts.mjs`, `eslint.config.mjs`, `.github/workflows/ci.yml`, `docs/dev/{ARCHITECTURE,TESTING}.md`, `STATE.md` e `docs/fase3/diario_de_bordo-fase3.md`.
 - **Próximo passo recomendado:**
-  1. Remover o worktree já integrado (`.worktrees/docs-issue-58-adr-012-photo-standard`) e avançar em **`UX-01` (#60 e sub-issues `#61`–`#68`)** e/ou **`MVP-04D` (#42)** em paralelo usando `/solve-issue --use-worktree`.
+  1. Avançar em **`UX-01` (#60, sub-issues `#61`–`#68`)**, que desbloqueia `MVP-04E` (#43) e `MVP-04F` (#44) — estas registram os projetores locais por tipo de operação na composição e substituem as telas provisórias.
+  2. Ambientes locais com API antiga: `docker compose up -d --build api` + `pnpm db:migrate` antes de testar o app no emulador.

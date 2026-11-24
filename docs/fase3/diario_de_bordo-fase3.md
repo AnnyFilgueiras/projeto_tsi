@@ -412,3 +412,57 @@
 ### Pendências para a próxima sessão
 - Remover o worktree pós-merge (`.worktrees/docs-issue-58-adr-012-photo-standard`) e iniciar **`UX-01` (#60 e sub-issues `#61`–`#68`)** e/ou **`MVP-04D` (#42)** via `/solve-issue --use-worktree`.
 
+---
+
+## [23/11/2026] — MVP-04D (#42): Mobile — Fundação Expo Router, SQLCipher, HttpClient Tipado e OperationEnqueuer (Estágio 1)
+
+- **Papel da IA:** Engenheiro Mobile / Plataforma Offline e Revisor de Código (Claude Code), aplicando as skills `.agents/skills/solve-issue`, `.agents/skills/tdd`, `.agents/skills/code-comments` e `.agents/skills/code-review`.
+- **Técnicas aplicadas:** planejamento somente leitura em `.plans/feat-issue-42-mobile-foundation.md` com aprovação da dupla antes do código; TDD vertical (`RED → GREEN`) para `Migrator`, fila de transações serializadas, `SqlCipherDatabase`, `HttpClient` (header, refresh, *single-flight*), `SessionGate`, `DirectOnlineOperationEnqueuer`, UUID v7, `DownloadSetSync` e `PhotoManager`; `FakeLocalDatabase` sobre `node:sqlite` para executar SQL real no Jest; teste de navegação com `expo-router/testing-library`; prova de falha intencional de fronteiras (7 imports proibidos); verificação real em *development build* no Emulador Android com inspeção do arquivo do banco via `adb`/`sqlite3`.
+- **Prompts-chave / Contexto da sessão:**
+  1. Invocação de `/solve-issue #42 --no-cut`.
+  2. Aprovação do plano com o aviso de que a `development` recebeu o merge do `ADR-012` atualizado (#70) — levando ao ajuste do `PhotoManager` (armazenamento persistente + integridade por SHA-256).
+  3. Após o PR #71, solicitação de atualizar `STATE.md` e Diário e fazer push na mesma branch do PR.
+- **Insumos usados:** Issue `#42`, `AGENTS.md`, `STATE.md`, `docs/dev/{ARCHITECTURE,PRIVACY,TESTING}.md`, `docs/playbooks/03-qualidade-fronteiras-e-contratos.md`, `docs/fase2/02-adr/adr-012-fotos.md`, `docs/fase2/04-contratos/openapi.yaml`, `apps/api/src/cross-cutting/{sync,identity}/internal/**` (hash de idempotência e rotas), `apps/api/src/modules/progress/internal/unlock-rules.ts` e `eslint.config.mjs`.
+- **Artefatos produzidos:**
+  - **`core/local-db` (`ADR-005`, `A2`, `A5`, `A05`):** `local-database.ts` (porta com `transaction`), `serialized-database.ts`, `sqlcipher-database.ts`, `database-key-store.ts`, `secure-store-database-key-adapter.ts`, `migrator.ts` e `migrations.ts` (`profile_local`, `restrictions_local`, `candidates_local`, `recipes_local`, `local_cooking_state`, `ratings_local`, `unlocks_local`, `meta_sync`).
+  - **`core/network` (`ADR-007`, `A7`):** `openapi.generated.ts`, `http-client.ts`, `http-errors.ts`, `token-store.ts`, `fetch-http-client-adapter.ts`, `secure-store-token-adapter.ts` e `session.ts`.
+  - **`core/sync` (`ADR-008`, `P04`, `RN04`, `RN09`):** `operation-enqueuer.ts` (resultado `confirmed`/`rejected`/`unavailable`/`queued`), `local-operation-projector.ts`, `direct-online-operation-enqueuer-adapter.ts`, `download-set-sync.ts` e `id-generator.ts`.
+  - **`core/photos` (`ADR-012`):** `photo-manager.ts` e `file-system-photo-manager-adapter.ts`.
+  - **Navegação e composição (`MVP-01`, `A1`, `A8`):** `app/{_layout,index,onboarding}.tsx`, `app/(tabs)/{_layout,discover,kitchen,collection,profile}.tsx`, `app/recipe/[dishId].tsx`, `src/app/composition/{index,config,dependencies-context}`, telas provisórias em `src/features/{suggestions,routine,progress,profile,recipe}/ui/`, `features/profile/data/onboarding-repository.ts` e `src/shared/{theme,ui}`.
+  - **Suítes de Teste:** 84 testes Jest no mobile (`test/core/*`, `test/navigation.test.tsx`, `test/allergen-rules.test.ts`); monorepo com 56 + 62 + 84 verdes.
+
+### Decisões tomadas
+1. **Conexão única com fila FIFO no banco local:** o `withExclusiveTransactionAsync` do `expo-sqlite` abre outra conexão sem `PRAGMA key`, incompatível com SQLCipher.
+2. **Fail-closed sem SQLCipher (`A05`):** `PRAGMA cipher_version` vazio impede abrir o banco, pois o `PRAGMA key` seria ignorado e os dados ficariam em texto plano.
+3. **Estágio 1 com cópia local pós-confirmação:** projetores por tipo de operação, registrados pela camada `data/` da feature dona na composição; desbloqueios gravados só por acréscimo (`RN04`).
+4. **Versão do `DownloadSet` gravada só após receitas e fotos:** evita que um `304` posterior esconda receitas que falharam no download.
+5. **Novo elemento de fronteira `mobile-api-contract`:** tipos gerados do contrato acessíveis a portas, `core/sync` e camadas `data`/`domain`, nunca a `ui/`.
+6. **CI de contratos também para `apps/mobile/**`** e `contracts:check` cobrindo os dois arquivos gerados.
+
+### Artefatos alterados (retroalimentação)
+- `docs/dev/ARCHITECTURE.md`: seção “Núcleo do app (`src/core/` — `MVP-04D`)” com portas, adaptadores, transações serializadas e troca Estágio 1 → 2.
+- `docs/dev/TESTING.md`: comandos de contrato atualizados, fake de banco sobre `node:sqlite` e Seção 5 (*development build* + prova de cifra em disco).
+- `.github/workflows/ci.yml`, `scripts/check-contracts.mjs`, `package.json` e `eslint.config.mjs`.
+- `STATE.md` e este Diário: fechamento de `MVP-04D` (#42, PR #71).
+
+### Iterações relevantes (erros e retrabalho da IA)
+1. **Campo errado no `DownloadSetSync`:** o código lia `candidate.dish.id`, mas `DishSummary` expõe `dishId`; o fixture de teste repetia o erro e os testes passavam — o `typecheck` contra os tipos gerados do OpenAPI capturou a divergência.
+2. **Teste de `Migrator` com código sem sentido:** a primeira versão de um caso continha um *spy* inútil; reescrita antes de rodar a fase RED.
+3. **Teste de navegação com ordem de setup incorreta:** inseria linha antes das migrations; corrigido migrando no `beforeEach`.
+4. **2 achados confirmados no `code-review` (corrigidos com teste RED → GREEN):**
+   - Após `401`, se outra chamada já tivesse encerrado a sessão, o cliente reenviaria um refresh token gasto, o que revogaria a família de tokens (`ADR-007`, `R13`) — agora lança `SessionExpiredError`.
+   - A composição apagava o banco local em qualquer falha de abertura, inclusive com SQLCipher ausente — agora só reinicia a cópia quando a chave não confere.
+5. **Comando de verificação documentado incorreto:** `sqlite3 '.tables'` falha em silêncio na v3.53; substituído por `select count(*) from sqlite_master;` (`file is not a database (26)`).
+
+### Divergências registradas (briefing/professor × artefatos)
+- `expo-crypto` só gera UUID v4, enquanto o contrato exige `opId` v7: implementado gerador v7 local (RFC 9562) sobre bytes aleatórios do `expo-crypto`.
+
+### Riscos aceitos
+- Reset da cópia local quando a chave do SecureStore é perdida apaga o estado “em preparo” (único dado exclusivamente local no Estágio 1); o restante é recuperado pelo `DownloadSet`.
+- Testes do mobile exigem Node ≥ 22.13 (`node:sqlite` sem flag); a CI usa a versão 22 mais recente.
+- Ícones das abas ainda ausentes (glifo padrão) e telas provisórias até `UX-01`/`MVP-04E`/`MVP-04F`.
+- Ambiente local da dupla estava com imagem antiga da API e sem a migration `0003` em `panelada_dev`; corrigido com `docker compose up -d --build api` + `pnpm db:migrate` (sem mudança de código).
+
+### Pendências para a próxima sessão
+- Avançar em **`UX-01` (#60, `#61`–`#68`)** para desbloquear `MVP-04E` (#43) e `MVP-04F` (#44), que registrarão os projetores locais e substituirão as telas provisórias.
+
