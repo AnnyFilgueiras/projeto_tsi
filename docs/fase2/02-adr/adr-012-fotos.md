@@ -110,3 +110,14 @@ R10 (estendido às imagens).
 - **Porta `PhotoStorage` (`P02f`) e Hospedagem no Supabase Storage (Opção 4C):** Para manter paridade entre o Docker Compose local e o deploy real em nuvem gratuita (ADR-004), a gravação e leitura de fotos no servidor ficam atrás da porta `PhotoStorage`:
   - **Local (Docker Compose):** `LocalDiskPhotoStorage` grava os arquivos WebP nomeados por hash no volume do Compose e a própria API os serve.
   - **Deploy Cloud Gratuita:** `SupabasePhotoStorage` grava os arquivos WebP no bucket gratuito do Supabase Storage, mantendo o download idempotente por hash no nome e o armazenamento local persistente no aparelho (`PhotoManager`) para uso offline das receitas planejadas.
+
+## Detalhamento (Padronização de Tipos e Formatos de Imagem — 23/11/2026)
+
+Formaliza o padrão técnico implementado em `MVP-04B` (`apps/api/src/modules/importer/internal/photo-processor.ts` e `docs/dev/ARCHITECTURE.md`), mantendo rastreio com `A09`, `A04` e `US05`:
+
+- **Entrada aceita na curadoria (`PUT /v1/curation/proposals/{proposalId}/photo`):** `image/webp`, `image/jpeg` e `image/png`, validados por *magic bytes*. Qualquer outro formato, arquivo vazio ou payload corrompido/não decodificável retorna `415` (`unsupported-media-type`).
+- **Teto de upload:** `5 MiB` (`5 * 1024 * 1024` bytes); arquivos que excedem esse limite retornam `413` (`payload-too-large`).
+- **Normalização de saída:** sempre **`image/webp`** com qualidade **`82`**, rotação automática pela orientação EXIF e remoção de metadados EXIF na recompressão.
+- **Dimensões máximas sem recorte:** teto de **`1024 × 1024` px** (`fit: 'inside'`, `withoutEnlargement: true`), preservando integralmente a proporção original sem cortes nem ampliação artificial.
+- **Proporção recomendada na curadoria:** **`4:3`** ou **`16:9`** para cards e tela de receita no mobile, sem recorte forçado no servidor para não mutilar fotos verticais ou largas.
+- **Endereçamento por hash e cache imutável:** o binário WebP normalizado é nomeado pelo hash **SHA-256** do conteúdo e servido com `Cache-Control: public, max-age=31536000, immutable`.
