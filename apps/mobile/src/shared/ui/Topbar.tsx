@@ -25,7 +25,8 @@ export function Topbar({ title, leading, onLeadingPress, trailing }: TopbarProps
       <Text accessibilityRole="header" style={[styles.title, !leading && styles.titleAlone]}>
         {title}
       </Text>
-      {trailing}
+      {/* Wrapper keeps self-aligned children (e.g. Pill) vertically centered in the bar. */}
+      {trailing ? <View style={styles.trailing}>{trailing}</View> : null}
     </View>
   );
 }
@@ -39,5 +40,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xs,
   },
   title: { ...typography.subtitle, flex: 1, color: colors.textPrimary },
+  trailing: { paddingRight: spacing.sm },
   titleAlone: { paddingHorizontal: spacing.md - spacing.xs },
 });
