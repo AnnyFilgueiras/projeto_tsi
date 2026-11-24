@@ -160,7 +160,7 @@ button.chip { min-height: var(--touch-min); }
 .tab .dot { position: absolute; top: 10px; left: calc(50% + 10px); width: 9px; height: 9px; background: var(--color-primary); border-radius: 50%; border: 2px solid var(--color-surface); }
 
 /* ---------- Toast e folha inferior ---------- */
-#toast { position: absolute; left: 12px; right: 12px; bottom: 80px; background: #2A2420; color: #fff; border-radius: var(--radius-md); padding: 12px 14px; font-size: 14px; display: flex; align-items: center; gap: 10px; z-index: 30; box-shadow: var(--elevation-sheet); }
+#toast { position: absolute; left: 12px; right: 12px; bottom: 84px; background: #2A2420; color: #fff; border-radius: var(--radius-md); padding: 12px 14px; font-size: 14px; display: flex; align-items: center; gap: 10px; z-index: 30; box-shadow: var(--elevation-sheet); }
 #toast .link { color: #F6B79F; min-height: 32px; }
 .scrim { position: absolute; inset: 0; background: rgba(20,14,10,.45); z-index: 40; display: flex; align-items: flex-end; }
 .sheet { background: var(--color-surface); width: 100%; border-radius: var(--radius-lg) var(--radius-lg) 0 0; padding: 8px var(--space-md) var(--space-lg); max-height: 85%; overflow-y: auto; box-shadow: var(--elevation-sheet); }
@@ -909,8 +909,9 @@ function render(resetScroll = false) {
   const prevScroll = $('#scroll') ? $('#scroll').scrollTop : 0;
   const r = S.route.name;
   const screens = { onboarding: screenOnboarding, discover: screenDiscover, kitchen: screenKitchen, recipe: screenRecipe, rate: screenRate, celebrate: screenCelebrate, collection: screenCollection, profile: screenProfile };
-  const showTabs = ['discover', 'kitchen', 'collection', 'profile', 'recipe'].includes(r);
-  const activeTab = r === 'recipe' ? (S.route.from && TABS.some((t) => t[0] === S.route.from) ? S.route.from : 'kitchen') : r;
+  // A Receita fica fora de (tabs) no shell de #42, então a barra de abas some nela (§1.1).
+  const showTabs = ['discover', 'kitchen', 'collection', 'profile'].includes(r);
+  const activeTab = r;
   $('#app').innerHTML = screens[r]()
     + (showTabs ? `<nav class="tabbar" aria-label="Navegação principal">${TABS.map(([k, l, ic]) => `<button class="tab ${activeTab === k ? 'active' : ''}" data-a="tab" data-v="${k}" ${activeTab === k ? 'aria-current="page"' : ''}><span class="ic" aria-hidden="true">${ic}</span>${l}${k === 'kitchen' && S.kitchenDot ? '<span class="dot" aria-label="novidade"></span>' : ''}</button>`).join('')}</nav>` : '')
     + (S.toast ? `<div id="toast" role="status"><span style="flex:1">${esc(S.toast.text)}</span>${S.toast.action ? `<button class="link" data-a="${S.toast.action.a}" data-v="${S.toast.action.v}">${S.toast.action.label}</button>` : ''}</div>` : '')

@@ -41,19 +41,21 @@
 
 ### 1.1 Arquitetura de informação e navegação (`#38`, `#42`)
 
-| Rota (Expo Router — `#42`) | Tela | Tipo | Exige rede no Estágio 1? |
+| Rota (Expo Router) | Tela | Tipo | Exige rede no Estágio 1? |
 |---|---|---|---|
 | `onboarding` | Onboarding (3 passos) | Pilha, só no 1º acesso | Sim (`POST /v1/accounts/anonymous`, salvar restrições) |
 | `(tabs)/discover` | **Descobrir** | Aba 1 | Sim (sugestões vêm da API — `ADR-001`) |
 | `(tabs)/kitchen` | **Cozinha** | Aba 2 | Leitura não; "Cozinhar agora" sim (download) |
 | `(tabs)/collection` | **Coleção** | Aba 3 | Não (dados locais no `SqlCipherDatabase`) |
 | `(tabs)/profile` | **Perfil** | Aba 4 | Leitura não; editar restrição/preferência sim |
-| `recipe/[dishId]` | **Receita** | Pilha sobre as abas | Não, se baixada (`DownloadSet`) |
-| `recipe/[dishId]/rate` | **Avaliação** | Modal em tela cheia | Sim (salvar `Rating`) |
-| `recipe/[dishId]/celebrate` | **Celebração** | Modal em tela cheia | Não (resultado já devolvido pelo salvamento) |
+| `recipe/[dishId]` | **Receita** | Pilha fora de `(tabs)` (já existe em `#42`) | Não, se baixada (`DownloadSet`) |
+| `recipe/[dishId]/rate` *(sugerida para `#44`)* | **Avaliação** | Modal em tela cheia | Sim (salvar `Rating`) |
+| `recipe/[dishId]/celebrate` *(sugerida para `#44`)* | **Celebração** | Modal em tela cheia | Não (resultado já devolvido pelo salvamento) |
+
+> `onboarding`, `(tabs)/*` e `recipe/[dishId]` já existem no shell de `#42`; as rotas de Avaliação e Celebração são sugestão — `#44` pode implementá-las como modais da mesma pilha sem mudar a jornada.
 
 Regras:
-1. **Barra de abas fixa** com 4 itens (ícone + rótulo sempre visível, nunca só ícone): `Descobrir`, `Cozinha`, `Coleção`, `Perfil`. Fica oculta apenas no Onboarding, na Avaliação e na Celebração (fluxos focados).
+1. **Barra de abas fixa** com 4 itens (ícone + rótulo sempre visível, nunca só ícone): `Descobrir`, `Cozinha`, `Coleção`, `Perfil`. Fica oculta no Onboarding e nas telas de pilha (Receita, Avaliação e Celebração — fluxos focados; na Receita isso libera espaço para o modo bancada). Essas telas sempre têm Voltar/Fechar.
 2. **Sem becos sem saída:** toda tela tem saída explícita — botão Voltar no cabeçalho das telas de pilha, botão **Fechar/Cancelar** nos modais e CTAs de continuidade nos estados vazios (ver tabela de saídas em cada seção).
 3. **Rotas canônicas de ida e volta:** `Descobrir → (aprovar) → Cozinha → Receita → Avaliação → Celebração → Coleção | Cozinha | Descobrir`. A `Coleção` abre `Receita` de evoluções (somente leitura quando bloqueada) e retorna para si mesma.
 4. **Indicador de novidade, não de cobrança:** a aba `Cozinha` recebe um ponto discreto (`primary`) quando uma candidata nova chega; o ponto some ao abrir a aba. **Nunca** usar contadores de pendência vermelhos.
