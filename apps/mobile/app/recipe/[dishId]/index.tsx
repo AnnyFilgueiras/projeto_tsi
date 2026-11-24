@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from 'expo-router';
-import { RecipeScreen } from '../../src/features/recipe/ui/RecipeScreen';
+import { RecipeScreen } from '../../../src/features/recipe/ui/RecipeScreen';
 
 export default function RecipeRoute() {
   const { dishId } = useLocalSearchParams<{ dishId: string }>();

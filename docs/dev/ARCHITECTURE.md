@@ -82,7 +82,7 @@ apps/mobile/src/
 │       ├── domain/               # Casos de uso e funções puras (ex.: UnlockCalculator, ReminderScheduler)
 │       └── data/                 # Repositórios da feature (único ponto que importa LocalDatabase)
 ├── core/                         # local-db (SqlCipher), network, sync, photos
-├── shared/                       # Componentes UI genéricos e tipos puros
+├── shared/                       # theme (tokens), format (PT-BR), ui (componentes de apresentação), assets
 └── app/composition/              # Raiz de composição única (regra A8 — sem Singletons)
 ```
 
@@ -110,6 +110,17 @@ apps/mobile/src/
 - **Estágio 1 (`ADR-008`):** o `DirectOnlineOperationEnqueuer` só grava a cópia local **depois** da confirmação do servidor, via *projetores* por tipo de operação (`LocalOperationProjectors`), registrados pela camada `data/` da feature dona na composição. Offline, `5xx` ou rejeição não tocam o banco local.
 - **Troca para o Estágio 2:** substituir a criação do enqueuer em `src/app/composition/index.ts` pelo `OutboxOperationEnqueuer` + `Synchronizer`. Features e telas não mudam (o tipo de resultado já prevê `queued`).
 - **Navegação (`MVP-01`):** `app/_layout.tsx` monta o `DependenciesProvider` (grafo criado uma vez, sem singletons); `app/(tabs)/_layout.tsx` redireciona para `/onboarding` até `profile_local.onboarded_at` existir; as rotas só montam telas de `src/features/<f>/ui/` e repassam portas por props.
+- **Rotas de pilha da Receita (`MVP-04E1`):** `app/recipe/[dishId]/` é uma `Stack` (`index`, `rate`, `celebrate`); `rate` e `celebrate` abrem como `fullScreenModal`. Por ficarem fora de `(tabs)`, a barra de abas some sozinha. Cada issue de tela preenche só o próprio arquivo de rota.
+
+### Biblioteca visual (`src/shared/{theme,format,ui}` — `MVP-04E1`)
+
+- **Só apresentação:** `shared/ui` recebe dados e callbacks por props; não importa `features/`, `core/`, `expo-router` nem o contrato gerado (o ESLint já barra). Adaptadores de navegação ficam em `app/` (ex.: `RouterTabBar` em `app/(tabs)/_layout.tsx` converte as props do react-navigation para o `TabBar`).
+- **Tokens obrigatórios:** cor, espaçamento, raio, tipografia, sombra e alvo de toque vêm de `shared/theme` (cópia literal da §1.2 de `docs/fase3/ux-onda1a.md`). Nada de hex, `fontSize`, sombra ou raio literal em componente ou tela. As cores `allergen*` só significam segurança alimentar; erro técnico usa `danger`.
+- **Textos de segurança fixos (`A06`):** banner `RN16`, título e motivos do alerta *fail-closed*, rótulos do selo e "Contém alérgeno do seu perfil" vivem em `shared/ui/allergen/copy.ts`; rótulos dos 19 códigos em `allergen/labels.ts`. As telas não reescrevem esses textos.
+- **Ícones e imagens, nunca emoji:** ícones são SVG 24×24 com `currentColor` em `shared/assets/icons/`, carregados pelo `react-native-svg-transformer` (ver `metro.config.js`; no Jest viram um `View` inerte). Use `<Icon name="…" />`; o nome é tipado por `icons/registry.ts`. Imagens entram como `ImageSourcePropType` (`DishThumb`, `BadgeIcon`, `EmptyState`), com *placeholder* vetorial quando não houver foto.
+- **Acessibilidade (§1.6):** alvo ≥ `touchTarget.min`, sem `allowFontScaling={false}`, estado por ícone + texto, `accessibilityLabel` obrigatório em botão só de ícone; animações (`ProgressBar`, `Skeleton`) duram ≤ 300 ms e param com "reduzir movimento" (`useReducedMotion`).
+- **Novo componente = arquivo novo** em `shared/ui/` + export em `shared/ui/index.ts` (+ entrada em `icons/registry.ts` se trouxer ícone). Alterar a API de um componente existente vai em PR próprio, para não conflitar com telas em paralelo. Para conferir tudo visualmente, abra `/dev/ui-catalog` no dev build (em produção redireciona para `/`).
+- **Datas e números:** `shared/format` (`formatDate`, `formatTime`, `formatLastSync`, `formatStars`) monta PT-BR à mão, na hora local do aparelho, sem depender de `Intl` no Hermes.
 
 ### Dono das tabelas locais (`A1`, `A3`, `A8` — `MVP-04E2`)
 

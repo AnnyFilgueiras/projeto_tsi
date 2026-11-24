@@ -8,6 +8,7 @@
     "noEmit": true
   },
   "include": [
+    "declarations.d.ts",
     "app/**/*.ts",
     "app/**/*.tsx",
     "src/**/*.ts",
