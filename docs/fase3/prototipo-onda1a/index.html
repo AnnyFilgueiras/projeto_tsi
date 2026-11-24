@@ -1,0 +1,991 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panelada — Protótipo da Onda 1A (UX-01)</title>
+<!--
+  Protótipo navegável da Onda 1A (UX-01 #60, sub-issues #61–#68).
+  Especificação: docs/fase3/ux-onda1a.md. Arquivo único, sem dependências externas.
+  Abra index.html#figma para esconder o painel do protótipo.
+  Os nomes das CSS custom properties espelham os tokens semânticos da §1.2
+  (camelCase -> kebab-case) para mapear 1:1 em apps/mobile/src/shared/theme/.
+-->
+<style>
+:root {
+  --color-background: #FAF7F2;
+  --color-surface: #FFFFFF;
+  --color-surface-alt: #F3EDE4;
+  --color-border: #E3DCD1;
+  --color-primary: #B4441F;
+  --color-on-primary: #FFFFFF;
+  --color-primary-soft: #FBE9E1;
+  --color-text-primary: #1F2937;
+  --color-text-secondary: #4B5563;
+  --color-text-muted: #6B7280;
+  --color-allergen-safe: #166534;
+  --color-allergen-safe-soft: #DCFCE7;
+  --color-allergen-warning: #92400E;
+  --color-allergen-warning-soft: #FEF3C7;
+  --color-allergen-danger: #B91C1C;
+  --color-allergen-danger-soft: #FEE2E2;
+  --color-on-allergen-danger: #FFFFFF;
+  --color-offline-banner: #E2E8F0;
+  --color-on-offline-banner: #1E293B;
+  --color-success-unlock: #6D28D9;
+  --color-success-unlock-soft: #EDE9FE;
+  --color-progress: #B4441F;
+  --color-danger: #B91C1C;
+  --space-xxs: 2px; --space-xs: 4px; --space-sm: 8px; --space-md: 16px; --space-lg: 24px; --space-xl: 32px; --space-xxl: 48px;
+  --radius-sm: 8px; --radius-md: 12px; --radius-lg: 20px; --radius-pill: 999px;
+  --touch-min: 48px; --touch-comfortable: 56px;
+  --elevation-card: 0 2px 6px rgba(0,0,0,.08);
+  --elevation-sheet: 0 -4px 16px rgba(0,0,0,.16);
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { font-family: var(--font); background: #2B2622; color: var(--color-text-primary); display: flex; gap: 32px; justify-content: center; align-items: flex-start; padding: 24px; min-height: 100vh; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+input, textarea { font: inherit; }
+
+/* ---------- Painel do protótipo (fora do app) ---------- */
+#panel { width: 300px; background: #1B1815; color: #EDE7DF; border-radius: 16px; padding: 16px; font-size: 13px; position: sticky; top: 24px; max-height: calc(100vh - 48px); overflow: auto; }
+#panel h1 { font-size: 15px; margin: 0 0 4px; }
+#panel p { margin: 0 0 12px; color: #B9AFA4; line-height: 1.4; }
+#panel h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #D9A48F; margin: 16px 0 6px; }
+#panel .row { display: flex; flex-wrap: wrap; gap: 6px; }
+#panel button { background: #332D28; border: 1px solid #4A423B; color: #EDE7DF; border-radius: 8px; padding: 6px 9px; font-size: 12px; }
+#panel button:hover { background: #443C35; }
+#panel button.on { background: #B4441F; border-color: #D9A48F; }
+#panel .hint { font-size: 11px; color: #9C9187; margin-top: 6px; }
+body.figma #panel { display: none; }
+body.figma { background: #FFFFFF; }
+
+/* ---------- Moldura do aparelho ---------- */
+.device { width: 380px; height: 820px; background: #111; border-radius: 44px; padding: 10px; box-shadow: 0 20px 60px rgba(0,0,0,.45); flex-shrink: 0; }
+.phone { width: 360px; height: 800px; background: var(--color-background); border-radius: 34px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+.statusbar { height: 28px; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; padding: 0 22px; font-size: 12px; font-weight: 600; color: var(--color-text-primary); }
+#app { flex: 1; display: flex; flex-direction: column; min-height: 0; position: relative; }
+.screen { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.body { flex: 1; overflow-y: auto; padding: 0 var(--space-md) var(--space-lg); }
+.body.no-pad { padding: 0; }
+.footer { flex-shrink: 0; padding: var(--space-sm) var(--space-md) var(--space-md); background: var(--color-background); border-top: 1px solid var(--color-border); }
+
+/* ---------- Tipografia ---------- */
+.display { font-size: 28px; line-height: 34px; font-weight: 700; margin: 0; }
+.title { font-size: 22px; line-height: 28px; font-weight: 700; margin: 0; }
+.subtitle { font-size: 18px; line-height: 24px; font-weight: 600; margin: 0; }
+.bodytext { font-size: 16px; line-height: 24px; }
+.caption { font-size: 14px; line-height: 20px; color: var(--color-text-muted); }
+.overline { font-size: 12px; line-height: 16px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--color-text-secondary); }
+.muted { color: var(--color-text-muted); }
+.secondary { color: var(--color-text-secondary); }
+
+/* ---------- Cabeçalhos ---------- */
+.header { padding: var(--space-sm) var(--space-md) var(--space-md); flex-shrink: 0; }
+.topbar { display: flex; align-items: center; gap: var(--space-xs); padding: 0 var(--space-xs); min-height: 56px; flex-shrink: 0; }
+.topbar .t { flex: 1; font-weight: 600; font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.iconbtn { width: var(--touch-min); height: var(--touch-min); border: 0; background: transparent; border-radius: var(--radius-pill); font-size: 22px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.iconbtn:hover { background: var(--color-surface-alt); }
+
+/* ---------- Botões ---------- */
+.btn { min-height: var(--touch-min); border-radius: var(--radius-md); padding: 0 var(--space-md); font-size: 16px; font-weight: 600; border: 2px solid transparent; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-sm); }
+.btn.block { width: 100%; }
+.btn.lg { min-height: var(--touch-comfortable); }
+.btn.primary { background: var(--color-primary); color: var(--color-on-primary); }
+.btn.primary:disabled { background: #D9CFC4; color: #5B5249; }
+.btn.secondary { background: var(--color-surface); color: var(--color-primary); border-color: var(--color-primary); }
+.btn.secondary:disabled { color: #8A8178; border-color: #CFC6BB; }
+.btn.ghost { background: transparent; color: var(--color-primary); }
+.btn.danger-text { background: transparent; color: var(--color-danger); }
+.btn.unlock { background: var(--color-success-unlock); color: #fff; }
+.link { background: none; border: 0; color: var(--color-primary); font-weight: 600; min-height: var(--touch-min); padding: 0 var(--space-xs); text-decoration: underline; text-underline-offset: 3px; }
+.stack { display: flex; flex-direction: column; gap: var(--space-sm); }
+.hrow { display: flex; gap: var(--space-sm); }
+.hrow > * { flex: 1; }
+
+/* ---------- Cards e superfícies ---------- */
+.card { background: var(--color-surface); border-radius: var(--radius-md); box-shadow: var(--elevation-card); overflow: hidden; }
+.card.pad, .card .pad { padding: var(--space-md); }
+.section-title { display: flex; justify-content: space-between; align-items: baseline; margin: var(--space-lg) 0 var(--space-sm); }
+.photo { aspect-ratio: 4 / 3; display: flex; align-items: center; justify-content: center; font-size: 72px; position: relative; }
+.photo.thumb { width: 72px; height: 72px; aspect-ratio: auto; font-size: 34px; border-radius: var(--radius-sm); flex-shrink: 0; }
+.photo.strip { aspect-ratio: auto; height: 96px; font-size: 44px; }
+.meta { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 14px; color: var(--color-text-secondary); }
+.chip { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 14px; border-radius: var(--radius-pill); border: 1.5px solid var(--color-border); background: var(--color-surface); font-size: 14px; font-weight: 500; }
+.chip.sel { background: var(--color-primary-soft); border-color: var(--color-primary); color: var(--color-primary); font-weight: 600; }
+button.chip { min-height: var(--touch-min); }
+.chips { display: flex; flex-wrap: wrap; gap: var(--space-sm); }
+.pill { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: var(--radius-pill); }
+.pill.offline-ok { background: var(--color-offline-banner); color: var(--color-on-offline-banner); }
+.pill.unlock { background: var(--color-success-unlock-soft); color: var(--color-success-unlock); }
+.pill.soon { background: var(--color-surface-alt); color: var(--color-text-secondary); }
+
+/* ---------- Segurança alimentar (§1.4) ---------- */
+.seal { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 700; padding: 4px 10px; border-radius: var(--radius-pill); border: 0; min-height: 28px; }
+.seal.verified { background: var(--color-allergen-safe-soft); color: var(--color-allergen-safe); }
+.seal.source_declared { background: var(--color-allergen-warning-soft); color: var(--color-allergen-warning); }
+.seal.unverified { background: var(--color-allergen-danger-soft); color: var(--color-allergen-danger); }
+.rn16 { display: flex; gap: 8px; align-items: flex-start; background: var(--color-allergen-warning-soft); color: var(--color-allergen-warning); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 13px; line-height: 18px; font-weight: 500; }
+.rn16.compact { padding: 6px 10px; font-size: 12px; line-height: 16px; }
+.failclosed { background: var(--color-allergen-danger); color: var(--color-on-allergen-danger); border-radius: var(--radius-md); padding: 14px 16px; }
+.failclosed .h { font-size: 17px; font-weight: 800; display: flex; gap: 8px; align-items: center; }
+.failclosed p { margin: 6px 0 0; font-size: 14px; line-height: 20px; }
+.failclosed.compact { padding: 10px 12px; }
+.failclosed.compact .h { font-size: 15px; }
+.tag-danger { display: inline-block; font-size: 12px; font-weight: 700; color: var(--color-allergen-danger); background: var(--color-allergen-danger-soft); padding: 2px 8px; border-radius: var(--radius-pill); margin-top: 4px; }
+
+/* ---------- Estados (§1.5) ---------- */
+.offline-bar { background: var(--color-offline-banner); color: var(--color-on-offline-banner); font-size: 13px; font-weight: 600; padding: 8px 16px; display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+.notice { border-radius: var(--radius-md); padding: 12px 14px; font-size: 14px; line-height: 20px; }
+.notice.offline { background: var(--color-offline-banner); color: var(--color-on-offline-banner); }
+.notice.error { background: var(--color-allergen-danger-soft); color: var(--color-allergen-danger); }
+.notice.info { background: var(--color-surface-alt); color: var(--color-text-secondary); }
+.empty { text-align: center; padding: var(--space-xl) var(--space-md); }
+.empty .e { font-size: 56px; }
+.empty h3 { margin: var(--space-sm) 0; font-size: 18px; }
+.empty p { color: var(--color-text-secondary); margin: 0 0 var(--space-lg); line-height: 22px; }
+.sk { background: var(--color-surface-alt); border-radius: var(--radius-sm); animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .5; } }
+.lastsync { font-size: 12px; color: var(--color-text-muted); display: flex; gap: 6px; align-items: center; }
+
+/* ---------- Tab bar ---------- */
+.tabbar { height: 68px; flex-shrink: 0; display: flex; background: var(--color-surface); border-top: 1px solid var(--color-border); }
+.tab { flex: 1; border: 0; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 12px; font-weight: 600; color: var(--color-text-muted); position: relative; }
+.tab .ic { font-size: 22px; filter: grayscale(1); opacity: .7; }
+.tab.active { color: var(--color-primary); }
+.tab.active .ic { filter: none; opacity: 1; }
+.tab .dot { position: absolute; top: 10px; left: calc(50% + 10px); width: 9px; height: 9px; background: var(--color-primary); border-radius: 50%; border: 2px solid var(--color-surface); }
+
+/* ---------- Toast e folha inferior ---------- */
+#toast { position: absolute; left: 12px; right: 12px; bottom: 80px; background: #2A2420; color: #fff; border-radius: var(--radius-md); padding: 12px 14px; font-size: 14px; display: flex; align-items: center; gap: 10px; z-index: 30; box-shadow: var(--elevation-sheet); }
+#toast .link { color: #F6B79F; min-height: 32px; }
+.scrim { position: absolute; inset: 0; background: rgba(20,14,10,.45); z-index: 40; display: flex; align-items: flex-end; }
+.sheet { background: var(--color-surface); width: 100%; border-radius: var(--radius-lg) var(--radius-lg) 0 0; padding: 8px var(--space-md) var(--space-lg); max-height: 85%; overflow-y: auto; box-shadow: var(--elevation-sheet); }
+.sheet .grab { width: 40px; height: 4px; border-radius: 2px; background: var(--color-border); margin: 4px auto 12px; }
+
+/* ---------- Onboarding ---------- */
+.progressbar { height: 6px; background: var(--color-surface-alt); border-radius: 3px; overflow: hidden; }
+.progressbar > span { display: block; height: 100%; background: var(--color-progress); border-radius: 3px; transition: width .6s ease; }
+.consent { border: 2px solid var(--color-allergen-warning); background: var(--color-surface); border-radius: var(--radius-md); padding: 14px; }
+.consent.invalid { border-color: var(--color-allergen-danger); }
+.consent label { display: flex; gap: 12px; align-items: flex-start; min-height: var(--touch-min); padding-top: 10px; font-weight: 600; cursor: pointer; }
+.consent input { width: 24px; height: 24px; margin: 0; accent-color: var(--color-primary); flex-shrink: 0; }
+.search { width: 100%; min-height: var(--touch-min); border: 1.5px solid var(--color-border); border-radius: var(--radius-md); padding: 0 14px; background: var(--color-surface); font-size: 16px; }
+.group-title { font-size: 13px; font-weight: 700; color: var(--color-text-secondary); margin: 14px 0 8px; }
+
+/* ---------- Receita ---------- */
+.segmented { display: flex; background: var(--color-surface-alt); border-radius: var(--radius-md); padding: 4px; gap: 4px; }
+.segmented button { flex: 1; min-height: 44px; border: 0; border-radius: 9px; background: transparent; font-weight: 600; font-size: 14px; color: var(--color-text-secondary); white-space: nowrap; padding: 0 6px; }
+.segmented button.on { background: var(--color-surface); color: var(--color-primary); box-shadow: var(--elevation-card); }
+.ingredient { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--color-border); }
+.ingredient .n { flex: 1; font-size: 16px; }
+.ingredient.restricted .n { color: var(--color-allergen-danger); font-weight: 600; }
+.swapbtn { min-height: var(--touch-min); min-width: var(--touch-min); border: 1.5px solid var(--color-border); background: var(--color-surface); border-radius: var(--radius-md); font-weight: 600; font-size: 13px; color: var(--color-primary); padding: 0 10px; }
+.step { border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 8px; display: flex; gap: 12px; border: 0; width: 100%; text-align: left; background: transparent; }
+.step .num { width: 28px; height: 28px; border-radius: 50%; background: var(--color-surface-alt); display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+.step.done { color: var(--color-text-muted); }
+.step.done .num { background: var(--color-allergen-safe-soft); color: var(--color-allergen-safe); }
+.step.next { color: var(--color-text-secondary); }
+.step.current { background: var(--color-surface); border-left: 4px solid var(--color-primary); box-shadow: var(--elevation-card); font-size: 22px; line-height: 32px; font-weight: 500; color: var(--color-text-primary); padding: 16px; }
+.step.current .num { background: var(--color-primary); color: #fff; }
+.locked-banner { background: var(--color-success-unlock-soft); color: var(--color-success-unlock); border-radius: var(--radius-md); padding: 12px 14px; font-weight: 600; font-size: 14px; line-height: 20px; }
+
+/* ---------- Avaliação ---------- */
+.stars { display: flex; justify-content: center; gap: 4px; }
+.star { width: 52px; height: 52px; position: relative; font-size: 46px; line-height: 52px; text-align: center; color: #D9CFC4; user-select: none; }
+.star .fill { position: absolute; inset: 0; overflow: hidden; color: #E5A100; white-space: nowrap; }
+.star .half { position: absolute; top: 0; bottom: 0; width: 50%; border: 0; background: transparent; padding: 0; }
+.star .half.l { left: 0; } .star .half.r { right: 0; }
+.stepper { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 8px; }
+.stepper button { width: var(--touch-min); height: var(--touch-min); border-radius: 50%; border: 1.5px solid var(--color-border); background: var(--color-surface); font-size: 22px; font-weight: 700; color: var(--color-primary); }
+.stepper .val { font-size: 24px; font-weight: 700; min-width: 56px; text-align: center; }
+textarea { width: 100%; min-height: 84px; border: 1.5px solid var(--color-border); border-radius: var(--radius-md); padding: 12px; background: var(--color-surface); resize: vertical; font-size: 16px; line-height: 22px; }
+.field-label { font-weight: 600; margin: 18px 0 6px; display: flex; justify-content: space-between; }
+.field-label .opt { font-weight: 500; font-size: 13px; color: var(--color-text-muted); }
+
+/* ---------- Celebração / Coleção ---------- */
+.celebrate-hero { text-align: center; padding: var(--space-lg) var(--space-md) var(--space-md); }
+.celebrate-hero .e { font-size: 64px; animation: pop .5s ease-out; }
+@keyframes pop { 0% { transform: scale(.3); opacity: 0; } 80% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
+.unlock-card { background: var(--color-success-unlock-soft); border-radius: var(--radius-md); padding: 14px; display: flex; gap: 12px; align-items: center; }
+.badge-ic { width: 52px; height: 52px; border-radius: 50%; background: #FFF4D6; display: inline-flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; border: 2px solid #E5A100; }
+.badge-ic.off { background: var(--color-surface-alt); border-color: var(--color-border); filter: grayscale(1); opacity: .75; }
+.dishgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
+.dishcell { text-align: center; font-size: 11px; line-height: 14px; }
+.dishcell .sq { aspect-ratio: 1; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 26px; position: relative; margin-bottom: 4px; }
+.dishcell .sq.pending { background: var(--color-surface-alt) !important; filter: grayscale(1); opacity: .55; }
+.dishcell .ck { position: absolute; right: 3px; top: 3px; background: var(--color-allergen-safe); color: #fff; border-radius: 50%; width: 16px; height: 16px; font-size: 10px; display: flex; align-items: center; justify-content: center; }
+.chain { display: flex; flex-direction: column; gap: 0; }
+.node { display: flex; gap: 12px; align-items: center; padding: 10px; border-radius: var(--radius-md); border: 0; background: transparent; width: 100%; text-align: left; min-height: 64px; }
+.node:hover { background: var(--color-surface-alt); }
+.node .lvl { font-size: 11px; font-weight: 700; color: var(--color-text-muted); }
+.node.locked .photo { filter: grayscale(1); opacity: .5; }
+.connector { width: 2px; height: 14px; background: var(--color-border); margin-left: 45px; }
+.timeline-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--color-border); border-left: 0; border-right: 0; border-top: 0; background: transparent; width: 100%; text-align: left; }
+.rowbtn { display: flex; gap: 12px; align-items: center; width: 100%; border: 0; background: transparent; text-align: left; padding: 0; }
+.soon-row { display: flex; justify-content: space-between; align-items: center; min-height: var(--touch-min); color: var(--color-text-muted); border-bottom: 1px solid var(--color-border); }
+.saving { opacity: .6; }
+</style>
+</head>
+<body>
+
+<aside id="panel" aria-label="Painel do protótipo (não faz parte do app)">
+  <h1>Painel do protótipo</h1>
+  <p>Fora do app. Atalhos para telas, cenários e estados da Onda 1A. Especificação em <code>docs/fase3/ux-onda1a.md</code>.</p>
+
+  <h2>Cenário</h2>
+  <div class="row">
+    <button data-p="scenario" data-v="new">Novo usuário</button>
+    <button data-p="scenario" data-v="progress">Usuário com progresso</button>
+  </div>
+  <div class="hint">"Novo usuário" começa no Onboarding com tudo vazio.</div>
+
+  <h2>Ir para tela</h2>
+  <div class="row">
+    <button data-p="go" data-v="onboarding">Onboarding</button>
+    <button data-p="go" data-v="discover">Descobrir</button>
+    <button data-p="go" data-v="kitchen">Cozinha</button>
+    <button data-p="go" data-v="recipe">Receita</button>
+    <button data-p="go" data-v="rate">Avaliação</button>
+    <button data-p="go" data-v="celebrate">Celebração</button>
+    <button data-p="go" data-v="collection">Coleção</button>
+    <button data-p="go" data-v="profile">Perfil</button>
+  </div>
+
+  <h2>Rede e carregamento</h2>
+  <div class="row">
+    <button data-p="toggle" data-v="offline" id="pt-offline">Sem rede (Estágio 1)</button>
+    <button data-p="toggle" data-v="loading" id="pt-loading">Carregando (skeleton)</button>
+  </div>
+  <div class="hint">Sem rede: leituras locais funcionam; ações online mostram aviso e preservam o estado.</div>
+
+  <h2>Estados específicos</h2>
+  <div class="row">
+    <button data-p="state" data-v="discover-empty">Descobrir esgotado</button>
+    <button data-p="state" data-v="discover-offline">Descobrir sem rede (1º carregamento)</button>
+    <button data-p="state" data-v="allergen">Alerta de alérgeno</button>
+    <button data-p="state" data-v="locked">Evolução bloqueada</button>
+    <button data-p="state" data-v="repeat">Avaliar repetição</button>
+    <button data-p="state" data-v="no-restrictions">Perfil sem restrições</button>
+  </div>
+
+  <h2>Celebração (variantes)</h2>
+  <div class="row">
+    <button data-p="celebrate" data-v="1">1 · Evolução + badge</button>
+    <button data-p="celebrate" data-v="2">2 · Nova sem desbloqueio</button>
+    <button data-p="celebrate" data-v="3">3 · Repetição</button>
+  </div>
+  <div class="hint">Abra <code>index.html#figma</code> para esconder este painel.</div>
+</aside>
+
+<div class="device">
+  <div class="phone" id="phone">
+    <div class="statusbar"><span>14:32</span><span id="sb-net">▂▄▆ 5G 🔋</span></div>
+    <div id="app"></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* =====================================================================
+ * Dados de exemplo — coerentes com o seed canônico (framework-gamificacao §7.4).
+ * Fotos são placeholders (emoji + gradiente) em proporção 4:3 (ADR-012).
+ * ===================================================================== */
+const NOW = '23/11/2026 14:32';
+const TODAY = '23/11/2026';
+
+// 19 códigos = 18 ANVISA RDC 727/2022 + lactose (packages/allergen-rules/src/types.ts).
+const ALLERGEN_GROUPS = [
+  ['Glúten', [['trigo_centeio_cevada_aveia', 'Trigo, centeio, cevada e aveia (glúten)']]],
+  ['Leite', [['leite', 'Leite (proteína do leite)'], ['lactose', 'Lactose (intolerância)']]],
+  ['Ovos', [['ovo', 'Ovos']]],
+  ['Peixes e frutos do mar', [['peixe', 'Peixes'], ['crustaceos', 'Crustáceos']]],
+  ['Leguminosas', [['amendoim', 'Amendoim'], ['soja', 'Soja']]],
+  ['Castanhas e nozes', [['amendoa', 'Amêndoa'], ['avela', 'Avelã'], ['castanha_caju', 'Castanha-de-caju'], ['castanha_brasil', 'Castanha-do-pará'], ['macadamia', 'Macadâmia'], ['noz', 'Nozes'], ['peca', 'Pecã'], ['pistache', 'Pistache'], ['pinoli', 'Pinoli'], ['castanha_castanea', 'Castanha-portuguesa']]],
+  ['Outros', [['latex', 'Látex natural']]],
+];
+const ALLERGEN_LABEL = Object.fromEntries(ALLERGEN_GROUPS.flatMap(([, items]) => items));
+
+const CUISINES = {
+  fr: { name: 'Francesa', flag: '🇫🇷', continent: 'Europa', total: 10 },
+  th: { name: 'Tailandesa', flag: '🇹🇭', continent: 'Ásia', total: 10 },
+  ar: { name: 'Árabe', flag: '🇱🇧', continent: 'Ásia', total: 10 },
+  mx: { name: 'Mexicana', flag: '🇲🇽', continent: 'Américas', total: 10 },
+  ma: { name: 'Marroquina', flag: '🇲🇦', continent: 'África', total: 10 },
+  gr: { name: 'Grega', flag: '🇬🇷', continent: 'Europa', total: 10 },
+  it: { name: 'Italiana', flag: '🇮🇹', continent: 'Europa', total: 10 },
+  jp: { name: 'Japonesa', flag: '🇯🇵', continent: 'Ásia', total: 10 },
+  au: { name: 'Australiana', flag: '🇦🇺', continent: 'Oceania', total: 10 },
+  br: { name: 'Brasileira', flag: '🇧🇷', continent: 'Américas', total: 10 },
+};
+const CONTINENTS = ['Américas', 'África', 'Europa', 'Ásia', 'Oceania'];
+
+const sub = (name, allergens, state, note) => ({ name, allergens, state, confirmed: allergens.length === 0 && state === 'verified', note });
+const ing = (name, qty, allergens = [], subs = []) => ({ name, qty, allergens, subs });
+
+const DISHES = {
+  ratatouille: { name: 'Ratatouille', c: 'fr', time: 50, diff: 'Fácil', allergens: [], state: 'verified', confirmed: true, base: null, emoji: '🍆', bg: 'linear-gradient(135deg,#F4C7A1,#C8553D)', source: 'Acervo Público de Cozinha Francesa (exemplo)',
+    ingredients: [ing('Berinjela', '1 média'), ing('Abobrinha', '2 unidades', [], [sub('Abóbora-menina', [], 'verified', 'Mesma quantidade, em cubos')]), ing('Pimentão vermelho', '1 unidade'), ing('Tomate maduro', '4 unidades', [], [sub('Tomate pelado em lata', [], 'verified', '1 lata (400 g)')]), ing('Cebola', '1 unidade'), ing('Alho', '3 dentes'), ing('Azeite', '4 colheres (sopa)'), ing('Tomilho fresco', '4 ramos', [], [sub('Tomilho seco', [], 'verified', '1 colher (chá)'), sub('Ervas de Provence', [], 'verified', '1 colher (chá)')])],
+    steps: ['Corte a berinjela, a abobrinha e o pimentão em cubos de 2 cm. Pique a cebola e o alho.', 'Aqueça 2 colheres de azeite numa panela larga e refogue a cebola por 5 minutos, até ficar macia.', 'Junte o alho e o pimentão e cozinhe por mais 3 minutos, mexendo de vez em quando.', 'Acrescente a berinjela e a abobrinha com o restante do azeite. Tempere com sal e cozinhe por 10 minutos.', 'Adicione os tomates picados e o tomilho. Tampe e cozinhe em fogo baixo por 20 minutos.', 'Ajuste o sal, regue com um fio de azeite e sirva quente ou em temperatura ambiente.'] },
+  tian: { name: 'Tian provençal', c: 'fr', time: 60, diff: 'Média', allergens: [], state: 'verified', confirmed: true, base: 'ratatouille', emoji: '🥘', bg: 'linear-gradient(135deg,#F6D59B,#B5523B)', source: 'Acervo Público de Cozinha Francesa (exemplo)' },
+  byaldi: { name: 'Confit byaldi', c: 'fr', time: 90, diff: 'Difícil', allergens: [], state: 'verified', confirmed: true, base: 'tian', emoji: '🍅', bg: 'linear-gradient(135deg,#F7B2A0,#9E2A2B)', source: 'Acervo Público de Cozinha Francesa (exemplo)' },
+  padthai: { name: 'Pad Thai', c: 'th', time: 35, diff: 'Média', allergens: ['amendoim', 'ovo', 'crustaceos', 'soja'], state: 'verified', base: null, emoji: '🍜', bg: 'linear-gradient(135deg,#FCE38A,#F38181)', source: 'Cozinha de Rua Tailandesa (exemplo)',
+    ingredients: [ing('Talharim de arroz', '200 g'), ing('Camarão', '200 g', ['crustaceos'], [sub('Tofu firme', ['soja'], 'verified', 'Em cubos, dourado na frigideira'), sub('Cogumelo shimeji', [], 'verified', 'Mesma quantidade')]), ing('Ovos', '2 unidades', ['ovo']), ing('Molho de soja', '3 colheres (sopa)', ['soja'], [sub('Aminos de coco', [], 'verified', 'Mesma quantidade')]), ing('Amendoim torrado', '½ xícara', ['amendoim'], [sub('Sementes de girassol torradas', [], 'verified', 'Mesma quantidade'), sub('Castanha-de-caju picada', ['castanha_caju'], 'unverified', '')]), ing('Broto de feijão', '1 xícara'), ing('Limão', '1 unidade')],
+    steps: ['Deixe o talharim de molho em água morna por 10 minutos e escorra.', 'Doure o camarão em uma frigideira grande com óleo por 2 minutos de cada lado. Reserve.', 'Na mesma frigideira, mexa os ovos até quase firmes.', 'Junte o talharim e o molho de soja e salteie por 3 minutos.', 'Volte o camarão, acrescente o broto de feijão e misture por 1 minuto.', 'Sirva com amendoim por cima e gomos de limão.'] },
+  shakshuka: { name: 'Shakshuka', c: 'ar', time: 30, diff: 'Fácil', allergens: ['ovo'], state: 'verified', base: null, emoji: '🍳', bg: 'linear-gradient(135deg,#FFB88C,#DE6262)', source: 'Mesa do Oriente Médio (exemplo)' },
+  shakverde: { name: 'Shakshuka verde com feta', c: 'ar', time: 35, diff: 'Média', allergens: ['ovo', 'leite', 'lactose'], state: 'verified', base: 'shakshuka', emoji: '🥬', bg: 'linear-gradient(135deg,#C6EA8D,#4E9F3D)', source: 'Mesa do Oriente Médio (exemplo)' },
+  tacos: { name: 'Tacos de feijão com guacamole', c: 'mx', time: 25, diff: 'Fácil', allergens: ['trigo_centeio_cevada_aveia'], state: 'verified', base: null, emoji: '🌮', bg: 'linear-gradient(135deg,#FDEB71,#8BC34A)', source: 'Cocina Casera Mexicana (exemplo)' },
+  tagine: { name: 'Tagine de grão-de-bico', c: 'ma', time: 60, diff: 'Média', allergens: [], state: 'source_declared', base: null, emoji: '🍲', bg: 'linear-gradient(135deg,#F9D29D,#C17C3E)', source: 'Receitas do Magrebe (exemplo)' },
+  moussaka: { name: 'Moussaka', c: 'gr', time: 80, diff: 'Difícil', allergens: ['leite', 'lactose', 'ovo', 'trigo_centeio_cevada_aveia'], state: 'verified', base: null, emoji: '🫕', bg: 'linear-gradient(135deg,#E2B0FF,#9F44D3)', source: 'Cozinha Grega Tradicional (exemplo)' },
+  carbonara: { name: 'Espaguete à carbonara', c: 'it', time: 25, diff: 'Média', allergens: ['trigo_centeio_cevada_aveia', 'ovo', 'leite', 'lactose'], state: 'verified', base: null, emoji: '🍝', bg: 'linear-gradient(135deg,#FFF1A8,#E0A94A)', source: 'Trattoria de Família (exemplo)' },
+  lamen: { name: 'Lámen de missô', c: 'jp', time: 40, diff: 'Média', allergens: ['soja', 'trigo_centeio_cevada_aveia'], state: 'unverified', base: null, emoji: '🍥', bg: 'linear-gradient(135deg,#FFDDE1,#EE9CA7)', source: 'Caderno de Lámen (exemplo)' },
+  moqueca: { name: 'Moqueca de peixe', c: 'br', time: 45, diff: 'Média', allergens: ['peixe'], state: 'verified', base: null, emoji: '🐟', bg: 'linear-gradient(135deg,#FFD194,#D1913C)', source: 'Sabores da Bahia (exemplo)' },
+  pavlova: { name: 'Pavlova de frutas vermelhas', c: 'au', time: 120, diff: 'Média', allergens: ['ovo', 'leite', 'lactose'], state: 'verified', base: null, emoji: '🍰', bg: 'linear-gradient(135deg,#FBD3E9,#BB377D)', source: 'Sobremesas da Oceania (exemplo)' },
+};
+// Receitas sem detalhe completo recebem ingredientes/passos genéricos (protótipo).
+for (const d of Object.values(DISHES)) {
+  if (!d.ingredients) d.ingredients = [ing('Ingrediente principal', 'a gosto', d.allergens.slice(0, 1)), ing('Cebola', '1 unidade'), ing('Alho', '2 dentes'), ing('Azeite', '2 colheres (sopa)'), ing('Sal e pimenta', 'a gosto')];
+  if (!d.steps) d.steps = ['Separe e prepare todos os ingredientes (mise en place).', 'Refogue a cebola e o alho no azeite até dourar levemente.', 'Junte o ingrediente principal e cozinhe conforme a receita original.', 'Ajuste o tempero e sirva.'];
+}
+const CHAINS = [['ratatouille', 'tian', 'byaldi'], ['shakshuka', 'shakverde']];
+const SUGGESTION_ORDER = ['padthai', 'ratatouille', 'shakshuka', 'tacos', 'tagine', 'lamen', 'moqueca', 'carbonara', 'moussaka', 'pavlova'];
+
+// Badges canônicos (framework-gamificacao §7.4) — milestone declarativo RN03 a–h.
+const BADGES = [
+  { id: 'primeiro_fogo', name: 'Primeiro Fogo', icon: '🔥', desc: 'Concluiu seu primeiro prato no Panelada.', m: { type: 'total_dishes', quantity: 1 } },
+  { id: 'mini_chef', name: 'Mini Chef', icon: '👨‍🍳', desc: 'Preparou e avaliou o clássico Ratatouille.', m: { type: 'dish', dishId: 'ratatouille' } },
+  { id: 'toque_pessoal', name: 'Toque Pessoal', icon: '✍️', desc: 'Registrou sua primeira adaptação criativa.', m: { type: 'adaptation_count', quantity: 1 } },
+  { id: 'arabia', name: 'Chegando na Arábia', icon: '🕌', desc: 'Concluiu um prato da culinária árabe.', m: { type: 'cuisine', cuisineId: 'ar' } },
+  { id: 'alem_basico', name: 'Além do Básico', icon: '⬆️', desc: 'Concluiu a primeira evolução de um prato (nível 2).', m: { type: 'evolution_level', minLevel: 2 } },
+  { id: 'chef_rotina', name: 'Chef de Rotina', icon: '🍽️', desc: 'Concluiu 5 pratos distintos.', m: { type: 'total_dishes', quantity: 5 } },
+  { id: 'alquimista', name: 'Alquimista da Cozinha', icon: '⚗️', desc: 'Registrou alterações pessoais em 5 preparos.', m: { type: 'adaptation_count', quantity: 5 } },
+  { id: 'civilizacoes', name: 'Grandes Civilizações', icon: '🏛️', desc: 'Concluiu pratos italianos, gregos e árabes.', m: { type: 'set', cuisineIds: ['it', 'gr', 'ar'] } },
+  { id: 'mestre_evo', name: 'Mestre da Evolução', icon: '👑', desc: 'Concluiu o topo de uma cadeia de 3 níveis.', m: { type: 'evolution_level', minLevel: 3 } },
+  { id: 'passaporte', name: 'Passaporte Carimbado', icon: '🛂', desc: 'Concluiu pratos de 10 culinárias distintas.', m: { type: 'n_cuisines', quantity: 10 } },
+  { id: 'rei_mundo', name: 'Rei do Mundo', icon: '🌍', desc: 'Concluiu pratos dos 5 continentes.', m: { type: 'all_continents' } },
+];
+
+/* =====================================================================
+ * Regras espelhadas de packages/allergen-rules (fail-closed, ADR-014) e do
+ * UnlockCalculator (RN02, RN03 a–h, RN04) — versão simplificada só para o protótipo.
+ * ===================================================================== */
+function classify(item, restrictions) {
+  if (restrictions.length === 0) return { result: 'compatible', reason: 'no_restrictions', matched: [] };
+  const matched = item.allergens.filter((a) => restrictions.includes(a));
+  if (matched.length) return { result: 'incompatible', reason: 'allergen_match', matched };
+  if (item.state === 'unverified') return { result: 'unconfirmed', reason: 'allergen_state_unverified', matched };
+  if (item.state === 'source_declared') return { result: 'unconfirmed', reason: 'source_declared_unconfirmed', matched };
+  if (item.allergens.length === 0 && !item.confirmed) return { result: 'unconfirmed', reason: 'empty_allergens_unconfirmed', matched };
+  return { result: 'compatible', reason: 'allergen_verified_safe', matched };
+}
+const isSubstituteAllowed = (s, restrictions) => classify(s, restrictions).result === 'compatible';
+const level = (id) => { let n = 1, cur = DISHES[id]; const seen = new Set(); while (cur.base && !seen.has(cur.base) && n < 10) { seen.add(cur.base); n++; cur = DISHES[cur.base]; } return n; };
+
+function completedSet(ratings) { return new Set(ratings.map((r) => r.dishId)); }
+function badgeProgress(b, ratings) {
+  const done = completedSet(ratings);
+  const cuisines = new Set([...done].map((d) => DISHES[d].c));
+  const m = b.m;
+  switch (m.type) {
+    case 'total_dishes': return { cur: Math.min(done.size, m.quantity), target: m.quantity, unit: m.quantity === 1 ? 'prato' : 'pratos' };
+    case 'dish': return { cur: done.has(m.dishId) ? 1 : 0, target: 1, unit: 'prato' };
+    case 'cuisine': return { cur: cuisines.has(m.cuisineId) ? 1 : 0, target: 1, unit: 'prato' };
+    case 'n_cuisines': return { cur: Math.min(cuisines.size, m.quantity), target: m.quantity, unit: 'culinárias' };
+    case 'set': return { cur: m.cuisineIds.filter((c) => cuisines.has(c)).length, target: m.cuisineIds.length, unit: 'culinárias' };
+    case 'all_continents': { const cs = new Set([...cuisines].map((c) => CUISINES[c].continent)); return { cur: cs.size, target: 5, unit: 'continentes' }; }
+    case 'evolution_level': { const max = Math.max(0, ...[...done].map(level)); return { cur: Math.min(max, m.minLevel), target: m.minLevel, unit: 'nível' }; }
+    case 'adaptation_count': { const n = ratings.filter((r) => r.changes && r.changes.trim().length > 0).length; return { cur: Math.min(n, m.quantity), target: m.quantity, unit: m.quantity === 1 ? 'adaptação' : 'adaptações' }; }
+  }
+}
+const badgeMet = (b, ratings) => { const p = badgeProgress(b, ratings); return p.cur >= p.target; };
+const cuisinePct = (c, ratings) => { const n = [...completedSet(ratings)].filter((d) => DISHES[d].c === c).length; return { n, total: CUISINES[c].total, pct: Math.round((n / CUISINES[c].total) * 100) }; };
+
+/* ===================================================================== Estado */
+let S;
+function freshState() {
+  return {
+    route: { name: 'onboarding' }, onboarded: false,
+    ob: { step: 1, picked: [], consent: false, invalid: false, search: '', prefs: [], busy: false, error: null },
+    restrictions: [], consentAt: null, prefs: [],
+    candidates: [], preparing: {}, ratings: [], awarded: {}, unlocked: {}, discarded: [],
+    online: true, loading: false, discoverExhausted: false, discoverOfflineInitial: false,
+    kitchenDot: false, recipe: {}, draft: null, celebration: null, collectionTab: 'cuisines', openCuisine: null,
+    toast: null, sheet: null, busy: {}, inlineError: {},
+  };
+}
+function progressState() {
+  const s = freshState();
+  s.onboarded = true; s.route = { name: 'discover' };
+  s.restrictions = ['amendoim']; s.consentAt = '23/11/2026 às 14:05'; s.prefs = ['fr', 'th', 'ar'];
+  s.ratings = [
+    { id: 'r1', dishId: 'ratatouille', score: 4.5, comment: 'Ficou ótimo com pão.', changes: 'Usei ervas de Provence no lugar do tomilho.', date: '18/11/2026' },
+    { id: 'r2', dishId: 'tacos', score: 4, comment: '', changes: '', date: '20/11/2026' },
+    { id: 'r3', dishId: 'ratatouille', score: 5, comment: 'Segunda vez saiu ainda melhor.', changes: '', date: '21/11/2026' },
+    { id: 'r4', dishId: 'shakshuka', score: 3.5, comment: 'Passei do ponto do ovo.', changes: '', date: '22/11/2026' },
+    { id: 'r5', dishId: 'moqueca', score: 5, comment: '', changes: '', date: '22/11/2026' },
+  ];
+  s.awarded = { primeiro_fogo: '18/11/2026', mini_chef: '18/11/2026', toque_pessoal: '18/11/2026', arabia: '22/11/2026' };
+  s.unlocked = { tian: '18/11/2026', shakverde: '22/11/2026' };
+  // Pad Thai foi aprovado e baixado antes de cadastrar a restrição "amendoim":
+  // demonstra o alerta fail-closed na Cozinha e na Receita (§1.4c).
+  s.preparing = { tian: { step: 1, lastSyncAt: '23/11 às 09:10' }, padthai: { step: 0, lastSyncAt: '22/11 às 19:40' } };
+  s.candidates = ['carbonara', 'moussaka'];
+  return s;
+}
+
+/* ===================================================================== Utilidades */
+const $ = (sel) => document.querySelector(sel);
+const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fmtScore = (n) => String(n).replace('.', ',');
+const hasR = () => S.restrictions.length > 0;
+const completed = (id) => S.ratings.some((r) => r.dishId === id);
+const isLocked = (id) => !!DISHES[id].base && !completed(DISHES[id].base);
+const cuisineLine = (d) => `${CUISINES[d.c].flag} ${CUISINES[d.c].name}`;
+const STATE_LABEL = { verified: ['✓', 'Verificado'], source_declared: ['◐', 'Declarado pela fonte'], unverified: ['?', 'Não verificado'] };
+const seal = (state) => `<button class="seal ${state}" data-a="sealInfo" data-v="${state}" aria-label="Alérgenos: ${STATE_LABEL[state][1]}"><span aria-hidden="true">${STATE_LABEL[state][0]}</span>${STATE_LABEL[state][1]}</button>`;
+const photo = (d, cls = '') => `<div class="photo ${cls}" style="background:${d.bg}" role="img" aria-label="Foto: ${esc(d.name)}">${d.emoji}</div>`;
+const RN16 = (compact = false) => `<div class="rn16 ${compact ? 'compact' : ''}" role="note"><span aria-hidden="true">ℹ️</span><span>${compact ? 'Verificamos só os 19 alérgenos do vocabulário controlado. Confira o rótulo.' : 'Verificamos apenas os 19 alérgenos do vocabulário controlado (ANVISA + lactose). Confira sempre o rótulo dos ingredientes.'}</span></div>`;
+const offlineBar = () => (S.online ? '' : `<div class="offline-bar" role="status"><span aria-hidden="true">📡</span>Sem conexão — o que está salvo no aparelho continua disponível.</div>`);
+const lastSync = (t) => `<div class="lastsync"><span aria-hidden="true">⤓</span>Disponível offline · atualizado em ${t}</div>`;
+const offlineMsg = (what) => `<b>Sem conexão agora.</b> Para ${what}, precisamos de internet. Nada foi perdido — tente de novo quando a conexão voltar.`;
+function failReason(d) {
+  const c = classify(d, S.restrictions);
+  if (c.reason === 'allergen_match') return `Esta receita contém <b>${c.matched.map((a) => ALLERGEN_LABEL[a]).join(', ')}</b>, que está nas suas restrições.`;
+  if (c.reason === 'source_declared_unconfirmed') return 'A lista de alérgenos vem da fonte original e não foi confirmada pela curadoria.';
+  return 'Os alérgenos desta receita ainda não foram verificados.';
+}
+const isUnsafe = (d) => hasR() && classify(d, S.restrictions).result !== 'compatible';
+const failClosed = (d, compact = false) => `<div class="failclosed ${compact ? 'compact' : ''}" role="alert"><div class="h"><span aria-hidden="true">⚠️</span>Compatibilidade não confirmada</div>${compact ? '' : `<p>${failReason(d)}</p><p>Revise os ingredientes antes de preparar.</p>`}</div>`;
+function stars(n, size = 16) {
+  let out = '';
+  for (let i = 1; i <= 5; i++) out += n >= i ? '★' : n >= i - 0.5 ? '⯪' : '☆';
+  return `<span style="color:#C98A00;font-size:${size}px;letter-spacing:1px" aria-label="${fmtScore(n)} de 5 estrelas">${out}</span>`;
+}
+
+/* ===================================================================== Ações */
+let toastTimer;
+function toast(text, action) { S.toast = { text, action }; clearTimeout(toastTimer); toastTimer = setTimeout(() => { S.toast = null; render(); }, 3500); }
+function go(name, params = {}) { S.route = { name, ...params }; S.sheet = null; if (name === 'kitchen') S.kitchenDot = false; render(true); }
+function later(ms, fn) { setTimeout(() => { fn(); render(); }, ms); }
+
+function suggestions() {
+  const done = completedSet(S.ratings);
+  return SUGGESTION_ORDER.filter((id) => !done.has(id) && !S.candidates.includes(id) && !S.preparing[id] && !S.discarded.includes(id) && !DISHES[id].base)
+    .filter((id) => !hasR() || classify(DISHES[id], S.restrictions).result === 'compatible') // RN08
+    .sort((a, b) => (S.prefs.includes(DISHES[b].c) ? 1 : 0) - (S.prefs.includes(DISHES[a].c) ? 1 : 0)); // RN10
+}
+function hint(id) {
+  const evo = Object.entries(DISHES).find(([, d]) => d.base === id);
+  if (evo) return `🔓 Abre a evolução <b>${esc(evo[1].name)}</b>`;
+  const done = completedSet(S.ratings);
+  if (![...done].some((d) => DISHES[d].c === DISHES[id].c)) return `✨ Primeiro prato <b>${CUISINES[DISHES[id].c].name.toLowerCase()}</b> da sua coleção`;
+  return '';
+}
+
+function saveRating() {
+  const d = S.draft; const dishId = S.route.dishId;
+  if (d.score == null) return;
+  d.sending = true; d.error = false; render();
+  later(900, () => {
+    d.sending = false;
+    if (!S.online) { d.error = true; return; }
+    const before = S.ratings.slice();
+    const isRepeat = completed(dishId);
+    const prev = cuisinePct(DISHES[dishId].c, before);
+    S.ratings.push({ id: 'r' + (S.ratings.length + 1) + Date.now(), dishId, score: d.score, comment: d.comment, changes: d.changes, date: TODAY });
+    const next = cuisinePct(DISHES[dishId].c, S.ratings);
+    const evolutions = isRepeat ? [] : Object.keys(DISHES).filter((k) => DISHES[k].base === dishId && !S.unlocked[k]);
+    evolutions.forEach((k) => { S.unlocked[k] = TODAY; });
+    const badges = BADGES.filter((b) => !S.awarded[b.id] && badgeMet(b, S.ratings)).map((b) => b.id);
+    badges.forEach((b) => { S.awarded[b] = TODAY; });
+    delete S.preparing[dishId]; S.candidates = S.candidates.filter((c) => c !== dishId);
+    S.celebration = { dishId, score: d.score, isRepeat, prev, next, evolutions, badges, count: S.ratings.filter((r) => r.dishId === dishId).length };
+    S.draft = null;
+    S.route = { name: 'celebrate' };
+  });
+}
+
+function startCooking(id) {
+  if (!S.online) { S.inlineError[id] = true; render(); return; }
+  S.busy[id] = true; render();
+  later(1100, () => {
+    delete S.busy[id];
+    S.candidates = S.candidates.filter((c) => c !== id);
+    S.preparing[id] = { step: 0, lastSyncAt: '23/11 às 14:32' };
+    S.route = { name: 'recipe', dishId: id }; S.recipe = { tab: 'steps' };
+  });
+}
+
+const A = {
+  // Onboarding
+  obStart() {
+    S.ob.busy = true; S.ob.error = null; render();
+    later(900, () => { S.ob.busy = false; if (!S.online) { S.ob.error = 'account'; return; } S.ob.step = 2; });
+  },
+  obBack() { S.ob.step = Math.max(1, S.ob.step - 1); S.ob.error = null; render(); },
+  obPick(code) {
+    const p = S.ob.picked; const i = p.indexOf(code); i >= 0 ? p.splice(i, 1) : p.push(code);
+    if (p.length === 0) { S.ob.consent = false; S.ob.invalid = false; }
+    render();
+  },
+  obNoRestrictions() { S.ob.picked = []; S.ob.consent = false; S.ob.invalid = false; S.ob.step = 3; render(); },
+  obSaveRestrictions() {
+    if (!S.ob.consent) { S.ob.invalid = true; S.focusConsent = true; render(); return; }
+    S.ob.busy = true; S.ob.error = null; render();
+    later(800, () => {
+      S.ob.busy = false;
+      if (!S.online) { S.ob.error = 'restrictions'; return; }
+      S.restrictions = S.ob.picked.slice(); S.consentAt = '23/11/2026 às 14:32'; S.ob.step = 3;
+    });
+  },
+  obPref(c) { const p = S.ob.prefs; const i = p.indexOf(c); i >= 0 ? p.splice(i, 1) : p.push(c); render(); },
+  obFinish(skip) {
+    if (!skip && S.ob.prefs.length && !S.online) { S.ob.error = 'prefs'; render(); return; }
+    if (!skip) S.prefs = S.ob.prefs.slice();
+    S.onboarded = true; go('discover');
+  },
+  // Abas
+  tab(name) { go(name); },
+  // Descobrir
+  approve(id) {
+    if (!S.online) { toast('Sem conexão — não deu para salvar sua escolha. O prato continua aqui.'); render(); return; }
+    S.candidates.push(id); S.kitchenDot = true; toast('Foi para Cozinha → Candidatas', { label: 'Ver', a: 'tab', v: 'kitchen' }); render();
+  },
+  discard(id) {
+    if (!S.online) { toast('Sem conexão — não deu para salvar sua escolha. O prato continua aqui.'); render(); return; }
+    S.discarded.push(id); render();
+  },
+  retryDiscover() { if (S.online) { S.discoverOfflineInitial = false; S.discoverExhausted = false; } else toast('Ainda sem conexão.'); render(); },
+  newRound() { S.discarded = []; S.discoverExhausted = false; render(); },
+  // Cozinha / Receita
+  cook(id) { startCooking(id); },
+  addToKitchen(id) {
+    if (!S.online) { toast('Sem conexão — não deu para adicionar agora.'); render(); return; }
+    if (!S.candidates.includes(id)) S.candidates.push(id); S.kitchenDot = true; toast('Foi para Cozinha → Candidatas', { label: 'Ver', a: 'tab', v: 'kitchen' }); render();
+  },
+  open(id) { S.recipe = { tab: S.preparing[id] ? 'steps' : 'ingredients' }; S.focusStep = !!S.preparing[id]; go('recipe', { dishId: id, from: S.route.name }); },
+  back() { const from = S.route.from; go(from && from !== 'recipe' ? from : 'kitchen'); },
+  rtab(t) { S.recipe.tab = t; S.focusStep = t === 'steps'; render(true); },
+  stepTo(i) { S.preparing[S.route.dishId].step = Number(i); S.focusStep = true; render(); },
+  stepPrev() { const p = S.preparing[S.route.dishId]; p.step = Math.max(0, p.step - 1); S.focusStep = true; render(); },
+  stepNext() { const p = S.preparing[S.route.dishId]; p.step = Math.min(DISHES[S.route.dishId].steps.length - 1, p.step + 1); S.focusStep = true; render(); },
+  swaps(i) { S.sheet = { type: 'swaps', i: Number(i) }; render(); },
+  sealInfo(state) { S.sheet = { type: 'seal', state }; render(); },
+  closeSheet() { S.sheet = null; render(); },
+  rate(id) { if (!S.draft || S.draft.dishId !== id) S.draft = { dishId: id, score: null, comment: '', changes: '', sending: false, error: false }; go('rate', { dishId: id }); },
+  // Avaliação
+  setScore(v) { S.draft.score = Number(v); S.draft.error = false; render(); },
+  stepScore(delta) { const cur = S.draft.score ?? 0; S.draft.score = Math.min(5, Math.max(0, (S.draft.score == null && Number(delta) < 0 ? 0 : cur + Number(delta)))); render(); },
+  saveRating() { saveRating(); },
+  closeRate() { go('recipe', { dishId: S.route.dishId }); },
+  // Celebração / Coleção
+  ctab(t) { S.collectionTab = t; render(true); },
+  toggleCuisine(c) { S.openCuisine = S.openCuisine === c ? null : c; render(); },
+  history(id) { S.sheet = { type: 'history', id }; render(); },
+  goCollection() { S.collectionTab = S.celebration && S.celebration.badges.length ? 'badges' : 'cuisines'; go('collection'); },
+  // Perfil
+  askRemove(code) { S.sheet = { type: 'remove', code }; render(); },
+  confirmRemove(code) {
+    if (!S.online) { S.sheet = null; toast('Sem conexão agora. Nada foi alterado nas suas restrições — tente de novo quando a internet voltar.'); render(); return; }
+    S.sheet = null; S.busy['r-' + code] = true; render();
+    later(700, () => {
+      delete S.busy['r-' + code];
+      S.restrictions = S.restrictions.filter((r) => r !== code);
+      if (S.restrictions.length === 0) S.consentAt = null; // RN09: remover a última = revogar
+      toast(`${ALLERGEN_LABEL[code]} removido das suas restrições.`);
+    });
+  },
+  addRestriction() { S.sheet = { type: 'add', picked: [], consent: false, invalid: false, search: '' }; render(); },
+  addPick(code) { const p = S.sheet.picked; const i = p.indexOf(code); i >= 0 ? p.splice(i, 1) : p.push(code); render(); },
+  addSave() {
+    const sh = S.sheet;
+    if (!sh.picked.length) return;
+    if (!S.consentAt && !sh.consent) { sh.invalid = true; S.focusConsent = true; render(); return; }
+    if (!S.online) { S.sheet = null; toast('Sem conexão agora. Nada foi alterado nas suas restrições — tente de novo quando a internet voltar.'); render(); return; }
+    S.restrictions = [...new Set([...S.restrictions, ...sh.picked])]; if (!S.consentAt) S.consentAt = '23/11/2026 às 14:32';
+    S.sheet = null; toast('Restrições salvas. Suas sugestões já consideram a mudança.'); render();
+  },
+  pref(c) {
+    if (!S.online) { toast('Sem conexão agora. Suas preferências não foram alteradas.'); render(); return; }
+    const i = S.prefs.indexOf(c); i >= 0 ? S.prefs.splice(i, 1) : S.prefs.push(c); render();
+  },
+};
+
+/* ===================================================================== Telas */
+function screenOnboarding() {
+  const o = S.ob;
+  const pct = { 1: 33, 2: 66, 3: 100 }[o.step];
+  const err = o.error ? `<div class="notice offline" role="alert" style="margin-top:12px">${o.error === 'account' ? '<b>Sem conexão agora.</b> Precisamos de internet só neste primeiro acesso para criar sua conta. Nada foi perdido.' : offlineMsg(o.error === 'prefs' ? 'salvar suas preferências' : 'salvar suas restrições')}</div>` : '';
+  const head = `<div class="header" style="padding-top:12px">
+      <div class="hrow" style="align-items:center;margin-bottom:10px">${o.step > 1 ? '<button class="iconbtn" data-a="obBack" aria-label="Voltar" style="flex:0">←</button>' : ''}<span class="caption" style="flex:1">Passo ${o.step} de 3</span></div>
+      <div class="progressbar" aria-hidden="true"><span style="width:${pct}%"></span></div></div>`;
+  if (o.step === 1) {
+    return `<div class="screen">${offlineBar()}${head}<div class="body">
+      <div style="text-align:center;margin:24px 0 8px"><div style="font-size:64px">🍲</div><div class="overline" style="color:var(--color-primary)">Panelada</div></div>
+      <h1 class="display" style="text-align:center">Cozinhe o mundo, um prato por vez</h1>
+      <ul class="bodytext secondary" style="padding-left:20px;margin:20px 0">
+        <li>Sugestões que respeitam suas restrições alimentares</li>
+        <li>Receita na bancada, mesmo sem internet</li>
+        <li>Uma coleção que cresce a cada prato que você faz</li></ul>
+      <div class="notice info">Sem cadastro nem senha: criamos uma conta anônima só para guardar seu progresso.</div>
+      <p class="caption" style="text-align:center">Em menos de 2 minutos você vê seu primeiro prato.</p>${err}</div>
+      <div class="footer"><button class="btn primary block lg" data-a="obStart" ${o.busy ? 'disabled' : ''}>${o.busy ? 'Preparando sua cozinha…' : o.error ? 'Tentar novamente' : 'Começar'}</button></div></div>`;
+  }
+  if (o.step === 2) {
+    const q = o.search.trim().toLowerCase();
+    const groups = ALLERGEN_GROUPS.map(([g, items]) => [g, items.filter(([c, l]) => !q || l.toLowerCase().includes(q) || c.includes(q))]).filter(([, it]) => it.length);
+    const chips = groups.map(([g, items]) => `<div class="group-title">${g}</div><div class="chips">${items.map(([c, l]) => `<button class="chip ${o.picked.includes(c) ? 'sel' : ''}" data-a="obPick" data-v="${c}" aria-pressed="${o.picked.includes(c)}">${o.picked.includes(c) ? '✓ ' : ''}${l}</button>`).join('')}</div>`).join('') || '<p class="caption">Nenhum alérgeno com esse nome. Os 19 verificados estão nos grupos abaixo.</p>';
+    const consent = o.picked.length ? `<div class="consent ${o.invalid ? 'invalid' : ''}" style="margin-top:20px">
+        <div style="font-size:14px;line-height:20px">🔒 <b>Restrição alimentar é um dado sensível de saúde.</b> Usamos só para filtrar sugestões e alertar sobre alérgenos. Ela fica cifrada no seu aparelho e no servidor, nunca vai para logs nem para a IA, e você pode remover quando quiser no Perfil.</div>
+        <label><input type="checkbox" id="ob-consent" ${o.consent ? 'checked' : ''}> Concordo com o tratamento das minhas restrições alimentares para esses fins.</label>
+        ${o.invalid ? '<div style="color:var(--color-allergen-danger);font-weight:600;font-size:14px;margin-top:6px" role="alert">Para guardar suas restrições, marque o consentimento acima.</div>' : ''}</div>` : '';
+    return `<div class="screen">${offlineBar()}${head}<div class="body" id="scroll">
+      <h1 class="title">Alguém vai comer com restrição alimentar?</h1>
+      <p class="secondary" style="margin:8px 0 16px">Filtramos as sugestões para nunca mostrar pratos com esses alérgenos.</p>
+      <button class="btn secondary block lg" data-a="obNoRestrictions">Não tenho restrições — continuar</button>
+      <div style="margin:20px 0 4px"><input class="search" id="ob-search" type="search" placeholder="Buscar alérgeno (ex.: leite, castanha)" value="${esc(o.search)}" aria-label="Buscar alérgeno"></div>
+      ${chips}${consent}${err}</div>
+      ${o.picked.length ? `<div class="footer"><button class="btn primary block lg" data-a="obSaveRestrictions" ${o.busy ? 'disabled' : ''}>${o.busy ? 'Salvando suas restrições…' : o.error ? 'Tentar novamente' : `Salvar e continuar (${o.picked.length})`}</button></div>` : ''}</div>`;
+  }
+  return `<div class="screen">${offlineBar()}${head}<div class="body">
+    <h1 class="title">Quais cozinhas você quer explorar?</h1>
+    <p class="secondary" style="margin:8px 0 16px">Usamos isso só para ordenar as sugestões. Escolha quantas quiser.</p>
+    <div class="chips">${Object.entries(CUISINES).map(([k, c]) => `<button class="chip ${o.prefs.includes(k) ? 'sel' : ''}" data-a="obPref" data-v="${k}" aria-pressed="${o.prefs.includes(k)}">${c.flag} ${c.name}</button>`).join('')}</div>${err}</div>
+    <div class="footer stack"><button class="btn primary block lg" data-a="obFinish">${o.error ? 'Tentar novamente' : 'Ver minhas sugestões'}</button>
+    <button class="btn ghost block" data-a="obFinish" data-v="skip">Pular — pode ajustar quando quiser no Perfil</button></div></div>`;
+}
+
+function skeletonCards(n = 2) { return Array.from({ length: n }, () => `<div class="card" style="margin-bottom:12px"><div class="sk" style="height:150px;border-radius:0"></div><div class="pad stack"><div class="sk" style="height:18px;width:70%"></div><div class="sk" style="height:14px;width:45%"></div></div></div>`).join(''); }
+
+function screenDiscover() {
+  const list = suggestions();
+  const header = `<div class="header"><h1 class="title">Descobrir</h1><div class="caption">Sugestões compatíveis com seu perfil</div></div>`;
+  let content;
+  if (S.loading) content = `<p class="caption" style="margin-top:0">Buscando pratos para você…</p>${skeletonCards(1)}<div class="hrow"><div class="sk" style="height:56px"></div><div class="sk" style="height:56px"></div></div>`;
+  else if (S.discoverOfflineInitial && !S.online) content = `<div class="empty"><div class="e">📡</div><h3>Sugestões precisam de internet</h3><p>Suas receitas baixadas continuam na Cozinha, mesmo offline.</p><div class="stack"><button class="btn primary block" data-a="tab" data-v="kitchen">Ir para a Cozinha</button><button class="btn secondary block" data-a="retryDiscover">Tentar novamente</button></div></div>`;
+  else if (S.discoverExhausted || list.length === 0) content = `<div class="empty"><div class="e">🍽️</div><h3>Você viu todas as sugestões desta rodada</h3><p>Que tal cozinhar uma das suas candidatas? Novas sugestões aparecem na próxima visita.</p><div class="stack"><button class="btn primary block" data-a="tab" data-v="kitchen">Ir para a Cozinha</button><button class="btn secondary block" data-a="tab" data-v="profile">Revisar restrições e preferências</button><button class="link" data-a="newRound">Ver a rodada de novo (protótipo)</button></div></div>`;
+  else {
+    const id = list[0]; const d = DISHES[id]; const h = hint(id);
+    content = `${hasR() ? RN16() : ''}
+      <div class="card" style="margin-top:12px">
+        <button class="rowbtn" data-a="open" data-v="${id}" style="display:block" aria-label="Ver receita de ${esc(d.name)}"><div class="photo" style="background:${d.bg}">${d.emoji}</div></button>
+        <div class="pad">
+          <div style="margin:-4px 0 8px">${seal(d.state)}</div>
+          <h2 class="title" style="font-size:24px">${esc(d.name)}</h2>
+          <div class="meta" style="margin-top:6px"><span>${cuisineLine(d)}</span><span>⏱ ${d.time} min</span><span>📊 ${d.diff}</span></div>
+          ${h ? `<div class="pill unlock" style="margin-top:12px;font-size:13px;padding:6px 10px">${h}</div>` : ''}
+          <div class="caption" style="margin-top:12px">${list.length > 1 ? `Mais ${list.length - 1} ${list.length === 2 ? 'sugestão' : 'sugestões'} nesta rodada` : 'Última sugestão desta rodada'}</div>
+        </div></div>
+      <div class="hrow" style="margin-top:16px">
+        <button class="btn secondary lg" data-a="discard" data-v="${id}" aria-label="Descartar sugestão">✕ Descartar</button>
+        <button class="btn primary lg" data-a="approve" data-v="${id}">♥ Quero cozinhar</button></div>`;
+  }
+  return `<div class="screen">${offlineBar()}${header}<div class="body" id="scroll">${content}</div></div>`;
+}
+
+function screenKitchen() {
+  const prep = Object.entries(S.preparing);
+  const header = `<div class="header"><h1 class="title">Cozinha</h1>${S.candidates.length && !prep.length ? '<div class="caption">Que tal transformar uma candidata em jantar hoje?</div>' : '<div class="caption">Seus pratos em andamento e os que você escolheu</div>'}</div>`;
+  let body;
+  if (S.loading) body = skeletonCards(2);
+  else if (!prep.length && !S.candidates.length) body = `<div class="empty"><div class="e">🍳</div><h3>Sua cozinha está esperando o primeiro prato</h3><p>Aprove sugestões em Descobrir e elas aparecem aqui.</p><button class="btn primary block" data-a="tab" data-v="discover">Descobrir pratos</button></div>`;
+  else {
+    body = '';
+    if (prep.length) {
+      body += `<div class="section-title" style="margin-top:0"><span class="subtitle">Em preparo <span class="pill offline-ok">offline ✓</span></span></div>`;
+      body += prep.map(([id, p]) => { const d = DISHES[id]; const n = d.steps.length; return `<div class="card" style="margin-bottom:12px">
+        <div class="pad" style="display:flex;gap:12px">${photo(d, 'thumb')}<div style="flex:1;min-width:0"><div class="subtitle">${esc(d.name)}</div>
+          <div class="meta">${cuisineLine(d)} · Passo ${p.step + 1} de ${n}</div>
+          <div class="progressbar" style="margin:8px 0"><span style="width:${((p.step + 1) / n) * 100}%"></span></div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${seal(d.state)}</div></div></div>
+        <div style="padding:0 16px">${isUnsafe(d) ? failClosed(d, true) : ''}${lastSync(p.lastSyncAt)}</div>
+        <div class="pad hrow" style="padding-top:12px"><button class="btn primary" data-a="open" data-v="${id}">Continuar preparo</button><button class="btn ghost" data-a="rate" data-v="${id}" style="flex:0 0 auto">Concluir e avaliar</button></div></div>`; }).join('');
+    }
+    body += `<div class="card" style="padding:12px 16px;margin:16px 0;background:var(--color-surface-alt);box-shadow:none"><div class="caption" style="color:var(--color-text-secondary)">🗓️ <b>Em breve:</b> Plano da semana e Lista de compras</div></div>`;
+    body += `<div class="section-title"><span class="subtitle">Candidatas</span><span class="caption">${S.candidates.length}</span></div>`;
+    if (!S.candidates.length) body += `<p class="caption">Nenhuma candidata agora. <button class="link" data-a="tab" data-v="discover">Descobrir mais</button></p>`;
+    else body += `<p class="caption" style="margin-top:0">Ao tocar em “Cozinhar agora”, baixamos receita e foto para usar sem internet.</p>` + S.candidates.map((id, i) => { const d = DISHES[id]; const busy = S.busy[id]; return `<div class="card" style="margin-bottom:10px"><div class="pad" style="display:flex;gap:12px;align-items:center">
+        <button class="rowbtn" data-a="open" data-v="${id}" style="flex:1;min-width:0" aria-label="Ver receita de ${esc(d.name)}">${photo(d, 'thumb')}<div style="min-width:0"><div style="font-weight:600">${esc(d.name)}</div><div class="meta">${cuisineLine(d)} · ⏱ ${d.time} min</div></div></button></div>
+        <div style="padding:0 16px 10px">${seal(d.state)}</div>
+        ${isUnsafe(d) ? `<div style="padding:0 16px 8px">${failClosed(d, true)}</div>` : ''}
+        ${S.inlineError[id] && !S.online ? `<div class="notice offline" style="margin:0 16px 8px" role="alert">Para baixar esta receita precisamos de internet. Ela continua nas suas candidatas.</div>` : ''}
+        <div style="padding:0 16px 16px">${busy ? `<button class="btn secondary block" disabled>Baixando receita e foto…</button><div class="progressbar" style="margin-top:8px"><span style="width:70%"></span></div>` : `<button class="btn ${!prep.length && i === 0 ? 'primary' : 'secondary'} block" data-a="cook" data-v="${id}">Cozinhar agora</button>`}</div></div>`; }).join('');
+  }
+  return `<div class="screen">${offlineBar()}${header}<div class="body" id="scroll">${body}</div></div>`;
+}
+
+function screenRecipe() {
+  const id = S.route.dishId; const d = DISHES[id];
+  const prep = S.preparing[id]; const locked = isLocked(id); const unsafe = isUnsafe(d);
+  const top = `<div class="topbar"><button class="iconbtn" data-a="back" aria-label="Voltar">←</button><span class="t">${esc(d.name)}</span>${prep ? '<span class="pill offline-ok" style="margin-right:12px">Offline ✓</span>' : ''}</div>`;
+  if (S.loading) return `<div class="screen">${offlineBar()}${top}<div class="body"><div class="sk" style="height:180px;margin-bottom:12px"></div><div class="stack">${'<div class="sk" style="height:18px"></div>'.repeat(4)}</div></div></div>`;
+  const restrictedIng = (g) => g.allergens.some((a) => S.restrictions.includes(a));
+  const ingredients = `<div>${d.ingredients.map((g, i) => `<div class="ingredient ${restrictedIng(g) ? 'restricted' : ''}"><div class="n">${esc(g.name)}<div class="caption">${esc(g.qty)}</div>${restrictedIng(g) ? '<span class="tag-danger">Contém alérgeno do seu perfil</span>' : ''}</div><button class="swapbtn" data-a="swaps" data-v="${i}" aria-label="Ver trocas de ${esc(g.name)}">⇄ Trocas</button></div>`).join('')}</div>`;
+  const stepMode = prep && !locked && S.recipe.tab === 'steps';
+  // Alerta fail-closed logo abaixo da barra superior: visível já na primeira dobra (§1.4c).
+  const alertTop = unsafe ? `<div style="padding:0 16px 12px">${failClosed(d)}</div>` : '';
+  const header = stepMode ? `${alertTop}<div style="padding:0 16px">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${seal(d.state)}<span class="caption">${cuisineLine(d)} · ⏱ ${d.time} min</span></div>
+      <div style="margin-top:4px">${lastSync(prep.lastSyncAt)}</div>
+      ${hasR() ? `<div style="margin-top:8px">${RN16(true)}</div>` : ''}</div>` : `${alertTop}${photo(d)}
+    <div style="padding:12px 16px 0">
+      <div class="meta"><span>${cuisineLine(d)}</span><span>⏱ ${d.time} min</span><span>📊 ${d.diff}</span>${d.base ? `<span>Nível ${level(id)}</span>` : ''}</div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap">${seal(d.state)}<span class="caption">${d.allergens.length ? 'Contém: ' + d.allergens.map((a) => ALLERGEN_LABEL[a].split(' (')[0].toLowerCase()).join(', ') : d.confirmed ? 'Sem alérgenos do vocabulário (confirmado)' : 'Lista de alérgenos não confirmada'}</span></div>
+      <div class="caption" style="margin-top:6px">Fonte: receita adaptada de <i>${esc(d.source)}</i></div>
+      ${prep ? `<div style="margin-top:4px">${lastSync(prep.lastSyncAt)}</div>` : ''}
+      ${hasR() ? `<div style="margin-top:10px">${RN16()}</div>` : ''}
+    </div>`;
+  let body; let footer = '';
+  if (locked) {
+    const base = DISHES[d.base];
+    body = `${header}<div style="padding:16px"><div class="locked-banner">🔒 Evolução bloqueada — conclua <b>${esc(base.name)}</b> para abrir.<div><button class="link" data-a="open" data-v="${d.base}" style="color:var(--color-success-unlock)">Ver ${esc(base.name)} →</button></div></div>
+      <div class="section-title"><span class="subtitle">Ingredientes</span></div>${ingredients}</div>`;
+    footer = `<div class="footer stack"><button class="btn primary block lg" disabled>Iniciar passo a passo</button><button class="btn secondary block" disabled>Avaliar prato</button><div class="caption" style="text-align:center">Disponível depois de concluir ${esc(base.name)} (RN02)</div></div>`;
+  } else if (!prep) {
+    const isCand = S.candidates.includes(id);
+    body = `${header}<div style="padding:16px"><div class="notice info">A receita completa fica disponível offline quando você toca em “Cozinhar agora”.</div>
+      <div class="section-title"><span class="subtitle">Ingredientes</span></div>${ingredients}</div>`;
+    footer = `<div class="footer">${S.busy[id] ? '<button class="btn primary block lg" disabled>Baixando receita e foto…</button>' : isCand ? `<button class="btn primary block lg" data-a="cook" data-v="${id}">Cozinhar agora</button>${S.inlineError[id] && !S.online ? '<div class="notice offline" style="margin-top:8px">Para baixar esta receita precisamos de internet. Ela continua nas suas candidatas.</div>' : ''}` : completed(id) ? `<button class="btn primary block lg" data-a="addToKitchen" data-v="${id}">Cozinhar de novo</button>` : `<button class="btn primary block lg" data-a="addToKitchen" data-v="${id}">Adicionar à Cozinha</button>`}</div>`;
+  } else {
+    const n = d.steps.length; const cur = prep.step;
+    const seg = `<div style="padding:16px 16px 8px"><div class="segmented" role="tablist"><button class="${S.recipe.tab === 'ingredients' ? 'on' : ''}" data-a="rtab" data-v="ingredients" role="tab">Ingredientes</button><button class="${S.recipe.tab === 'steps' ? 'on' : ''}" data-a="rtab" data-v="steps" role="tab">Passo a passo · ${cur + 1}/${n}</button></div></div>`;
+    const steps = `<div class="overline" style="margin:4px 0 10px">Passo ${cur + 1} de ${n}</div><div class="progressbar" style="margin-bottom:14px"><span style="width:${((cur + 1) / n) * 100}%"></span></div>` + d.steps.map((s, i) => `<button class="step ${i < cur ? 'done' : i === cur ? 'current' : 'next'}" data-a="stepTo" data-v="${i}" ${i === cur ? 'aria-current="step"' : ''}><span class="num">${i < cur ? '✓' : i + 1}</span><span>${esc(s)}</span></button>`).join('');
+    body = `${header}${seg}<div style="padding:0 16px 16px">${S.recipe.tab === 'ingredients' ? ingredients + '<p class="caption">Trocou algo? Registre na avaliação — entra no seu caderno.</p>' : steps}</div>`;
+    const last = cur === n - 1;
+    footer = `<div class="footer">${unsafe ? `<div style="margin-bottom:8px">${failClosed(d, true)}</div>` : ''}
+      ${S.recipe.tab === 'steps' ? `<div class="hrow"><button class="btn secondary lg" data-a="stepPrev" ${cur === 0 ? 'disabled' : ''}>‹ Anterior</button>${last ? `<button class="btn primary lg" data-a="rate" data-v="${id}" style="flex:1.4">Concluir e avaliar prato</button>` : '<button class="btn primary lg" data-a="stepNext">Próximo ›</button>'}</div>` : ''}
+      ${!last || S.recipe.tab !== 'steps' ? `<div style="text-align:center"><button class="link" data-a="rate" data-v="${id}">Concluir e avaliar prato</button></div>` : ''}</div>`;
+  }
+  return `<div class="screen">${offlineBar()}${top}<div class="body no-pad" id="scroll">${body}</div>${footer}</div>`;
+}
+
+function screenRate() {
+  const id = S.route.dishId; const d = DISHES[id]; const f = S.draft;
+  const prev = S.ratings.filter((r) => r.dishId === id);
+  const v = f.score;
+  const label = v == null ? 'Toque nas estrelas para dar sua nota' : v === 0 ? 'Não rolou dessa vez' : v <= 2 ? 'Dá para melhorar' : v <= 3.5 ? 'Ficou bom' : v <= 4.5 ? 'Muito bom!' : 'Perfeito!';
+  const starRow = [1, 2, 3, 4, 5].map((i) => { const fill = v == null ? 0 : v >= i ? 100 : v >= i - 0.5 ? 50 : 0; return `<div class="star"><span aria-hidden="true">★</span><span class="fill" style="width:${fill}%" aria-hidden="true">★</span><button class="half l" data-a="setScore" data-v="${i - 0.5}" aria-label="${fmtScore(i - 0.5)} estrelas" ${f.sending ? 'disabled' : ''}></button><button class="half r" data-a="setScore" data-v="${i}" aria-label="${i} ${i === 1 ? 'estrela' : 'estrelas'}" ${f.sending ? 'disabled' : ''}></button></div>`; }).join('');
+  const hasChanges = f.changes.trim().length > 0;
+  return `<div class="screen">${offlineBar()}<div class="topbar"><button class="iconbtn" data-a="closeRate" aria-label="Fechar avaliação">✕</button><span class="t">Avaliar prato</span></div>
+    <div class="body" id="scroll">
+      <h1 class="title">Como ficou o ${esc(d.name)}?</h1>
+      ${prev.length ? `<div class="notice info" style="margin-top:12px">📖 Você já preparou este prato ${prev.length} ${prev.length === 1 ? 'vez' : 'vezes'} (${prev[prev.length - 1].date}). Este preparo entra como um <b>novo registro</b> no seu caderno — os anteriores continuam guardados.</div>` : ''}
+      <div class="field-label"><span>Sua nota</span><span class="opt">obrigatória</span></div>
+      <div class="stars" role="group" aria-label="Nota de 0 a 5 em passos de meia estrela">${starRow}</div>
+      <div class="stepper"><button data-a="stepScore" data-v="-0.5" aria-label="Diminuir meia estrela" ${f.sending ? 'disabled' : ''}>−</button><span class="val" aria-live="polite">${v == null ? '–' : fmtScore(v)}</span><button data-a="stepScore" data-v="0.5" aria-label="Aumentar meia estrela" ${f.sending ? 'disabled' : ''}>+</button></div>
+      <div class="caption" style="text-align:center;margin-top:6px">${label}</div>
+      <div class="field-label"><span>Relato pessoal</span><span class="opt">opcional</span></div>
+      <textarea id="f-comment" placeholder="Como foi? (opcional)" ${f.sending ? 'readonly' : ''}>${esc(f.comment)}</textarea>
+      <div class="field-label"><span>Alterações que eu fiz</span><span class="opt">opcional</span></div>
+      <textarea id="f-changes" placeholder="Ex.: troquei o tomilho por ervas de Provence" ${f.sending ? 'readonly' : ''}>${esc(f.changes)}</textarea>
+      <div class="caption" style="margin-top:6px">Deu seu toque na receita? Registrar suas adaptações entra no seu caderno e conta para o badge <b>Toque Pessoal</b>.</div>
+      <div id="changes-chip" style="margin-top:8px;${hasChanges ? '' : 'display:none'}"><span class="pill unlock">Conta para Toque Pessoal ✨</span></div>
+    </div>
+    <div class="footer">
+      ${f.error ? `<div class="notice offline" role="alert" style="margin-bottom:8px"><b>Sem conexão agora.</b> Sua avaliação continua aqui — toque em Tentar novamente quando a internet voltar.</div>` : ''}
+      <button class="btn primary block lg" data-a="saveRating" ${v == null || f.sending ? 'disabled' : ''}>${f.sending ? 'Salvando…' : f.error ? 'Tentar novamente' : 'Salvar avaliação'}</button>
+      <div class="caption" style="text-align:center;margin-top:6px">${v == null ? 'Escolha uma nota para salvar.' : 'Só a nota é obrigatória.'}</div></div></div>`;
+}
+
+function screenCelebrate() {
+  const c = S.celebration; const d = DISHES[c.dishId]; const cu = CUISINES[d.c];
+  const missing = c.next.total - c.next.n;
+  const blocks = [];
+  if (!c.isRepeat) blocks.push(`<div class="card pad"><div class="overline">Progresso da culinária</div>
+      <div style="display:flex;justify-content:space-between;margin:8px 0"><b>${cu.flag} ${cu.name}</b><span class="caption">${c.next.n} de ${c.next.total} pratos (${c.next.pct}%)</span></div>
+      <div class="progressbar" style="height:10px"><span id="cel-bar" style="width:${c.prev.pct}%" data-to="${c.next.pct}"></span></div>
+      <div class="caption" style="margin-top:6px">${missing ? `Faltam ${missing} pratos da culinária ${cu.name} para completar.` : 'Culinária completa! 🎉'}</div></div>`);
+  c.evolutions.forEach((e) => { const ed = DISHES[e]; blocks.push(`<div class="unlock-card">${photo(ed, 'thumb')}<div style="flex:1"><div class="overline" style="color:var(--color-success-unlock)">🔓 Evolução desbloqueada</div><div class="subtitle" style="margin:2px 0 6px">${esc(ed.name)}</div><button class="btn unlock" data-a="open" data-v="${e}" style="min-height:40px">Conhecer</button></div></div>`); });
+  if (c.badges.length) blocks.push(`<div class="card pad"><div class="overline">${c.badges.length === 1 ? 'Badge conquistado' : 'Badges conquistados'}</div>${c.badges.map((b) => { const bd = BADGES.find((x) => x.id === b); return `<div style="display:flex;gap:12px;align-items:center;margin-top:12px"><span class="badge-ic">${bd.icon}</span><div><b>${bd.name}</b><div class="caption">${bd.desc}</div></div></div>`; }).join('')}<div class="caption" style="margin-top:10px">É seu para sempre.</div></div>`);
+  if (c.isRepeat) blocks.push(`<div class="card pad">📖 Você já registrou <b>${c.count} preparos</b> deste prato. Compare suas notas no Histórico.</div>`);
+  return `<div class="screen"><div class="body" id="scroll">
+    <div class="celebrate-hero"><div class="e">${c.isRepeat ? '📖' : '🎉'}</div><h1 class="display" style="margin-top:8px">${c.isRepeat ? 'Mais um registro no seu caderno!' : 'Prato registrado na sua Coleção!'}</h1>
+      <div style="margin-top:8px">${esc(d.name)} · ${stars(c.score, 18)}</div></div>
+    <div class="stack" style="gap:12px">${blocks.join('')}</div></div>
+    <div class="footer stack"><button class="btn primary block lg" data-a="goCollection">Ver na Coleção</button>
+      <div class="hrow"><button class="btn secondary" data-a="tab" data-v="kitchen">Voltar para Cozinha</button><button class="btn ghost" data-a="tab" data-v="discover">Descobrir mais</button></div></div></div>`;
+}
+
+function screenCollection() {
+  const done = completedSet(S.ratings);
+  const cuisinesDone = new Set([...done].map((x) => DISHES[x].c));
+  const conts = new Set([...cuisinesDone].map((c) => CUISINES[c].continent));
+  const tabs = [['cuisines', 'Culinárias'], ['evolutions', 'Evoluções'], ['badges', 'Badges'], ['history', 'Histórico']];
+  const header = `<div class="header"><h1 class="title">Coleção</h1><div class="caption">${done.size} ${done.size === 1 ? 'prato' : 'pratos'} · ${cuisinesDone.size} ${cuisinesDone.size === 1 ? 'culinária' : 'culinárias'} · ${conts.size} de 5 continentes 🌍</div>
+    ${S.ratings.length ? `<div style="margin-top:4px">${lastSync('23/11 às 14:32')}</div>` : ''}
+    <div class="segmented" role="tablist" style="margin-top:12px">${tabs.map(([k, l]) => `<button class="${S.collectionTab === k ? 'on' : ''}" data-a="ctab" data-v="${k}" role="tab">${l}</button>`).join('')}</div></div>`;
+  const emptyBlock = `<div class="empty"><div class="e">📖</div><h3>Sua coleção começa no primeiro prato avaliado</h3><p>Cada preparo vira um registro no seu caderno.</p><div class="stack"><button class="btn primary block" data-a="tab" data-v="discover">Descobrir pratos</button><button class="btn secondary block" data-a="tab" data-v="kitchen">Ir para a Cozinha</button></div></div>`;
+  let body = '';
+  if (S.loading) body = skeletonCards(2);
+  else if (S.collectionTab === 'cuisines') {
+    if (!done.size) body = emptyBlock;
+    else {
+      const order = Object.keys(CUISINES).sort((a, b) => cuisinePct(b, S.ratings).n - cuisinePct(a, S.ratings).n || CUISINES[a].name.localeCompare(CUISINES[b].name));
+      body = order.map((k) => { const cu = CUISINES[k]; const p = cuisinePct(k, S.ratings); const open = S.openCuisine === k;
+        const dishes = Object.entries(DISHES).filter(([, d]) => d.c === k);
+        const placeholders = Math.max(0, cu.total - dishes.length);
+        return `<div class="card" style="margin-bottom:10px"><button class="rowbtn pad" data-a="toggleCuisine" data-v="${k}" aria-expanded="${open}" style="padding:14px 16px"><span style="font-size:28px">${cu.flag}</span><div style="flex:1"><div style="display:flex;justify-content:space-between"><b>${cu.name}</b><span class="caption">${p.n} de ${p.total}${p.n ? ` · faltam ${p.total - p.n}` : ''}</span></div><div class="progressbar" style="margin-top:8px"><span style="width:${p.pct}%"></span></div></div><span aria-hidden="true">${open ? '▴' : '▾'}</span></button>
+          ${open ? `<div style="padding:0 16px 16px"><div class="dishgrid">${dishes.map(([id, d]) => `<button class="dishcell rowbtn" style="display:block" data-a="open" data-v="${id}"><div class="sq ${done.has(id) ? '' : 'pending'}" style="background:${d.bg}">${d.emoji}${done.has(id) ? '<span class="ck">✓</span>' : ''}</div>${esc(d.name)}</button>`).join('')}${Array.from({ length: Math.min(placeholders, 4) }, () => '<div class="dishcell"><div class="sq pending">?</div>…</div>').join('')}</div>${placeholders > 4 ? `<div class="caption" style="margin-top:8px">+ ${placeholders - 4} pratos no catálogo</div>` : ''}</div>` : ''}</div>`; }).join('');
+    }
+  } else if (S.collectionTab === 'evolutions') {
+    body = (!done.size ? '<div class="notice info" style="margin-bottom:12px">Conclua um prato base para abrir sua primeira evolução.</div>' : '') + CHAINS.map((chain) => `<div class="card pad" style="margin-bottom:12px"><div class="overline" style="margin-bottom:6px">Cadeia ${esc(DISHES[chain[0]].name)}</div><div class="chain">${chain.map((id, i) => {
+      const d = DISHES[id]; const st = completed(id) ? 'done' : isLocked(id) ? 'locked' : 'open';
+      const sub = st === 'done' ? '<span style="color:var(--color-allergen-safe);font-weight:600">✓ Concluído</span>' : st === 'open' ? '<span style="color:var(--color-success-unlock);font-weight:600">Pronto para cozinhar</span>' : `<span class="secondary">🔒 Conclua <b>${esc(DISHES[d.base].name)}</b> para abrir</span>`;
+      return `${i ? '<div class="connector"></div>' : ''}<button class="node ${st === 'locked' ? 'locked' : ''}" data-a="open" data-v="${id}">${photo(d, 'thumb')}<div style="flex:1"><div class="lvl">NÍVEL ${i + 1}</div><div style="font-weight:600">${esc(d.name)}</div><div style="font-size:13px">${sub}</div></div><span aria-hidden="true">›</span></button>`; }).join('')}</div></div>`).join('');
+  } else if (S.collectionTab === 'badges') {
+    const got = BADGES.filter((b) => S.awarded[b.id]); const next = BADGES.filter((b) => !S.awarded[b.id]);
+    body = `<div class="section-title" style="margin-top:0"><span class="subtitle">Conquistados</span><span class="caption">${got.length} de ${BADGES.length}</span></div>`
+      + (got.length ? got.map((b) => `<div class="card pad" style="display:flex;gap:12px;align-items:center;margin-bottom:8px"><span class="badge-ic">${b.icon}</span><div><b>${b.name}</b><div class="caption">${b.desc}</div><div class="caption">Conquistado em ${S.awarded[b.id]} · é seu para sempre</div></div></div>`).join('') : '<p class="caption">Seu primeiro badge chega com o primeiro prato avaliado.</p>')
+      + `<div class="section-title"><span class="subtitle">Próximos marcos</span></div>`
+      + next.map((b) => { const p = badgeProgress(b, S.ratings); return `<div class="card pad" style="display:flex;gap:12px;align-items:center;margin-bottom:8px"><span class="badge-ic off">${b.icon}</span><div style="flex:1"><b>${b.name}</b><div class="caption">${b.desc}</div><div class="progressbar" style="margin:6px 0 2px"><span style="width:${(p.cur / p.target) * 100}%"></span></div><div class="caption">${b.m.type === 'evolution_level' ? `Nível ${p.cur} de ${p.target}` : `${p.cur} de ${p.target} ${p.unit}`}</div></div></div>`; }).join('');
+  } else {
+    body = S.ratings.length ? S.ratings.slice().reverse().map((r) => { const d = DISHES[r.dishId]; return `<button class="timeline-item" data-a="history" data-v="${r.id}">${photo(d, 'thumb')}<div style="flex:1;min-width:0"><div class="caption">${r.date}</div><div style="font-weight:600">${esc(d.name)}</div>${stars(r.score)}${r.comment ? `<div class="caption" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">“${esc(r.comment)}”</div>` : ''}${r.changes ? '<span class="pill unlock" style="margin-top:4px">✍️ Toque pessoal</span>' : ''}</div></button>`; }).join('') : emptyBlock;
+  }
+  return `<div class="screen">${offlineBar()}${header}<div class="body" id="scroll">${body}</div></div>`;
+}
+
+function screenProfile() {
+  const r = S.restrictions;
+  const restr = r.length ? `<div class="chips">${r.map((c) => `<span class="chip sel ${S.busy['r-' + c] ? 'saving' : ''}" style="padding-right:4px">${ALLERGEN_LABEL[c]}${S.busy['r-' + c] ? ' · Salvando…' : `<button class="iconbtn" style="width:40px;height:40px;font-size:16px" data-a="askRemove" data-v="${c}" aria-label="Remover ${ALLERGEN_LABEL[c]}">✕</button>`}</span>`).join('')}</div>
+      <div class="caption" style="margin-top:12px">Consentimento dado em ${S.consentAt}</div>
+      <div class="caption">🔒 Cifradas no aparelho e no servidor; nunca vão para logs nem para a IA.</div>
+      <div style="margin-top:12px">${RN16()}</div>
+      <button class="btn secondary block" style="margin-top:12px" data-a="addRestriction">+ Adicionar restrição</button>`
+    : `<div class="notice info">Nenhuma restrição cadastrada. Se alguém da sua casa tem alergia ou intolerância, adicione aqui para filtrarmos as sugestões.</div><button class="btn primary block" style="margin-top:12px" data-a="addRestriction">+ Adicionar restrição</button>`;
+  return `<div class="screen">${offlineBar()}<div class="header"><h1 class="title">Perfil</h1></div><div class="body" id="scroll">
+    <div class="card pad"><div class="subtitle" style="margin-bottom:12px">Restrições alimentares</div>${restr}</div>
+    <div class="card pad" style="margin-top:12px"><div class="subtitle">Preferências culinárias</div><div class="caption" style="margin:4px 0 12px">Usadas para ordenar suas sugestões em Descobrir.</div>
+      <div class="chips">${Object.entries(CUISINES).map(([k, c]) => `<button class="chip ${S.prefs.includes(k) ? 'sel' : ''}" data-a="pref" data-v="${k}" aria-pressed="${S.prefs.includes(k)}">${c.flag} ${c.name}</button>`).join('')}</div></div>
+    <div class="card pad" style="margin-top:12px"><div class="subtitle">Conta e sincronização</div>
+      <div class="soon-row" style="color:var(--color-text-secondary)"><span>👤 Conta anônima ativa neste aparelho</span></div>
+      <div class="soon-row" style="color:var(--color-text-secondary)"><span>🔄 Última sincronização: hoje às 14:32</span></div>
+      <div class="soon-row"><span>✉️ Vincular e-mail</span><span class="pill soon">Em breve</span></div>
+      <div class="soon-row" style="border:0"><span>🗑️ Excluir conta</span><span class="pill soon">Em breve</span></div></div>
+    <p class="caption" style="text-align:center;margin-top:16px">Panelada · protótipo UX-01 (Onda 1A)</p></div></div>`;
+}
+
+function sheetHtml() {
+  const sh = S.sheet; if (!sh) return '';
+  let inner = '';
+  if (sh.type === 'swaps') {
+    const g = DISHES[S.route.dishId].ingredients[sh.i];
+    const allowed = g.subs.filter((s) => isSubstituteAllowed(s, S.restrictions));
+    const hidden = g.subs.length - allowed.length;
+    inner = `<div class="overline">Trocas seguras</div><h2 class="subtitle" style="margin:4px 0 12px">${esc(g.name)}</h2>
+      ${allowed.length ? allowed.map((s) => `<div class="ingredient"><div class="n">${esc(s.name)}<div class="caption">${esc(s.note)}</div></div>${seal(s.state)}</div>`).join('') : `<div class="notice info"><b>Nenhum substituto seguro cadastrado.</b><br>Não inventamos trocas: se precisar adaptar, registre o que fez na avaliação.</div>`}
+      ${hidden ? `<p class="caption">${hidden} ${hidden === 1 ? 'opção ocultada' : 'opções ocultadas'} por conter alérgeno do seu perfil ou não ter verificação.</p>` : ''}
+      <p class="caption">Trocou? Registre na avaliação — entra no seu caderno.</p>
+      <button class="btn secondary block" data-a="closeSheet">Fechar</button>`;
+  } else if (sh.type === 'seal') {
+    const txt = { verified: 'A curadoria conferiu os ingredientes desta receita contra os 19 alérgenos do vocabulário controlado.', source_declared: 'A lista de alérgenos foi informada pela fonte original da receita e ainda não foi conferida pela curadoria. Para quem tem restrição, conta como compatibilidade não confirmada.', unverified: 'Os alérgenos desta receita ainda não foram verificados. Para quem tem restrição, ela nunca é tratada como compatível.' }[sh.state];
+    inner = `<div style="margin-bottom:10px">${seal(sh.state)}</div><p class="bodytext">${txt}</p><button class="btn secondary block" data-a="closeSheet">Entendi</button>`;
+  } else if (sh.type === 'history') {
+    const r = S.ratings.find((x) => x.id === sh.id); const d = DISHES[r.dishId];
+    inner = `<div class="caption">${r.date}</div><h2 class="subtitle" style="margin:4px 0">${esc(d.name)}</h2>${stars(r.score, 20)} <b>${fmtScore(r.score)}</b>
+      <div class="field-label">Relato pessoal</div><p class="secondary" style="margin:0">${r.comment ? esc(r.comment) : '<span class="muted">Sem relato.</span>'}</p>
+      <div class="field-label">Alterações que eu fiz</div><p class="secondary" style="margin:0">${r.changes ? '✍️ ' + esc(r.changes) : '<span class="muted">Sem alterações registradas.</span>'}</p>
+      <div class="hrow" style="margin-top:20px"><button class="btn secondary" data-a="closeSheet">Fechar</button><button class="btn primary" data-a="open" data-v="${r.dishId}">Ver receita</button></div>`;
+  } else if (sh.type === 'remove') {
+    const last = S.restrictions.length === 1; const label = ALLERGEN_LABEL[sh.code];
+    inner = `<h2 class="subtitle">Remover ${esc(label)} das suas restrições?</h2><p class="secondary">Pratos com ${esc(label.split(' (')[0].toLowerCase())} poderão voltar às sugestões.${last ? ' Seu consentimento também será revogado.' : ''}</p>
+      <div class="hrow"><button class="btn secondary" data-a="closeSheet">Cancelar</button><button class="btn danger-text" data-a="confirmRemove" data-v="${sh.code}">Remover</button></div>`;
+  } else if (sh.type === 'add') {
+    const q = sh.search.trim().toLowerCase();
+    const groups = ALLERGEN_GROUPS.map(([g, items]) => [g, items.filter(([c, l]) => !S.restrictions.includes(c) && (!q || l.toLowerCase().includes(q)))]).filter(([, it]) => it.length);
+    inner = `<h2 class="subtitle">Adicionar restrição</h2><input class="search" id="add-search" type="search" placeholder="Buscar alérgeno" value="${esc(sh.search)}" style="margin:12px 0 0" aria-label="Buscar alérgeno">
+      ${groups.map(([g, items]) => `<div class="group-title">${g}</div><div class="chips">${items.map(([c, l]) => `<button class="chip ${sh.picked.includes(c) ? 'sel' : ''}" data-a="addPick" data-v="${c}">${sh.picked.includes(c) ? '✓ ' : ''}${l}</button>`).join('')}</div>`).join('')}
+      ${!S.consentAt && sh.picked.length ? `<div class="consent ${sh.invalid ? 'invalid' : ''}" style="margin-top:16px"><div style="font-size:14px;line-height:20px">🔒 <b>Restrição alimentar é um dado sensível de saúde.</b> Usamos só para filtrar sugestões e alertar sobre alérgenos; fica cifrada e você pode remover quando quiser.</div><label><input type="checkbox" id="add-consent" ${sh.consent ? 'checked' : ''}> Concordo com o tratamento das minhas restrições alimentares para esses fins.</label>${sh.invalid ? '<div style="color:var(--color-allergen-danger);font-weight:600;font-size:14px" role="alert">Para guardar suas restrições, marque o consentimento acima.</div>' : ''}</div>` : ''}
+      <div class="hrow" style="margin-top:16px"><button class="btn secondary" data-a="closeSheet">Cancelar</button><button class="btn primary" data-a="addSave" ${sh.picked.length ? '' : 'disabled'}>Salvar</button></div>`;
+  }
+  return `<div class="scrim" data-a="closeSheet" data-scrim="1"><div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>${inner}</div></div>`;
+}
+
+/* ===================================================================== Render */
+const TABS = [['discover', 'Descobrir', '🧭'], ['kitchen', 'Cozinha', '🍳'], ['collection', 'Coleção', '📖'], ['profile', 'Perfil', '👤']];
+function render(resetScroll = false) {
+  const prevScroll = $('#scroll') ? $('#scroll').scrollTop : 0;
+  const r = S.route.name;
+  const screens = { onboarding: screenOnboarding, discover: screenDiscover, kitchen: screenKitchen, recipe: screenRecipe, rate: screenRate, celebrate: screenCelebrate, collection: screenCollection, profile: screenProfile };
+  const showTabs = ['discover', 'kitchen', 'collection', 'profile', 'recipe'].includes(r);
+  const activeTab = r === 'recipe' ? (S.route.from && TABS.some((t) => t[0] === S.route.from) ? S.route.from : 'kitchen') : r;
+  $('#app').innerHTML = screens[r]()
+    + (showTabs ? `<nav class="tabbar" aria-label="Navegação principal">${TABS.map(([k, l, ic]) => `<button class="tab ${activeTab === k ? 'active' : ''}" data-a="tab" data-v="${k}" ${activeTab === k ? 'aria-current="page"' : ''}><span class="ic" aria-hidden="true">${ic}</span>${l}${k === 'kitchen' && S.kitchenDot ? '<span class="dot" aria-label="novidade"></span>' : ''}</button>`).join('')}</nav>` : '')
+    + (S.toast ? `<div id="toast" role="status"><span style="flex:1">${esc(S.toast.text)}</span>${S.toast.action ? `<button class="link" data-a="${S.toast.action.a}" data-v="${S.toast.action.v}">${S.toast.action.label}</button>` : ''}</div>` : '')
+    + sheetHtml();
+  if (!resetScroll && $('#scroll')) $('#scroll').scrollTop = prevScroll;
+  $('#sb-net').textContent = S.online ? '▂▄▆ 5G 🔋' : '✈︎ sem rede 🔋';
+  $('#pt-offline').classList.toggle('on', !S.online);
+  $('#pt-loading').classList.toggle('on', S.loading);
+  // Mantém o passo atual na tela para uso com as mãos ocupadas na bancada (§7, A04).
+  const cur = $('.step.current');
+  if (cur && S.focusStep) { S.focusStep = false; const sc = $('#scroll'); sc.scrollTop = Math.max(0, cur.offsetTop - sc.offsetTop - 120); }
+  // Validação de consentimento precisa ficar visível (A05): rola até o cartão.
+  const inv = $('.consent.invalid');
+  if (inv && S.focusConsent) { S.focusConsent = false; inv.scrollIntoView({ block: 'center' }); }
+  const bar = $('#cel-bar');
+  if (bar) requestAnimationFrame(() => setTimeout(() => { bar.style.width = bar.dataset.to + '%'; }, 250));
+}
+
+document.addEventListener('click', (e) => {
+  const el = e.target.closest('[data-a]');
+  if (el && el.dataset.scrim && e.target !== el) return; // clique dentro da folha não fecha
+  if (el && !el.disabled && A[el.dataset.a]) { A[el.dataset.a](el.dataset.v, el); return; }
+  const p = e.target.closest('[data-p]');
+  if (p) panel(p.dataset.p, p.dataset.v);
+});
+document.addEventListener('input', (e) => {
+  const t = e.target;
+  if (t.id === 'f-comment') S.draft.comment = t.value;
+  if (t.id === 'f-changes') { S.draft.changes = t.value; $('#changes-chip').style.display = t.value.trim() ? '' : 'none'; }
+  if (t.id === 'ob-search' || t.id === 'add-search') {
+    if (t.id === 'ob-search') S.ob.search = t.value; else S.sheet.search = t.value;
+    const pos = t.selectionStart; render(); const n = $('#' + t.id); n.focus(); n.setSelectionRange(pos, pos);
+  }
+});
+document.addEventListener('change', (e) => {
+  if (e.target.id === 'ob-consent') { S.ob.consent = e.target.checked; S.ob.invalid = false; render(); }
+  if (e.target.id === 'add-consent') { S.sheet.consent = e.target.checked; S.sheet.invalid = false; render(); }
+});
+
+/* ===================================================================== Painel do protótipo */
+function panel(kind, v) {
+  if (kind === 'scenario') { S = v === 'new' ? freshState() : progressState(); render(true); return; }
+  if (kind === 'toggle') { if (v === 'offline') S.online = !S.online; else S.loading = !S.loading; render(); return; }
+  if (kind === 'go') {
+    if (v === 'onboarding') { S.ob = freshState().ob; S.route = { name: 'onboarding' }; render(true); return; }
+    if (!S.onboarded && v !== 'onboarding') { S = progressState(); }
+    if (v === 'recipe') { const id = Object.keys(S.preparing)[0] || 'ratatouille'; if (!S.preparing[id]) S.preparing[id] = { step: 0, lastSyncAt: '23/11 às 14:32' }; S.recipe = { tab: 'steps' }; go('recipe', { dishId: id, from: 'kitchen' }); return; }
+    if (v === 'rate') { const id = Object.keys(S.preparing)[0] || 'ratatouille'; A.rate(id); return; }
+    if (v === 'celebrate') { panel('celebrate', '1'); return; }
+    go(v); return;
+  }
+  if (kind === 'state') {
+    if (!S.onboarded) S = progressState();
+    if (v === 'discover-empty') { S.discoverExhausted = true; go('discover'); }
+    if (v === 'discover-offline') { S.online = false; S.discoverOfflineInitial = true; go('discover'); }
+    if (v === 'allergen') { if (!S.restrictions.includes('amendoim')) { S.restrictions.push('amendoim'); S.consentAt = S.consentAt || '23/11/2026 às 14:05'; } S.preparing.padthai = S.preparing.padthai || { step: 0, lastSyncAt: '22/11 às 19:40' }; S.recipe = { tab: 'ingredients' }; go('recipe', { dishId: 'padthai', from: 'kitchen' }); }
+    if (v === 'locked') { S.recipe = { tab: 'ingredients' }; go('recipe', { dishId: 'byaldi', from: 'collection' }); }
+    if (v === 'repeat') { S.preparing.ratatouille = { step: 5, lastSyncAt: '23/11 às 14:32' }; S.draft = null; A.rate('ratatouille'); }
+    if (v === 'no-restrictions') { S.restrictions = []; S.consentAt = null; go('profile'); }
+    return;
+  }
+  if (kind === 'celebrate') {
+    // Monta o cenário e salva uma avaliação real pelo mesmo caminho do app.
+    if (v === '1') { S = freshState(); S.onboarded = true; S.preparing.ratatouille = { step: 5, lastSyncAt: '23/11 às 14:32' }; S.draft = { dishId: 'ratatouille', score: 4.5, comment: '', changes: '', sending: false, error: false }; S.route = { name: 'rate', dishId: 'ratatouille' }; }
+    if (v === '2') { S = freshState(); S.onboarded = true; S.ratings = [{ id: 'r0', dishId: 'tacos', score: 4, comment: '', changes: '', date: '20/11/2026' }]; S.awarded = { primeiro_fogo: '20/11/2026' }; S.preparing.moqueca = { step: 3, lastSyncAt: '23/11 às 14:32' }; S.draft = { dishId: 'moqueca', score: 4, comment: '', changes: '', sending: false, error: false }; S.route = { name: 'rate', dishId: 'moqueca' }; }
+    if (v === '3') { S = progressState(); S.preparing.ratatouille = { step: 5, lastSyncAt: '23/11 às 14:32' }; S.draft = { dishId: 'ratatouille', score: 5, comment: 'Terceira vez, agora com mais alho.', changes: '', sending: false, error: false }; S.route = { name: 'rate', dishId: 'ratatouille' }; }
+    S.online = true; render(true); saveRating();
+  }
+}
+
+const applyHash = () => document.body.classList.toggle('figma', location.hash === '#figma');
+window.addEventListener('hashchange', applyHash);
+applyHash();
+S = freshState();
+render(true);
+</script>
+</body>
+</html>
