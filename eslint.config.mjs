@@ -184,6 +184,13 @@ const BOUNDARY_ELEMENTS = [
     pattern: 'apps/mobile/src/core/sync/**/*.{ts,tsx}',
     mode: 'full',
   },
+  // Types generated from openapi.yaml: a shared contract, not network behavior, so ports outside
+  // core/network (e.g. OperationEnqueuer) may reference operation and payload types.
+  {
+    type: 'mobile-api-contract',
+    pattern: 'apps/mobile/src/core/network/openapi.generated.ts',
+    mode: 'full',
+  },
   {
     type: 'mobile-core-adapter',
     pattern: 'apps/mobile/src/core/*/**/*-adapter.{ts,tsx}',
@@ -426,6 +433,7 @@ const BOUNDARY_RULES = [
       'mobile-core-sync-internal',
       'mobile-core-adapter',
       'mobile-core-network',
+      'mobile-api-contract',
       'mobile-core-notifications',
       'mobile-core-other',
       'mobile-shared',
@@ -460,6 +468,7 @@ const BOUNDARY_RULES = [
       ['mobile-feature-data', { feature: '${from.feature}' }],
       // A4: features import only the OperationEnqueuer port.
       'mobile-core-sync-enqueuer',
+      'mobile-api-contract',
       'mobile-shared',
       'allergen-rules-entry',
     ],
@@ -474,6 +483,7 @@ const BOUNDARY_RULES = [
       'mobile-core-local-db-port',
       'mobile-core-sync-enqueuer',
       'mobile-core-network',
+      'mobile-api-contract',
       'mobile-shared',
       'allergen-rules-entry',
     ],
@@ -484,7 +494,7 @@ const BOUNDARY_RULES = [
   },
   {
     from: ['mobile-core-sync-enqueuer'],
-    allow: ['mobile-shared', 'allergen-rules-entry'],
+    allow: ['mobile-api-contract', 'mobile-shared', 'allergen-rules-entry'],
   },
   {
     from: ['mobile-core-sync-adapter', 'mobile-core-sync-internal'],
@@ -493,13 +503,14 @@ const BOUNDARY_RULES = [
       'mobile-core-sync-internal',
       'mobile-core-local-db-port',
       'mobile-core-network',
+      'mobile-api-contract',
       'mobile-shared',
       'allergen-rules-entry',
     ],
   },
   {
     from: ['mobile-core-network'],
-    allow: ['mobile-core-network', 'mobile-shared', 'allergen-rules-entry'],
+    allow: ['mobile-core-network', 'mobile-api-contract', 'mobile-shared', 'allergen-rules-entry'],
   },
   {
     from: ['mobile-core-notifications'],
@@ -510,6 +521,7 @@ const BOUNDARY_RULES = [
     allow: [
       ['mobile-core-other', { coreArea: '${from.coreArea}' }],
       'mobile-core-network',
+      'mobile-api-contract',
       'mobile-core-notifications',
       'mobile-core-local-db-port',
       'mobile-shared',
@@ -611,6 +623,7 @@ export default tseslint.config(
       '**/coverage/**',
       '**/.expo/**',
       'apps/api/src/shared/openapi.generated.ts',
+      'apps/mobile/src/core/network/openapi.generated.ts',
       'docs/**',
       '.plans/**',
       '.worktrees/**',

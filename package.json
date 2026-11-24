@@ -14,7 +14,7 @@
     "test": "pnpm -r --if-present test",
     "test:integration": "pnpm --filter @panelada/api test:integration",
     "contracts:lint": "redocly lint docs/fase2/04-contratos/openapi.yaml",
-    "contracts:generate": "openapi-typescript docs/fase2/04-contratos/openapi.yaml -o apps/api/src/shared/openapi.generated.ts && prettier --write apps/api/src/shared/openapi.generated.ts",
+    "contracts:generate": "openapi-typescript docs/fase2/04-contratos/openapi.yaml -o apps/api/src/shared/openapi.generated.ts && openapi-typescript docs/fase2/04-contratos/openapi.yaml -o apps/mobile/src/core/network/openapi.generated.ts && prettier --write apps/api/src/shared/openapi.generated.ts apps/mobile/src/core/network/openapi.generated.ts",
     "contracts:check": "node scripts/check-contracts.mjs",
     "db:migrate": "pnpm --filter @panelada/api db:migrate",
     "db:seed": "pnpm --filter @panelada/api db:seed",

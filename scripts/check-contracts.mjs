@@ -7,7 +7,12 @@ import { fileURLToPath } from 'node:url';
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const specPath = path.join(rootDir, 'docs', 'fase2', '04-contratos', 'openapi.yaml');
-const generatedPath = path.join(rootDir, 'apps', 'api', 'src', 'shared', 'openapi.generated.ts');
+// Both the API and the mobile client compile against types generated from the same spec, so
+// either copy drifting from openapi.yaml would silently break the contract on that side.
+const generatedPaths = [
+  path.join(rootDir, 'apps', 'api', 'src', 'shared', 'openapi.generated.ts'),
+  path.join(rootDir, 'apps', 'mobile', 'src', 'core', 'network', 'openapi.generated.ts'),
+];
 
 const require = createRequire(import.meta.url);
 const openapiPkgPath = require.resolve('openapi-typescript/package.json', { paths: [rootDir] });
@@ -40,21 +45,29 @@ try {
   );
 
   const expected = readFileSync(tempOut, 'utf8');
-  let actual = '';
-  try {
-    actual = readFileSync(generatedPath, 'utf8');
-  } catch {
-    console.error(
-      `Missing generated OpenAPI types at ${path.relative(rootDir, generatedPath)}. Run "pnpm contracts:generate".`,
-    );
-    process.exit(1);
+  let outdated = false;
+  for (const generatedPath of generatedPaths) {
+    const relative = path.relative(rootDir, generatedPath);
+    let actual;
+    try {
+      actual = readFileSync(generatedPath, 'utf8');
+    } catch {
+      console.error(
+        `Missing generated OpenAPI types at ${relative}. Run "pnpm contracts:generate".`,
+      );
+      outdated = true;
+      continue;
+    }
+    if (actual !== expected) {
+      console.error(
+        `Generated OpenAPI types at ${relative} are out of date with docs/fase2/04-contratos/openapi.yaml.`,
+      );
+      outdated = true;
+    }
   }
 
-  if (actual !== expected) {
-    console.error(
-      'Generated OpenAPI types are out of date with docs/fase2/04-contratos/openapi.yaml.\n' +
-        'Run "pnpm contracts:generate" and commit the updated file.',
-    );
+  if (outdated) {
+    console.error('Run "pnpm contracts:generate" and commit the updated files.');
     process.exit(1);
   }
 
