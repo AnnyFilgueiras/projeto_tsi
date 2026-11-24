@@ -132,7 +132,8 @@ const BOUNDARY_ELEMENTS = [
   },
   {
     type: 'mobile-pure-domain',
-    pattern: 'apps/mobile/src/features/*/domain/{unlock-calculator,reminder-scheduler}.ts',
+    pattern:
+      'apps/mobile/src/features/*/domain/{unlock-calculator,milestone-progress,reminder-scheduler}.ts',
     mode: 'full',
     capture: ['feature'],
   },
@@ -788,8 +789,10 @@ export default tseslint.config(
     },
   },
   {
-    // A6: UnlockCalculator and ReminderScheduler must stay pure TypeScript while retaining A2/A7/A05 bans.
-    files: ['apps/mobile/src/features/*/domain/{unlock-calculator,reminder-scheduler}.ts'],
+    // A6: UnlockCalculator, milestoneProgress and ReminderScheduler must stay pure TypeScript while retaining A2/A7/A05 bans.
+    files: [
+      'apps/mobile/src/features/*/domain/{unlock-calculator,milestone-progress,reminder-scheduler}.ts',
+    ],
     rules: {
       'no-restricted-imports': [
         'error',
