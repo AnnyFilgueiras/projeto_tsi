@@ -25,6 +25,7 @@ export function sealAccessibilityLabel(state: AllergenState): string {
   return `Alérgenos: ${SEAL_LABELS[state].toLowerCase()}`;
 }
 
+const MATCH_WITHOUT_NAMES_REASON = 'Esta receita contém alérgenos que estão nas suas restrições.';
 const UNVERIFIED_REASON = 'Os alérgenos desta receita ainda não foram verificados.';
 const SOURCE_DECLARED_REASON =
   'A lista de alérgenos vem da fonte original e não foi confirmada pela curadoria.';
@@ -44,7 +45,8 @@ export function failClosedReasonText(
   reasons: readonly ClassificationReason[],
   matchedAllergens: readonly AllergenCode[] = [],
 ): string {
-  if (reasons.includes('allergen_match') && matchedAllergens.length > 0) {
+  if (reasons.includes('allergen_match')) {
+    if (matchedAllergens.length === 0) return MATCH_WITHOUT_NAMES_REASON;
     const plural = matchedAllergens.length > 1;
     return `Esta receita contém ${joinLabels(matchedAllergens)}, ${plural ? 'que estão' : 'que está'} nas suas restrições.`;
   }

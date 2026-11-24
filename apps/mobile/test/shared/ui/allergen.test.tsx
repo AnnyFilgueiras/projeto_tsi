@@ -64,6 +64,13 @@ describe('FailClosedAlert (§1.4c)', () => {
     ).toBeTruthy();
   });
 
+  it('still reports a match when the codes are missing', () => {
+    render(<FailClosedAlert reasons={['allergen_match']} />);
+    expect(
+      screen.getByText('Esta receita contém alérgenos que estão nas suas restrições.'),
+    ).toBeTruthy();
+  });
+
   it.each([
     [['allergen_state_unverified'], 'Os alérgenos desta receita ainda não foram verificados.'],
     [['empty_allergens_unconfirmed'], 'Os alérgenos desta receita ainda não foram verificados.'],
