@@ -29,7 +29,8 @@
 
 - **Abrir o protótipo:** `docs/fase3/prototipo-onda1a/index.html` no navegador (Chrome/Firefox/Edge). A moldura central simula um aparelho de **360 × 800 dp** (Android médio). Não há rede, CDN nem build: todo o estado é simulado em memória e reinicia ao recarregar a página.
 - **Painel do protótipo (fora da moldura):** atalhos para pular entre telas, carregar cenários (`Novo usuário`, `Usuário com progresso`) e **simular estados** (sem rede no Estágio 1, carregando, Descobrir esgotado, alerta de alérgeno, evolução bloqueada, variantes da celebração). O painel **não faz parte da UI do app**.
-- **Modo Figma:** abra `index.html#figma` para esconder o painel e deixar apenas a moldura (útil para importar via plugin *html.to.design* ou capturar a tela). O protótipo usa apenas HTML/CSS + JS vanilla e CSS *custom properties* com os mesmos nomes dos tokens da §1.2, o que facilita reproduzir as telas como *frames* no Figma.
+- **Galeria:** abra `index.html#galeria` para ver **todas as telas e estados lado a lado** (46 molduras agrupadas por sub-issue, com legenda), geradas pelo mesmo código do protótipo. É a página indicada para a revisão heurística da §12 e para importar tudo no Figma de uma vez.
+- **Modo Figma:** abra `index.html#figma` para esconder o painel e deixar apenas a moldura (útil para capturar um estado específico). O protótipo usa apenas HTML/CSS + JS vanilla e CSS *custom properties* com os mesmos nomes dos tokens da §1.2, o que facilita reproduzir as telas como *frames* no Figma.
 - **Fidelidade:** é um protótipo de **média fidelidade** — hierarquia, microcopy, estados e fluxo são o contrato para `#43`/`#44`; fotos são *placeholders* (gradiente + emoji em proporção `4:3`), e animações avançadas ficam para `UX-02`.
 - **Mapeamento para o código:** cada seção de tela indica a pasta de destino em `apps/mobile/src/features/<feature>/ui/` (arquitetura *feature-first* — ver [`docs/dev/ARCHITECTURE.md`](../dev/ARCHITECTURE.md)).
 
@@ -453,7 +454,7 @@ Cartão `surface` com borda `allergenWarning`, visível assim que há ≥ 1 rest
 | **Alerta "Compatibilidade não confirmada"** (`incompatible` ou `unverified`/`unconfirmed`) | Bloco §1.4c fixo + ingredientes destacados; **não** bloqueia ver a receita (o usuário decide), mas o alerta reaparece compacto acima do CTA de conclusão |
 | **Ingrediente com substitutos seguros** | Folha com lista |
 | **"Nenhum substituto seguro cadastrado"** | Folha com mensagem explícita |
-| **Evolução bloqueada (`RN02`, vinda da Coleção)** | Faixa `successUnlockSoft` "🔒 Evolução bloqueada — conclua **Tian provençal** para abrir" com link para o prato base; botões **Iniciar passo a passo** e **Avaliar prato** desabilitados com o motivo como legenda |
+| **Evolução bloqueada (`RN02`, vinda da Coleção)** | Faixa `successUnlockSoft` no topo (acima da foto) "🔒 Evolução bloqueada — conclua **Tian provençal** para abrir" com link para o prato base; botões **Iniciar passo a passo** e **Avaliar prato** desabilitados com o motivo como legenda |
 | **Não baixada (detalhe vindo de Descobrir/Coleção)** | Mostra resumo + CTA "Adicionar à Cozinha"/"Cozinhar agora"; passos só após download |
 | **Carregando** | *Skeleton* do cabeçalho + 4 linhas |
 

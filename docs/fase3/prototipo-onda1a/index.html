@@ -7,7 +7,8 @@
 <!--
   Protótipo navegável da Onda 1A (UX-01 #60, sub-issues #61–#68).
   Especificação: docs/fase3/ux-onda1a.md. Arquivo único, sem dependências externas.
-  Abra index.html#figma para esconder o painel do protótipo.
+  Abra index.html#figma para esconder o painel do protótipo e index.html#galeria
+  para ver todas as telas e estados lado a lado (revisão e importação no Figma).
   Os nomes das CSS custom properties espelham os tokens semânticos da §1.2
   (camelCase -> kebab-case) para mapear 1:1 em apps/mobile/src/shared/theme/.
 -->
@@ -61,13 +62,30 @@ input, textarea { font: inherit; }
 #panel button.on { background: #B4441F; border-color: #D9A48F; }
 #panel .hint { font-size: 11px; color: #9C9187; margin-top: 6px; }
 body.figma #panel { display: none; }
+
+/* ---------- Galeria (index.html#galeria): todas as telas e estados lado a lado ---------- */
+#galeria { display: none; }
+body.galeria { display: block; background: #EFEAE3; padding: 48px; }
+body.galeria #panel, body.galeria > .device { display: none; }
+body.galeria #galeria { display: block; }
+#galeria .g-head { max-width: 900px; margin-bottom: 40px; color: #2B2622; }
+#galeria .g-head h1 { font-size: 32px; margin: 0 0 8px; }
+#galeria .g-head p { margin: 0 0 6px; font-size: 16px; line-height: 24px; color: #4B5563; }
+#galeria section { margin-bottom: 64px; }
+#galeria section > h2 { font-size: 24px; color: #2B2622; margin: 0 0 24px; padding-bottom: 8px; border-bottom: 2px solid #D9CFC4; }
+#galeria .g-grid { display: flex; flex-wrap: wrap; gap: 48px 40px; }
+#galeria .g-item { width: 380px; }
+#galeria .g-cap { font-size: 15px; font-weight: 700; color: #2B2622; margin: 0 0 10px; min-height: 40px; }
+#galeria .g-cap small { display: block; font-weight: 400; color: #4B5563; font-size: 13px; margin-top: 2px; }
+#galeria .device { box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+#galeria .app { pointer-events: none; }
 body.figma { background: #FFFFFF; }
 
 /* ---------- Moldura do aparelho ---------- */
 .device { width: 380px; height: 820px; background: #111; border-radius: 44px; padding: 10px; box-shadow: 0 20px 60px rgba(0,0,0,.45); flex-shrink: 0; }
 .phone { width: 360px; height: 800px; background: var(--color-background); border-radius: 34px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
 .statusbar { height: 28px; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; padding: 0 22px; font-size: 12px; font-weight: 600; color: var(--color-text-primary); }
-#app { flex: 1; display: flex; flex-direction: column; min-height: 0; position: relative; }
+#app, .app { flex: 1; display: flex; flex-direction: column; min-height: 0; position: relative; }
 .screen { flex: 1; display: flex; flex-direction: column; min-height: 0; }
 .body { flex: 1; overflow-y: auto; padding: 0 var(--space-md) var(--space-lg); }
 .body.no-pad { padding: 0; }
@@ -278,8 +296,12 @@ textarea { width: 100%; min-height: 84px; border: 1.5px solid var(--color-border
     <button data-p="celebrate" data-v="2">2 · Nova sem desbloqueio</button>
     <button data-p="celebrate" data-v="3">3 · Repetição</button>
   </div>
+  <h2>Exportar</h2>
+  <div class="row"><a href="#galeria" style="color:#F6B79F">Abrir galeria de todas as telas →</a></div>
   <div class="hint">Abra <code>index.html#figma</code> para esconder este painel.</div>
 </aside>
+
+<main id="galeria" aria-label="Galeria de telas e estados"></main>
 
 <div class="device">
   <div class="phone" id="phone">
@@ -492,6 +514,13 @@ function saveRating() {
   later(900, () => {
     d.sending = false;
     if (!S.online) { d.error = true; return; }
+    commitRating(dishId);
+  });
+}
+
+// Grava a avaliação e calcula o que a Celebração mostra (RN01, RN02, RN03, RN06, RN07).
+function commitRating(dishId) {
+    const d = S.draft;
     const before = S.ratings.slice();
     const isRepeat = completed(dishId);
     const prev = cuisinePct(DISHES[dishId].c, before);
@@ -505,7 +534,6 @@ function saveRating() {
     S.celebration = { dishId, score: d.score, isRepeat, prev, next, evolutions, badges, count: S.ratings.filter((r) => r.dishId === dishId).length };
     S.draft = null;
     S.route = { name: 'celebrate' };
-  });
 }
 
 function startCooking(id) {
@@ -741,7 +769,8 @@ function screenRecipe() {
   let body; let footer = '';
   if (locked) {
     const base = DISHES[d.base];
-    body = `${header}<div style="padding:16px"><div class="locked-banner">🔒 Evolução bloqueada — conclua <b>${esc(base.name)}</b> para abrir.<div><button class="link" data-a="open" data-v="${d.base}" style="color:var(--color-success-unlock)">Ver ${esc(base.name)} →</button></div></div>
+    // Faixa de bloqueio no topo: o motivo (RN02) aparece antes da foto, na primeira dobra.
+    body = `<div style="padding:0 16px 12px"><div class="locked-banner">🔒 Evolução bloqueada — conclua <b>${esc(base.name)}</b> para abrir.<div><button class="link" data-a="open" data-v="${d.base}" style="color:var(--color-success-unlock)">Ver ${esc(base.name)} →</button></div></div></div>${header}<div style="padding:0 16px 16px">
       <div class="section-title"><span class="subtitle">Ingredientes</span></div>${ingredients}</div>`;
     footer = `<div class="footer stack"><button class="btn primary block lg" disabled>Iniciar passo a passo</button><button class="btn secondary block" disabled>Avaliar prato</button><div class="caption" style="text-align:center">Disponível depois de concluir ${esc(base.name)} (RN02)</div></div>`;
   } else if (!prep) {
@@ -907,17 +936,9 @@ function sheetHtml() {
 const TABS = [['discover', 'Descobrir', '🧭'], ['kitchen', 'Cozinha', '🍳'], ['collection', 'Coleção', '📖'], ['profile', 'Perfil', '👤']];
 function render(resetScroll = false) {
   const prevScroll = $('#scroll') ? $('#scroll').scrollTop : 0;
-  const r = S.route.name;
-  const screens = { onboarding: screenOnboarding, discover: screenDiscover, kitchen: screenKitchen, recipe: screenRecipe, rate: screenRate, celebrate: screenCelebrate, collection: screenCollection, profile: screenProfile };
-  // A Receita fica fora de (tabs) no shell de #42, então a barra de abas some nela (§1.1).
-  const showTabs = ['discover', 'kitchen', 'collection', 'profile'].includes(r);
-  const activeTab = r;
-  $('#app').innerHTML = screens[r]()
-    + (showTabs ? `<nav class="tabbar" aria-label="Navegação principal">${TABS.map(([k, l, ic]) => `<button class="tab ${activeTab === k ? 'active' : ''}" data-a="tab" data-v="${k}" ${activeTab === k ? 'aria-current="page"' : ''}><span class="ic" aria-hidden="true">${ic}</span>${l}${k === 'kitchen' && S.kitchenDot ? '<span class="dot" aria-label="novidade"></span>' : ''}</button>`).join('')}</nav>` : '')
-    + (S.toast ? `<div id="toast" role="status"><span style="flex:1">${esc(S.toast.text)}</span>${S.toast.action ? `<button class="link" data-a="${S.toast.action.a}" data-v="${S.toast.action.v}">${S.toast.action.label}</button>` : ''}</div>` : '')
-    + sheetHtml();
+  $('#app').innerHTML = appHtml();
   if (!resetScroll && $('#scroll')) $('#scroll').scrollTop = prevScroll;
-  $('#sb-net').textContent = S.online ? '▂▄▆ 5G 🔋' : '✈︎ sem rede 🔋';
+  $('#sb-net').textContent = netLabel();
   $('#pt-offline').classList.toggle('on', !S.online);
   $('#pt-loading').classList.toggle('on', S.loading);
   // Mantém o passo atual na tela para uso com as mãos ocupadas na bancada (§7, A04).
@@ -928,6 +949,21 @@ function render(resetScroll = false) {
   if (inv && S.focusConsent) { S.focusConsent = false; inv.scrollIntoView({ block: 'center' }); }
   const bar = $('#cel-bar');
   if (bar) requestAnimationFrame(() => setTimeout(() => { bar.style.width = bar.dataset.to + '%'; }, 250));
+}
+
+const netLabel = () => (S.online ? '▂▄▆ 5G 🔋' : '✈︎ sem rede 🔋');
+
+// Monta a tela atual a partir de S (usado pelo app e pela galeria).
+function appHtml() {
+  const r = S.route.name;
+  const screens = { onboarding: screenOnboarding, discover: screenDiscover, kitchen: screenKitchen, recipe: screenRecipe, rate: screenRate, celebrate: screenCelebrate, collection: screenCollection, profile: screenProfile };
+  // A Receita fica fora de (tabs) no shell de #42, então a barra de abas some nela (§1.1).
+  const showTabs = ['discover', 'kitchen', 'collection', 'profile'].includes(r);
+  const activeTab = r;
+  return screens[r]()
+    + (showTabs ? `<nav class="tabbar" aria-label="Navegação principal">${TABS.map(([k, l, ic]) => `<button class="tab ${activeTab === k ? 'active' : ''}" data-a="tab" data-v="${k}" ${activeTab === k ? 'aria-current="page"' : ''}><span class="ic" aria-hidden="true">${ic}</span>${l}${k === 'kitchen' && S.kitchenDot ? '<span class="dot" aria-label="novidade"></span>' : ''}</button>`).join('')}</nav>` : '')
+    + (S.toast ? `<div id="toast" role="status"><span style="flex:1">${esc(S.toast.text)}</span>${S.toast.action ? `<button class="link" data-a="${S.toast.action.a}" data-v="${S.toast.action.v}">${S.toast.action.label}</button>` : ''}</div>` : '')
+    + sheetHtml();
 }
 
 document.addEventListener('click', (e) => {
@@ -982,11 +1018,114 @@ function panel(kind, v) {
   }
 }
 
-const applyHash = () => document.body.classList.toggle('figma', location.hash === '#figma');
-window.addEventListener('hashchange', applyHash);
-applyHash();
+/* ===================================================================== Galeria (#galeria)
+ * Renderiza todas as telas e estados lado a lado, com o mesmo código do app, para
+ * revisão heurística (§12) e importação de uma só vez no Figma (ex.: html.to.design).
+ * ===================================================================== */
+const newUser = () => { const s = freshState(); s.onboarded = true; s.route = { name: 'discover' }; return s; };
+const draftFor = (dishId, extra = {}) => ({ dishId, score: null, comment: '', changes: '', sending: false, error: false, ...extra });
+const recipeAt = (dishId, tab, from = 'kitchen') => { S.route = { name: 'recipe', dishId, from }; S.recipe = { tab }; };
+const rateFor = (dishId, extra) => { S.draft = draftFor(dishId, extra); S.route = { name: 'rate', dishId }; };
+const celebrate = (dishId, score, changes = '') => { S.draft = draftFor(dishId, { score, changes }); commitRating(dishId); };
+
+const GALLERY = [
+  ['UX-01A · Onboarding (#61)', [
+    ['Boas-vindas', 'Conta anônima, sem cadastro nem senha', () => { S = freshState(); }],
+    ['Criando conta (carregando)', 'POST /v1/accounts/anonymous', () => { S = freshState(); S.ob.busy = true; }],
+    ['Sem rede no 1º acesso', 'Estágio 1 — nada é perdido', () => { S = freshState(); S.online = false; S.ob.error = 'account'; }],
+    ['Restrições — padrão', 'Atalho de 1 toque sem restrições', () => { S = freshState(); S.ob.step = 2; }],
+    ['Restrições + consentimento', 'Aceite explícito antes de salvar (A05)', () => { S = freshState(); S.ob.step = 2; S.ob.search = 'amend'; S.ob.picked = ['amendoim']; S.ob.consent = true; }],
+    ['Validação sem aceite', 'Tentou salvar sem consentir', () => { S = freshState(); S.ob.step = 2; S.ob.search = 'leite'; S.ob.picked = ['leite']; S.ob.invalid = true; }],
+    ['Preferências (opcional)', 'Pular sem culpa', () => { S = freshState(); S.ob.step = 3; S.ob.prefs = ['fr', 'th']; }],
+  ]],
+  ['UX-01B · Descobrir (#62)', [
+    ['Sugestão com restrição', 'Banner RN16 + só pratos compatíveis', () => { S = progressState(); }],
+    ['Sugestão sem restrição', 'Pista de curiosidade (CD7/CD4)', () => { S = newUser(); }],
+    ['Aprovou', 'Toast + ponto na aba Cozinha', () => { S = progressState(); S.kitchenDot = true; S.toast = { text: 'Foi para Cozinha → Candidatas', action: { label: 'Ver', a: 'tab', v: 'kitchen' } }; }],
+    ['Carregando', 'Skeleton do card', () => { S = progressState(); S.loading = true; }],
+    ['Vazio — rodada esgotada', 'CTA construtivo para a Cozinha', () => { S = progressState(); S.discoverExhausted = true; }],
+    ['Sem rede', 'Sugestões exigem internet (ADR-001)', () => { S = progressState(); S.online = false; S.discoverOfflineInitial = true; }],
+  ]],
+  ['UX-01C · Cozinha (#63)', [
+    ['Em preparo + Candidatas', 'lastSyncAt e alerta compacto', () => { S = progressState(); S.route = { name: 'kitchen' }; }],
+    ['Só candidatas', 'Nudge Intenção → Ação', () => { S = newUser(); S.candidates = ['ratatouille', 'shakshuka']; S.route = { name: 'kitchen' }; }],
+    ['Vazio', 'CTA para Descobrir', () => { S = newUser(); S.route = { name: 'kitchen' }; }],
+    ['Baixando receita', 'Após tocar “Cozinhar agora”', () => { S = progressState(); S.busy.carbonara = true; S.route = { name: 'kitchen' }; }],
+    ['Sem rede', 'Em preparo abre; candidata não baixa', () => { S = progressState(); S.online = false; S.inlineError.carbonara = true; S.route = { name: 'kitchen' }; }],
+  ]],
+  ['UX-01D · Receita Offline (#64)', [
+    ['Passo a passo (bancada)', 'Verificado, offline, passo atual em destaque', () => { S = progressState(); recipeAt('tian', 'steps'); }],
+    ['Último passo', '“Concluir e avaliar prato”', () => { S = newUser(); S.preparing.ratatouille = { step: 5, lastSyncAt: '23/11 às 14:32' }; recipeAt('ratatouille', 'steps'); }],
+    ['Trocas seguras', 'Substitutos aprovados (US10, RN22)', () => { S = newUser(); S.preparing.ratatouille = { step: 2, lastSyncAt: '23/11 às 14:32' }; recipeAt('ratatouille', 'ingredients'); S.sheet = { type: 'swaps', i: 7 }; }],
+    ['Compatibilidade não confirmada', 'Alerta fail-closed (A06, RN16)', () => { S = progressState(); recipeAt('padthai', 'ingredients'); }],
+    ['Sem substituto seguro', '“Nenhum substituto seguro cadastrado”', () => { S = progressState(); recipeAt('padthai', 'ingredients'); S.sheet = { type: 'swaps', i: 2 }; }],
+    ['Evolução bloqueada', 'Vinda da Coleção (RN02)', () => { S = progressState(); recipeAt('byaldi', 'ingredients', 'collection'); }],
+    ['Ainda não baixada', 'Detalhe aberto a partir de Descobrir', () => { S = newUser(); recipeAt('tacos', 'ingredients', 'discover'); }],
+  ]],
+  ['UX-01E · Avaliação (#65)', [
+    ['Inicial', 'Salvar bloqueado até escolher a nota', () => { S = newUser(); rateFor('ratatouille'); }],
+    ['Só a nota', 'Salvamento válido em 1 toque', () => { S = newUser(); rateFor('ratatouille', { score: 4 }); }],
+    ['Nota + alterações', 'Nudge CD3 (Toque Pessoal)', () => { S = newUser(); rateFor('ratatouille', { score: 4.5, comment: 'Ficou ótimo com pão.', changes: 'Troquei o tomilho por ervas de Provence.' }); }],
+    ['Enviando', 'Campos somente leitura', () => { S = newUser(); rateFor('ratatouille', { score: 4.5, sending: true }); }],
+    ['Sem rede', 'Rascunho preservado + Tentar novamente', () => { S = newUser(); S.online = false; rateFor('ratatouille', { score: 4.5, comment: 'Ficou ótimo com pão.', error: true }); }],
+    ['Repetição de prato', 'Novo registro no caderno (RN06)', () => { S = progressState(); rateFor('ratatouille', { score: 5 }); }],
+  ]],
+  ['UX-01F · Celebração (#66)', [
+    ['Evolução + badges', '1º preparo de um prato base', () => { S = newUser(); celebrate('ratatouille', 4.5); }],
+    ['Nova sem desbloqueio', 'Foco no avanço % da culinária', () => { S = newUser(); S.ratings = [{ id: 'r0', dishId: 'tacos', score: 4, comment: '', changes: '', date: '20/11/2026' }]; S.awarded = { primeiro_fogo: '20/11/2026' }; celebrate('moqueca', 4); }],
+    ['Repetição de prato', 'Foco no caderno pessoal (RN06)', () => { S = progressState(); celebrate('ratatouille', 5); }],
+  ]],
+  ['UX-01G · Coleção (#67)', [
+    ['Culinárias', 'Progresso % e “faltam N” (RN07)', () => { S = progressState(); S.route = { name: 'collection' }; S.openCuisine = 'fr'; }],
+    ['Evoluções', 'Cadeia com nó bloqueado (RN02)', () => { S = progressState(); S.route = { name: 'collection' }; S.collectionTab = 'evolutions'; }],
+    ['Badges', 'Conquistados + próximos marcos', () => { S = progressState(); S.route = { name: 'collection' }; S.collectionTab = 'badges'; }],
+    ['Histórico', 'Linha do tempo com repetições', () => { S = progressState(); S.route = { name: 'collection' }; S.collectionTab = 'history'; }],
+    ['Registro do histórico', 'Relato e alterações', () => { S = progressState(); S.route = { name: 'collection' }; S.collectionTab = 'history'; S.sheet = { type: 'history', id: 'r1' }; }],
+    ['Vazio', 'Nenhum prato concluído ainda', () => { S = newUser(); S.route = { name: 'collection' }; }],
+    ['Carregando', 'Skeleton', () => { S = progressState(); S.route = { name: 'collection' }; S.loading = true; }],
+  ]],
+  ['UX-01H · Perfil (#68)', [
+    ['Com restrições', 'consentAt + aviso RN16', () => { S = progressState(); S.route = { name: 'profile' }; }],
+    ['Sem restrições', 'Empty state com CTA', () => { S = newUser(); S.route = { name: 'profile' }; }],
+    ['Confirmar remoção', 'Última restrição revoga o consentimento', () => { S = progressState(); S.route = { name: 'profile' }; S.sheet = { type: 'remove', code: 'amendoim' }; }],
+    ['Adicionar com consentimento', 'Validação sem aceite', () => { S = newUser(); S.route = { name: 'profile' }; S.sheet = { type: 'add', picked: ['ovo'], consent: false, invalid: true, search: 'ov' }; }],
+    ['Sem rede', 'Nada é alterado', () => { S = progressState(); S.route = { name: 'profile' }; S.online = false; S.toast = { text: 'Sem conexão agora. Nada foi alterado nas suas restrições — tente de novo quando a internet voltar.' }; }],
+  ]],
+];
+
+function buildGallery() {
+  const total = GALLERY.reduce((n, [, items]) => n + items.length, 0);
+  const root = $('#galeria');
+  root.innerHTML = `<header class="g-head"><h1>Panelada — Onda 1A · Telas e estados</h1>
+    <p>${total} telas geradas pelo mesmo código do protótipo navegável (<code>index.html</code>), agrupadas por sub-issue de <code>UX-01</code> (#60). Especificação: <code>docs/fase3/ux-onda1a.md</code>.</p>
+    <p>Aparelho de 360 × 800 dp. Para navegar e interagir, abra <code>index.html</code> sem o <code>#galeria</code>.</p></header>`
+    + GALLERY.map(([title, items], si) => `<section><h2>${title}</h2><div class="g-grid">${items.map(([cap, sub], ii) => `<div class="g-item"><p class="g-cap">${cap}<small>${sub}</small></p><div class="device"><div class="phone"><div class="statusbar"><span>14:32</span><span data-net="${si}-${ii}"></span></div><div class="app" data-g="${si}-${ii}"></div></div></div></div>`).join('')}</div></section>`).join('');
+  GALLERY.forEach(([, items], si) => items.forEach(([, , setup], ii) => {
+    setup();
+    root.querySelector(`[data-net="${si}-${ii}"]`).textContent = netLabel();
+    const app = root.querySelector(`[data-g="${si}-${ii}"]`);
+    app.innerHTML = appHtml();
+    // Estado final estático: barra da celebração cheia e passo atual/consentimento visíveis.
+    app.querySelectorAll('#cel-bar').forEach((b) => { b.style.transition = 'none'; b.style.width = b.dataset.to + '%'; });
+    const sc = app.querySelector('#scroll');
+    const cur = app.querySelector('.step.current');
+    if (sc && cur) sc.scrollTop = Math.max(0, cur.offsetTop - sc.offsetTop - 120);
+    const inv = app.querySelector('.consent.invalid');
+    if (sc && inv && sc.contains(inv)) sc.scrollTop = inv.offsetTop - sc.offsetTop - 200;
+  }));
+  S = freshState();
+}
+
+const applyHash = () => {
+  const gallery = location.hash === '#galeria';
+  document.body.classList.toggle('figma', location.hash === '#figma');
+  document.body.classList.toggle('galeria', gallery);
+  if (gallery) buildGallery();
+};
+window.addEventListener('hashchange', () => { applyHash(); if (location.hash !== '#galeria') { S = freshState(); render(true); } });
 S = freshState();
 render(true);
+applyHash();
 </script>
 </body>
 </html>
