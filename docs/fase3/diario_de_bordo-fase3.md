@@ -339,3 +339,42 @@
 
 ### Pendências para a próxima sessão
 - Executar **`MVP-04D` (#42)** via `solve-issue` (desbloqueada) e/ou iniciar o desenho de **`UX-01` (#60–#68)** (decisões transversais + 8 telas + protótipo HTML) para desbloquear `#43` e `#44`.
+
+
+---
+
+## [23/11/2026] — Governança: Adaptação da Skill `using-git-worktree` e Flag `--use-worktree` no `solve-issue`
+
+- **Papel da IA:** Engenheiro de Plataforma / Governança Multi-Agente (Antigravity CLI).
+- **Técnicas aplicadas:** adaptação de skill genérica às regras concretas do monorepo Panelada (`development` como base, `pnpm` local sem instalação global, `TZ=UTC`, isolamento de Docker/`panelada_test`, convenção bilíngue `ADR-015` e portabilidade Linux/Windows); blindagem preventiva de arquivos de ignore (Git, ESLint, Prettier, Docker) contra `.worktrees/`; integração não-destrutiva na skill `solve-issue` preservando o portão somente leitura.
+- **Prompts-chave / Contexto da sessão:**
+  1. Solicitação da dupla para adaptar uma skill pré-pronta de git worktree (`.agents/skills/using-git-worktree/SKILL.md`) ao projeto Panelada visando uso geral — começando pela resolução paralela da issue `#60` e suas sub-issues (`#61`–`#68`) —, adicionar a flag `--use-worktree` na skill `/solve-issue` e registrar o setup no `STATE.md` e no Diário de Bordo.
+- **Insumos usados:** `.agents/skills/using-git-worktree/SKILL.md`, `.agents/skills/solve-issue/SKILL.md`, `AGENTS.md`, `STATE.md`, `docs/playbooks/01-sessao-issues-e-diario.md`, `docs/dev/TESTING.md`, `.gitignore`, `.prettierignore`, `.dockerignore`, `eslint.config.mjs`, `docker-compose.yml`, `package.json` e `scripts/setup-agent-skills.mjs`.
+- **Artefatos produzidos:**
+  - `.agents/skills/using-git-worktree/SKILL.md`: reescrita adaptada ao Panelada (PT-BR conforme `ADR-015`), com Passo 0 (detecção + guarda de submódulo), Passo 1 (ferramenta nativa preferida + fallback `.worktrees/<slug>` a partir de `origin/development` ou branch pai), Passo 2 (Perfil A sem `pnpm install` para docs/UX vs. Perfil B com `pnpm install --frozen-lockfile` + alerta de concorrência em `panelada_test`), Passo 3 (baseline `TZ=UTC`) e Passo 4 (padrões paralelos para issue pai + sub-issues e limpeza pós-merge).
+  - `.agents/skills/solve-issue/SKILL.md`: adicionada flag `--use-worktree` em `argument-hint`, tabela de opções, Passo 0 (`git fetch origin development` sem exigir checkout principal limpo), Passo 3 (campo `Worktree:` no plano e suporte em `--resume`), Passo 4 (delegação à skill `using-git-worktree`), Passos 7.4/7.5 (lembrete de limpeza pós-merge) e `Modo Separado`.
+  - `.gitignore`, `.prettierignore`, `.dockerignore` e `eslint.config.mjs`: inclusão de `.worktrees/` / `.worktrees/**` para impedir vazamento no Git, no lint de fronteiras, na formatação ou no contexto de build Docker.
+  - `AGENTS.md`, `STATE.md` e `docs/fase3/diario_de_bordo-fase3.md`: atualização da lista de skills e registro consolidado do setup.
+
+### Decisões tomadas
+1. **Diretório canônico `.worktrees/<slug>` com `/` achatado para `-`:** alinhado ao padrão de `.plans/` (visível na raiz, ignorado por Git/ESLint/Prettier/Docker) e achatando barras de nomes de branch (`docs/issue-61-ux-onboarding` → `docs-issue-61-ux-onboarding`) para evitar subdiretórios aninhados e problemas de caminho no Windows.
+2. **Criação do worktree no Passo 4 do `solve-issue --use-worktree`:** mantém os Passos 1–3 estritamente somente leitura conforme o contrato da skill `solve-issue` e evita worktrees órfãos quando um plano é descartado antes da aprovação.
+3. **Dois perfis de setup (A: docs/UX vs. B: código) + guarda de concorrência de banco:** evita cópias desnecessárias de `node_modules` em worktrees de UX/protótipo (`#60`–`#68`) e documenta explicitamente que `TZ=UTC pnpm test` (unitários/Jest) roda em paralelo com segurança, enquanto `test:integration` e `db:reset` precisam ser serializados ou apontados para bancos `*_test` distintos.
+4. **Alinhamento do `name` da skill (`using-git-worktree`):** ajustado de `using-git-worktrees` para `using-git-worktree`, espelhando o nome da pasta em `.agents/skills/using-git-worktree/` (padrão de todas as demais skills do projeto).
+
+### Artefatos alterados (retroalimentação)
+- `AGENTS.md`: adicionada `using-git-worktree` à lista de skills do projeto e menção a `.worktrees/` junto a `.plans/`.
+- `STATE.md` e `docs/fase3/diario_de_bordo-fase3.md`: atualização da diretriz multi-agente, handoff e registro desta sessão.
+
+### Iterações relevantes (erros e retrabalho da IA)
+1. Nenhuma falha ou retrabalho relevante; a inspeção prévia de `eslint.config.mjs`, `.prettierignore`, `.dockerignore` e `docker-compose.yml` revelou previamente os quatro pontos críticos que a skill genérica não tratava (ignore em ferramentas do monorepo, `pnpm` local sem instalação global, `TZ=UTC` e corrida no banco `panelada_test`).
+
+### Divergências registradas (briefing/professor × artefatos)
+- Nenhuma divergência; o setup preserva integralmente o fluxo em mão única para `development`, a convenção bilíngue (`ADR-015`) e a política de registro de IA restrito a `STATE.md` e Diário de Bordo.
+
+### Riscos aceitos
+- Execução simultânea de `test:integration` ou `db:reset` em dois worktrees contra o mesmo container PostgreSQL pode gerar corrida em `panelada_test` (mitigado pela regra explícita de serialização ou banco `*_test` isolado na skill).
+- Acúmulo de espaço em disco caso worktrees de código (`node_modules`) não sejam removidos após o merge (mitigado pelo Passo 4 de teardown e pelo lembrete no resumo final do `solve-issue`).
+
+### Pendências para a próxima sessão
+- Commitar/integrar este setup de governança na `development` e iniciar **`UX-01` (#60 e sub-issues `#61`–`#68`)** e/ou **`MVP-04D` (#42)** utilizando `/solve-issue --use-worktree`.

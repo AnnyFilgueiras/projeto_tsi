@@ -4,6 +4,7 @@ build/
 coverage/
 .expo/
 .plans/
+.worktrees/
 pnpm-lock.yaml
 docs/
 .agents/

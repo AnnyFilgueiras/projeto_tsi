@@ -1,7 +1,7 @@
 ---
 name: solve-issue
 description: Implementa uma ou mais issues do GitHub do Panelada de ponta a ponta (#42 #57) — parte de `development`, lê issues e comentários, grava plano visível em `.plans/` e aguarda aprovação, implementa seguindo fronteiras (`S1`–`S8`/`A1`–`A8`), TDD e convenção bilíngue (`ADR-015`), verifica, executa `code-review`, atualiza checkboxes/Project (`Em revisão`), commita em inglês (sem atribuição de IA), dá push e abre PR em PT-BR para `development`. Use quando o usuário pedir "resolve a #42", "implementa a issue 42", "pega essa issue" ou passar URL de issue.
-argument-hint: "#N [#N...] [--separate] [--no-plan] [--triage] [--draft] [--no-push] [--no-commit] [--no-cut] | --resume <plano.md>"
+argument-hint: "#N [#N...] [--use-worktree] [--separate] [--no-plan] [--triage] [--draft] [--no-push] [--no-commit] [--no-cut] | --resume <plano.md>"
 ---
 
 # Solve Issue (Panelada)
@@ -19,6 +19,7 @@ O fluxo tem um portão no meio: depois de atualizar `development` (passo 0), tud
 | Flag | Efeito |
 |---|---|
 | _(nenhuma)_ | Todas as issues num plano em `.plans/`, numa branch e num PR para `development`. |
+| `--use-worktree` | Executa a entrega em um git worktree isolado via skill `using-git-worktree` (`.worktrees/<slug>`), sem alterar a branch nem exigir working tree limpo no checkout principal (ideal para resolver múltiplas issues em paralelo). |
 | `--separate` | Uma branch e um PR por issue, com um único plano e aprovação (ver [Modo separado](#modo-separado)). |
 | `--no-plan` | Pula a pausa de aprovação no passo 3 (o plano ainda é salvo em `.plans/` e aparece no resumo). |
 | `--triage` | Age sobre achados fora de escopo do `code-review`: corrige no PR o que for pequeno/seguro ou abre issue via `github-issue-craft`. |
@@ -51,13 +52,15 @@ Além das seções do passo 3.2, o arquivo em `.plans/<branch>.md` mantém três
 Ao parar para um corte, encerre o turno com:
 > Corte de contexto (N de M). O estado está em `.plans/<branch>.md`. Rode `/clear` e depois retome com `solve-issue --resume .plans/<branch>.md`.
 
-Ao retomar (`--resume`): leia o arquivo inteiro, confira `git status --porcelain`, `git branch --show-current` e `git log --oneline development..HEAD`; se divergir do **Progresso**, pare e mostre a diferença.
+Ao retomar (`--resume`): leia o arquivo inteiro; se o plano registrar `Worktree: .worktrees/<slug>`, entre nesse diretório antes de validar o estado Git. Confira `git status --porcelain`, `git branch --show-current` e `git log --oneline development..HEAD`; se divergir do **Progresso**, pare e mostre a diferença.
 
 ---
 
 ## 0. Parta da `development` atualizada
 
 Todo trabalho da Fase 3 sai de **`development`** (nunca direto de `main`, salvo instrução explícita do usuário):
+
+### Fluxo padrão (sem `--use-worktree`)
 
 ```bash
 git status --porcelain          # precisa estar vazio
@@ -67,6 +70,15 @@ git pull
 
 - Há alterações não commitadas? Pare e pergunte antes de trocar de branch (nunca rode `stash`/`reset`/`checkout` por conta própria).
 - `development` ainda não existe no remoto? Avise o usuário e confirme o ponto de partida antes de seguir.
+
+### Fluxo isolado (com `--use-worktree`)
+
+- **Não troque a branch** do checkout principal e **não exija** que o checkout principal esteja limpo.
+- Atualize a referência base sem tocar no working tree:
+  ```bash
+  git fetch origin development
+  ```
+- Se você já estiver dentro de um worktree vinculado (Passo 0 de `using-git-worktree`), apenas confirme a branch/base atual. Caso contrário, os passos 1–3 continuam **somente leitura** e o worktree só é criado no início do **passo 4** (evitando worktrees órfãos caso o plano seja cancelado).
 
 ## 1. Leia as issues inteiras
 
@@ -109,7 +121,7 @@ Inclua:
 - **Arquivos** (criar/alterar com caminho)
 - **Testes** (política do Playbook 03: TDD estrito / vetores JSON / contrato / teste depois)
 - **Verificação** (comandos exatos para validar cada critério de aceite)
-- **Branch e commits** (em **inglês**, saindo de `development`, ex.: `feat/issue-42-short-name`)
+- **Branch e commits** (em **inglês**, saindo de `development`, ex.: `feat/issue-42-short-name`; com `--use-worktree`, registre também **`Worktree: .worktrees/<slug>`** e a `<base-ref>` prevista)
 - **PR** (título e resumo em **PT-BR**, base `development`, uma linha `Closes #N` por issue)
 - **Fora de escopo**
 - Seções vivas: **Decisões**, **Armadilhas encontradas** e **Progresso**
@@ -119,11 +131,20 @@ Mostre o caminho `.plans/<branch>.md` e um resumo claro do plano e **encerre o t
 
 ## 4. Implemente
 
+### Sem `--use-worktree`
+
 Crie a branch a partir de `development`:
 
 ```bash
 git switch -c feat/issue-42-short-name development
 ```
+
+### Com `--use-worktree`
+
+Acione a skill **`using-git-worktree`** para:
+1. Detectar se já está em um worktree isolado (Passo 0) ou criar `.worktrees/<slug>` na branch planejada a partir de `origin/development` (ou da branch pai, quando empilhada).
+2. Executar o setup do Panelada adequado ao perfil da issue (Perfil A sem `pnpm install` para docs/UX/protótipo HTML; Perfil B com `pnpm install --frozen-lockfile` + baseline `TZ=UTC` para código) e respeitar a serialização de `panelada_test` em testes de integração.
+3. Copiar/mover `.plans/<branch>.md` para `.plans/` dentro do worktree (mantendo o caminho atualizado no campo `Worktree:` para eventuais `--resume`) e executar os passos 4–7 inteiramente dentro do worktree.
 
 - Implemente uma issue por vez na ordem do plano, commitando cada uma ao ficar verificada.
 - Siga a skill **`tdd`** nas camadas de TDD estrito/contrato/regressão (Playbook 03) e a skill **`code-comments`** (comentários em inglês explicando o *porquê*, citando `RN##`/`A##`/`ADR-###`).
@@ -177,16 +198,17 @@ Se a issue estiver em exatamente 1 Project V2 com coluna `Em revisão` (ou `In r
 
 ### 7.4 Higiene local e Registro Acadêmico
 - **Plano local:** avise que o plano em `.plans/<branch>.md` pode ser removido após o merge (ou remova-o se o fluxo terminou sem corte 4 pendente).
+- **Worktree (`--use-worktree`):** **não** remova o worktree automaticamente enquanto o PR puder receber revisão; informe no resumo final o caminho `.worktrees/<slug>` e o comando de limpeza pós-merge (`git worktree remove .worktrees/<slug>`).
 - **`STATE.md` e Diário de Bordo:** na Fase 3, **não** atualize `STATE.md` em todo micro-PR (para evitar conflitos de merge em paralelo). Atualize `STATE.md` e `diario_de_bordo` quando a issue fechar um **marco/etapa relevante** (`GOV-##`, `MVP-01`–`MVP-04`, decisão arquitetural) ou na promoção semanal `development` → `main`.
 
 ### 7.5 Resumo final
-Feche o turno em poucas linhas com: URL do PR (ou ponto de parada pelas flags), resumo por issue, o que foi marcado/não marcado nas issues, achados fora de escopo (e destino se `--triage`), e lembrete de `STATE.md`/Diário se fechou marco.
+Feche o turno em poucas linhas com: URL do PR (ou ponto de parada pelas flags), resumo por issue, o que foi marcado/não marcado nas issues, achados fora de escopo (e destino se `--triage`), caminho/limpeza do worktree (se `--use-worktree`), e lembrete de `STATE.md`/Diário se fechou marco.
 
 ---
 
 ## Modo Separado (`--separate`)
 
-Um plano único com um bloco por issue (branch, base, commits, PR) e uma aprovação. Sem dependência no lote → sai de `development` com PR para `development`; bloqueada por outra do lote → sai da branch da bloqueadora com PR empilhado para ela (avisando para re-apontar para `development` se o repo não apagar branches no merge).
+Um plano único com um bloco por issue (branch, base, commits, PR) e uma aprovação. Sem dependência no lote → sai de `development` com PR para `development`; bloqueada por outra do lote → sai da branch da bloqueadora com PR empilhado para ela (avisando para re-apontar para `development` se o repo não apagar branches no merge). Combinado com `--use-worktree`, cada branch independente (ou empilhada) recebe seu próprio worktree em `.worktrees/<slug>`, permitindo executar múltiplas sub-issues em paralelo.
 
 ## Sem `gh` disponível
 

@@ -1,5 +1,6 @@
 # Local agent working state (visible in the workspace, never committed)
 .plans/
+.worktrees/
 .pending-issues/
 .claude/skills
 

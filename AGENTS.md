@@ -44,7 +44,7 @@ Detalhes completos de fronteiras (`S1`–`S8`, `A1`–`A8`), portas (`P02a`–`P
 - **Fronteiras de banco e `tx: Tx` (`S8`, `T01`):** tabelas usam prefixo do módulo dono (`catalog_*`, `profile_*`, `routine_*`, `progress_*`). O `eslint-plugin-boundaries` não inspeciona SQL em texto — nunca faça `JOIN` em tabela de outro módulo. Escritas cross-módulo exigem `tx: Tx` obrigatório.
 - **Privacidade (`A05`) e Alérgenos (`A06`):** restrição alimentar é cifrada em repouso no aparelho (SQLCipher) e na API (`FieldCipher` AES-256-GCM + `accountId` como AAD) antes de tocar o Postgres (inclusive no Supabase — proibido SDK BaaS no cliente). Zero restrições em logs (`A13`) e zero dados de usuário enviados ao `AiProvider` (`RNF06`). Alérgeno `unverified` é sempre *fail-closed* (`RN08`).
 - **Política de IA vs. Disciplina:** **zero** atribuição de IA em código, comentários, commits ou PRs (nunca `Co-Authored-By` nem rodapés de "Generated with..."). O registro obrigatório do uso de IA para avaliação da disciplina vive **exclusivamente** no `STATE.md` e no `diario_de_bordo` (atualizados por marco/etapa ou promoção semanal, nunca em micro-PRs para evitar conflitos).
-- **Planos visíveis em `.plans/`:** salve planos de trabalho e arquivos temporários de `gh --body-file` em `.plans/` (ignorado pelo `.gitignore`, portátil entre Windows e Linux — nunca em `~/.claude/plans/` nem `$TMPDIR`).
+- **Planos visíveis em `.plans/` e worktrees em `.worktrees/`:** salve planos de trabalho e arquivos temporários de `gh --body-file` em `.plans/` e worktrees isolados em `.worktrees/` (ambos ignorados pelo `.gitignore`, portáteis entre Windows e Linux — nunca em `~/.claude/plans/` nem `$TMPDIR`).
 - **Mantenha o contexto enxuto:** busque código direto em `apps/` e `packages/` (`rg ... apps/ packages/`) para não varrer `docs/fase1/` e `docs/fase2/` à toa. Leia arquivos inteiros apenas quando for editá-los. Em testes, exiba resumo curto quando passar e saída completa com traceback quando falhar.
 - **Docs vivos evoluem no mesmo PR:** `docs/dev/` segue "1 pergunta por página" (≤ 400 linhas) e nunca duplica tabelas da Fase 2. Se uma feature aparece em tela (a partir de `MVP-02`), estenda o seed de desenvolvimento (`db:reset`) no mesmo PR.
 - **Imutabilidade de ADRs:** nunca apague nem reescreva uma decisão histórica em `docs/fase2/02-adr/`. Evoluções entram como `## Detalhamento (<Contexto> — DD/MM/AAAA)` ao final; revogações criam um novo `ADR-NNN`.
@@ -54,7 +54,7 @@ Detalhes completos de fronteiras (`S1`–`S8`, `A1`–`A8`), portas (`P02a`–`P
 ## Skills do Projeto (`.agents/skills/`)
 
 Fonte única para Antigravity, Codex, Kimi e Claude Code (via `setup-agent-skills.mjs`):
-`grilling` · `github-issue-craft` · `solve-issue` · `code-review` · `tdd` · `codebase-design` · `code-comments`.
+`grilling` · `github-issue-craft` · `solve-issue` · `using-git-worktree` · `code-review` · `tdd` · `codebase-design` · `code-comments`.
 
 ---
 

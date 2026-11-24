@@ -613,6 +613,7 @@ export default tseslint.config(
       'apps/api/src/shared/openapi.generated.ts',
       'docs/**',
       '.plans/**',
+      '.worktrees/**',
     ],
   },
   js.configs.recommended,
