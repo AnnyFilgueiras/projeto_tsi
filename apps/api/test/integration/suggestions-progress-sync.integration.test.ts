@@ -27,6 +27,7 @@ interface SuggestionResponseBody {
       prepTimeMinutes: number;
       difficulty: 'easy' | 'medium' | 'hard';
       photoHash?: string;
+      allergenState: AllergenState;
     };
     missingIngredients: string[];
     missingUtensils: string[];
@@ -66,7 +67,7 @@ interface DownloadSetResponseBody {
   candidates: Array<{
     id: string;
     status: string;
-    dish: { dishId: string; name: string };
+    dish: { dishId: string; name: string; allergenState: AllergenState };
   }>;
   ratings: Array<{
     id: string;
@@ -198,6 +199,10 @@ describe('MVP-04C integration: suggestions, recipes, rating.register gamificatio
       expect(suggestedDishIds).not.toContain(DISH_IDS.shrimpPadThai);
       expect(suggestedDishIds).not.toContain(unverifiedDishId);
       expect(suggestionsBody.suggestions[0]?.dish.cuisineId).toBe(CUISINE_IDS.french);
+      // RN08 regression: with an active restriction every suggested dish is `verified`.
+      expect(suggestionsBody.suggestions.map((item) => item.dish.allergenState)).toEqual(
+        suggestionsBody.suggestions.map(() => 'verified'),
+      );
 
       // 3. Approve one suggestion (with Idempotency-Key) and discard another.
       const toApprove = suggestionsBody.suggestions[0]!;
@@ -438,6 +443,9 @@ describe('MVP-04C integration: suggestions, recipes, rating.register gamificatio
       expect(downloadSet.candidates.map((item) => item.dish.dishId)).toContain(
         toApprove.dish.dishId,
       );
+      expect(downloadSet.candidates.map((item) => item.dish.allergenState)).toEqual(
+        downloadSet.candidates.map(() => 'verified'),
+      );
       expect(downloadSet.recipesToDownload.map((item) => item.dishId)).toContain(
         toApprove.dish.dishId,
       );
@@ -500,6 +508,41 @@ describe('MVP-04C integration: suggestions, recipes, rating.register gamificatio
       });
     } finally {
       await dbClient.pool.query(`DELETE FROM catalog_dishes WHERE id = $1`, [unverifiedDishId]);
+      await app.close();
+    }
+  });
+  it('MVP-04C1 / RN08 / A05: exposes the catalog allergenState of every dish in DishSummary for an account without restrictions', async () => {
+    const app = buildApp({
+      checkDatabaseHealth: dbClient.checkHealth,
+      dbClient,
+      keyProvider: new InMemoryKeyProvider({ currentVersion: 1, keys: { 1: randomBytes(32) } }),
+      photoStorage: new InMemoryPhotoStorage(),
+      clock: () => new Date('2026-11-24T12:00:00.000Z'),
+    });
+
+    try {
+      const anonRes = await app.inject({ method: 'POST', url: '/v1/accounts/anonymous' });
+      expect(anonRes.statusCode).toBe(201);
+      const { tokens } = anonRes.json() as { tokens: { accessToken: string } };
+
+      const suggestionsRes = await app.inject({
+        method: 'GET',
+        url: '/v1/suggestions?limit=20',
+        headers: { authorization: `Bearer ${tokens.accessToken}` },
+      });
+      expect(suggestionsRes.statusCode).toBe(200);
+      const { suggestions } = suggestionsRes.json() as SuggestionResponseBody;
+
+      const stateByDishId = new Map(
+        suggestions.map((item) => [item.dish.dishId, item.dish.allergenState]),
+      );
+      expect(new Set(stateByDishId.values())).toEqual(
+        new Set(['verified', 'source_declared', 'unverified']),
+      );
+      expect(stateByDishId.get(DISH_IDS.guacamole)).toBe('source_declared');
+      expect(stateByDishId.get(DISH_IDS.beefTacos)).toBe('unverified');
+      expect(stateByDishId.get(DISH_IDS.aglioEOlio)).toBe('verified');
+    } finally {
       await app.close();
     }
   });

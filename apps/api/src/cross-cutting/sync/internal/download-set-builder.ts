@@ -1,4 +1,5 @@
 import { PACKAGE_VERSION } from '@panelada/allergen-rules/rules';
+import type { AllergenState } from '@panelada/allergen-rules/rules';
 import type {
   CatalogDishSummaryDto,
   CatalogReadPort,
@@ -51,6 +52,7 @@ export interface DownloadSetCandidateItem {
     readonly prepTimeMinutes: number;
     readonly difficulty: Difficulty;
     readonly photoHash?: string;
+    readonly allergenState: AllergenState;
   };
   readonly missingIngredients: readonly string[];
   readonly missingUtensils: readonly string[];
@@ -186,6 +188,7 @@ export class DownloadSetBuilder {
           prepTimeMinutes: dish.prepTimeMinutes,
           difficulty: dish.difficulty,
           ...(dish.photoHash !== null ? { photoHash: dish.photoHash } : {}),
+          allergenState: dish.allergenState,
         },
         missingIngredients: [],
         missingUtensils: [],

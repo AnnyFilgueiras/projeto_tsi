@@ -263,4 +263,21 @@ describe('SuggestionService (UC01, RN08, RN10, RN11, A06, A13)', () => {
     expect(response.noResult).toBe(true);
     expect(response.minPackageVersion).toBe(PACKAGE_VERSION);
   });
+
+  it('MVP-04C1: DishSummary copies the catalog allergenState of each dish, including non-verified ones when there are no restrictions', async () => {
+    const { service } = createDeps({ restrictions: [] });
+
+    const response = await service.getSuggestions({
+      accountId: ACCOUNT_ID,
+      sessionKey: 'session-1',
+      limit: 20,
+      usePantry: false,
+    });
+
+    const stateByDishId = new Map(
+      response.suggestions.map((item) => [item.dish.dishId, item.dish.allergenState]),
+    );
+    expect(stateByDishId.get(DISH_UNVERIFIED)).toBe('unverified');
+    expect(stateByDishId.get(DISH_SAFE_FR)).toBe('verified');
+  });
 });

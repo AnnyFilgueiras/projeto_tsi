@@ -46,6 +46,9 @@ export interface SeedDishRecipe {
   readonly sourceName: string;
   readonly sourceUrl: string;
   readonly photoColor: readonly [number, number, number];
+  // RN16 / MVP-04C1: Defaults to `verified`; a few dishes stay non-verified so every AllergenState
+  // shows up on screen during development.
+  readonly allergenState?: 'verified' | 'source_declared' | 'unverified';
 }
 
 export interface SeedBadgeDefinition {
@@ -743,6 +746,7 @@ export const SEED_DISHES: readonly SeedDishRecipe[] = [
     sourceName: 'Acervo Curado Panelada (Cozinha Mexicana)',
     sourceUrl: 'https://panelada.app/sources/guacamole-fresco',
     photoColor: [108, 166, 74],
+    allergenState: 'source_declared',
   },
   {
     id: DISH_IDS.beefTacos,
@@ -767,6 +771,7 @@ export const SEED_DISHES: readonly SeedDishRecipe[] = [
     sourceName: 'Acervo Curado Panelada (Cozinha Mexicana)',
     sourceUrl: 'https://panelada.app/sources/tacos-de-carne',
     photoColor: [188, 92, 54],
+    allergenState: 'unverified',
   },
   {
     id: DISH_IDS.almondChickenTagine,

@@ -1156,6 +1156,7 @@ export interface components {
       prepTimeMinutes: number;
       difficulty: components['schemas']['Difficulty'];
       photoHash?: string;
+      allergenState: components['schemas']['AllergenState'];
     };
     SuggestionItem: {
       /** Format: uuid */

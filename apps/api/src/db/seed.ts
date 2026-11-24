@@ -97,7 +97,8 @@ async function writeSeedPhotoFile(directory: string, hash: string, bytes: Buffer
  * - 19 controlled restriction types (ANVISA RDC 727/2022 + lactose)
  * - Default curator account (`CURATOR_EMAIL` / `CURATOR_PASSWORD`)
  * - 10 cuisines across all 5 continents, canonical ingredients, utensils, and safe/unsafe substitutions
- * - 20 verified dishes (including a 3-level evolution chain and allergen-free dishes) + WebP photos
+ * - 20 dishes (18 verified, 1 source_declared, 1 unverified), including a 3-level evolution chain and
+ *   allergen-free dishes, + WebP photos
  * - 11 declarative badge definitions exercising all 8 RN03 (a-h) milestone types
  */
 export async function runSeed(
@@ -207,7 +208,9 @@ export async function runSeed(
           dish.ingredients.flatMap((item) => ingredientAllergensById.get(item.ingredientId) ?? []),
         ),
       ];
-      const confirmedAllergenFree = allergenUnion.length === 0;
+      const allergenState = dish.allergenState ?? 'verified';
+      // ADR-014 invariant: only a verified recipe may assert it is free of allergens.
+      const confirmedAllergenFree = allergenState === 'verified' && allergenUnion.length === 0;
       const photo = await generateSeedWebpPhoto(dish.photoColor);
 
       if (photoDir) {
@@ -228,7 +231,7 @@ export async function runSeed(
            dish_id, prep_time_minutes, difficulty, steps, allergens, allergen_state,
            confirmed_allergen_free, allergens_updated_at, source_name, source_url, origin, updated_at
          )
-         VALUES ($1, $2, $3, $4::jsonb, $5::jsonb, 'verified', $6, $7, $8, $9, 'manual', $7)
+         VALUES ($1, $2, $3, $4::jsonb, $5::jsonb, $10, $6, $7, $8, $9, 'manual', $7)
          ON CONFLICT (dish_id) DO NOTHING`,
         [
           dish.id,
@@ -240,6 +243,7 @@ export async function runSeed(
           seedTimestamp,
           dish.sourceName,
           dish.sourceUrl,
+          allergenState,
         ],
       );
 
