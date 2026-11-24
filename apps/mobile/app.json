@@ -11,7 +11,21 @@
       "package": "br.edu.panelada.app",
       "allowBackup": false
     },
-    "plugins": [["expo-router", { "root": "./app" }]],
+    "plugins": [
+      [
+        "expo-router",
+        {
+          "root": "./app"
+        }
+      ],
+      [
+        "expo-sqlite",
+        {
+          "useSQLCipher": true
+        }
+      ],
+      "expo-secure-store"
+    ],
     "experiments": {
       "typedRoutes": false
     }
