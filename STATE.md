@@ -6,8 +6,8 @@
 
 ## 1. Panorama Atual do Projeto
 
-- **Fase Acadêmica Atual:** **Fase 3 — Implementação do MVP e Deploy em Cloud Gratuita (EM ANDAMENTO — `MVP-01` PR #47, `MVP-02` #36 PR #48, `MVP-03` #37 PR #51, `MVP-04A` #39 PR #53, `MVP-04B` #40 PR #55 e `MVP-04C` #41 PR #59 integrados na `development`; backlog de UX/protótipo da Onda 1A `UX-01` `#60`–`#68` e refinamento pós-MVP `UX-02` `#69` publicados; próximos passos: `MVP-04D` #42 e/ou `UX-01` #60–#68)**.
-- **Branch de Integração (Fase 3):** `development` (atualizada em `22c774b` com `GOV-04`, `MVP-01`, `MVP-02`, `MVP-03`, `MVP-04A`, `MVP-04B`, `MVP-04C` e retroalimentação Opção A do `ADR-014`).
+- **Fase Acadêmica Atual:** **Fase 3 — Implementação do MVP e Deploy em Cloud Gratuita (EM ANDAMENTO — `MVP-01` PR #47, `MVP-02` #36 PR #48, `MVP-03` #37 PR #51, `MVP-04A` #39 PR #53, `MVP-04B` #40 PR #55, `MVP-04C` #41 PR #59 e `DOCS-01` #58 PR #70 integrados na `development`; backlog de UX/protótipo da Onda 1A `UX-01` `#60`–`#68` e refinamento pós-MVP `UX-02` `#69` publicados; próximos passos: `MVP-04D` #42 e/ou `UX-01` #60–#68)**.
+- **Branch de Integração (Fase 3):** `development` (atualizada em `d1a52f8` com `GOV-04`, `using-git-worktree`, `MVP-01`, `MVP-02`, `MVP-03`, `MVP-04A`, `MVP-04B`, `MVP-04C`, `DOCS-01` e retroalimentação Opção A do `ADR-014`).
 - **Última Atualização:** `23/11/2026`
 - **Status Geral das Fases:**
   - ✅ **Fase 1 (Engenharia de Requisitos):** Concluída (`validated-backlog--v1.0`) e sincronizada com Lote 1 (#30), Gamificação (`ADR-016`) e Lote 3 (#32).
@@ -63,6 +63,7 @@
 - [x] **MVP-01:** Recorte funcional prioritário de histórias/telas para o primeiro deploy (Estágio 1 em Onda 1A + Onda 1B), baseline técnico (`Drizzle`, `Zod`, `pino` redact, `node:crypto`, `openapi-typescript`, `Expo Router` + `StyleSheet`, `Vitest`/`Jest`, `Render` + `Supabase`) e backlog executável publicado no GitHub (`#36`–`#46`) via `grilling` + `github-issue-craft` (integrado via PR #47).
 - [x] **MVP-02 (#36):** Configurar o esqueleto do monorepo (`pnpm` workspaces, TypeScript, Drizzle, Zod, `openapi-typescript`, `eslint-plugin-boundaries` com prova de falha intencional `S1`–`S8`/`A1`–`A8`, `docker-compose.yml` com Postgres dev/test + API em `0.0.0.0:3000`, trava `_test`, seed base `db:reset`, CI + `docs/dev/DATABASE.md` e `docs/dev/TESTING.md`) — integrado via PR #48.
 - [x] **MVP-03 (#37):** Implementar `packages/allergen-rules` com TDD estrito e 100% dos vetores JSON (`A06`, `ADR-014` — Opção A *fail-closed* estrito, `PACKAGE_VERSION = 1.0.0`, 56 testes no pacote + 9 na API + 35 no Mobile/Jest).
+- [x] **DOCS-01 (#58):** Formalizar no `ADR-012` (`## Detalhamento`) a padronização de fotos do catálogo adotada em `MVP-04B` (entrada `image/webp`/`jpeg`/`png` por *magic bytes*, teto `5 MiB`, saída WebP q82 sem EXIF, dimensões máximas `1024 × 1024` px sem recorte, proporção recomendada `4:3`/`16:9` e cache imutável por SHA-256) — integrado via PR #70.
 - [ ] **UX-01 (#60 — UX e Protótipo Inicial da Onda 1A):** Definir decisões transversais (tokens semânticos, navegação, tom *White Hat*, padrão visual de alérgenos `A06`, estados/offline Estágio 1, acessibilidade na cozinha) e protótipo HTML/CSS navegável (importável no Figma) em 8 sub-issues nativas por tela: `#61` (`UX-01A` Onboarding), `#62` (`UX-01B` Descobrir), `#63` (`UX-01C` Cozinha), `#64` (`UX-01D` Receita Offline), `#65` (`UX-01E` Avaliação), `#66` (`UX-01F` Celebração), `#67` (`UX-01G` Coleção) e `#68` (`UX-01H` Perfil). **Não bloqueia `#42`; bloqueia `#43` e `#44`.**
 - [ ] **MVP-04 (#38 — Épico Onda 1A, Primeiro Deploy):** Implementar núcleo jogável de ponta a ponta + gamificação 6D/Octalysis e realizar o primeiro deploy em Cloud 4C (Supabase PostgreSQL TLS + Storage + Render Docker) — sub-issues: `#39` (`MVP-04A` — PR #53), `#40` (`MVP-04B` — PR #55), `#41` (`MVP-04C` — PR #59), `#42` (`MVP-04D` — desbloqueada), `#43` (`MVP-04E` — bloqueada por `#60`), `#44` (`MVP-04F` — bloqueada por `#60`) e `#45` (`MVP-04G`).
 - [ ] **UX-02 (#69 — Refinamento Visual e Revisão Heurística Pós-MVP):** Rodada de *UI polish* e revisão heurística com o app rodando no emulador (bloqueada por `#60`, `#43` e `#44`), desdobrada em novas sub-issues referenciando `UX-01A`–`UX-01H` (sem reabrir as issues fechadas da v1).
@@ -72,16 +73,14 @@
 
 ## 4. Handoff da Última Sessão
 
-- **Data e Agente:** `23/11/2026` — Antigravity CLI (papel: Engenheiro de Plataforma / Governança Multi-Agente).
-- **Branch de Trabalho:** `development` (alterações locais de governança prontas para commit/PR na `development`).
-- **O que foi feito (Setup de `using-git-worktree` e `--use-worktree` no `solve-issue`):**
-  1. Adaptada a skill pré-pronta [`.agents/skills/using-git-worktree/SKILL.md`](./.agents/skills/using-git-worktree/SKILL.md) ao contexto do Panelada (em PT-BR conforme `ADR-015`): detecção de isolamento existente + guarda de submódulo, preferência por ferramenta nativa do harness com fallback em `.worktrees/<slug>`, saída obrigatória de `origin/development` (ou branch pai em sub-issues empilhadas como `#60` → `#61`–`#68`), dois perfis de setup (Perfil A sem `pnpm install` para docs/UX/protótipo HTML; Perfil B com `pnpm install --frozen-lockfile` + `TZ=UTC pnpm test` para código), alerta de serialização para `panelada_test` no Docker Compose e passo explícito de teardown (`git worktree remove`).
-  2. Adicionada a flag **`--use-worktree`** à skill [`.agents/skills/solve-issue/SKILL.md`](./.agents/skills/solve-issue/SKILL.md) (passos 0, 3, 4, 7.4/7.5, `--resume` e `--separate`), preservando o portão somente leitura antes da aprovação do plano e criando o worktree isolado no início da implementação sem sujar o checkout principal.
-  3. Blindados `.gitignore`, `eslint.config.mjs`, `.prettierignore` e `.dockerignore` contra `.worktrees/`, atualizada a lista de skills em `AGENTS.md` e registrado o setup no `STATE.md` e no `docs/fase3/diario_de_bordo-fase3.md`.
+- **Data e Agente:** `23/11/2026` — Antigravity CLI (papel: Engenheiro de Arquitetura / Documentação).
+- **Branch de Trabalho:** `development` (PR #70 integrado em `d1a52f8`; `STATE.md` e Diário atualizados direto na `development`).
+- **O que foi feito (`DOCS-01` #58 — Retroalimentação do `ADR-012` via `/solve-issue --use-worktree --no-cut --no-plan`):**
+  1. Validado em produção o fluxo `/solve-issue --use-worktree` (Perfil A — docs, sem `pnpm install`) em `.worktrees/docs-issue-58-adr-012-photo-standard` sobre `origin/development`.
+  2. Conferida coerência 100% entre `apps/api/src/modules/importer/internal/photo-processor.ts`, `routes.ts`, `apps/api/src/shared/problem.ts`, `apps/api/src/modules/catalog/internal/{routes,photo-storage}.ts` e `docs/dev/ARCHITECTURE.md`.
+  3. Adicionada ao final de `docs/fase2/02-adr/adr-012-fotos.md` a seção `## Detalhamento (Padronização de Tipos e Formatos de Imagem — 23/11/2026)` preservando integralmente o texto histórico (Playbook 02 §2 Caso A), com PR #70 integrado na `development` e critérios verificados marcados na issue `#58`.
 - **Decisões tomadas:**
-  - **Diretório canônico `.worktrees/<slug>` com `/` achatado para `-`:** evita subdiretórios aninhados e limites de caminho no Windows, mantendo isolamento total de Git, ESLint, Prettier e contexto de build Docker.
-  - **Criação do worktree apenas no passo 4 do `solve-issue --use-worktree`:** mantém passos 1–3 estritamente somente leitura e evita worktrees órfãos caso o plano seja cancelado ou ajustado.
-  - **Setup em dois perfis (A: docs/UX vs. B: código) + guarda de concorrência em `panelada_test`:** evita instalar `node_modules` em worktrees de protótipo/UX (`#60`–`#68`) e previne corridas quando múltiplos worktrees rodam testes de integração contra o mesmo Postgres Docker.
-- **Arquivos criados/alterados:** `.agents/skills/using-git-worktree/SKILL.md`, `.agents/skills/solve-issue/SKILL.md`, `.gitignore`, `.prettierignore`, `.dockerignore`, `eslint.config.mjs`, `AGENTS.md`, `STATE.md` e `docs/fase3/diario_de_bordo-fase3.md`.
+  - **`openapi.yaml` mantido inalterado (item opcional na `#58`):** alterar a `description` da rota de foto exigiria regenerar `apps/api/src/shared/openapi.generated.ts`, violando o escopo exclusivo de documentação (`apps/api` fora de escopo).
+- **Arquivos criados/alterados:** `docs/fase2/02-adr/adr-012-fotos.md` (PR #70), `STATE.md` e `docs/fase3/diario_de_bordo-fase3.md`.
 - **Próximo passo recomendado:**
-  1. Revisar e integrar este setup de governança na `development`, e em seguida iniciar **`UX-01` (#60 e sub-issues `#61`–`#68`)** e/ou **`MVP-04D` (#42)** em paralelo usando `/solve-issue --use-worktree`.
+  1. Remover o worktree já integrado (`.worktrees/docs-issue-58-adr-012-photo-standard`) e avançar em **`UX-01` (#60 e sub-issues `#61`–`#68`)** e/ou **`MVP-04D` (#42)** em paralelo usando `/solve-issue --use-worktree`.

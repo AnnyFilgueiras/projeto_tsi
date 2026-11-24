@@ -378,3 +378,37 @@
 
 ### Pendências para a próxima sessão
 - Commitar/integrar este setup de governança na `development` e iniciar **`UX-01` (#60 e sub-issues `#61`–`#68`)** e/ou **`MVP-04D` (#42)** utilizando `/solve-issue --use-worktree`.
+
+---
+
+## [23/11/2026] — DOCS-01 (#58): Retroalimentação Documental do ADR-012 (Padronização de Fotos do Catálogo)
+
+- **Papel da IA:** Engenheiro de Arquitetura / Documentação (Antigravity CLI), aplicando as skills `.agents/skills/solve-issue`, `.agents/skills/using-git-worktree` e `.agents/skills/code-review`.
+- **Técnicas aplicadas:** primeira execução ponta a ponta do fluxo `/solve-issue --use-worktree --no-cut --no-plan` em worktree isolado Perfil A (sem `pnpm install`); verificação cruzada direta entre código em produção (`photo-processor.ts`, `routes.ts`, `problem.ts`, `photo-storage.ts`), documentação operacional (`docs/dev/ARCHITECTURE.md`) e ADR histórico (`ADR-012`); preservação estrita da imutabilidade de ADR (`Playbook 02` §2 Caso A).
+- **Prompts-chave / Contexto da sessão:**
+  1. Invocação de `/solve-issue --use-worktree --no-cut --no-plan #58` para formalizar no `ADR-012` o padrão técnico de imagens do catálogo adotado em `MVP-04B`.
+  2. Após merge do PR `#70` na `development`, solicitação direta da dupla para atualizar `STATE.md` e este Diário de Bordo na `development`.
+- **Insumos usados:** Issue `#58`, `STATE.md`, `docs/dev/{ARCHITECTURE,GLOSSARY}.md`, `docs/playbooks/02-arquitetura-adrs-e-retroalimentacao.md`, `docs/fase2/02-adr/adr-012-fotos.md`, `docs/fase2/04-contratos/openapi.yaml`, `apps/api/src/modules/importer/internal/{photo-processor,routes}.ts`, `apps/api/src/modules/catalog/internal/{routes,photo-storage}.ts` e `apps/api/src/shared/problem.ts`.
+- **Artefatos produzidos:**
+  - `docs/fase2/02-adr/adr-012-fotos.md`: adicionada seção `## Detalhamento (Padronização de Tipos e Formatos de Imagem — 23/11/2026)` ao final do ADR, sem alterar nenhuma linha histórica (PR `#70` integrado em `development`, commit `d1a52f8`).
+  - Atualização dos critérios verificados na issue `#58`, de `STATE.md` e desta entrada no `docs/fase3/diario_de_bordo-fase3.md`.
+
+### Decisões tomadas
+1. **Manter `openapi.yaml` inalterado:** embora mencionado como opcional na issue `#58`, enriquecer a `description` da rota `PUT /v1/curation/proposals/{proposalId}/photo` exigiria regenerar `apps/api/src/shared/openapi.generated.ts` para passar `pnpm contracts:check`, violando o escopo exclusivo de documentação (`apps/api` explicitamente fora de escopo).
+
+### Artefatos alterados (retroalimentação)
+- `docs/fase2/02-adr/adr-012-fotos.md`: formalização dos tipos aceitos (`image/webp`, `image/jpeg`, `image/png` via *magic bytes*, erro `415`), teto de `5 MiB` (erro `413`), saída WebP q82 com rotação/remoção de EXIF, teto `1024 × 1024` px sem recorte (`fit: 'inside'`, `withoutEnlargement: true`), proporção recomendada `4:3`/`16:9` e cache imutável por SHA-256 (`Cache-Control: public, max-age=31536000, immutable`).
+- `STATE.md` e `docs/fase3/diario_de_bordo-fase3.md`: registro do fechamento de `DOCS-01` (`#58`, PR `#70`) na `development`.
+
+### Iterações relevantes (erros e retrabalho da IA)
+1. Nenhuma falha de código ou retrabalho; o fluxo `--use-worktree` (Perfil A) validou o isolamento do checkout principal mesmo com alteração local não commitada na raiz.
+
+### Divergências registradas (briefing/professor × artefatos)
+- Nenhuma divergência; coerência 100% confirmada entre `ADR-012`, `docs/dev/ARCHITECTURE.md` e `apps/api/src/modules/importer/internal/photo-processor.ts`.
+
+### Riscos aceitos
+- Nenhum risco adicional; o critério condicional de `openapi.yaml` permaneceu desmarcado na issue `#58` como N/A por opção de manter o PR exclusivamente documental.
+
+### Pendências para a próxima sessão
+- Remover o worktree pós-merge (`.worktrees/docs-issue-58-adr-012-photo-standard`) e iniciar **`UX-01` (#60 e sub-issues `#61`–`#68`)** e/ou **`MVP-04D` (#42)** via `/solve-issue --use-worktree`.
+
