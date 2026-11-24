@@ -466,3 +466,36 @@
 ### Pendências para a próxima sessão
 - Avançar em **`UX-01` (#60, `#61`–`#68`)** para desbloquear `MVP-04E` (#43) e `MVP-04F` (#44), que registrarão os projetores locais e substituirão as telas provisórias.
 
+---
+
+## [23/11/2026] — UX-01 (#60, #61–#68): UX, Decisões Transversais e Protótipo Navegável da Onda 1A
+
+- **Papel da IA:** Designer de UX / Engenheiro de Protótipo e Revisor (Claude Code), aplicando as skills `.agents/skills/solve-issue` (com `--use-worktree --no-cut`), `.agents/skills/using-git-worktree` e `.agents/skills/code-review`.
+- **Técnicas aplicadas:** leitura integral da issue-mãe e das 8 sub-issues antes do plano (`.plans/docs-issue-60-ux-onda1a.md`, aprovado pela dupla); worktree isolado (Perfil A, sem `pnpm install`); especificação orientada a estados (normal/vazio/carregando/sem rede); espelhamento das regras reais de `packages/allergen-rules` (`classifyRecipe`/`isSubstituteAllowed`) e dos 8 tipos de marco (`RN03 a–h`) dentro do protótipo; cálculo de contraste WCAG por script; percurso automatizado do protótipo em Chromium *headless* (Playwright, fora do repositório) com capturas de tela revisadas visualmente.
+- **Prompts-chave / Contexto da sessão:**
+  1. Invocação de `/solve-issue #60 --use-worktree --no-cut`.
+  2. Aprovação do plano pela dupla ("pode").
+- **Insumos usados:** Issues `#60`–`#68`, `AGENTS.md`, `STATE.md`, `docs/dev/GLOSSARY.md`, `docs/fase1/1.2-analise/regras-de-negocio.md`, `docs/fase2/03-modelagem/framework-gamificacao.md`, `packages/allergen-rules/src/{types,rules}.ts`, `apps/mobile/src/shared/theme/index.ts` e `apps/mobile/app/**` (rotas do shell de #42).
+- **Artefatos produzidos:**
+  - `docs/fase3/ux-onda1a.md` — contrato de UX das 8 telas (`UX-01A`–`UX-01H`), tokens semânticos, jornada, inventário de *nudges* e checklist heurístico.
+  - `docs/fase3/prototipo-onda1a/index.html` — protótipo navegável HTML/CSS/JS vanilla, importável no Figma (`#figma`).
+
+### Decisões tomadas
+1. **Tokens com as mesmas chaves do tema provisório** (`colors`, `spacing`, `radius`, `typography` + `elevation`, `touchTarget`): `#43` troca um arquivo só.
+2. **19 códigos de alérgenos = 18 ANVISA + `lactose`** (o código vence o texto da issue).
+3. **Alerta "Compatibilidade não confirmada" no topo da receita**, nunca fechável, repetido em versão compacta acima do CTA de conclusão.
+4. **Protótipo de arquivo único com painel de simulação fora da moldura**, para demonstrar estados sem poluir a UI.
+
+### Iterações relevantes (erros e retrabalho da IA)
+1. **Tabela de contraste estimada:** a primeira versão trazia razões aproximadas; o script corrigiu os valores e revelou um par reprovado (`textMuted` sobre `surfaceAlt`, 4,15:1), registrado como proibido.
+2. **Hierarquia da receita:** as capturas mostraram o passo atual e o alerta *fail-closed* abaixo da primeira dobra; o cabeçalho foi compactado no modo passo a passo e o alerta subiu para acima da foto.
+3. **Botão aninhado:** o selo de alérgeno (um `<button>`) estava dentro do botão do card de candidata, e o navegador quebrava o layout; corrigido.
+4. **Achados do `code-review` (corrigidos):** rotas de Avaliação/Celebração apresentadas como existentes (agora "sugeridas para #44") e barra de abas visível na Receita, divergente do shell de #42.
+
+### Riscos aceitos
+- Protótipo de média fidelidade: fotos são *placeholders* e animações avançadas ficam para `UX-02` (#69).
+- Meias estrelas com 26 dp de largura por metade; o *stepper* de 48 dp é o caminho acessível garantido.
+
+### Pendências para a próxima sessão
+- Validação do protótipo pela dupla e merge do PR #72; depois `MVP-04E` (#43) e `MVP-04F` (#44).
+
