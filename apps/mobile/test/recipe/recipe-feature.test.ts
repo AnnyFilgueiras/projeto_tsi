@@ -2,6 +2,7 @@ import { LOCAL_MIGRATIONS } from '../../src/core/local-db/migrations';
 import { runMigrations } from '../../src/core/local-db/migrator';
 import type { HttpClient } from '../../src/core/network/http-client';
 import { HttpError, NetworkUnavailableError } from '../../src/core/network/http-errors';
+import { createCandidatesReader } from '../../src/features/recipe/data/candidates-reader';
 import { createCookingStateRepository } from '../../src/features/recipe/data/cooking-state-repository';
 import {
   createRecipeRepository,
@@ -55,6 +56,7 @@ describe('recipe feature: LoadRecipe, StartCooking and cooking state (A04, ADR-0
     return createRecipeFeature({
       recipes: createRecipeRepository({ http, localDatabase: db, photos }),
       cooking: createCookingStateRepository(db),
+      candidates: createCandidatesReader(db),
       now: () => NOW,
     });
   }

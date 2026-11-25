@@ -8,3 +8,4 @@ export type { Difficulty, IngredientSubstitution, Recipe, RecipeIngredient } fro
 export type { RecipeEvolution, RecipeView } from './load-recipe';
 export { createRecipeFeature, type RecipeFeature, type RecipeFeatureDeps } from './recipe-feature';
 export type { StartCookingResult } from './start-cooking';
+export type { CookingDish, KitchenCandidate, KitchenView } from './load-kitchen';
