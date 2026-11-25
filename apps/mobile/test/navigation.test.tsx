@@ -53,6 +53,7 @@ async function fakeDependencies(db: FakeLocalDatabase): Promise<MobileDependenci
       registerRating: { execute: async () => ({ status: 'offline', opId: 'op-1' }) },
       loadRatingContext: async () => ({ dishName: null, previousCount: 0 }),
       snapshots: createProgressRepository(db),
+      collection: createProgressRepository(db),
     },
     syncInBackground: async () => undefined,
   } as Partial<MobileDependencies> as MobileDependencies;
@@ -109,6 +110,19 @@ describe('Navigation shell (MVP-01: onboarding + 4 fixed tabs, A8)', () => {
 
     expect(await screen.findByText('Nenhum prato ainda')).toBeTruthy();
     expect(screen.getByRole('tab', { name: 'Cozinha' })).toBeSelected();
+  });
+
+  it('opens the Collection tab straight on the sub-view named by `view` (#85)', async () => {
+    await db.execute("INSERT INTO profile_local (id, onboarded_at) VALUES (1, '2026-11-23')");
+
+    renderRouter('./app', { initialUrl: '/collection?view=badges' });
+
+    expect(await screen.findByRole('tab', { name: 'Badges', selected: true })).toBeTruthy();
+    expect(screen.getByRole('tab', { name: 'Coleção' })).toBeSelected();
+
+    fireEvent.press(screen.getByRole('tab', { name: 'Histórico' }));
+    expect(await screen.findByText('Sua coleção começa no primeiro prato avaliado.')).toBeTruthy();
+    expect(screen).toHaveSearchParams({ view: 'history' });
   });
 
   it('labels active restrictions on the Profile tab from the rules entrypoint (A7)', async () => {

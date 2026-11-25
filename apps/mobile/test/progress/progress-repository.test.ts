@@ -54,7 +54,7 @@ describe('progress-repository read model (US12, US14–US16, RN02–RN07)', () =
 
     const { cuisines } = await load();
 
-    expect(cuisines).toEqual([
+    expect(cuisines.map(({ dishes: _dishes, ...counts }) => counts)).toEqual([
       {
         cuisineId: CUISINE.brasileira,
         name: 'Brasileira',
