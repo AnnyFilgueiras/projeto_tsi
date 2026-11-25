@@ -139,6 +139,19 @@ apps/mobile/src/
 
 - **Feature `recipe` (`MVP-04E6`, #80):** a composição expõe `recipe: RecipeFeature` (`loadRecipe`, `startCooking`, `saveStep`). `domain/` não pode importar `core/network` nem `core/photos`, então a `data/` devolve falha de rede como valor (`offline`/`not-found`), recebe a foto pela porta estrutural `RecipePhotoStore` (o `PhotoManager` a satisfaz) e grava receita + "em preparo" numa transação só, depois dos downloads. A Cozinha (#81) reusa `startCooking` e `cooking-state-repository.listActive`.
 
+### Fatia de referência e portas entre features (`MVP-04E`/`MVP-04H` — #86)
+
+- **Fatia de referência:** `features/profile` é o exemplo a copiar ao abrir uma feature. `ui/` só recebe funções por props (nunca importa `data/`); `domain/` tem os casos de uso (`register-restrictions`, `revoke-restriction`) que falam só com a porta `OperationEnqueuer` (`A4`); `data/` lê e grava as tabelas da feature e exporta os **projetores** (`restrictionProjectors`) que o enqueuer roda só depois da confirmação do servidor (Estágio 1, `ADR-008`). A composição junta as três camadas e registra os projetores.
+- **Portas entre features (`A1`, `A8`):** ficam em `src/app/composition/feature-ports.ts`, únicas ligações em que uma feature reage à outra:
+
+| Porta | Origem → efeito |
+|---|---|
+| `completionFinishesCooking` | `progress` salva a avaliação → `recipe` tira o prato de "em preparo" (`DishCompletionListener` → `cooking-state-repository.finish`). |
+| `approvalMarksKitchenNews` | `suggestions` aprova → ponto de novidade na aba Cozinha (`kitchen-news.ts`, só em memória; a aba limpa ao ganhar foco). |
+| `profileChangesInvalidate` | `profile` muda restrição ou preferência → `suggestions.invalidate()`; a Descobrir busca de novo ao ganhar foco (`version()`). |
+
+- O teste `apps/mobile/test/navigation.test.tsx` liga as features reais sobre uma API falsa usando essas mesmas portas e cobre a jornada feliz da Onda 1A.
+
 ---
 
 ## 4. Portas Plugáveis e Ambiente Containerizado

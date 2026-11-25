@@ -6,9 +6,9 @@
 
 ## 1. Panorama Atual do Projeto
 
-- **Fase Acadêmica Atual:** **Fase 3 — Implementação do MVP e Deploy em Cloud Gratuita (EM ANDAMENTO — `MVP-01` PR #47, `MVP-02` #36 PR #48, `MVP-03` #37 PR #51, `MVP-04A` #39 PR #53, `MVP-04B` #40 PR #55, `MVP-04C` #41 PR #59, `DOCS-01` #58 PR #70 e `MVP-04D` #42 PR #71 integrados na `development`; `UX-01` #60–#68 (especificação de UX + protótipo HTML da Onda 1A) em revisão no PR #72; refinamento pós-MVP `UX-02` `#69` publicado; próximos passos: integrar PR #72 e iniciar `MVP-04E` #43, `MVP-04F` #44 e `MVP-04G` #45)**.
+- **Fase Acadêmica Atual:** **Fase 3 — Implementação do MVP e Deploy em Cloud Gratuita (EM ANDAMENTO — `MVP-01` PR #47, `MVP-02` #36 PR #48, `MVP-03` #37 PR #51, `MVP-04A` #39 PR #53, `MVP-04B` #40 PR #55, `MVP-04C` #41 PR #59, `DOCS-01` #58 PR #70, `MVP-04D` #42 PR #71, `UX-01` #60–#68 PR #72, `MVP-04E` #43 (PRs #89–#96) e `MVP-04F` #44 (PRs #87, #92, #97–#99) integrados na `development`; `MVP-04H` #86 (jornada da Onda 1A de ponta a ponta) em revisão; próximos passos: integrar `MVP-04H` e fazer o primeiro deploy `MVP-04G` #45)**.
 - **Branch de Integração (Fase 3):** `development` (com `GOV-04`, `using-git-worktree`, `MVP-01`, `MVP-02`, `MVP-03`, `MVP-04A`, `MVP-04B`, `MVP-04C`, `DOCS-01`, `MVP-04D` (PR #71) e retroalimentação Opção A do `ADR-014`).
-- **Última Atualização:** `23/11/2026`
+- **Última Atualização:** `25/11/2026`
 - **Status Geral das Fases:**
   - ✅ **Fase 1 (Engenharia de Requisitos):** Concluída (`validated-backlog--v1.0`) e sincronizada com Lote 1 (#30), Gamificação (`ADR-016`) e Lote 3 (#32).
   - ✅ **Fase 2 (Projeto Arquitetural):** Concluída integralmente (`2.1`–`2.9`, `architecture-design--v1.0`), com `ADR-001`–`ADR-016`, `openapi.yaml` v1.2.0-2.8 (0 erros Redocly CLI), coleção Bruno (33 reqs + fixture), revisão adversarial (`R1`–`R21`) e fechamento.
@@ -66,26 +66,25 @@
 - [x] **DOCS-01 (#58):** Formalizar no `ADR-012` (`## Detalhamento`) a padronização de fotos do catálogo adotada em `MVP-04B` (entrada `image/webp`/`jpeg`/`png` por *magic bytes*, teto `5 MiB`, saída WebP q82 sem EXIF, dimensões máximas `1024 × 1024` px sem recorte, proporção recomendada `4:3`/`16:9` e cache imutável por SHA-256) — integrado via PR #70.
 - [x] **MVP-04D (#42):** Fundação do app mobile — Expo Router (Onboarding + 4 abas `Descobrir`/`Cozinha`/`Coleção`/`Perfil` + `recipe/[dishId]`), `SqlCipherDatabase` com chave de 256 bits no `expo-secure-store` e verificação *fail-closed* de `PRAGMA cipher_version` (`A05`), `Migrator` idempotente por `PRAGMA user_version` (8 tabelas locais), `HttpClient` tipado por `openapi-typescript` (`X-Allergen-Package-Version` em toda chamada, refresh rotativo único entre chamadas concorrentes), `OperationEnqueuer` com `DirectOnlineOperationEnqueuer` (Estágio 1, `opId` UUID v7, cópia local só após confirmação), `DownloadSetSync`, `PhotoManager` (`ADR-012`), raiz de composição única (`A8`) e elemento de fronteira `mobile-api-contract`; 84 testes Jest com `node:sqlite` + verificação no emulador (arquivo do banco ilegível sem a chave) — integrado via PR #71.
 - [x] **UX-01 (#60 — UX e Protótipo Inicial da Onda 1A — PR #72):** Definir decisões transversais (tokens semânticos, navegação, tom *White Hat*, padrão visual de alérgenos `A06`, estados/offline Estágio 1, acessibilidade na cozinha) e protótipo HTML/CSS navegável (importável no Figma) em 8 sub-issues nativas por tela: `#61` (`UX-01A` Onboarding), `#62` (`UX-01B` Descobrir), `#63` (`UX-01C` Cozinha), `#64` (`UX-01D` Receita Offline), `#65` (`UX-01E` Avaliação), `#66` (`UX-01F` Celebração), `#67` (`UX-01G` Coleção) e `#68` (`UX-01H` Perfil). **Não bloqueia `#42`; bloqueia `#43` e `#44`.**
-- [ ] **MVP-04 (#38 — Épico Onda 1A, Primeiro Deploy):** Implementar núcleo jogável de ponta a ponta + gamificação 6D/Octalysis e realizar o primeiro deploy em Cloud 4C (Supabase PostgreSQL TLS + Storage + Render Docker) — sub-issues: `#39` (`MVP-04A` — PR #53), `#40` (`MVP-04B` — PR #55), `#41` (`MVP-04C` — PR #59), `#42` (`MVP-04D` — PR #71), `#43` (`MVP-04E` — bloqueada por `#60`), `#44` (`MVP-04F` — bloqueada por `#60`) e `#45` (`MVP-04G`).
+- [ ] **MVP-04 (#38 — Épico Onda 1A, Primeiro Deploy):** Implementar núcleo jogável de ponta a ponta + gamificação 6D/Octalysis e realizar o primeiro deploy em Cloud 4C (Supabase PostgreSQL TLS + Storage + Render Docker) — sub-issues: `#39` (`MVP-04A` — PR #53), `#40` (`MVP-04B` — PR #55), `#41` (`MVP-04C` — PR #59), `#42` (`MVP-04D` — PR #71), `#43` (`MVP-04E` — sub-issues #74, #75, #77–#81), `#44` (`MVP-04F` — sub-issues #76, #82–#85), `#86` (`MVP-04H` — integração da jornada, em revisão) e `#45` (`MVP-04G`).
 - [ ] **UX-02 (#69 — Refinamento Visual e Revisão Heurística Pós-MVP):** Rodada de *UI polish* e revisão heurística com o app rodando no emulador (bloqueada por `#60`, `#43` e `#44`), desdobrada em novas sub-issues referenciando `UX-01A`–`UX-01H` (sem reabrir as issues fechadas da v1).
+- [ ] **GAM-03 (#100) e GAM-04 (#101–#112) — `Should`, Onda 1B:** espaço `iconKey` opcional para cada badge ter ícone próprio (contrato, API, download set e app) e um desenho por badge do seed (11 sub-issues). Cosmético, mas persuasivo (`CD4`/`CD2`, como os avatares do Duolingo); registrado no `ADR-016` em PR de docs próprio.
 - [ ] **MVP-05 (#46 — Épico Onda 1B, Fechamento Estágio 1):** Rotina (`US06`/`US07`/`US08`), Despensa (`US03`), Busca (`US04`), Utensílios (`US11`), Conta completa (`POST /v1/account/email`, `DELETE /v1/account`) e Curadoria assistida por IA (`US18` Kimi/Recorded) — fatiamento em sub-issues após concluir `#38`.
 
 ---
 
 ## 4. Handoff da Última Sessão
 
-- **Data e Agente:** `23/11/2026` — Claude Code (papel: Designer de UX / Engenheiro de Protótipo e Revisor).
-- **Branch de Trabalho:** `docs/issue-60-ux-onda1a` (worktree `.worktrees/docs-issue-60-ux-onda1a`) → PR #72 para `development` (`STATE.md` e Diário incluídos no mesmo PR).
-- **O que foi feito (`UX-01` #60 + `UX-01A`–`UX-01H` #61–#68 via `/solve-issue #60 --use-worktree --no-cut`):**
-  1. [`docs/fase3/ux-onda1a.md`](./docs/fase3/ux-onda1a.md): 6 decisões transversais (rotas/navegação, tokens semânticos compatíveis com `StyleSheet` + tabela de contraste WCAG, tom *White Hat*, padrão visual de alérgenos `A06`, estados/offline Estágio 1, acessibilidade), mapa de jornada, inventário de 24 *nudges* × Core Drives e uma seção por tela com estados e microcopy PT-BR.
-  2. [`docs/fase3/prototipo-onda1a/index.html`](./docs/fase3/prototipo-onda1a/index.html): protótipo navegável único (360×800, sem dependências) com o fluxo completo e painel de simulação de estados; `#figma` esconde o painel.
-  3. Verificação: percurso automatizado em Chromium *headless* (Playwright fora do repo) cobrindo todos os estados dos critérios de aceite, sem erros de console.
-- **Decisões tomadas:**
-  - Vocabulário = 19 códigos (18 ANVISA + `lactose`), conforme `packages/allergen-rules` (corrige o texto da issue).
-  - Nota 0–5 em meias estrelas na UI ↔ `score = estrelas × 2` (`RN05`); *stepper* de 48 dp garante o alvo acessível.
-  - Alerta *fail-closed* fica acima da foto da receita; modo passo a passo com cabeçalho compacto e rolagem até o passo atual.
-  - Receita/Avaliação/Celebração sem barra de abas (coerente com `recipe/[dishId]` fora de `(tabs)` em #42); rotas de Avaliação/Celebração são sugestão para #44.
+- **Data e Agente:** `25/11/2026` — Claude Code (papel: Engenheiro de Integração Mobile e Revisor).
+- **Branch de Trabalho:** `feat/issue-86-onda-1a-journey` (worktree `.worktrees/feat-issue-86-onda-1a-journey`) → PR para `development` (`STATE.md` e Diário incluídos, por ser o marco de fechamento da Onda 1A).
+- **O que foi feito (`MVP-04H` #86 via `/solve-issue #86`):**
+  1. Portas entre features na composição (`src/app/composition/feature-ports.ts`): avaliação salva tira o prato de "Em preparo"; aprovar na Descobrir acende o ponto da aba Cozinha (só em memória); mudar restrição ou preferência faz a Descobrir buscar nova rodada.
+  2. Pratos misteriosos (formato C, pedido da dupla): evolução cujo prato base não foi concluído fica sem nome na Coleção e não é sugerida pela API (`RN02`); o total da culinária não muda. Badge conquistado mantém a descrição.
+  3. `PlaceholderScreen` removida (erro de abertura vira `EmptyState` com "Tentar novamente"); `navigation.test.tsx` cobre a jornada feliz com as features reais sobre API falsa.
+  4. Roteiro completo no emulador, inclusive offline (API parada): receita, passos e trocas funcionam; salvar avaliação mostra "Sem conexão" e preserva o rascunho; o reenvio salva.
+- **Decisões tomadas:** formato C para evoluções (todos os níveis visíveis, mistério sem nome, dica pelo nome do base só quando ele está revelado); ícone por badge como campo do contrato em issues próprias (`GAM-03`/`GAM-04`, `Should`).
+- **Riscos registrados:** quem tem restrição que exclui um prato base (ex.: ovo na Carbonara) nunca revela as evoluções acima dele (efeito de `RN02` + `RN07`, para `UX-02` #69); 2 testes de integração da API falham também na `development` limpa (contagem de `allergenState` do seed).
 - **Próximo passo recomendado:**
-  1. Revisar o protótipo no navegador (checklist §12 do documento) e integrar o PR #72.
-  2. Iniciar **`MVP-04E` (#43)** substituindo `apps/mobile/src/shared/theme/index.ts` pelos tokens da §1.2, e **`MVP-04F` (#44)**.
-  3. Pós-merge: `git worktree remove .worktrees/docs-issue-60-ux-onda1a`.
+  1. Revisar e integrar o PR da #86 e o PR de docs do `ADR-016`.
+  2. Analisar se `GAM-03` (#100) precisa de rota de curadoria para o ícone (pendência combinada na #86).
+  3. Iniciar `MVP-04G` (#45, primeiro deploy). Pós-merge: `git worktree remove .worktrees/feat-issue-86-onda-1a-journey`.

@@ -499,3 +499,29 @@
 ### Pendências para a próxima sessão
 - Validação do protótipo pela dupla e merge do PR #72; depois `MVP-04E` (#43) e `MVP-04F` (#44).
 
+---
+
+## [25/11/2026] — MVP-04H (#86): Jornada da Onda 1A de Ponta a Ponta, Pratos Misteriosos e Ícones de Badge
+
+- **Papel da IA:** Engenheiro de Integração Mobile e Revisor (Claude Code), aplicando as skills `.agents/skills/solve-issue`, `using-git-worktree`, `tdd`, `github-issue-craft` e `code-review`.
+- **Técnicas aplicadas:** worktree isolado (o checkout principal tinha uma deleção pendente que não podia ser tocada); TDD vertical nas regras novas (invalidação da rodada, revelação de evolução, filtro de sugestões); teste de jornada com as features reais sobre API falsa, conferido por mutação (desligar cada porta faz o teste falhar); roteiro no emulador Android com a API reconstruída a partir do worktree e modo offline simulado com `docker stop`.
+- **Prompts-chave / Contexto da sessão:**
+  1. `/solve-issue #86` com quatro extras: prato concluído continuava "em preparo"; badge conquistado perdia a descrição; evoluções deveriam ficar misteriosas (Aglio e Olio → Carbonara → Bolognese); existe espaço para ícone por badge?
+  2. A dupla pediu análise argumentativa antes de decidir: (a) ícone por badge via contrato × só no app; (b) esconder o 3º nível × mostrar todos com o último oculto, considerando os tipos de jogador de Bartle e o "falta X" da culinária.
+- **Insumos usados:** Issue #86, `AGENTS.md`, `STATE.md`, `docs/fase3/ux-onda1a.md` (§1.1, §2, §3, §10), `docs/fase2/03-modelagem/framework-gamificacao.md` (personas × Hexad/Bartle), `RN02`, `RN03`, `RN04`, `RN07`, `ADR-016`, seed da API e código de `apps/mobile`.
+- **Artefatos produzidos:** `apps/mobile/src/app/composition/{feature-ports,kitchen-news}.ts`; regra de revelação em `features/progress/domain/progress-model.ts`; filtro de evoluções em `apps/api/src/cross-cutting/suggestion-search/internal/service.ts`; jornada em `apps/mobile/test/navigation.test.tsx`; issues `GAM-03` (#100) e `GAM-04` (#101) com 11 sub-issues (#102–#112).
+
+### Decisões tomadas
+1. **Formato C para evoluções:** todos os níveis aparecem; o nó não revelado fica "Prato misterioso"; a dica cita o prato base só quando ele está visível, senão "Revele o prato acima primeiro". Motivo: o "falta X" já conta os pratos ocultos, e reduzir o total para esconder um nível tiraria "Completa" de quem já tinha (perda, `CD8` proibido). Serve ao explorador (silhueta, `CD7`) e ao conquistador (meta estável, `CD2`).
+2. **Mistério também na Descobrir:** a API só sugere uma evolução depois do prato base concluído, e a dica N05 deixou de dizer o nome.
+3. **Ícone por badge pelo contrato (`iconKey` opcional), fora da #86:** mantém o badge definido num lugar só (seed, `RN03`/`ADR-016`). Prioridade `Should`, por ser cosmético mas persuasivo.
+
+### Iterações relevantes (erros e retrabalho da IA)
+1. **Perguntas de decisão pouco claras:** a dupla recusou dois questionários seguidos e pediu análise com prós e contras antes; registrado como preferência para as próximas sessões.
+2. **Corrida na invalidação:** uma busca iniciada antes da mudança do Perfil podia gravar a rodada antiga; o teste RED expôs o caso e a rodada passou a refazer a busca.
+3. **Fixtures da jornada:** a receita de teste caía no alerta *fail-closed* (lista de alérgenos vazia sem `confirmedAllergenFree`) e o fake de remoção não apagava a restrição local; trocados pela implementação real.
+
+### Riscos aceitos
+- Restrição que exclui um prato base trava a revelação das evoluções acima dele (efeito de `RN02` + `RN07`), levado para `UX-02` (#69).
+- 2 testes de integração da API (contagem de `allergenState` no seed) falham também na `development` limpa; fora do escopo da #86.
+
