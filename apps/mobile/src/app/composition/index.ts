@@ -51,6 +51,14 @@ import {
 import { createProgressRepository } from '../../features/progress/data/progress-repository';
 import { projectRatingRegistered } from '../../features/progress/data/rating-repository';
 import type { ProgressSnapshotSource } from '../../features/progress/domain/progress-model';
+import {
+  loadRatingContext,
+  type RatingContext,
+} from '../../features/progress/domain/rating-context';
+import {
+  createRegisterRating,
+  type RegisterRating,
+} from '../../features/progress/domain/register-rating';
 import { createCandidatesReader } from '../../features/recipe/data/candidates-reader';
 import { createCookingStateRepository } from '../../features/recipe/data/cooking-state-repository';
 import { createRecipeRepository } from '../../features/recipe/data/recipe-repository';
@@ -77,9 +85,17 @@ export interface MobileDependencies {
   readonly suggestions: SuggestionRound;
   /** LoadRecipe / StartCooking / saveStep (#80) and LoadKitchen for the Kitchen tab (#81). */
   readonly recipe: RecipeFeature;
+  /** Rating modal (#83) and Celebration (#84): all offline-first reads of the local copy. */
   readonly progress: ProgressDependencies;
   /** Best-effort background refresh of the offline copy; never throws (offline is normal). */
   readonly syncInBackground: () => Promise<void>;
+}
+
+export interface ProgressDependencies {
+  readonly registerRating: RegisterRating;
+  readonly loadRatingContext: (dishId: string) => Promise<RatingContext>;
+  /** Local progress snapshot read by the Celebration (#84); never touches the network. */
+  readonly snapshots: ProgressSnapshotSource;
 }
 
 export interface ProfileDependencies {
@@ -97,11 +113,6 @@ export interface ProfileDependencies {
   readonly revokeRestriction: RevokeRestriction;
   /** Unlike `saveCulinaryPreferences`, sends an empty list too (unchecking the last cuisine). */
   readonly savePreferences: (cuisineIds: readonly string[]) => Promise<SavePreferencesResult>;
-}
-
-export interface ProgressDependencies {
-  /** Local progress snapshot read by the Celebration (#84); never touches the network. */
-  readonly snapshots: ProgressSnapshotSource;
 }
 
 export async function createMobileDependencies(
@@ -174,6 +185,7 @@ export async function createMobileDependencies(
 
   const preferences = createPreferencesRepository({ http, localDatabase });
   const profileRepository = createProfileRepository(localDatabase);
+  const progressRepository = createProgressRepository(localDatabase);
 
   return {
     http,
@@ -212,7 +224,16 @@ export async function createMobileDependencies(
       candidates: createCandidatesReader(localDatabase),
       now,
     }),
-    progress: { snapshots: createProgressRepository(localDatabase) },
+    progress: {
+      registerRating: createRegisterRating({
+        enqueuer: operationEnqueuer,
+        progress: progressRepository,
+        // Clearing the "em preparo" mark after a rating lands in #86 (cooking-state `finish`).
+        completionListener: { onDishCompleted: async () => undefined },
+      }),
+      loadRatingContext: (dishId) => loadRatingContext(progressRepository, dishId),
+      snapshots: progressRepository,
+    },
     syncInBackground: async () => {
       try {
         await sessions.ensureSession();

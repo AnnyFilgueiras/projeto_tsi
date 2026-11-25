@@ -47,7 +47,12 @@ async function fakeDependencies(db: FakeLocalDatabase): Promise<MobileDependenci
       saveStep: async () => undefined,
       loadKitchen: async () => ({ cooking: [], candidates: [] }),
     },
-    progress: { snapshots: createProgressRepository(db) },
+    // No catalog yet: the Rating modal falls back to its generic title.
+    progress: {
+      registerRating: { execute: async () => ({ status: 'offline', opId: 'op-1' }) },
+      loadRatingContext: async () => ({ dishName: null, previousCount: 0 }),
+      snapshots: createProgressRepository(db),
+    },
     syncInBackground: async () => undefined,
   } as Partial<MobileDependencies> as MobileDependencies;
 }
@@ -118,7 +123,7 @@ describe('Navigation shell (MVP-01: onboarding + 4 fixed tabs, A8)', () => {
 
   it.each([
     ['/recipe/dish-1', 'Receita'],
-    ['/recipe/dish-1/rate', 'Avaliação'],
+    ['/recipe/dish-1/rate', 'Avaliar prato'],
     // Empty local copy: the Celebration falls back to its generic confirmation.
     ['/recipe/dish-1/celebrate', 'Avaliação salva!'],
   ])('%s renders "%s" without the tab bar (§1.1)', async (initialUrl, title) => {
