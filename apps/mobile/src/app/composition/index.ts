@@ -48,7 +48,16 @@ import {
   type SaveCulinaryPreferences,
   type SavePreferencesResult,
 } from '../../features/profile/domain/save-culinary-preferences';
+import { createProgressRepository } from '../../features/progress/data/progress-repository';
 import { projectRatingRegistered } from '../../features/progress/data/rating-repository';
+import {
+  loadRatingContext,
+  type RatingContext,
+} from '../../features/progress/domain/rating-context';
+import {
+  createRegisterRating,
+  type RegisterRating,
+} from '../../features/progress/domain/register-rating';
 import { createCandidatesReader } from '../../features/recipe/data/candidates-reader';
 import { createCookingStateRepository } from '../../features/recipe/data/cooking-state-repository';
 import { createRecipeRepository } from '../../features/recipe/data/recipe-repository';
@@ -75,8 +84,15 @@ export interface MobileDependencies {
   readonly suggestions: SuggestionRound;
   /** LoadRecipe / StartCooking / saveStep (#80) and LoadKitchen for the Kitchen tab (#81). */
   readonly recipe: RecipeFeature;
+  /** Rating modal (#83): RegisterRating (#82) and the repeat context, both offline-first reads. */
+  readonly progress: ProgressDependencies;
   /** Best-effort background refresh of the offline copy; never throws (offline is normal). */
   readonly syncInBackground: () => Promise<void>;
+}
+
+export interface ProgressDependencies {
+  readonly registerRating: RegisterRating;
+  readonly loadRatingContext: (dishId: string) => Promise<RatingContext>;
 }
 
 export interface ProfileDependencies {
@@ -166,6 +182,7 @@ export async function createMobileDependencies(
 
   const preferences = createPreferencesRepository({ http, localDatabase });
   const profileRepository = createProfileRepository(localDatabase);
+  const progressRepository = createProgressRepository(localDatabase);
 
   return {
     http,
@@ -204,6 +221,15 @@ export async function createMobileDependencies(
       candidates: createCandidatesReader(localDatabase),
       now,
     }),
+    progress: {
+      registerRating: createRegisterRating({
+        enqueuer: operationEnqueuer,
+        progress: progressRepository,
+        // Clearing the "em preparo" mark after a rating lands in #86 (cooking-state `finish`).
+        completionListener: { onDishCompleted: async () => undefined },
+      }),
+      loadRatingContext: (dishId) => loadRatingContext(progressRepository, dishId),
+    },
     syncInBackground: async () => {
       try {
         await sessions.ensureSession();

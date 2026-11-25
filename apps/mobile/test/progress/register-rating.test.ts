@@ -175,10 +175,33 @@ describe('RegisterRating (UC10, RN05, RN06, P04)', () => {
       fakeEnqueuer({ status: 'unavailable', opId: OP_ID, reason: 'offline', operation: anyOp }),
     ).execute({ dishId: DISH.feijoada, stars: 4 });
 
-    expect(result).toEqual({ status: 'offline' });
+    expect(result).toEqual({ status: 'offline', opId: OP_ID });
     expect(ratingRows()).toEqual([]);
     expect(unlockRows()).toEqual([]);
     expect(completed).toEqual([]);
+  });
+
+  it('resends with the opId of the failed attempt, so a 5xx that did save never counts twice (RN06)', async () => {
+    const sent: unknown[] = [];
+    const enqueuer: OperationEnqueuer = {
+      enqueue: async (request) => {
+        sent.push(request.opId);
+        return sent.length === 1
+          ? { status: 'unavailable', opId: OP_ID, reason: 'server-error', operation: anyOp }
+          : { status: 'confirmed', opId: OP_ID, repeated: true, unlocks: {}, localCopy: 'updated' };
+      },
+    };
+    const register = registerRating(enqueuer);
+
+    const first = await register.execute({ dishId: DISH.feijoada, stars: 4 });
+    const retry = await register.execute({
+      dishId: DISH.feijoada,
+      stars: 4,
+      opId: first.status === 'offline' ? first.opId : undefined,
+    });
+
+    expect(sent).toEqual([undefined, OP_ID]);
+    expect(retry).toMatchObject({ status: 'saved', ratingId: OP_ID });
   });
 
   it('returns the server problem when the rating is rejected', async () => {

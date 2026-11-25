@@ -45,6 +45,7 @@ export { StepItem, type StepItemProps, type StepState } from './StepItem';
 export { Stepper, type StepperProps } from './Stepper';
 export { SwapButton, type SwapButtonProps } from './SwapButton';
 export { TabBar, type TabBarItem, type TabBarProps } from './TabBar';
+export { TextArea, type TextAreaProps } from './TextArea';
 export { TextLink, type TextLinkProps, type TextLinkTone } from './TextLink';
 export { Toast, type ToastProps } from './Toast';
 export { Topbar, type TopbarProps } from './Topbar';

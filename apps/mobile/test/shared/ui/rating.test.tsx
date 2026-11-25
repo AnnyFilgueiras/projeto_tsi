@@ -1,5 +1,12 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
-import { BadgeIcon, FieldLabel, SearchField, Star, Stepper } from '../../../src/shared/ui';
+import {
+  BadgeIcon,
+  FieldLabel,
+  SearchField,
+  Star,
+  Stepper,
+  TextArea,
+} from '../../../src/shared/ui';
 
 describe('Star', () => {
   it.each(['empty', 'half', 'full'] as const)('renders the %s fill', (fill) => {
@@ -62,5 +69,26 @@ describe('BadgeIcon', () => {
     render(<BadgeIcon state={state} accessibilityLabel={label} />);
     expect(screen.getByRole('image', { name: label })).toBeTruthy();
     expect(screen.getByTestId(`badge-${state}`)).toBeTruthy();
+  });
+});
+
+describe('TextArea', () => {
+  it('reports typing and becomes read-only while saving', () => {
+    const onChangeText = jest.fn();
+    const { rerender } = render(
+      <TextArea value="" onChangeText={onChangeText} accessibilityLabel="Relato pessoal" />,
+    );
+    fireEvent.changeText(screen.getByLabelText('Relato pessoal'), 'Ficou ótimo');
+    expect(onChangeText).toHaveBeenCalledWith('Ficou ótimo');
+
+    rerender(
+      <TextArea
+        value="Ficou ótimo"
+        onChangeText={onChangeText}
+        accessibilityLabel="Relato pessoal"
+        editable={false}
+      />,
+    );
+    expect(screen.getByLabelText('Relato pessoal').props.editable).toBe(false);
   });
 });

@@ -23,6 +23,12 @@ export interface RegisterRatingInput {
   readonly stars: number;
   readonly comment?: string;
   readonly changes?: string;
+  /**
+   * The `opId` of an `offline` result, to resend the same rating: a 5xx or timeout may have
+   * saved it on the server, and a new id would count as a second preparation (RN06). Leave it
+   * empty once the draft changes — that is a different rating.
+   */
+  readonly opId?: string;
 }
 
 /** Contract limit for `comment` and `changes` (openapi RatingPayload). */
@@ -39,7 +45,7 @@ export type RegisterRatingResult =
       readonly cuisineProgressAfter: CuisineProgress | null;
     }
   /** `offline` and `rejected` leave the local copy exactly as it was (Stage 1, P04). */
-  | { readonly status: 'offline' }
+  | { readonly status: 'offline'; readonly opId: string }
   | { readonly status: 'rejected'; readonly problem: OperationProblem | undefined }
   /** Nothing was sent nor stored; the screen points at the offending field. */
   | { readonly status: 'invalid'; readonly field: 'stars' | 'comment' | 'changes' };
@@ -66,10 +72,11 @@ export function createRegisterRating(deps: RegisterRatingDeps): RegisterRating {
 
       const result = await deps.enqueuer.enqueue({
         type: 'rating.register',
+        ...(input.opId !== undefined && { opId: input.opId }),
         // itemId stays null in Onda 1A: there is no routine plan to complete yet (UC10 FA2).
         payload: { dishId: input.dishId, score: parsed.score, ...parsed.texts, itemId: null },
       });
-      if (result.status === 'unavailable') return { status: 'offline' };
+      if (result.status === 'unavailable') return { status: 'offline', opId: result.opId };
       if (result.status === 'rejected') return { status: 'rejected', problem: result.problem };
 
       // Stage 1 trusts the server's unlocks; a Stage 2 queued rating has no server answer yet, so
