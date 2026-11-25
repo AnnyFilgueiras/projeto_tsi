@@ -102,7 +102,7 @@ apps/mobile/src/
 |---|---|---|
 | `local-db` | `LocalDatabase` (`execute`/`query`/`transaction`) | `openSqlCipherDatabase` (`expo-sqlite` + SQLCipher, chave de 256 bits do `DatabaseKeyStore` no `expo-secure-store`) |
 | `local-db` | `runMigrations` + `LOCAL_MIGRATIONS` (versão em `PRAGMA user_version`, uma transação por migration, idempotente, *append-only*; v2 `stage-1-onda-1a` — `MVP-04E2`) | — |
-| `network` | `HttpClient.call(operationId, …)` tipado pelo `openapi.yaml`; sempre envia `X-Allergen-Package-Version`; renova o token (refresh rotativo, uma renovação compartilhada entre chamadas concorrentes) | `createFetchHttpClient`, `createSecureStoreTokenStore`, `createSessionGate` (conta anônima na primeira abertura) |
+| `network` | `HttpClient.call(operationId, …)` tipado pelo `openapi.yaml`; sempre envia `X-Allergen-Package-Version`; cabeçalhos do contrato (ex.: `Idempotency-Key`) vão em `header`, tipado pelo `openapi.yaml`; renova o token (refresh rotativo, uma renovação compartilhada entre chamadas concorrentes) | `createFetchHttpClient`, `createSecureStoreTokenStore`, `createSessionGate` (conta anônima na primeira abertura) |
 | `sync` | `OperationEnqueuer.enqueue(request)` → `confirmed` \| `rejected` \| `unavailable` (reenviar a `operation` devolvida, mesmo `opId` UUID v7) \| `queued` (Estágio 2) | `createDirectOnlineOperationEnqueuer` (Estágio 1), `createDownloadSetSync` |
 | `photos` | `PhotoManager` (WebP por SHA-256 em `documentDirectory/photos/`, verificação de integridade, `prune`) | `createFileSystemPhotoManager` (`expo-file-system`) |
 
@@ -155,4 +155,8 @@ apps/mobile/src/
 ### Estratégia de Containers (`docker-compose.yml`)
 - **No Docker (`docker-compose.yml`):** PostgreSQL (`postgres:16-alpine`, `TZ=UTC`, com bancos separados `panelada_dev` e `panelada_test` inicializado em `infra/postgres/init/01-create-test-db.sql`) + API Fastify escutando em `0.0.0.0:3000` (`GET /v1/health`) + volume `panelada_photos`. Ninguém instala Postgres no host. Detalhes operacionais em [`DATABASE.md`](./DATABASE.md).
 - **No host:** apenas Emulador Android + Expo/React Native (`apps/mobile`), que acessa a API no Docker via `10.0.2.2:3000` (Android emulator) ou `localhost:3000`.
-- **Fatia vertical de referência (API — `MVP-04A`):** leia `apps/api/src/modules/profile/` (`public/{index,profile-lifecycle,profile-query,restrictions-for-filter}.ts` + `internal/{schema,repository,service,applier,routes}.ts`) e a composição em `apps/api/src/app.ts` antes de criar o próximo módulo. No Mobile, a fatia de referência será registrada em `MVP-04E`.
+- **Fatia vertical de referência (API — `MVP-04A`):** leia `apps/api/src/modules/profile/` (`public/{index,profile-lifecycle,profile-query,restrictions-for-filter}.ts` + `internal/{schema,repository,service,applier,routes}.ts`) e a composição em `apps/api/src/app.ts` antes de criar o próximo módulo. No Mobile, leia `apps/mobile/src/features/suggestions/` (`MVP-04E5`, #79):
+  - `domain/` define as portas que a feature precisa (`SuggestionsGateway`, `SuggestionsLocalStore`, `DishPhotos`) e os casos de uso (`createSuggestionRound`), sem importar `core/network`: o lint barra, então `data/` traduz erros de transporte em `ok | offline | failed`.
+  - `data/` implementa as portas (`HttpClient` e `LocalDatabase`); `ui/` recebe o caso de uso por props e nunca vê o contrato gerado.
+  - A composição cria o objeto da feature uma vez (estado de sessão sem singleton, `A8`) e a rota em `app/` só liga `useDependencies()` e `router` às props da tela.
+  - Mutação online fora do contrato `Operation` (aprovar/descartar sugestão) chama o `HttpClient` direto com uma `Idempotency-Key` UUID v7 por (ação, item), reaproveitada na nova tentativa.
