@@ -31,15 +31,22 @@ import {
   type OnboardingRepository,
 } from '../../features/profile/data/onboarding-repository';
 import { createPreferencesRepository } from '../../features/profile/data/preferences-repository';
+import { createProfileRepository } from '../../features/profile/data/profile-repository';
 import { restrictionProjectors } from '../../features/profile/data/restriction-repository';
 import {
   createRegisterRestrictions,
   type RegisterRestrictions,
 } from '../../features/profile/domain/register-restrictions';
+import type { ProfileSnapshot } from '../../features/profile/domain/profile-snapshot';
+import {
+  createRevokeRestriction,
+  type RevokeRestriction,
+} from '../../features/profile/domain/revoke-restriction';
 import {
   createSaveCulinaryPreferences,
   type CuisineOption,
   type SaveCulinaryPreferences,
+  type SavePreferencesResult,
 } from '../../features/profile/domain/save-culinary-preferences';
 import { projectRatingRegistered } from '../../features/progress/data/rating-repository';
 import { createCandidatesReader } from '../../features/recipe/data/candidates-reader';
@@ -68,8 +75,6 @@ export interface MobileDependencies {
   readonly suggestions: SuggestionRound;
   /** LoadRecipe / StartCooking / saveStep (#80) and LoadKitchen for the Kitchen tab (#81). */
   readonly recipe: RecipeFeature;
-  /** Health probe used by the Profile shell. */
-  readonly checkApi: () => Promise<boolean>;
   /** Best-effort background refresh of the offline copy; never throws (offline is normal). */
   readonly syncInBackground: () => Promise<void>;
 }
@@ -84,6 +89,11 @@ export interface ProfileDependencies {
   readonly registerRestrictions: RegisterRestrictions;
   readonly listCuisines: () => Promise<readonly CuisineOption[]>;
   readonly saveCulinaryPreferences: SaveCulinaryPreferences;
+  /** Profile tab (#78): local snapshot, removal and preference changes. */
+  readonly readProfile: () => Promise<ProfileSnapshot>;
+  readonly revokeRestriction: RevokeRestriction;
+  /** Unlike `saveCulinaryPreferences`, sends an empty list too (unchecking the last cuisine). */
+  readonly savePreferences: (cuisineIds: readonly string[]) => Promise<SavePreferencesResult>;
 }
 
 export async function createMobileDependencies(
@@ -155,6 +165,7 @@ export async function createMobileDependencies(
   });
 
   const preferences = createPreferencesRepository({ http, localDatabase });
+  const profileRepository = createProfileRepository(localDatabase);
 
   return {
     http,
@@ -182,6 +193,9 @@ export async function createMobileDependencies(
       registerRestrictions: createRegisterRestrictions({ enqueuer: operationEnqueuer, now }),
       listCuisines: () => preferences.listCuisines(),
       saveCulinaryPreferences: createSaveCulinaryPreferences(preferences),
+      readProfile: () => profileRepository.read(),
+      revokeRestriction: createRevokeRestriction({ enqueuer: operationEnqueuer }),
+      savePreferences: (cuisineIds) => preferences.save(cuisineIds),
     },
     suggestions,
     recipe: createRecipeFeature({
@@ -190,14 +204,6 @@ export async function createMobileDependencies(
       candidates: createCandidatesReader(localDatabase),
       now,
     }),
-    checkApi: async () => {
-      try {
-        await http.call('checkHealth', {});
-        return true;
-      } catch {
-        return false;
-      }
-    },
     syncInBackground: async () => {
       try {
         await sessions.ensureSession();
