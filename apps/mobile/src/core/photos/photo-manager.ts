@@ -27,7 +27,7 @@ export interface PhotoFileSystem {
   ensureDirectory(): Promise<void>;
   exists(uri: string): Promise<boolean>;
   /** Returns the HTTP status; rejects only when the network is unreachable. */
-  download(url: string, toUri: string): Promise<number>;
+  download(url: string, toUri: string, headers?: Readonly<Record<string, string>>): Promise<number>;
   move(fromUri: string, toUri: string): Promise<void>;
   delete(uri: string): Promise<void>;
   list(): Promise<readonly string[]>;
@@ -38,11 +38,20 @@ export interface PhotoManagerDeps {
   readonly fs: PhotoFileSystem;
   /** Demo: `{API}/v1/photos/{hash}`; cloud: static Storage URL (ADR-012 item 5). */
   readonly resolveUrl: (hash: string) => string;
+  /**
+   * Headers for each download. The demo route `GET /v1/photos/{hash}` inherits the contract's
+   * global bearerAuth; the cloud target serves static URLs and needs none.
+   */
+  readonly requestHeaders?: () => Promise<Readonly<Record<string, string>>>;
 }
 
 const SHA256_HEX = /^[0-9a-f]{64}$/;
 
-export function createPhotoManager({ fs, resolveUrl }: PhotoManagerDeps): PhotoManager {
+export function createPhotoManager({
+  fs,
+  resolveUrl,
+  requestHeaders,
+}: PhotoManagerDeps): PhotoManager {
   const uriFor = (hash: string) => `${fs.directory}${hash}.webp`;
 
   return {
@@ -69,7 +78,7 @@ export function createPhotoManager({ fs, resolveUrl }: PhotoManagerDeps): PhotoM
         // Download beside the target and move only once verified, so a crash never leaves a
         // truncated file under the final name.
         const partial = `${target}.part`;
-        const status = await fs.download(resolveUrl(hash), partial);
+        const status = await fs.download(resolveUrl(hash), partial, await requestHeaders?.());
         if (status !== 200) {
           await fs.delete(partial);
           skipped.push({ hash, reason: 'not-found' });

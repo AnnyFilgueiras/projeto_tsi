@@ -75,6 +75,12 @@ export async function createMobileDependencies(
   // resolver for the Storage static URL without touching PhotoManager.
   const photos = createFileSystemPhotoManager(
     (hash) => `${config.apiBaseUrl.replace(/\/$/, '')}/v1/photos/${hash}`,
+    // The demo route requires the bearer token. Photos are fetched right after an API call that
+    // already renewed it, so the stored access token is current; a 401 only skips that photo.
+    async (): Promise<Record<string, string>> => {
+      const tokens = await tokenStore.read();
+      return tokens ? { Authorization: `Bearer ${tokens.accessToken}` } : {};
+    },
   );
 
   const downloadSet = createDownloadSetSync({
