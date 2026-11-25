@@ -32,6 +32,7 @@ import {
   Stepper,
   SwapButton,
   TabBar,
+  TextArea,
   TextLink,
   Toast,
   Topbar,
@@ -62,6 +63,7 @@ export default function UiCatalogRoute() {
   const [segment, setSegment] = useState('ingredients');
   const [rating, setRating] = useState(4.5);
   const [query, setQuery] = useState('');
+  const [notes, setNotes] = useState('');
 
   if (!__DEV__) return <Redirect href="/" />;
 
@@ -223,6 +225,13 @@ export default function UiCatalogRoute() {
             value={query}
             onChangeText={setQuery}
             placeholder="Buscar alérgeno (ex.: leite, castanha)"
+          />
+          <FieldLabel label="Relato pessoal" hint="opcional" />
+          <TextArea
+            value={notes}
+            onChangeText={setNotes}
+            placeholder="Como foi?"
+            accessibilityLabel="Relato pessoal"
           />
           <Row>
             <BadgeIcon state="earned" accessibilityLabel="Conquista obtida" />

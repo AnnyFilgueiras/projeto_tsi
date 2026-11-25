@@ -45,6 +45,11 @@ async function fakeDependencies(db: FakeLocalDatabase): Promise<MobileDependenci
       saveStep: async () => undefined,
       loadKitchen: async () => ({ cooking: [], candidates: [] }),
     },
+    // No catalog yet: the Rating modal falls back to its generic title.
+    progress: {
+      registerRating: { execute: async () => ({ status: 'offline', opId: 'op-1' }) },
+      loadRatingContext: async () => ({ dishName: null, previousCount: 0 }),
+    },
     syncInBackground: async () => undefined,
   } as Partial<MobileDependencies> as MobileDependencies;
 }
@@ -115,7 +120,7 @@ describe('Navigation shell (MVP-01: onboarding + 4 fixed tabs, A8)', () => {
 
   it.each([
     ['/recipe/dish-1', 'Receita'],
-    ['/recipe/dish-1/rate', 'Avaliação'],
+    ['/recipe/dish-1/rate', 'Avaliar prato'],
     ['/recipe/dish-1/celebrate', 'Celebração'],
   ])('%s renders "%s" without the tab bar (§1.1)', async (initialUrl, title) => {
     await db.execute("INSERT INTO profile_local (id, onboarded_at) VALUES (1, '2026-11-23')");
