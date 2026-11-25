@@ -38,7 +38,9 @@ export function createFetchHttpClient(deps: FetchHttpClientDeps): HttpClient {
     options: ApiCallOptions<ApiOperationId>,
     accessToken?: string,
   ): Promise<Response> {
+    // Contract headers go first so the client's own headers can never be overridden by a caller.
     const headers: Record<string, string> = {
+      ...((options.header ?? {}) as Record<string, string>),
       Accept: 'application/json',
       'X-Allergen-Package-Version': deps.packageVersion,
     };

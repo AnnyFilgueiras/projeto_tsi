@@ -19,7 +19,8 @@ jest.mock('../../src/app/composition', () => ({
 
 const NOW = new Date('2026-11-24T14:05:00.000Z');
 const FR = { id: '00000000-0000-4000-8000-0000000000f1', name: 'Francesa' };
-const DISCOVER_TEXT = 'Sugestões de pratos para o seu perfil aparecerão aqui.';
+// The fake Discover round below is empty, so Descobrir lands on its "round over" state.
+const DISCOVER_TEXT = 'Rodada concluída';
 
 type SyncHandler = (request: RecordedRequest) => FakeReply | Promise<FakeReply>;
 
@@ -77,6 +78,19 @@ describe('Onboarding (UX-01A, US09, RN09, RN10)', () => {
         localDatabase: db,
         onboarding: createOnboardingRepository(db),
         profile: profile as unknown as ProfileDependencies,
+        suggestions: {
+          loadSuggestions: async () => ({
+            status: 'ready',
+            cards: [],
+            position: 1,
+            total: 0,
+            hasRestrictions: false,
+          }),
+          approveSuggestion: async () => 'done',
+          discardSuggestion: async () => 'done',
+          snapshot: () => ({ cards: [], position: 1, total: 0, hasRestrictions: false }),
+          photoUri: async () => null,
+        },
         checkApi: async () => true,
         syncInBackground: async () => undefined,
       } as Partial<MobileDependencies> as MobileDependencies;

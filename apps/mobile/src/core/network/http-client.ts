@@ -19,6 +19,17 @@ export const API_ROUTES = {
     path: '/v1/profile/preferences',
     authenticated: true,
   },
+  getSuggestions: { method: 'GET', path: '/v1/suggestions', authenticated: true },
+  approveSuggestion: {
+    method: 'POST',
+    path: '/v1/suggestions/{suggestionId}/approve',
+    authenticated: true,
+  },
+  discardSuggestion: {
+    method: 'POST',
+    path: '/v1/suggestions/{suggestionId}/discard',
+    authenticated: true,
+  },
 } as const satisfies Partial<Record<keyof operations, ApiRoute>>;
 
 export interface ApiRoute {
@@ -44,6 +55,8 @@ export interface ApiCallOptions<K extends ApiOperationId> {
   readonly body?: ApiRequestBody<K>;
   readonly path?: NonNullable<Operation<K>['parameters']['path']>;
   readonly query?: NonNullable<Operation<K>['parameters']['query']>;
+  /** Operation-specific headers declared in the contract (e.g. `Idempotency-Key`). */
+  readonly header?: NonNullable<Operation<K>['parameters']['header']>;
 }
 
 /** `data` is null for bodiless statuses such as 204 and 304 (download set unchanged). */

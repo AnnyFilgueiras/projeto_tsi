@@ -20,6 +20,12 @@ import { createDirectOnlineOperationEnqueuer } from '../../core/sync/direct-onli
 import { createDownloadSetSync, type DownloadSetSync } from '../../core/sync/download-set-sync';
 import { createUuidV7Generator } from '../../core/sync/id-generator';
 import type { OperationEnqueuer } from '../../core/sync/operation-enqueuer';
+import { createSuggestionsGateway } from '../../features/suggestions/data/suggestions-gateway';
+import { createSuggestionsLocalStore } from '../../features/suggestions/data/suggestions-local-store';
+import {
+  createSuggestionRound,
+  type SuggestionRound,
+} from '../../features/suggestions/domain/suggestion-round';
 import {
   createOnboardingRepository,
   type OnboardingRepository,
@@ -35,6 +41,10 @@ import {
   type CuisineOption,
   type SaveCulinaryPreferences,
 } from '../../features/profile/domain/save-culinary-preferences';
+import { projectRatingRegistered } from '../../features/progress/data/rating-repository';
+import { createCookingStateRepository } from '../../features/recipe/data/cooking-state-repository';
+import { createRecipeRepository } from '../../features/recipe/data/recipe-repository';
+import { createRecipeFeature, type RecipeFeature } from '../../features/recipe/domain';
 import { readMobileConfig, type MobileConfig } from './config';
 
 /**
@@ -53,6 +63,10 @@ export interface MobileDependencies {
   readonly photos: PhotoManager;
   readonly onboarding: OnboardingRepository;
   readonly profile: ProfileDependencies;
+  /** Discover round, kept for the whole app session so discarded dishes stay gone (RN11). */
+  readonly suggestions: SuggestionRound;
+  /** LoadRecipe / StartCooking / saveStep (#80); the Kitchen tab reuses startCooking (#81). */
+  readonly recipe: RecipeFeature;
   /** Health probe used by the Profile shell. */
   readonly checkApi: () => Promise<boolean>;
   /** Best-effort background refresh of the offline copy; never throws (offline is normal). */
@@ -92,6 +106,12 @@ export async function createMobileDependencies(
   // resolver for the Storage static URL without touching PhotoManager.
   const photos = createFileSystemPhotoManager(
     (hash) => `${config.apiBaseUrl.replace(/\/$/, '')}/v1/photos/${hash}`,
+    // The demo route requires the bearer token. Photos are fetched right after an API call that
+    // already renewed it, so the stored access token is current; a 401 only skips that photo.
+    async (): Promise<Record<string, string>> => {
+      const tokens = await tokenStore.read();
+      return tokens ? { Authorization: `Bearer ${tokens.accessToken}` } : {};
+    },
   );
 
   const downloadSet = createDownloadSetSync({
@@ -103,13 +123,34 @@ export async function createMobileDependencies(
     now,
   });
 
+  const newUuidV7 = createUuidV7Generator({ randomBytes: getRandomBytes, now: Date.now });
+
   const operationEnqueuer = createDirectOnlineOperationEnqueuer({
     http,
     localDatabase,
     // Feature projectors are registered here as features land (MVP-04E/F).
-    projectors: { ...restrictionProjectors },
-    newOperationId: createUuidV7Generator({ randomBytes: getRandomBytes, now: Date.now }),
+    projectors: { 'rating.register': projectRatingRegistered, ...restrictionProjectors },
+    newOperationId: newUuidV7,
     now,
+  });
+
+  const suggestions = createSuggestionRound({
+    gateway: createSuggestionsGateway({ http, sessions }),
+    store: createSuggestionsLocalStore(localDatabase),
+    photos: {
+      // Cached file first; otherwise one download attempt. Offline or missing → placeholder.
+      localUri: async (hash) => {
+        try {
+          const cached = await photos.getLocalUri(hash);
+          if (cached) return cached;
+          await photos.ensureDownloaded([hash]);
+          return await photos.getLocalUri(hash);
+        } catch {
+          return null;
+        }
+      },
+    },
+    newIdempotencyKey: newUuidV7,
   });
 
   const preferences = createPreferencesRepository({ http, localDatabase });
@@ -141,6 +182,12 @@ export async function createMobileDependencies(
       listCuisines: () => preferences.listCuisines(),
       saveCulinaryPreferences: createSaveCulinaryPreferences(preferences),
     },
+    suggestions,
+    recipe: createRecipeFeature({
+      recipes: createRecipeRepository({ http, localDatabase, photos }),
+      cooking: createCookingStateRepository(localDatabase),
+      now,
+    }),
     checkApi: async () => {
       try {
         await http.call('checkHealth', {});

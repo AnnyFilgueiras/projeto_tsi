@@ -1,5 +1,8 @@
 module.exports = {
   preset: 'jest-expo',
+  // The first render in each screen suite transforms the whole shared/ui + expo-router tree cold;
+  // on the 2-core CI runner that alone can pass Jest's 5 s default.
+  testTimeout: 20000,
   setupFilesAfterEnv: ['<rootDir>/test/support/setup-matchers.ts'],
   testMatch: ['<rootDir>/test/**/*.test.{ts,tsx}'],
   moduleNameMapper: {

@@ -175,4 +175,22 @@ describe('HttpClient (ADR-007, A7, X-Allergen-Package-Version)', () => {
       `${BASE_URL}/v1/sync/download-set?version=v+1`,
     ]);
   });
+
+  it('sends operation header parameters such as Idempotency-Key without dropping its own', async () => {
+    const fake = createFakeFetch({
+      'POST /v1/suggestions/s-1/discard': () => ({ status: 204 }),
+    });
+    const { http } = client(fake.fetch);
+
+    await http.call('discardSuggestion', {
+      path: { suggestionId: 's-1' },
+      header: { 'Idempotency-Key': 'key-1' },
+    });
+
+    expect(fake.requests[0]?.headers).toMatchObject({
+      'Idempotency-Key': 'key-1',
+      Authorization: 'Bearer access-1',
+      'X-Allergen-Package-Version': PACKAGE_VERSION,
+    });
+  });
 });
