@@ -7,8 +7,9 @@ import { allergenLabel } from './labels';
 
 // Food-safety copy is fixed here (A06) so it cannot drift between screens. Source: ux-onda1a §1.4.
 
-export const SCOPE_BANNER_TEXT =
-  'Verificamos apenas os 19 alérgenos do vocabulário controlado (ANVISA + lactose). Confira sempre o rótulo dos ingredientes.';
+// RN16 asks only that the coverage limit be visible; the code list stays in the contract
+// (ADR-015) and in the restriction picker, not in this banner.
+export const SCOPE_BANNER_TEXT = 'Checamos os principais alérgenos. Confira sempre o rótulo.';
 
 export const FAIL_CLOSED_TITLE = 'Compatibilidade não confirmada';
 

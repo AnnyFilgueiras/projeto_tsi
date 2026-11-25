@@ -15,6 +15,11 @@ async function fakeDependencies(db: FakeLocalDatabase): Promise<MobileDependenci
   return {
     localDatabase: db,
     onboarding: createOnboardingRepository(db),
+    recipe: {
+      loadRecipe: async () => ({ status: 'not-found' }),
+      startCooking: async () => ({ status: 'not-found' }),
+      saveStep: async () => undefined,
+    },
     checkApi: async () => true,
     syncInBackground: async () => undefined,
   } as Partial<MobileDependencies> as MobileDependencies;

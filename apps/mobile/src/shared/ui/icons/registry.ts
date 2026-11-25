@@ -4,6 +4,7 @@ import AlertCircleSvg from '../../assets/icons/alert-circle.svg';
 import BackSvg from '../../assets/icons/back.svg';
 import BadgeSvg from '../../assets/icons/badge.svg';
 import CheckSvg from '../../assets/icons/check.svg';
+import ClockSvg from '../../assets/icons/clock.svg';
 import CloseSvg from '../../assets/icons/close.svg';
 import DishPlaceholderSvg from '../../assets/icons/dish-placeholder.svg';
 import DownloadSvg from '../../assets/icons/download.svg';
@@ -30,6 +31,7 @@ export const ICONS = {
   back: BackSvg,
   badge: BadgeSvg,
   check: CheckSvg,
+  clock: ClockSvg,
   close: CloseSvg,
   'dish-placeholder': DishPlaceholderSvg,
   download: DownloadSvg,

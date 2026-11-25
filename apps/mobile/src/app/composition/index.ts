@@ -24,6 +24,9 @@ import {
   type OnboardingRepository,
 } from '../../features/profile/data/onboarding-repository';
 import { projectRatingRegistered } from '../../features/progress/data/rating-repository';
+import { createCookingStateRepository } from '../../features/recipe/data/cooking-state-repository';
+import { createRecipeRepository } from '../../features/recipe/data/recipe-repository';
+import { createRecipeFeature, type RecipeFeature } from '../../features/recipe/domain';
 import { readMobileConfig, type MobileConfig } from './config';
 
 /**
@@ -41,6 +44,8 @@ export interface MobileDependencies {
   readonly downloadSet: DownloadSetSync;
   readonly photos: PhotoManager;
   readonly onboarding: OnboardingRepository;
+  /** LoadRecipe / StartCooking / saveStep (#80); the Kitchen tab reuses startCooking (#81). */
+  readonly recipe: RecipeFeature;
   /** Health probe used by the Profile shell. */
   readonly checkApi: () => Promise<boolean>;
   /** Best-effort background refresh of the offline copy; never throws (offline is normal). */
@@ -96,6 +101,11 @@ export async function createMobileDependencies(
     downloadSet,
     photos,
     onboarding: createOnboardingRepository(localDatabase),
+    recipe: createRecipeFeature({
+      recipes: createRecipeRepository({ http, localDatabase, photos }),
+      cooking: createCookingStateRepository(localDatabase),
+      now,
+    }),
     checkApi: async () => {
       try {
         await http.call('checkHealth', {});
