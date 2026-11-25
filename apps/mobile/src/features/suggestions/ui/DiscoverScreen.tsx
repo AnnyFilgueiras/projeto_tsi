@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { colors, spacing, typography } from '../../../shared/theme';
+import { colors, spacing, touchTarget, typography } from '../../../shared/theme';
 import {
   ActionIconButton,
   AllergenScopeBanner,
@@ -142,29 +142,12 @@ export function DiscoverScreen({
         ) : null}
 
         {current ? (
-          <>
-            <SuggestionCard
-              key={current.suggestionId}
-              card={current}
-              loadPhoto={round.photoUri}
-              onOpen={onOpenRecipe}
-            />
-            <View style={styles.actions}>
-              <ActionIconButton
-                icon="close"
-                variant="secondary"
-                accessibilityLabel={DISCOVER_COPY.discard}
-                onPress={() => void decide('discard', current.suggestionId)}
-                disabled={busy}
-              />
-              <ActionIconButton
-                icon="heart"
-                accessibilityLabel={DISCOVER_COPY.approve}
-                onPress={() => void decide('approve', current.suggestionId)}
-                disabled={busy}
-              />
-            </View>
-          </>
+          <SuggestionCard
+            key={current.suggestionId}
+            card={current}
+            loadPhoto={round.photoUri}
+            onOpen={onOpenRecipe}
+          />
         ) : null}
 
         {view.kind === 'ready' && !current ? (
@@ -204,8 +187,28 @@ export function DiscoverScreen({
         ) : null}
       </ScrollView>
 
+      {/* Fixed footer: the buttons stay put whatever the card height, so decisions can be made
+          in a row with the thumb in the same place (A03). */}
+      {current ? (
+        <View style={styles.actions}>
+          <ActionIconButton
+            icon="close"
+            variant="secondary"
+            accessibilityLabel={DISCOVER_COPY.discard}
+            onPress={() => void decide('discard', current.suggestionId)}
+            disabled={busy}
+          />
+          <ActionIconButton
+            icon="heart"
+            accessibilityLabel={DISCOVER_COPY.approve}
+            onPress={() => void decide('approve', current.suggestionId)}
+            disabled={busy}
+          />
+        </View>
+      ) : null}
+
       {toast ? (
-        <View style={styles.toast}>
+        <View style={[styles.toast, current ? styles.toastAboveActions : null]}>
           <Toast
             message={toast.message}
             actionLabel={toast.withAction ? DISCOVER_COPY.approvedToastAction : undefined}
@@ -229,7 +232,21 @@ const styles = StyleSheet.create({
   },
   title: { ...typography.title, color: colors.textPrimary },
   position: { ...typography.caption, color: colors.textMuted },
-  content: { gap: spacing.md, paddingHorizontal: spacing.md, paddingBottom: spacing.lg },
-  actions: { flexDirection: 'row', justifyContent: 'center', gap: spacing.xl },
+  // Centered in the free space like the Figma frame, instead of leaving half the screen empty.
+  content: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    gap: spacing.md,
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.md,
+  },
+  actions: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: spacing.xl,
+    paddingVertical: spacing.md,
+  },
   toast: { position: 'absolute', left: spacing.sm, right: spacing.sm, bottom: spacing.sm },
+  // Never cover the decision buttons: sit just above the footer (button + its vertical padding).
+  toastAboveActions: { bottom: touchTarget.comfortable + spacing.md * 2 },
 });
