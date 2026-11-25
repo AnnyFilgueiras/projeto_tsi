@@ -38,8 +38,8 @@ export function AllergenPicker({ selected, onToggle }: AllergenPickerProps) {
       {groups.length === 0 ? (
         <Text style={styles.empty}>Nenhum alérgeno com esse nome.</Text>
       ) : (
-        groups.map(({ group, codes }) => (
-          <View key={group} style={styles.group}>
+        groups.map(({ group, codes }, index) => (
+          <View key={group} style={[styles.group, index > 0 && styles.divided]}>
             <Text style={styles.groupTitle} accessibilityRole="header">
               {group}
             </Text>
@@ -50,6 +50,7 @@ export function AllergenPicker({ selected, onToggle }: AllergenPickerProps) {
                   label={ALLERGEN_LABELS[code].label}
                   selected={selected.includes(code)}
                   onPress={() => onToggle(code)}
+                  fill
                 />
               ))}
             </View>
@@ -71,7 +72,13 @@ function normalize(text: string): string {
 const styles = StyleSheet.create({
   picker: { gap: spacing.md },
   group: { gap: spacing.sm },
-  groupTitle: { ...typography.overline, color: colors.textSecondary },
+  // A rule between groups plus a stronger title, so the 7 groups read as separate sections.
+  divided: { borderTopWidth: 1, borderTopColor: colors.border, paddingTop: spacing.md },
+  groupTitle: {
+    ...typography.caption,
+    color: colors.textPrimary,
+    fontWeight: typography.button.fontWeight,
+  },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   empty: { ...typography.body, color: colors.textSecondary },
 });

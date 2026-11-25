@@ -57,6 +57,7 @@ export function PreferencesStep(props: PreferencesStepProps) {
               selected={chosen.includes(cuisine.id)}
               onPress={() => props.onToggle(cuisine.id)}
               disabled={busy}
+              fill
             />
           ))}
         </View>
