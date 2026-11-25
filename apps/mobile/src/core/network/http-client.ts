@@ -14,6 +14,11 @@ export const API_ROUTES = {
   sendOperations: { method: 'POST', path: '/v1/sync/operations', authenticated: true },
   getDownloadSet: { method: 'GET', path: '/v1/sync/download-set', authenticated: true },
   getRecipe: { method: 'GET', path: '/v1/recipes/{dishId}', authenticated: true },
+  updateCulinaryPreferences: {
+    method: 'PUT',
+    path: '/v1/profile/preferences',
+    authenticated: true,
+  },
 } as const satisfies Partial<Record<keyof operations, ApiRoute>>;
 
 export interface ApiRoute {

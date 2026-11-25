@@ -15,6 +15,12 @@ async function fakeDependencies(db: FakeLocalDatabase): Promise<MobileDependenci
   return {
     localDatabase: db,
     onboarding: createOnboardingRepository(db),
+    profile: {
+      prepareAccount: async () => 'ready',
+      registerRestrictions: async () => ({ status: 'saved' }),
+      listCuisines: async () => [],
+      saveCulinaryPreferences: async () => 'saved',
+    },
     checkApi: async () => true,
     syncInBackground: async () => undefined,
   } as Partial<MobileDependencies> as MobileDependencies;
@@ -31,11 +37,12 @@ describe('Navigation shell (MVP-01: onboarding + 4 fixed tabs, A8)', () => {
 
   afterEach(() => db.close());
 
-  it('shows onboarding on first launch and enters the tabs after "Começar"', async () => {
+  it('shows onboarding on first launch and enters the tabs when it ends', async () => {
     renderRouter('./app', { initialUrl: '/' });
 
-    expect(await screen.findByText('Bem-vindo ao Panelada')).toBeTruthy();
-    fireEvent.press(screen.getByRole('button', { name: 'Começar' }));
+    fireEvent.press(await screen.findByRole('button', { name: 'Começar' }));
+    fireEvent.press(await screen.findByRole('button', { name: 'Não tenho restrições' }));
+    fireEvent.press(await screen.findByRole('button', { name: 'Continuar' }));
 
     expect(
       await screen.findByText('Sugestões de pratos para o seu perfil aparecerão aqui.'),

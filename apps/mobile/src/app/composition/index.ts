@@ -12,6 +12,7 @@ import {
 import { createFetchHttpClient } from '../../core/network/fetch-http-client-adapter';
 import type { HttpClient } from '../../core/network/http-client';
 import { createSecureStoreTokenStore } from '../../core/network/secure-store-token-adapter';
+import { HttpError, NetworkUnavailableError } from '../../core/network/http-errors';
 import { createSessionGate, type SessionGate } from '../../core/network/session';
 import { createFileSystemPhotoManager } from '../../core/photos/file-system-photo-manager-adapter';
 import type { PhotoManager } from '../../core/photos/photo-manager';
@@ -23,6 +24,17 @@ import {
   createOnboardingRepository,
   type OnboardingRepository,
 } from '../../features/profile/data/onboarding-repository';
+import { createPreferencesRepository } from '../../features/profile/data/preferences-repository';
+import { restrictionProjectors } from '../../features/profile/data/restriction-repository';
+import {
+  createRegisterRestrictions,
+  type RegisterRestrictions,
+} from '../../features/profile/domain/register-restrictions';
+import {
+  createSaveCulinaryPreferences,
+  type CuisineOption,
+  type SaveCulinaryPreferences,
+} from '../../features/profile/domain/save-culinary-preferences';
 import { readMobileConfig, type MobileConfig } from './config';
 
 /**
@@ -40,10 +52,23 @@ export interface MobileDependencies {
   readonly downloadSet: DownloadSetSync;
   readonly photos: PhotoManager;
   readonly onboarding: OnboardingRepository;
+  readonly profile: ProfileDependencies;
   /** Health probe used by the Profile shell. */
   readonly checkApi: () => Promise<boolean>;
   /** Best-effort background refresh of the offline copy; never throws (offline is normal). */
   readonly syncInBackground: () => Promise<void>;
+}
+
+export interface ProfileDependencies {
+  /**
+   * Creates the anonymous account and pulls the first download set (catalog index for the
+   * cuisines step). `offline` only when the account could not be created; a failed pull is not
+   * fatal because the cuisines step works without a catalog.
+   */
+  readonly prepareAccount: () => Promise<'ready' | 'offline'>;
+  readonly registerRestrictions: RegisterRestrictions;
+  readonly listCuisines: () => Promise<readonly CuisineOption[]>;
+  readonly saveCulinaryPreferences: SaveCulinaryPreferences;
 }
 
 export async function createMobileDependencies(
@@ -82,10 +107,12 @@ export async function createMobileDependencies(
     http,
     localDatabase,
     // Feature projectors are registered here as features land (MVP-04E/F).
-    projectors: {},
+    projectors: { ...restrictionProjectors },
     newOperationId: createUuidV7Generator({ randomBytes: getRandomBytes, now: Date.now }),
     now,
   });
+
+  const preferences = createPreferencesRepository({ http, localDatabase });
 
   return {
     http,
@@ -95,6 +122,25 @@ export async function createMobileDependencies(
     downloadSet,
     photos,
     onboarding: createOnboardingRepository(localDatabase),
+    profile: {
+      prepareAccount: async () => {
+        try {
+          await sessions.ensureSession();
+        } catch (error) {
+          if (isUnreachable(error)) return 'offline';
+          throw error;
+        }
+        try {
+          await downloadSet.pull();
+        } catch (error) {
+          if (__DEV__) console.warn('First download set skipped:', (error as Error).name);
+        }
+        return 'ready';
+      },
+      registerRestrictions: createRegisterRestrictions({ enqueuer: operationEnqueuer, now }),
+      listCuisines: () => preferences.listCuisines(),
+      saveCulinaryPreferences: createSaveCulinaryPreferences(preferences),
+    },
     checkApi: async () => {
       try {
         await http.call('checkHealth', {});
@@ -113,6 +159,12 @@ export async function createMobileDependencies(
       }
     },
   };
+}
+
+// Same retryable set as the enqueuer: no network, 5xx or rate limit (ADR-008 Stage 1).
+function isUnreachable(error: unknown): boolean {
+  if (error instanceof NetworkUnavailableError) return true;
+  return error instanceof HttpError && (error.status >= 500 || error.status === 429);
 }
 
 async function openLocalDatabase(databaseName: string): Promise<LocalDatabase> {
