@@ -19,6 +19,12 @@ import { createDirectOnlineOperationEnqueuer } from '../../core/sync/direct-onli
 import { createDownloadSetSync, type DownloadSetSync } from '../../core/sync/download-set-sync';
 import { createUuidV7Generator } from '../../core/sync/id-generator';
 import type { OperationEnqueuer } from '../../core/sync/operation-enqueuer';
+import { createSuggestionsGateway } from '../../features/suggestions/data/suggestions-gateway';
+import { createSuggestionsLocalStore } from '../../features/suggestions/data/suggestions-local-store';
+import {
+  createSuggestionRound,
+  type SuggestionRound,
+} from '../../features/suggestions/domain/suggestion-round';
 import {
   createOnboardingRepository,
   type OnboardingRepository,
@@ -40,6 +46,8 @@ export interface MobileDependencies {
   readonly downloadSet: DownloadSetSync;
   readonly photos: PhotoManager;
   readonly onboarding: OnboardingRepository;
+  /** Discover round, kept for the whole app session so discarded dishes stay gone (RN11). */
+  readonly suggestions: SuggestionRound;
   /** Health probe used by the Profile shell. */
   readonly checkApi: () => Promise<boolean>;
   /** Best-effort background refresh of the offline copy; never throws (offline is normal). */
@@ -78,13 +86,34 @@ export async function createMobileDependencies(
     now,
   });
 
+  const newUuidV7 = createUuidV7Generator({ randomBytes: getRandomBytes, now: Date.now });
+
   const operationEnqueuer = createDirectOnlineOperationEnqueuer({
     http,
     localDatabase,
     // Feature projectors are registered here as features land (MVP-04E/F).
     projectors: {},
-    newOperationId: createUuidV7Generator({ randomBytes: getRandomBytes, now: Date.now }),
+    newOperationId: newUuidV7,
     now,
+  });
+
+  const suggestions = createSuggestionRound({
+    gateway: createSuggestionsGateway({ http, sessions }),
+    store: createSuggestionsLocalStore(localDatabase),
+    photos: {
+      // Cached file first; otherwise one download attempt. Offline or missing → placeholder.
+      localUri: async (hash) => {
+        try {
+          const cached = await photos.getLocalUri(hash);
+          if (cached) return cached;
+          await photos.ensureDownloaded([hash]);
+          return await photos.getLocalUri(hash);
+        } catch {
+          return null;
+        }
+      },
+    },
+    newIdempotencyKey: newUuidV7,
   });
 
   return {
@@ -95,6 +124,7 @@ export async function createMobileDependencies(
     downloadSet,
     photos,
     onboarding: createOnboardingRepository(localDatabase),
+    suggestions,
     checkApi: async () => {
       try {
         await http.call('checkHealth', {});

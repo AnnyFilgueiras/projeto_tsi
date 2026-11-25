@@ -1,2 +1,3 @@
-// Feature data/repository layer for suggestions (A1, A3). Populated in MVP-04D.
-export {};
+// Feature data layer for suggestions (A1, A3): API gateway and the candidates_local owner.
+export * from './suggestions-gateway';
+export * from './suggestions-local-store';
