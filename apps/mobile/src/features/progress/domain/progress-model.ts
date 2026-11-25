@@ -72,12 +72,16 @@ export type EvolutionStatus = 'completed' | 'unlocked' | 'locked';
 
 export interface EvolutionNode {
   readonly dishId: string;
-  readonly name: string;
+  /** Null while the node is a mystery: its base dish was not cooked yet (#86, format C). */
+  readonly name: string | null;
   /** Root = 1 (same depth rule as `evolution_level`, RN03g). */
   readonly level: number;
   readonly status: EvolutionStatus;
-  /** Only on a locked node: the dish whose completion unlocks it (RN02). */
-  readonly baseDish: { readonly dishId: string; readonly name: string } | null;
+  /**
+   * Only on a locked node: the dish whose completion unlocks it (RN02). Its name is null when
+   * that base is a mystery too, so a deeper level never leaks the name of the one above it.
+   */
+  readonly baseDish: { readonly dishId: string; readonly name: string | null } | null;
 }
 
 export interface EvolutionChain {
@@ -129,7 +133,8 @@ export interface CollectionSummary {
 
 export interface CuisineDish {
   readonly dishId: string;
-  readonly name: string;
+  /** Null for a mystery evolution (#86): the same rule as the evolution chain. */
+  readonly name: string | null;
   readonly completed: boolean;
   /** Stars of the latest preparation (RN06: repeats keep the newest note); null when pending. */
   readonly stars: number | null;
@@ -237,12 +242,13 @@ export function buildProgressModel(snapshot: ProgressSnapshot): ProgressModel {
   const completed = new Set([...completedDishIdsOf(snapshot)].filter((id) => knownDishIds.has(id)));
 
   const latestStars = latestStarsByDish(snapshot.ratings);
+  const status = evolutionStatusOf(snapshot, completed);
   const cuisines = catalog.cuisines
     .map((cuisine) => cuisineProgressFor(catalog, cuisine.id, completed))
     .filter((progress): progress is CuisineProgress => progress !== null)
     .map((progress) => ({
       ...progress,
-      dishes: dishesOf(catalog, progress.cuisineId, latestStars),
+      dishes: dishesOf(catalog, progress.cuisineId, latestStars, status),
     }))
     .sort(
       (a, b) =>
@@ -261,7 +267,7 @@ export function buildProgressModel(snapshot: ProgressSnapshot): ProgressModel {
 
   return {
     cuisines,
-    evolutionChains: buildEvolutionChains(snapshot, completed),
+    evolutionChains: buildEvolutionChains(snapshot, status),
     badges: buildBadgeView(snapshot),
     history: buildHistory(snapshot),
     summary: {
@@ -283,20 +289,48 @@ function latestStarsByDish(ratings: readonly StoredRating[]): Map<string, number
   return new Map([...latest].map(([dishId, rating]) => [dishId, rating.score / 2]));
 }
 
-/** Completed dishes first so the grid opens on what was cooked, then alphabetical. */
+/**
+ * RN02 + #86 (format C): a dish is a mystery while it is an evolution whose base was not cooked.
+ * Cooking the base reveals it right away, even before the unlock arrives through the download
+ * set; a root is never a mystery because nothing has to be cooked before it.
+ */
+function evolutionStatusOf(
+  snapshot: ProgressSnapshot,
+  completed: ReadonlySet<string>,
+): (dish: CatalogDish) => EvolutionStatus {
+  const unlocked = new Set(
+    snapshot.unlocks
+      .filter((unlock) => unlock.kind === 'evolution')
+      .map((unlock) => unlock.targetId),
+  );
+  return (dish) => {
+    if (completed.has(dish.id)) return 'completed';
+    if (!dish.baseDishId || unlocked.has(dish.id) || completed.has(dish.baseDishId)) {
+      return 'unlocked';
+    }
+    return 'locked';
+  };
+}
+
+/** Completed dishes first so the grid opens on what was cooked, then alphabetical, mysteries last. */
 function dishesOf(
   catalog: CatalogIndex,
   cuisineId: string,
   latestStars: ReadonlyMap<string, number>,
+  statusOf: (dish: CatalogDish) => EvolutionStatus,
 ): CuisineDish[] {
   return catalog.dishes
     .filter((dish) => dish.cuisineId === cuisineId)
     .map((dish) => {
       const stars = latestStars.get(dish.id) ?? null;
-      return { dishId: dish.id, name: dish.name, completed: stars !== null, stars };
+      const name = statusOf(dish) === 'locked' ? null : dish.name;
+      return { dishId: dish.id, name, completed: stars !== null, stars };
     })
     .sort(
-      (a, b) => Number(b.completed) - Number(a.completed) || a.name.localeCompare(b.name, 'pt-BR'),
+      (a, b) =>
+        Number(b.completed) - Number(a.completed) ||
+        Number(a.name === null) - Number(b.name === null) ||
+        (a.name ?? '').localeCompare(b.name ?? '', 'pt-BR'),
     );
 }
 
@@ -306,7 +340,7 @@ function dishesOf(
  */
 function buildEvolutionChains(
   snapshot: ProgressSnapshot,
-  completed: ReadonlySet<string>,
+  statusOf: (dish: CatalogDish) => EvolutionStatus,
 ): EvolutionChain[] {
   const { dishes } = snapshot.catalog;
   const dishById = new Map(dishes.map((dish) => [dish.id, dish]));
@@ -315,19 +349,6 @@ function buildEvolutionChains(
     if (!dish.baseDishId) continue;
     childrenOf.set(dish.baseDishId, [...(childrenOf.get(dish.baseDishId) ?? []), dish]);
   }
-  const unlocked = new Set(
-    snapshot.unlocks
-      .filter((unlock) => unlock.kind === 'evolution')
-      .map((unlock) => unlock.targetId),
-  );
-
-  const statusOf = (dish: CatalogDish): EvolutionStatus => {
-    if (completed.has(dish.id)) return 'completed';
-    // A root has nothing to unlock it: it is always available to cook.
-    if (!dish.baseDishId || unlocked.has(dish.id)) return 'unlocked';
-    return 'locked';
-  };
-
   return dishes
     .filter((dish) => !dish.baseDishId && childrenOf.has(dish.id))
     .map((root) => {
@@ -343,10 +364,13 @@ function buildEvolutionChains(
           const base = dish.baseDishId ? dishById.get(dish.baseDishId) : undefined;
           nodes.push({
             dishId: dish.id,
-            name: dish.name,
+            name: status === 'locked' ? null : dish.name,
             level: depth,
             status,
-            baseDish: status === 'locked' && base ? { dishId: base.id, name: base.name } : null,
+            baseDish:
+              status === 'locked' && base
+                ? { dishId: base.id, name: statusOf(base) === 'locked' ? null : base.name }
+                : null,
           });
           nextLevel.push(...(childrenOf.get(dish.id) ?? []));
         }

@@ -25,10 +25,9 @@ const context = (overrides: Partial<HintContext> = {}): HintContext => ({
 });
 
 describe('pickCuriosityHint (N04/N05: at most one hint per card)', () => {
-  it('1st priority: names the evolution the dish opens when it is still locked', () => {
+  it('1st priority: points at the locked evolution without naming it (mystery dish, #86)', () => {
     expect(pickCuriosityHint({ dishId: 'ratatouille', cuisineId: FRENCH }, context())).toEqual({
       kind: 'evolution',
-      dishName: 'Tian provençal',
     });
   });
 

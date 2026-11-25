@@ -109,17 +109,19 @@ describe('progress-repository read model (US12, US14–US16, RN02–RN07)', () =
     ]);
   });
 
-  it('RN02: a locked node names the dish that unlocks it', async () => {
+  it('RN02: a locked node is a mystery that names the dish that unlocks it', async () => {
     await seedCatalog(db, CATALOG);
     await seedRating(db, { id: 'r1', dishId: DISH.feijoada, score: 8, date: '2026-11-10' });
     await seedUnlock(db, 'evolution', DISH.feijoadaLight, null);
 
     const [chain] = (await load()).evolutionChains;
 
-    expect(chain?.nodes.map((node) => [node.dishId, node.status, node.baseDish])).toEqual([
-      [DISH.feijoada, 'completed', null],
-      [DISH.feijoadaLight, 'unlocked', null],
-      [DISH.feijoadaVegana, 'locked', { dishId: DISH.feijoadaLight, name: 'Feijoada leve' }],
+    expect(
+      chain?.nodes.map((node) => [node.dishId, node.name, node.status, node.baseDish]),
+    ).toEqual([
+      [DISH.feijoada, 'Feijoada', 'completed', null],
+      [DISH.feijoadaLight, 'Feijoada leve', 'unlocked', null],
+      [DISH.feijoadaVegana, null, 'locked', { dishId: DISH.feijoadaLight, name: 'Feijoada leve' }],
     ]);
   });
 

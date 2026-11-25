@@ -18,8 +18,8 @@ export interface HintContext {
 }
 
 export type CuriosityHint =
-  | { readonly kind: 'evolution'; readonly dishName: string }
-  | { readonly kind: 'first-cuisine'; readonly cuisineName: string };
+  // No name: an evolution stays a mystery until its base dish is completed (#86, format C).
+  { readonly kind: 'evolution' } | { readonly kind: 'first-cuisine'; readonly cuisineName: string };
 
 /**
  * Picks the single curiosity hint for a suggestion card (UX-01B N04/N05). One hint at most so the
@@ -32,10 +32,10 @@ export function pickCuriosityHint(
   const { catalog } = context;
 
   const unlocked = new Set(context.unlockedEvolutionIds);
-  const lockedEvolution = catalog.dishes.find(
+  const opensLockedEvolution = catalog.dishes.some(
     (candidate) => candidate.baseDishId === dish.dishId && !unlocked.has(candidate.id),
   );
-  if (lockedEvolution) return { kind: 'evolution', dishName: lockedEvolution.name };
+  if (opensLockedEvolution) return { kind: 'evolution' };
 
   // Without the cuisine in the synced index there is no name to show, so no hint at all.
   const cuisine = catalog.cuisines.find((candidate) => candidate.id === dish.cuisineId);

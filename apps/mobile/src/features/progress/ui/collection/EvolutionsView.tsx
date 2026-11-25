@@ -43,7 +43,8 @@ const LOOK: Readonly<
 > = {
   completed: { icon: 'check', tint: colors.primary, bg: colors.primarySoft },
   unlocked: { icon: 'dish-placeholder', tint: colors.successUnlock, bg: colors.successUnlockSoft },
-  locked: { icon: 'lock', tint: colors.textSecondary, bg: colors.surfaceAlt },
+  // A locked node is a mystery (#86, format C): a question mark, never the dish name.
+  locked: { icon: 'question', tint: colors.textSecondary, bg: colors.surfaceAlt },
 };
 
 function EvolutionNodeRow({
@@ -60,19 +61,22 @@ function EvolutionNodeRow({
         <Icon name={look.icon} size={20} color={look.tint} />
       </View>
       <View style={styles.nodeText}>
-        <Text style={styles.nodeName}>{node.name}</Text>
+        <Text style={[styles.nodeName, node.name === null && styles.mystery]}>
+          {node.name ?? COLLECTION_COPY.mysteryDish}
+        </Text>
         <NodeStatus node={node} />
       </View>
     </>
   );
 
   // Completed nodes are a record, not a call to action; the other two lead somewhere (RN02):
-  // the dish itself when unlocked, the base dish that unlocks it when locked.
+  // the dish itself when unlocked, the base dish that reveals it when locked. A mystery whose
+  // base is a mystery too has nothing to open yet: the node above is the next step.
   const target =
     node.status === 'unlocked'
       ? node.dishId
-      : node.status === 'locked'
-        ? (node.baseDish?.dishId ?? null)
+      : node.status === 'locked' && node.baseDish?.name
+        ? node.baseDish.dishId
         : null;
   if (!target) {
     return (
@@ -86,9 +90,9 @@ function EvolutionNodeRow({
       onPress={() => onOpenRecipe(target)}
       accessibilityRole="button"
       accessibilityLabel={
-        node.status === 'locked' && node.baseDish
-          ? `${node.name}. ${COLLECTION_COPY.lockedA11y(node.baseDish.name)}`
-          : `${node.name}. ${COLLECTION_COPY.readyToCook}`
+        node.status === 'locked' && node.baseDish?.name
+          ? COLLECTION_COPY.lockedA11y(node.baseDish.name)
+          : `${node.name ?? COLLECTION_COPY.mysteryDish}. ${COLLECTION_COPY.readyToCook}`
       }
       style={styles.node}
       testID={`node-${node.dishId}`}
@@ -110,6 +114,9 @@ function NodeStatus({ node }: { node: EvolutionNode }) {
     return <Text style={[styles.status, styles.ready]}>{COLLECTION_COPY.readyToCook}</Text>;
   }
   if (!node.baseDish) return null;
+  if (node.baseDish.name === null) {
+    return <Text style={styles.status}>{COLLECTION_COPY.revealAboveFirst}</Text>;
+  }
   return (
     <Text style={styles.status}>
       {COLLECTION_COPY.lockedPrefix}
@@ -152,6 +159,7 @@ const styles = StyleSheet.create({
     fontWeight: typography.subtitle.fontWeight,
     color: colors.textPrimary,
   },
+  mystery: { color: colors.textSecondary },
   status: { ...typography.caption, color: colors.textSecondary },
   done: { color: colors.primary },
   ready: { color: colors.successUnlock },

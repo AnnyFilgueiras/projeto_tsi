@@ -12,7 +12,7 @@ export const DISCOVER_COPY = {
   position: (position: number, total: number) => `${position} de ${total}`,
   positionA11y: (position: number, total: number) => `Sugestão ${position} de ${total}`,
   minutes: (minutes: number) => `${minutes} min`,
-  hintEvolution: 'Abre a evolução ',
+  hintEvolution: 'Abre uma evolução misteriosa',
   hintFirstCuisine: 'Primeira receita ',
   approvedToast: 'Foi para Candidatas',
   approvedToastAction: 'Ver',
