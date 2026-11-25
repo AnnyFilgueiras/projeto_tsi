@@ -193,7 +193,14 @@ export class SuggestionService {
       ...exclusions.discardedDishIdsInSession,
     ]);
 
-    const eligibleDishes = compatibleDishes.filter((dish) => !excludedDishIds.has(dish.dishId));
+    // RN02 / #86: an evolution stays a mystery until its base dish is completed, so it is
+    // never suggested before that (suggesting it would reveal its name and photo).
+    const completed = new Set(completedDishIds);
+    const eligibleDishes = compatibleDishes.filter(
+      (dish) =>
+        !excludedDishIds.has(dish.dishId) &&
+        (dish.baseDishId === null || completed.has(dish.baseDishId)),
+    );
     const ranked = rankCompatibleDishes(eligibleDishes, preferences);
     const selected = ranked.slice(0, limit);
 

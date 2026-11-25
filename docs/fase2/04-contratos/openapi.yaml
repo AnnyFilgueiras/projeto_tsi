@@ -541,9 +541,10 @@ paths:
       summary: Obtém sugestões alinhadas ao perfil
       description: 'Online. O servidor lê restrições, preferências, despensa e histórico da conta e filtra por alérgenos
         (RN08, RN10). Nunca recebe restrição por query string. Candidatas e prato já concluído não voltam como novidade.
+        Uma evolução só é sugerida depois que o prato base foi concluído (RN02).
 
 
-        Rastreio: UC01, UC03; RN08, RN10, RN11; A01, A06'
+        Rastreio: UC01, UC03; RN02, RN08, RN10, RN11; A01, A06'
       parameters:
       - $ref: '#/components/parameters/PackageVersion'
       - name: limit
