@@ -39,6 +39,7 @@ async function fakeDependencies(db: FakeLocalDatabase): Promise<MobileDependenci
       loadRecipe: async () => ({ status: 'not-found' }),
       startCooking: async () => ({ status: 'not-found' }),
       saveStep: async () => undefined,
+      loadKitchen: async () => ({ cooking: [], candidates: [] }),
     },
     checkApi: async () => true,
     syncInBackground: async () => undefined,
@@ -87,6 +88,15 @@ describe('Navigation shell (MVP-01: onboarding + 4 fixed tabs, A8)', () => {
     fireEvent.press(await screen.findByRole('tab', { name: 'Perfil' }));
     expect(await screen.findByText('Servidor: conectado')).toBeTruthy();
     expect(screen.getByRole('tab', { name: 'Perfil' })).toBeSelected();
+  });
+
+  it('opens the Kitchen tab from the local copy', async () => {
+    await db.execute("INSERT INTO profile_local (id, onboarded_at) VALUES (1, '2026-11-23')");
+
+    renderRouter('./app', { initialUrl: '/kitchen' });
+
+    expect(await screen.findByText('Nenhum prato ainda')).toBeTruthy();
+    expect(screen.getByRole('tab', { name: 'Cozinha' })).toBeSelected();
   });
 
   it('shows the allergen rules version on the Profile tab (A7 entrypoint bundles)', async () => {

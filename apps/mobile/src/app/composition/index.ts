@@ -42,6 +42,7 @@ import {
   type SaveCulinaryPreferences,
 } from '../../features/profile/domain/save-culinary-preferences';
 import { projectRatingRegistered } from '../../features/progress/data/rating-repository';
+import { createCandidatesReader } from '../../features/recipe/data/candidates-reader';
 import { createCookingStateRepository } from '../../features/recipe/data/cooking-state-repository';
 import { createRecipeRepository } from '../../features/recipe/data/recipe-repository';
 import { createRecipeFeature, type RecipeFeature } from '../../features/recipe/domain';
@@ -65,7 +66,7 @@ export interface MobileDependencies {
   readonly profile: ProfileDependencies;
   /** Discover round, kept for the whole app session so discarded dishes stay gone (RN11). */
   readonly suggestions: SuggestionRound;
-  /** LoadRecipe / StartCooking / saveStep (#80); the Kitchen tab reuses startCooking (#81). */
+  /** LoadRecipe / StartCooking / saveStep (#80) and LoadKitchen for the Kitchen tab (#81). */
   readonly recipe: RecipeFeature;
   /** Health probe used by the Profile shell. */
   readonly checkApi: () => Promise<boolean>;
@@ -186,6 +187,7 @@ export async function createMobileDependencies(
     recipe: createRecipeFeature({
       recipes: createRecipeRepository({ http, localDatabase, photos }),
       cooking: createCookingStateRepository(localDatabase),
+      candidates: createCandidatesReader(localDatabase),
       now,
     }),
     checkApi: async () => {
