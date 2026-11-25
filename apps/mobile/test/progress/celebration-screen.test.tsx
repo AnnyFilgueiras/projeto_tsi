@@ -1,5 +1,5 @@
-import { act, fireEvent, render, screen } from '@testing-library/react-native';
-import { AccessibilityInfo, BackHandler } from 'react-native';
+import { fireEvent, render, screen } from '@testing-library/react-native';
+import { AccessibilityInfo } from 'react-native';
 import type {
   ProgressSnapshot,
   StoredRating,
@@ -118,23 +118,5 @@ describe('CelebrationScreen (§9, #84)', () => {
     expect(await screen.findByText('Avaliação salva!')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Ver na Coleção' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Voltar para Cozinha' })).toBeTruthy();
-  });
-
-  it('Android back goes to the Kitchen instead of the sent rating form', async () => {
-    const listeners: (() => boolean | null | undefined)[] = [];
-    const spy = jest.spyOn(BackHandler, 'addEventListener').mockImplementation((_, handler) => {
-      listeners.push(handler);
-      return { remove: jest.fn() };
-    });
-    const { onGoToKitchen } = setup([rating()]);
-    await screen.findByText('Prato concluído!');
-
-    let handled: boolean | null | undefined;
-    act(() => {
-      handled = listeners.at(-1)?.();
-    });
-    expect(handled).toBe(true);
-    expect(onGoToKitchen).toHaveBeenCalled();
-    spy.mockRestore();
   });
 });

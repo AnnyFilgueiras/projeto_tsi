@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { BackHandler, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { colors, spacing, typography } from '../../../../shared/theme';
 import { Button, TextLink } from '../../../../shared/ui';
 import {
@@ -77,15 +77,6 @@ export function CelebrationScreen({
       active = false;
     };
   }, [progress, params]);
-
-  // Android back never returns to the rating form that was already sent: it goes to the Kitchen.
-  useEffect(() => {
-    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
-      onGoToKitchen();
-      return true;
-    });
-    return () => subscription.remove();
-  }, [onGoToKitchen]);
 
   if (!view) return <SafeAreaView style={styles.screen} />;
 

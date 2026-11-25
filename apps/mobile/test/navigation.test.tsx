@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
 import { act, fireEvent, renderRouter, screen } from 'expo-router/testing-library';
+import { BackHandler } from 'react-native';
 import type { MobileDependencies } from '../src/app/composition';
 import { LOCAL_MIGRATIONS } from '../src/core/local-db/migrations';
 import { runMigrations } from '../src/core/local-db/migrator';
@@ -153,6 +154,39 @@ describe('Navigation shell (MVP-01: onboarding + 4 fixed tabs, A8)', () => {
     expect(screen).toHaveSearchParams(params);
     // The recipe and its modals are gone from the root stack: back never reopens the sent flow.
     expect(view.getRouterState().routes.map((route) => route.name)).toEqual(['(tabs)']);
+  });
+
+  it('Android back on the Celebration goes to the Kitchen only while it is focused (§9)', async () => {
+    const listeners = new Set<() => boolean | null | undefined>();
+    const spy = jest.spyOn(BackHandler, 'addEventListener').mockImplementation((_, handler) => {
+      listeners.add(handler);
+      return { remove: () => listeners.delete(handler) };
+    });
+    const pressBack = () => [...listeners].at(-1)?.();
+    await db.execute("INSERT INTO profile_local (id, onboarded_at) VALUES (1, '2026-11-23')");
+    const view = renderRouter('./app', { initialUrl: '/kitchen' });
+    await screen.findByText('Nenhum prato ainda');
+    act(() => router.push('/recipe/dish-1'));
+    act(() => router.replace('/recipe/dish-1/celebrate?ratingId=r-1&evolutions=&badges=&repeat=0'));
+    await screen.findByText('Avaliação salva!');
+
+    // "Conhecer" pushes the evolution on top: back there returns to the Celebration.
+    act(() => router.push('/recipe/dish-2'));
+    await screen.findByText('Receita');
+    act(() => {
+      pressBack();
+    });
+    await screen.findByText('Avaliação salva!');
+    expect(screen.queryByRole('tab')).toBeNull();
+
+    let handled: boolean | null | undefined;
+    act(() => {
+      handled = pressBack();
+    });
+    expect(handled).toBe(true);
+    expect(await screen.findByRole('tab', { name: 'Cozinha' })).toBeTruthy();
+    expect(view.getRouterState().routes.map((route) => route.name)).toEqual(['(tabs)']);
+    spy.mockRestore();
   });
 
   it('serves the dev UI catalog in development builds', async () => {

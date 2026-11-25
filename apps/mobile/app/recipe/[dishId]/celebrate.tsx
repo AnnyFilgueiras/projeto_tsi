@@ -1,5 +1,6 @@
-import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import { useCallback } from 'react';
+import { BackHandler } from 'react-native';
 import { useDependencies } from '../../../src/app/composition/dependencies-context';
 import {
   CelebrationScreen,
@@ -20,6 +21,18 @@ export default function CelebrateRoute() {
   // finished flow (§9: the rating form was already sent).
   const leaveTo = useCallback((href: Href) => router.dismissTo(href), [router]);
   const goToKitchen = useCallback(() => leaveTo('/(tabs)/kitchen'), [leaveTo]);
+
+  // Android back goes to the Kitchen, never to the sent rating form. Only while focused: once
+  // "Conhecer" pushes the evolution recipe on top, back must return here, not skip to the tab.
+  useFocusEffect(
+    useCallback(() => {
+      const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+        goToKitchen();
+        return true;
+      });
+      return () => subscription.remove();
+    }, [goToKitchen]),
+  );
 
   return (
     <CelebrationScreen
