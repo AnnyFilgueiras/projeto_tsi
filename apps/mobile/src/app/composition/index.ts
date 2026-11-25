@@ -48,7 +48,9 @@ import {
   type SaveCulinaryPreferences,
   type SavePreferencesResult,
 } from '../../features/profile/domain/save-culinary-preferences';
+import { createProgressRepository } from '../../features/progress/data/progress-repository';
 import { projectRatingRegistered } from '../../features/progress/data/rating-repository';
+import type { ProgressSnapshotSource } from '../../features/progress/domain/progress-model';
 import { createCandidatesReader } from '../../features/recipe/data/candidates-reader';
 import { createCookingStateRepository } from '../../features/recipe/data/cooking-state-repository';
 import { createRecipeRepository } from '../../features/recipe/data/recipe-repository';
@@ -75,6 +77,7 @@ export interface MobileDependencies {
   readonly suggestions: SuggestionRound;
   /** LoadRecipe / StartCooking / saveStep (#80) and LoadKitchen for the Kitchen tab (#81). */
   readonly recipe: RecipeFeature;
+  readonly progress: ProgressDependencies;
   /** Best-effort background refresh of the offline copy; never throws (offline is normal). */
   readonly syncInBackground: () => Promise<void>;
 }
@@ -94,6 +97,11 @@ export interface ProfileDependencies {
   readonly revokeRestriction: RevokeRestriction;
   /** Unlike `saveCulinaryPreferences`, sends an empty list too (unchecking the last cuisine). */
   readonly savePreferences: (cuisineIds: readonly string[]) => Promise<SavePreferencesResult>;
+}
+
+export interface ProgressDependencies {
+  /** Local progress snapshot read by the Celebration (#84); never touches the network. */
+  readonly snapshots: ProgressSnapshotSource;
 }
 
 export async function createMobileDependencies(
@@ -204,6 +212,7 @@ export async function createMobileDependencies(
       candidates: createCandidatesReader(localDatabase),
       now,
     }),
+    progress: { snapshots: createProgressRepository(localDatabase) },
     syncInBackground: async () => {
       try {
         await sessions.ensureSession();

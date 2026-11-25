@@ -1,9 +1,11 @@
-import { fireEvent, renderRouter, screen } from 'expo-router/testing-library';
+import { router } from 'expo-router';
+import { act, fireEvent, renderRouter, screen } from 'expo-router/testing-library';
 import type { MobileDependencies } from '../src/app/composition';
 import { LOCAL_MIGRATIONS } from '../src/core/local-db/migrations';
 import { runMigrations } from '../src/core/local-db/migrator';
 import { createOnboardingRepository } from '../src/features/profile/data/onboarding-repository';
 import { createProfileRepository } from '../src/features/profile/data/profile-repository';
+import { createProgressRepository } from '../src/features/progress/data/progress-repository';
 import { createFakeLocalDatabase, type FakeLocalDatabase } from './support/fake-local-database';
 
 // The real composition root opens SQLCipher and SecureStore, which only exist in the native build.
@@ -45,6 +47,7 @@ async function fakeDependencies(db: FakeLocalDatabase): Promise<MobileDependenci
       saveStep: async () => undefined,
       loadKitchen: async () => ({ cooking: [], candidates: [] }),
     },
+    progress: { snapshots: createProgressRepository(db) },
     syncInBackground: async () => undefined,
   } as Partial<MobileDependencies> as MobileDependencies;
 }
@@ -116,7 +119,8 @@ describe('Navigation shell (MVP-01: onboarding + 4 fixed tabs, A8)', () => {
   it.each([
     ['/recipe/dish-1', 'Receita'],
     ['/recipe/dish-1/rate', 'Avaliação'],
-    ['/recipe/dish-1/celebrate', 'Celebração'],
+    // Empty local copy: the Celebration falls back to its generic confirmation.
+    ['/recipe/dish-1/celebrate', 'Avaliação salva!'],
   ])('%s renders "%s" without the tab bar (§1.1)', async (initialUrl, title) => {
     await db.execute("INSERT INTO profile_local (id, onboarded_at) VALUES (1, '2026-11-23')");
 
@@ -124,6 +128,26 @@ describe('Navigation shell (MVP-01: onboarding + 4 fixed tabs, A8)', () => {
 
     expect(await screen.findByRole('header', { name: title })).toBeTruthy();
     expect(screen.queryByRole('tab')).toBeNull();
+  });
+
+  it.each([
+    ['Voltar para Cozinha', '/kitchen', {}],
+    ['Ver na Coleção', '/collection', { view: 'cuisines' }],
+  ])('"%s" closes the Celebration onto %s (§9)', async (action, pathname, params) => {
+    await db.execute("INSERT INTO profile_local (id, onboarded_at) VALUES (1, '2026-11-23')");
+    const view = renderRouter('./app', { initialUrl: '/kitchen' });
+    await screen.findByText('Nenhum prato ainda');
+    // Real flow: Kitchen → recipe → rating, which is replaced by the Celebration (#83 contract).
+    act(() => router.push('/recipe/dish-1'));
+    act(() => router.push('/recipe/dish-1/rate'));
+    act(() => router.replace('/recipe/dish-1/celebrate?ratingId=r-1&evolutions=&badges=&repeat=0'));
+    fireEvent.press(await screen.findByRole('button', { name: action }));
+
+    expect(await screen.findByRole('tab', { name: 'Cozinha' })).toBeTruthy();
+    expect(screen).toHavePathname(pathname);
+    expect(screen).toHaveSearchParams(params);
+    // The recipe and its modals are gone from the root stack: back never reopens the sent flow.
+    expect(view.getRouterState().routes.map((route) => route.name)).toEqual(['(tabs)']);
   });
 
   it('serves the dev UI catalog in development builds', async () => {

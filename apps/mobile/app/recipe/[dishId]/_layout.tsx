@@ -7,7 +7,11 @@ export default function RecipeLayout() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
       <Stack.Screen name="rate" options={{ presentation: 'fullScreenModal' }} />
-      <Stack.Screen name="celebrate" options={{ presentation: 'fullScreenModal' }} />
+      {/* No swipe back on iOS: it would land on the rating form that was already sent. */}
+      <Stack.Screen
+        name="celebrate"
+        options={{ presentation: 'fullScreenModal', gestureEnabled: false }}
+      />
     </Stack>
   );
 }
