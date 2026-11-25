@@ -35,9 +35,7 @@ describe('AllergenScopeBanner (§1.4a)', () => {
   it.each(['default', 'compact'] as const)('%s shows the fixed RN16 text', (size) => {
     render(<AllergenScopeBanner size={size} />);
     expect(
-      screen.getByText(
-        'Verificamos apenas os 19 alérgenos do vocabulário controlado (ANVISA + lactose). Confira sempre o rótulo dos ingredientes.',
-      ),
+      screen.getByText('Checamos os principais alérgenos. Confira sempre o rótulo.'),
     ).toBeTruthy();
     expect(screen.queryByRole('button')).toBeNull();
   });
