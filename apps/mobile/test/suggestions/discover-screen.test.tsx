@@ -206,4 +206,29 @@ describe('DiscoverScreen (UX-01B)', () => {
 
     await waitFor(() => expect(screen.getByTestId('suggestion-card-s-1')).toBeTruthy());
   });
+
+  it('shows the error state when the round cannot be read, instead of loading forever', async () => {
+    const round = fakeRound([card(1)]);
+    renderScreen({
+      ...round,
+      loadSuggestions: async () => {
+        throw new Error('local read failed');
+      },
+    });
+
+    expect(await screen.findByText('Algo deu errado')).toBeTruthy();
+  });
+
+  it('ignores a second tap while the first decision is still in flight', async () => {
+    const round = fakeRound([card(1), card(2), card(3)]);
+    const approve = jest.fn(round.approveSuggestion);
+    renderScreen({ ...round, approveSuggestion: approve });
+
+    const button = await screen.findByRole('button', { name: 'Quero cozinhar' });
+    fireEvent.press(button);
+    fireEvent.press(button);
+
+    expect(await screen.findByTestId('suggestion-card-s-2')).toBeTruthy();
+    expect(approve).toHaveBeenCalledTimes(1);
+  });
 });

@@ -8,7 +8,12 @@ import {
   TextLink,
   Toast,
 } from '../../../shared/ui';
-import type { ActionOutcome, RoundSnapshot, SuggestionRound } from '../domain/suggestion-round';
+import type {
+  ActionOutcome,
+  LoadOutcome,
+  RoundSnapshot,
+  SuggestionRound,
+} from '../domain/suggestion-round';
 import { DISCOVER_COPY } from './copy';
 import { DiscoverSkeleton } from './DiscoverSkeleton';
 import { SuggestionCard } from './SuggestionCard';
@@ -44,10 +49,18 @@ export function DiscoverScreen({
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState<ToastState | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // `busy` only disables the buttons on the next render; the ref blocks a second tap right away.
+  const deciding = useRef(false);
 
   const load = useCallback(async () => {
     setView({ kind: 'loading' });
-    const outcome = await round.loadSuggestions();
+    let outcome: LoadOutcome;
+    try {
+      outcome = await round.loadSuggestions();
+    } catch {
+      // A local read failure must not leave the skeleton spinning forever (§1.5).
+      outcome = { status: 'failed' };
+    }
     if (outcome.status === 'ready') {
       const { status: _status, ...snapshot } = outcome;
       setView({ kind: 'ready', round: snapshot });
@@ -74,6 +87,8 @@ export function DiscoverScreen({
   };
 
   const decide = async (action: 'approve' | 'discard', suggestionId: string) => {
+    if (deciding.current) return;
+    deciding.current = true;
     setBusy(true);
     let outcome: ActionOutcome;
     try {
@@ -84,6 +99,7 @@ export function DiscoverScreen({
     } catch {
       outcome = 'failed';
     }
+    deciding.current = false;
     setBusy(false);
 
     if (outcome === 'done') {
