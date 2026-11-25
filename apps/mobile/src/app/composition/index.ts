@@ -67,6 +67,11 @@ import { createCookingStateRepository } from '../../features/recipe/data/cooking
 import { createRecipeRepository } from '../../features/recipe/data/recipe-repository';
 import { createRecipeFeature, type RecipeFeature } from '../../features/recipe/domain';
 import { readMobileConfig, type MobileConfig } from './config';
+import {
+  approvalMarksKitchenNews,
+  completionFinishesCooking,
+  profileChangesInvalidate,
+} from './feature-ports';
 import { createKitchenNews, type KitchenNews } from './kitchen-news';
 
 /**
@@ -191,28 +196,9 @@ export async function createMobileDependencies(
     },
     newIdempotencyKey: newUuidV7,
   });
-  // Feature-to-feature ports live here (A1): suggestions never imports recipe or profile.
-  const suggestions: SuggestionRound = {
-    ...suggestionRound,
-    approveSuggestion: async (suggestionId) => {
-      const outcome = await suggestionRound.approveSuggestion(suggestionId);
-      if (outcome === 'done') kitchenNews.mark();
-      return outcome;
-    },
-  };
-  // A restriction or preference change makes the round stale (RN08, RN10): the Discover tab
-  // fetches again the next time it gains focus. Invalidating after any attempt is harmless.
-  const afterProfileChange = async <T>(change: Promise<T>): Promise<T> => {
-    try {
-      return await change;
-    } finally {
-      suggestionRound.invalidate();
-    }
-  };
+  const suggestions = approvalMarksKitchenNews(suggestionRound, kitchenNews);
 
   const preferences = createPreferencesRepository({ http, localDatabase });
-  const registerRestrictions = createRegisterRestrictions({ enqueuer: operationEnqueuer, now });
-  const revokeRestriction = createRevokeRestriction({ enqueuer: operationEnqueuer });
   // Device-only "em preparo" state, shared by the recipe feature and the rating's completion port.
   const cookingState = createCookingStateRepository(localDatabase);
   const profileRepository = createProfileRepository(localDatabase);
@@ -226,28 +212,31 @@ export async function createMobileDependencies(
     downloadSet,
     photos,
     onboarding: createOnboardingRepository(localDatabase),
-    profile: {
-      prepareAccount: async () => {
-        try {
-          await sessions.ensureSession();
-        } catch (error) {
-          if (isUnreachable(error)) return 'offline';
-          throw error;
-        }
-        try {
-          await downloadSet.pull();
-        } catch (error) {
-          if (__DEV__) console.warn('First download set skipped:', (error as Error).name);
-        }
-        return 'ready';
+    profile: profileChangesInvalidate(
+      {
+        prepareAccount: async () => {
+          try {
+            await sessions.ensureSession();
+          } catch (error) {
+            if (isUnreachable(error)) return 'offline';
+            throw error;
+          }
+          try {
+            await downloadSet.pull();
+          } catch (error) {
+            if (__DEV__) console.warn('First download set skipped:', (error as Error).name);
+          }
+          return 'ready';
+        },
+        registerRestrictions: createRegisterRestrictions({ enqueuer: operationEnqueuer, now }),
+        listCuisines: () => preferences.listCuisines(),
+        saveCulinaryPreferences: createSaveCulinaryPreferences(preferences),
+        readProfile: () => profileRepository.read(),
+        revokeRestriction: createRevokeRestriction({ enqueuer: operationEnqueuer }),
+        savePreferences: (cuisineIds) => preferences.save(cuisineIds),
       },
-      registerRestrictions: (input) => afterProfileChange(registerRestrictions(input)),
-      listCuisines: () => preferences.listCuisines(),
-      saveCulinaryPreferences: createSaveCulinaryPreferences(preferences),
-      readProfile: () => profileRepository.read(),
-      revokeRestriction: (input) => afterProfileChange(revokeRestriction(input)),
-      savePreferences: (cuisineIds) => afterProfileChange(preferences.save(cuisineIds)),
-    },
+      suggestionRound,
+    ),
     suggestions,
     recipe: createRecipeFeature({
       recipes: createRecipeRepository({ http, localDatabase, photos }),
@@ -259,8 +248,7 @@ export async function createMobileDependencies(
       registerRating: createRegisterRating({
         enqueuer: operationEnqueuer,
         progress: progressRepository,
-        // A saved rating ends "em preparo" (#86); progress never imports recipe (A1).
-        completionListener: { onDishCompleted: (dishId) => cookingState.finish(dishId) },
+        completionListener: completionFinishesCooking(cookingState),
       }),
       loadRatingContext: (dishId) => loadRatingContext(progressRepository, dishId),
       snapshots: progressRepository,
