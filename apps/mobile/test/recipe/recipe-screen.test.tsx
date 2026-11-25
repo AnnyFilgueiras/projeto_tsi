@@ -207,6 +207,43 @@ describe('RecipeScreen (UX-01D, §7)', () => {
     expect(screen.queryByText('Offline')).toBeNull();
   });
 
+  it('clamps a saved step beyond a refreshed recipe with fewer steps', async () => {
+    setup([downloaded({ currentStep: 7 })]);
+
+    expect(await screen.findByText('Passo 4 de 4')).toBeTruthy();
+    expect(screen.getByTestId('finish-and-rate')).toBeTruthy();
+  });
+
+  it('offers a retry instead of loading forever when the recipe fails to load', async () => {
+    const { recipes } = setup([downloaded()]);
+    recipes.loadRecipe.mockRejectedValueOnce(new Error('HTTP 500'));
+    screen.unmount();
+    render(
+      <RecipeScreen
+        dishId={DISH_ID}
+        recipes={recipes}
+        onBack={jest.fn()}
+        onOpenDish={jest.fn()}
+        onRate={jest.fn()}
+      />,
+    );
+
+    expect(await screen.findByText('Não foi possível abrir a receita.')).toBeTruthy();
+    fireEvent.press(screen.getByText('Tentar novamente'));
+    expect(await screen.findByText('Pad Thai')).toBeTruthy();
+  });
+
+  it('releases the button and offers a retry when the download fails unexpectedly', async () => {
+    const remote = downloaded();
+    const { recipes } = setup([{ ...remote, status: 'remote' } as RecipeView]);
+    recipes.startCooking.mockRejectedValueOnce(new Error('HTTP 500'));
+
+    fireEvent.press(await screen.findByRole('button', { name: 'Cozinhar agora' }));
+
+    expect(await screen.findByText('Não foi possível baixar a receita.')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Cozinhar agora' })).toBeEnabled();
+  });
+
   it('shows the offline notice when a not-downloaded recipe cannot be fetched', async () => {
     const { recipes } = setup([{ status: 'offline' }]);
 

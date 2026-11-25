@@ -54,22 +54,33 @@ export function RecipeScreen({ dishId, recipes, onBack, onOpenDish, onRate }: Re
   const [step, setStep] = useState<number | null>(null);
   const [sheet, setSheet] = useState<Sheet | null>(null);
   const [starting, setStarting] = useState(false);
-  const [startOffline, setStartOffline] = useState(false);
+  const [startProblem, setStartProblem] = useState<'offline' | 'error' | null>(null);
+  const [loadFailed, setLoadFailed] = useState(false);
 
   const scroll = useRef<ScrollView>(null);
   const stepsTop = useRef(0);
   const stepOffsets = useRef(new Map<number, number>());
   const reducedMotion = useReducedMotion();
 
-  const load = useCallback(async () => {
-    setView(null);
-    const next = await recipes.loadRecipe(dishId);
+  const showLoaded = useCallback((next: RecipeView) => {
     setView(next);
     if (next.status === 'downloaded' && next.currentStep !== null) {
-      setStep(next.currentStep);
+      // A refreshed copy may have fewer steps than when the step was saved.
+      setStep(Math.min(next.currentStep, Math.max(0, next.recipe.steps.length - 1)));
       setTab('steps');
     }
-  }, [dishId, recipes]);
+  }, []);
+
+  const load = useCallback(async () => {
+    setView(null);
+    setLoadFailed(false);
+    try {
+      showLoaded(await recipes.loadRecipe(dishId));
+    } catch {
+      // Offline and 404 come back as views; anything else (no session, server error) lands here.
+      setLoadFailed(true);
+    }
+  }, [dishId, recipes, showLoaded]);
 
   useEffect(() => {
     void load();
@@ -98,22 +109,43 @@ export function RecipeScreen({ dishId, recipes, onBack, onOpenDish, onRate }: Re
 
   const startCooking = async () => {
     setStarting(true);
-    setStartOffline(false);
-    const result = await recipes.startCooking(dishId);
-    setStarting(false);
-    if (result.status === 'offline') {
-      setStartOffline(true);
-      return;
+    setStartProblem(null);
+    try {
+      const result = await recipes.startCooking(dishId);
+      if (result.status === 'offline') {
+        setStartProblem('offline');
+        return;
+      }
+      if (result.status === 'not-found') {
+        setView({ status: 'not-found' });
+        return;
+      }
+      const next = await recipes.loadRecipe(dishId);
+      showLoaded(
+        next.status === 'downloaded' ? { ...next, currentStep: next.currentStep ?? 0 } : next,
+      );
+    } catch {
+      setStartProblem('error');
+    } finally {
+      setStarting(false);
     }
-    if (result.status === 'not-found') {
-      setView({ status: 'not-found' });
-      return;
-    }
-    const next = await recipes.loadRecipe(dishId);
-    setView(next);
-    setStep(next.status === 'downloaded' ? (next.currentStep ?? 0) : 0);
-    setTab('steps');
   };
+
+  if (loadFailed) {
+    return (
+      <SafeAreaView style={styles.screen}>
+        <Topbar title="Receita" leading="back" onLeadingPress={onBack} />
+        <View style={styles.padded}>
+          <Notice
+            type="error"
+            title="Não foi possível abrir a receita."
+            message="Tente de novo em instantes."
+            onRetry={() => void load()}
+          />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   if (view === null) return <LoadingState onBack={onBack} />;
 
@@ -248,7 +280,7 @@ export function RecipeScreen({ dishId, recipes, onBack, onOpenDish, onRate }: Re
           lastStep={lastStep}
           baseName={baseName}
           starting={starting}
-          startOffline={startOffline}
+          startProblem={startProblem}
           onStart={() => void startCooking()}
           onStep={goToStep}
           onRate={onRate}
@@ -277,14 +309,14 @@ interface FooterProps {
   readonly lastStep: number;
   readonly baseName: string;
   readonly starting: boolean;
-  readonly startOffline: boolean;
+  readonly startProblem: 'offline' | 'error' | null;
   readonly onStart: () => void;
   readonly onStep: (index: number) => void;
   readonly onRate: () => void;
 }
 
 function Footer(props: FooterProps) {
-  const { view, cooking, showSteps, step, lastStep, starting, startOffline } = props;
+  const { view, cooking, showSteps, step, lastStep, starting, startProblem } = props;
 
   // RN02: a locked evolution can be read, never cooked or rated.
   if (view.evolution.locked) {
@@ -305,11 +337,19 @@ function Footer(props: FooterProps) {
   if (!cooking) {
     return (
       <>
-        {startOffline ? (
+        {startProblem === 'offline' ? (
           <Notice
             type="offline"
             title="Sem conexão agora."
             message="Para baixar a receita, precisamos de internet."
+            onRetry={props.onStart}
+          />
+        ) : null}
+        {startProblem === 'error' ? (
+          <Notice
+            type="error"
+            title="Não foi possível baixar a receita."
+            message="Tente de novo em instantes."
             onRetry={props.onStart}
           />
         ) : null}

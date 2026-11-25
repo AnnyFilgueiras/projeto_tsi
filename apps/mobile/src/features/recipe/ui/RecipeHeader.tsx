@@ -106,7 +106,7 @@ export function RecipeHeader({
           <Text style={styles.secondary}>Receita adaptada de</Text>
           <TextLink
             label={recipe.sourceName}
-            onPress={() => void Linking.openURL(recipe.sourceUrl)}
+            onPress={() => void Linking.openURL(recipe.sourceUrl).catch(() => undefined)}
           />
         </View>
         {downloadedAt ? <LastSync syncedAt={downloadedAt} /> : null}
