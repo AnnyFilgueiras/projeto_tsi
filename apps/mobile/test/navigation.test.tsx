@@ -3,6 +3,7 @@ import type { MobileDependencies } from '../src/app/composition';
 import { LOCAL_MIGRATIONS } from '../src/core/local-db/migrations';
 import { runMigrations } from '../src/core/local-db/migrator';
 import { createOnboardingRepository } from '../src/features/profile/data/onboarding-repository';
+import { createProfileRepository } from '../src/features/profile/data/profile-repository';
 import { createFakeLocalDatabase, type FakeLocalDatabase } from './support/fake-local-database';
 
 // The real composition root opens SQLCipher and SecureStore, which only exist in the native build.
@@ -20,6 +21,9 @@ async function fakeDependencies(db: FakeLocalDatabase): Promise<MobileDependenci
       registerRestrictions: async () => ({ status: 'saved' }),
       listCuisines: async () => [],
       saveCulinaryPreferences: async () => 'saved',
+      readProfile: createProfileRepository(db).read,
+      revokeRestriction: async () => ({ status: 'removed' }),
+      savePreferences: async () => 'saved',
     },
     // An empty round: the Discover tab renders its "round over" state without network.
     suggestions: {
@@ -40,7 +44,6 @@ async function fakeDependencies(db: FakeLocalDatabase): Promise<MobileDependenci
       startCooking: async () => ({ status: 'not-found' }),
       saveStep: async () => undefined,
     },
-    checkApi: async () => true,
     syncInBackground: async () => undefined,
   } as Partial<MobileDependencies> as MobileDependencies;
 }
@@ -85,17 +88,19 @@ describe('Navigation shell (MVP-01: onboarding + 4 fixed tabs, A8)', () => {
     renderRouter('./app', { initialUrl: '/' });
 
     fireEvent.press(await screen.findByRole('tab', { name: 'Perfil' }));
-    expect(await screen.findByText('Servidor: conectado')).toBeTruthy();
+    expect(await screen.findByText('Conta anônima neste aparelho')).toBeTruthy();
     expect(screen.getByRole('tab', { name: 'Perfil' })).toBeSelected();
   });
 
-  it('shows the allergen rules version on the Profile tab (A7 entrypoint bundles)', async () => {
+  it('labels active restrictions on the Profile tab from the rules entrypoint (A7)', async () => {
     await db.execute("INSERT INTO profile_local (id, onboarded_at) VALUES (1, '2026-11-23')");
+    await db.execute(
+      "INSERT INTO restrictions_local (restriction_type, consent_at) VALUES ('amendoim', '2026-11-23T14:05:00.000Z')",
+    );
 
     renderRouter('./app', { initialUrl: '/profile' });
 
-    expect(await screen.findByText(/Versão das regras de alérgenos: 1\.0\.0/)).toBeTruthy();
-    expect(await screen.findByText('Servidor: conectado')).toBeTruthy();
+    expect(await screen.findByText('Amendoim')).toBeTruthy();
   });
 
   it.each([

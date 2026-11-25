@@ -6,6 +6,7 @@ import { runMigrations } from '../../src/core/local-db/migrator';
 import { createFetchHttpClient } from '../../src/core/network/fetch-http-client-adapter';
 import { createDirectOnlineOperationEnqueuer } from '../../src/core/sync/direct-online-operation-enqueuer-adapter';
 import { createOnboardingRepository } from '../../src/features/profile/data/onboarding-repository';
+import { createProfileRepository } from '../../src/features/profile/data/profile-repository';
 import { restrictionProjectors } from '../../src/features/profile/data/restriction-repository';
 import { createRegisterRestrictions } from '../../src/features/profile/domain/register-restrictions';
 import { createFakeFetch, type FakeReply, type RecordedRequest } from '../support/fake-fetch';
@@ -71,6 +72,9 @@ describe('Onboarding (UX-01A, US09, RN09, RN10)', () => {
       registerRestrictions: jest.fn(createRegisterRestrictions({ enqueuer, now: () => NOW })),
       listCuisines: jest.fn(async () => [FR]),
       saveCulinaryPreferences: jest.fn(async () => 'saved'),
+      readProfile: jest.fn(createProfileRepository(db).read),
+      revokeRestriction: jest.fn(async () => ({ status: 'removed' })),
+      savePreferences: jest.fn(async () => 'saved'),
     };
 
     mockCreateDependencies.mockImplementation(async () => {
@@ -91,7 +95,6 @@ describe('Onboarding (UX-01A, US09, RN09, RN10)', () => {
           snapshot: () => ({ cards: [], position: 1, total: 0, hasRestrictions: false }),
           photoUri: async () => null,
         },
-        checkApi: async () => true,
         syncInBackground: async () => undefined,
       } as Partial<MobileDependencies> as MobileDependencies;
     });

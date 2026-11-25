@@ -7,6 +7,8 @@ import { ALLERGEN_GROUPS, ALLERGEN_LABELS, Chip, SearchField } from '../../../..
 export interface AllergenPickerProps {
   readonly selected: readonly AllergenCode[];
   readonly onToggle: (code: AllergenCode) => void;
+  /** Codes left out of the list (the Profile hides restrictions that are already active). */
+  readonly hidden?: readonly AllergenCode[];
 }
 
 /**
@@ -14,23 +16,24 @@ export interface AllergenPickerProps {
  * and the Profile's "Adicionar restrição" (#78). Selected chips stay visible whatever the search,
  * so a filter never hides what the user already picked.
  */
-export function AllergenPicker({ selected, onToggle }: AllergenPickerProps) {
+export function AllergenPicker({ selected, onToggle, hidden = NONE }: AllergenPickerProps) {
   const [query, setQuery] = useState('');
 
   const groups = useMemo(() => {
     const term = normalize(query.trim());
     const visible = ALLERGEN_CODES.filter(
       (code) =>
-        !term ||
-        selected.includes(code) ||
-        normalize(ALLERGEN_LABELS[code].label).includes(term) ||
-        normalize(code).includes(term),
+        !hidden.includes(code) &&
+        (!term ||
+          selected.includes(code) ||
+          normalize(ALLERGEN_LABELS[code].label).includes(term) ||
+          normalize(code).includes(term)),
     );
     return ALLERGEN_GROUPS.map((group) => ({
       group,
       codes: visible.filter((code) => ALLERGEN_LABELS[code].group === group),
     })).filter(({ codes }) => codes.length > 0);
-  }, [query, selected]);
+  }, [query, selected, hidden]);
 
   return (
     <View style={styles.picker}>
@@ -60,6 +63,8 @@ export function AllergenPicker({ selected, onToggle }: AllergenPickerProps) {
     </View>
   );
 }
+
+const NONE: readonly AllergenCode[] = [];
 
 // "castanha" must match "Castanha-do-pará" and "pecã" must match "peca".
 function normalize(text: string): string {

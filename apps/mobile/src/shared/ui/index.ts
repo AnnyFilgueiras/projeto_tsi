@@ -1,6 +1,7 @@
 // Presentational component library (UX-01 "Componentes"). Props in, callbacks out: no imports
 // from features/ or core/. Adding a component = new file + export here.
 export { ActionIconButton, type ActionIconButtonProps } from './ActionIconButton';
+export { ActionSheet, type ActionSheetProps } from './ActionSheet';
 export { AllergenScopeBanner, type AllergenScopeBannerProps } from './allergen/AllergenScopeBanner';
 export { AllergenSeal, type AllergenSealProps } from './allergen/AllergenSeal';
 export { AllergenTag } from './allergen/AllergenTag';
@@ -30,6 +31,7 @@ export { OfflineBar, type OfflineBarProps } from './OfflineBar';
 export { Pill, type PillProps, type PillType } from './Pill';
 export { PlaceholderScreen, type PlaceholderScreenProps } from './PlaceholderScreen';
 export { ProgressBar, type ProgressBarProps } from './ProgressBar';
+export { RemovableChip, type RemovableChipProps } from './RemovableChip';
 export { SearchField, type SearchFieldProps } from './SearchField';
 export {
   SegmentedControl,
