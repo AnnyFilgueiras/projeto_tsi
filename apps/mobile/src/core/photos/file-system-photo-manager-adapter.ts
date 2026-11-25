@@ -6,7 +6,10 @@ import { createPhotoManager, type PhotoFileSystem, type PhotoManager } from './p
  * PhotoManager on expo-file-system. Uses `documentDirectory` (persistent) rather than
  * `cacheDirectory`, which Android may clear under storage pressure (ADR-012 item 6).
  */
-export function createFileSystemPhotoManager(resolveUrl: (hash: string) => string): PhotoManager {
+export function createFileSystemPhotoManager(
+  resolveUrl: (hash: string) => string,
+  requestHeaders?: () => Promise<Readonly<Record<string, string>>>,
+): PhotoManager {
   if (!FileSystem.documentDirectory) {
     throw new Error('Persistent document storage is unavailable on this platform.');
   }
@@ -20,7 +23,8 @@ export function createFileSystemPhotoManager(resolveUrl: (hash: string) => strin
       }
     },
     exists: async (uri) => (await FileSystem.getInfoAsync(uri)).exists,
-    download: async (url, toUri) => (await FileSystem.downloadAsync(url, toUri)).status,
+    download: async (url, toUri, headers) =>
+      (await FileSystem.downloadAsync(url, toUri, { headers: { ...headers } })).status,
     move: (from, to) => FileSystem.moveAsync({ from, to }),
     delete: (uri) => FileSystem.deleteAsync(uri, { idempotent: true }),
     list: () => FileSystem.readDirectoryAsync(directory),
@@ -35,5 +39,5 @@ export function createFileSystemPhotoManager(resolveUrl: (hash: string) => strin
     },
   };
 
-  return createPhotoManager({ fs, resolveUrl });
+  return createPhotoManager({ fs, resolveUrl, requestHeaders });
 }

@@ -8,12 +8,14 @@ const DIR = 'file:///docs/photos/';
 function memoryFs(serverFiles: Record<string, { status: number; contentHash?: string }>) {
   const files = new Map<string, string>();
   const downloads: string[] = [];
+  const headersSent: (Readonly<Record<string, string>> | undefined)[] = [];
   const fs: PhotoFileSystem = {
     directory: DIR,
     ensureDirectory: async () => undefined,
     exists: async (uri) => files.has(uri),
-    download: async (url, toUri) => {
+    download: async (url, toUri, headers) => {
       downloads.push(url);
+      headersSent.push(headers);
       const hash = url.split('/').pop()!;
       const remote = serverFiles[hash] ?? { status: 404 };
       if (remote.status === 200) files.set(toUri, remote.contentHash ?? hash);
@@ -29,7 +31,7 @@ function memoryFs(serverFiles: Record<string, { status: number; contentHash?: st
     list: async () => [...files.keys()].map((uri) => uri.replace(DIR, '')),
     sha256Hex: async (uri) => files.get(uri)!,
   };
-  return { fs, files, downloads };
+  return { fs, files, downloads, headersSent };
 }
 
 const resolveUrl = (hash: string) => `http://api.test/v1/photos/${hash}`;
@@ -87,5 +89,18 @@ describe('PhotoManager (ADR-012: WebP by SHA-256, persistent offline storage)', 
     await photos.prune([HASH_B]);
 
     expect([...files.keys()]).toEqual([`${DIR}${HASH_B}.webp`]);
+  });
+
+  it('authenticates downloads: the demo photo route requires the bearer token (openapi getPhoto)', async () => {
+    const { fs, headersSent } = memoryFs({ [HASH_A]: { status: 200 } });
+    const photos = createPhotoManager({
+      fs,
+      resolveUrl,
+      requestHeaders: async () => ({ Authorization: 'Bearer access-1' }),
+    });
+
+    await photos.ensureDownloaded([HASH_A]);
+
+    expect(headersSent).toEqual([{ Authorization: 'Bearer access-1' }]);
   });
 });

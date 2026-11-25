@@ -15,6 +15,20 @@ async function fakeDependencies(db: FakeLocalDatabase): Promise<MobileDependenci
   return {
     localDatabase: db,
     onboarding: createOnboardingRepository(db),
+    // An empty round: the Discover tab renders its "round over" state without network.
+    suggestions: {
+      loadSuggestions: async () => ({
+        status: 'ready',
+        cards: [],
+        position: 1,
+        total: 0,
+        hasRestrictions: false,
+      }),
+      approveSuggestion: async () => 'done',
+      discardSuggestion: async () => 'done',
+      snapshot: () => ({ cards: [], position: 1, total: 0, hasRestrictions: false }),
+      photoUri: async () => null,
+    },
     recipe: {
       loadRecipe: async () => ({ status: 'not-found' }),
       startCooking: async () => ({ status: 'not-found' }),
@@ -42,9 +56,7 @@ describe('Navigation shell (MVP-01: onboarding + 4 fixed tabs, A8)', () => {
     expect(await screen.findByText('Bem-vindo ao Panelada')).toBeTruthy();
     fireEvent.press(screen.getByRole('button', { name: 'Começar' }));
 
-    expect(
-      await screen.findByText('Sugestões de pratos para o seu perfil aparecerão aqui.'),
-    ).toBeTruthy();
+    expect(await screen.findByText('Rodada concluída')).toBeTruthy();
     expect(db.rows('SELECT onboarded_at FROM profile_local')).toHaveLength(1);
   });
 
@@ -53,9 +65,7 @@ describe('Navigation shell (MVP-01: onboarding + 4 fixed tabs, A8)', () => {
 
     renderRouter('./app', { initialUrl: '/' });
 
-    expect(
-      await screen.findByText('Sugestões de pratos para o seu perfil aparecerão aqui.'),
-    ).toBeTruthy();
+    expect(await screen.findByText('Rodada concluída')).toBeTruthy();
     for (const label of ['Descobrir', 'Cozinha', 'Coleção', 'Perfil']) {
       expect(screen.getByRole('tab', { name: label })).toBeTruthy();
     }

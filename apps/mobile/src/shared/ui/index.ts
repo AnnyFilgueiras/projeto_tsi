@@ -1,5 +1,6 @@
 // Presentational component library (UX-01 "Componentes"). Props in, callbacks out: no imports
 // from features/ or core/. Adding a component = new file + export here.
+export { ActionIconButton, type ActionIconButtonProps } from './ActionIconButton';
 export { AllergenScopeBanner, type AllergenScopeBannerProps } from './allergen/AllergenScopeBanner';
 export { AllergenSeal, type AllergenSealProps } from './allergen/AllergenSeal';
 export { AllergenTag } from './allergen/AllergenTag';
