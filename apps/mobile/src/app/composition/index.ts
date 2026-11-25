@@ -23,6 +23,7 @@ import {
   createOnboardingRepository,
   type OnboardingRepository,
 } from '../../features/profile/data/onboarding-repository';
+import { projectRatingRegistered } from '../../features/progress/data/rating-repository';
 import { createCookingStateRepository } from '../../features/recipe/data/cooking-state-repository';
 import { createRecipeRepository } from '../../features/recipe/data/recipe-repository';
 import { createRecipeFeature, type RecipeFeature } from '../../features/recipe/domain';
@@ -87,7 +88,7 @@ export async function createMobileDependencies(
     http,
     localDatabase,
     // Feature projectors are registered here as features land (MVP-04E/F).
-    projectors: {},
+    projectors: { 'rating.register': projectRatingRegistered },
     newOperationId: createUuidV7Generator({ randomBytes: getRandomBytes, now: Date.now }),
     now,
   });
