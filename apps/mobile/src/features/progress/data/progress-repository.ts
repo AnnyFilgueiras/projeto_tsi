@@ -3,13 +3,14 @@ import {
   buildProgressModel,
   type CatalogIndex,
   type ProgressModel,
+  type ProgressModelSource,
   type ProgressSnapshot,
   type ProgressSnapshotSource,
   type StoredRating,
   type StoredUnlock,
 } from '../domain/progress-model';
 
-export interface ProgressRepository extends ProgressSnapshotSource {
+export interface ProgressRepository extends ProgressSnapshotSource, ProgressModelSource {
   /** Collection, evolutions, badges, history and summary, all from the offline copy. */
   loadProgress(): Promise<ProgressModel>;
 }

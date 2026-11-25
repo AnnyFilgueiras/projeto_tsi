@@ -113,6 +113,9 @@ export interface HistoryEntry {
   readonly date: string;
   readonly commentExcerpt: string | null;
   readonly changesExcerpt: string | null;
+  /** Full, trimmed texts for the record sheet; null when blank. */
+  readonly comment: string | null;
+  readonly changes: string | null;
   readonly hasChanges: boolean;
 }
 
@@ -124,8 +127,21 @@ export interface CollectionSummary {
   readonly lastSyncAt: string | null;
 }
 
+export interface CuisineDish {
+  readonly dishId: string;
+  readonly name: string;
+  readonly completed: boolean;
+  /** Stars of the latest preparation (RN06: repeats keep the newest note); null when pending. */
+  readonly stars: number | null;
+}
+
+/** Cuisine card of the Collection tab: the RN07 counts plus its expandable dish grid. */
+export interface CuisineCollection extends CuisineProgress {
+  readonly dishes: readonly CuisineDish[];
+}
+
 export interface ProgressModel {
-  readonly cuisines: readonly CuisineProgress[];
+  readonly cuisines: readonly CuisineCollection[];
   readonly evolutionChains: readonly EvolutionChain[];
   readonly badges: BadgeView;
   readonly history: readonly HistoryEntry[];
@@ -138,6 +154,11 @@ export const HISTORY_EXCERPT_LENGTH = 120;
 /** Port implemented by `data/progress-repository` (A3: domain never touches LocalDatabase). */
 export interface ProgressSnapshotSource {
   load(): Promise<ProgressSnapshot>;
+}
+
+/** Port for the Collection tab (#85): the whole read model, built from the offline copy. */
+export interface ProgressModelSource {
+  loadProgress(): Promise<ProgressModel>;
 }
 
 export interface CuisineProgress {
@@ -215,9 +236,14 @@ export function buildProgressModel(snapshot: ProgressSnapshot): ProgressModel {
   const knownDishIds = new Set(catalog.dishes.map((dish) => dish.id));
   const completed = new Set([...completedDishIdsOf(snapshot)].filter((id) => knownDishIds.has(id)));
 
+  const latestStars = latestStarsByDish(snapshot.ratings);
   const cuisines = catalog.cuisines
     .map((cuisine) => cuisineProgressFor(catalog, cuisine.id, completed))
     .filter((progress): progress is CuisineProgress => progress !== null)
+    .map((progress) => ({
+      ...progress,
+      dishes: dishesOf(catalog, progress.cuisineId, latestStars),
+    }))
     .sort(
       (a, b) =>
         Number(b.completedDishes > 0) - Number(a.completedDishes > 0) ||
@@ -246,6 +272,32 @@ export function buildProgressModel(snapshot: ProgressSnapshot): ProgressModel {
       lastSyncAt: snapshot.lastSyncAt,
     },
   };
+}
+
+function latestStarsByDish(ratings: readonly StoredRating[]): Map<string, number> {
+  const latest = new Map<string, StoredRating>();
+  for (const rating of ratings) {
+    const current = latest.get(rating.dishId);
+    if (!current || rating.date.localeCompare(current.date) > 0) latest.set(rating.dishId, rating);
+  }
+  return new Map([...latest].map(([dishId, rating]) => [dishId, rating.score / 2]));
+}
+
+/** Completed dishes first so the grid opens on what was cooked, then alphabetical. */
+function dishesOf(
+  catalog: CatalogIndex,
+  cuisineId: string,
+  latestStars: ReadonlyMap<string, number>,
+): CuisineDish[] {
+  return catalog.dishes
+    .filter((dish) => dish.cuisineId === cuisineId)
+    .map((dish) => {
+      const stars = latestStars.get(dish.id) ?? null;
+      return { dishId: dish.id, name: dish.name, completed: stars !== null, stars };
+    })
+    .sort(
+      (a, b) => Number(b.completed) - Number(a.completed) || a.name.localeCompare(b.name, 'pt-BR'),
+    );
 }
 
 /**
@@ -354,6 +406,8 @@ function buildHistory(snapshot: ProgressSnapshot): HistoryEntry[] {
       date: rating.date,
       commentExcerpt: excerpt(rating.comment),
       changesExcerpt: excerpt(rating.changes),
+      comment: rating.comment?.trim() || null,
+      changes: rating.changes?.trim() || null,
       hasChanges: hasAdaptation(rating),
     }));
 }

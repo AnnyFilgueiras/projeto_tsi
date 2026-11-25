@@ -50,7 +50,10 @@ import {
 } from '../../features/profile/domain/save-culinary-preferences';
 import { createProgressRepository } from '../../features/progress/data/progress-repository';
 import { projectRatingRegistered } from '../../features/progress/data/rating-repository';
-import type { ProgressSnapshotSource } from '../../features/progress/domain/progress-model';
+import type {
+  ProgressModelSource,
+  ProgressSnapshotSource,
+} from '../../features/progress/domain/progress-model';
 import {
   loadRatingContext,
   type RatingContext,
@@ -85,7 +88,7 @@ export interface MobileDependencies {
   readonly suggestions: SuggestionRound;
   /** LoadRecipe / StartCooking / saveStep (#80) and LoadKitchen for the Kitchen tab (#81). */
   readonly recipe: RecipeFeature;
-  /** Rating modal (#83) and Celebration (#84): all offline-first reads of the local copy. */
+  /** Rating (#83), Celebration (#84) and Collection (#85): all offline-first reads of the local copy. */
   readonly progress: ProgressDependencies;
   /** Best-effort background refresh of the offline copy; never throws (offline is normal). */
   readonly syncInBackground: () => Promise<void>;
@@ -96,6 +99,8 @@ export interface ProgressDependencies {
   readonly loadRatingContext: (dishId: string) => Promise<RatingContext>;
   /** Local progress snapshot read by the Celebration (#84); never touches the network. */
   readonly snapshots: ProgressSnapshotSource;
+  /** Collection tab (#85): the whole read model from the offline copy, no network. */
+  readonly collection: ProgressModelSource;
 }
 
 export interface ProfileDependencies {
@@ -233,6 +238,7 @@ export async function createMobileDependencies(
       }),
       loadRatingContext: (dishId) => loadRatingContext(progressRepository, dishId),
       snapshots: progressRepository,
+      collection: progressRepository,
     },
     syncInBackground: async () => {
       try {
