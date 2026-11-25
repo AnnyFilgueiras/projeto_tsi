@@ -67,6 +67,13 @@ export interface SuggestionRound {
   discardSuggestion(suggestionId: string): Promise<ActionOutcome>;
   snapshot(): RoundSnapshot;
   photoUri(photoHash: string): Promise<string | null>;
+  /**
+   * Drops the round kept in memory so the next load asks the server again: a restriction or
+   * preference change makes the current cards stale (RN08, RN10).
+   */
+  invalidate(): void;
+  /** Bumps on every `invalidate`, so a screen can tell its cards came from an older round. */
+  version(): number;
 }
 
 export interface SuggestionRoundDeps {
@@ -85,6 +92,7 @@ export function createSuggestionRound(deps: SuggestionRoundDeps): SuggestionRoun
   let cards: SuggestionCardData[] = [];
   let total = 0;
   let hasRestrictions = false;
+  let generation = 0;
   // One key per (action, suggestion): a retry after a lost response must not apply twice (P05).
   const keys = new Map<string, string>();
 
@@ -109,20 +117,25 @@ export function createSuggestionRound(deps: SuggestionRoundDeps): SuggestionRoun
     cards = cards.filter((card) => card.suggestionId !== suggestionId);
   };
 
+  const loadSuggestions = async (): Promise<LoadOutcome> => {
+    hasRestrictions = await deps.store.hasRestrictions();
+    if (!loaded) {
+      const startedAt = generation;
+      const result = await deps.gateway.fetchRound(ROUND_SIZE);
+      if (result.status !== 'ok') return { status: result.status };
+      const context = await deps.store.readHintContext();
+      // Invalidated while the request was in flight: these cards predate the Profile change.
+      if (startedAt !== generation) return loadSuggestions();
+      // RN08: the server already filtered by restrictions; keep its list and order untouched.
+      cards = result.value.map((item) => toCard(item, context));
+      total = cards.length;
+      loaded = true;
+    }
+    return { status: 'ready', ...snapshot() };
+  };
+
   return {
-    async loadSuggestions() {
-      hasRestrictions = await deps.store.hasRestrictions();
-      if (!loaded) {
-        const result = await deps.gateway.fetchRound(ROUND_SIZE);
-        if (result.status !== 'ok') return { status: result.status };
-        const context = await deps.store.readHintContext();
-        // RN08: the server already filtered by restrictions; keep its list and order untouched.
-        cards = result.value.map((item) => toCard(item, context));
-        total = cards.length;
-        loaded = true;
-      }
-      return { status: 'ready', ...snapshot() };
-    },
+    loadSuggestions,
 
     async approveSuggestion(suggestionId) {
       const result = await deps.gateway.approve(suggestionId, keyFor('approve', suggestionId));
@@ -146,6 +159,15 @@ export function createSuggestionRound(deps: SuggestionRoundDeps): SuggestionRoun
     snapshot,
 
     photoUri: (photoHash) => deps.photos.localUri(photoHash),
+
+    invalidate() {
+      loaded = false;
+      cards = [];
+      total = 0;
+      generation += 1;
+    },
+
+    version: () => generation,
   };
 }
 

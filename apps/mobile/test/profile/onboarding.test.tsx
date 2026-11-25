@@ -1,6 +1,7 @@
 import { PACKAGE_VERSION } from '@panelada/allergen-rules/rules';
 import { act, fireEvent, renderRouter, screen, waitFor } from 'expo-router/testing-library';
 import type { MobileDependencies, ProfileDependencies } from '../../src/app/composition';
+import { createKitchenNews } from '../../src/app/composition/kitchen-news';
 import { LOCAL_MIGRATIONS } from '../../src/core/local-db/migrations';
 import { runMigrations } from '../../src/core/local-db/migrator';
 import { createFetchHttpClient } from '../../src/core/network/fetch-http-client-adapter';
@@ -94,7 +95,10 @@ describe('Onboarding (UX-01A, US09, RN09, RN10)', () => {
           discardSuggestion: async () => 'done',
           snapshot: () => ({ cards: [], position: 1, total: 0, hasRestrictions: false }),
           photoUri: async () => null,
+          invalidate: () => undefined,
+          version: () => 0,
         },
+        kitchenNews: createKitchenNews(),
         syncInBackground: async () => undefined,
       } as Partial<MobileDependencies> as MobileDependencies;
     });

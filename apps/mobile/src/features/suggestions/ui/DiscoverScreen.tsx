@@ -21,6 +21,8 @@ import { SuggestionCard } from './SuggestionCard';
 export interface DiscoverScreenProps {
   /** Session-wide round created once by the composition root (A8). */
   readonly round: SuggestionRound;
+  /** A new value reloads the round (the route bumps it after a Profile change). */
+  readonly refreshKey?: number;
   readonly onOpenRecipe: (dishId: string) => void;
   readonly onGoToKitchen: () => void;
   readonly onGoToProfile: () => void;
@@ -41,6 +43,7 @@ export const TOAST_DURATION_MS = 4000;
 
 export function DiscoverScreen({
   round,
+  refreshKey = 0,
   onOpenRecipe,
   onGoToKitchen,
   onGoToProfile,
@@ -71,7 +74,7 @@ export function DiscoverScreen({
 
   useEffect(() => {
     void load();
-  }, [load]);
+  }, [load, refreshKey]);
 
   useEffect(
     () => () => {

@@ -1,5 +1,5 @@
 import { Redirect, Tabs } from 'expo-router';
-import { type ComponentProps, useEffect, useState } from 'react';
+import { type ComponentProps, useEffect, useState, useSyncExternalStore } from 'react';
 import { useDependencies } from '../../src/app/composition/dependencies-context';
 import { type IconName, LoadingScreen, TabBar } from '../../src/shared/ui';
 
@@ -14,6 +14,8 @@ const TAB_ICONS: Readonly<Record<string, IconName>> = {
 
 // Adapter from react-navigation's tab bar props to the presentational shared/ui TabBar.
 function RouterTabBar({ state, descriptors, navigation, insets }: TabBarRenderProps) {
+  const { kitchenNews } = useDependencies();
+  const kitchenHasNews = useSyncExternalStore(kitchenNews.subscribe, kitchenNews.hasNews);
   const items = state.routes.map((route, index) => {
     const active = state.index === index;
     return {
@@ -21,8 +23,8 @@ function RouterTabBar({ state, descriptors, navigation, insets }: TabBarRenderPr
       label: descriptors[route.key]?.options.title ?? route.name,
       icon: TAB_ICONS[route.name] ?? 'tab-discover',
       active,
-      // Wired to "new candidate in the kitchen" in #78.
-      hasNews: false,
+      // §1.1 rule 4: a dot (never a number, never red) after "Quero cozinhar" on Discover.
+      hasNews: route.name === 'kitchen' && kitchenHasNews,
       onPress: () => {
         const event = navigation.emit({
           type: 'tabPress',

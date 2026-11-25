@@ -67,6 +67,7 @@ import { createCookingStateRepository } from '../../features/recipe/data/cooking
 import { createRecipeRepository } from '../../features/recipe/data/recipe-repository';
 import { createRecipeFeature, type RecipeFeature } from '../../features/recipe/domain';
 import { readMobileConfig, type MobileConfig } from './config';
+import { createKitchenNews, type KitchenNews } from './kitchen-news';
 
 /**
  * Single composition root for the mobile app (A8): the only place that instantiates concrete
@@ -90,6 +91,8 @@ export interface MobileDependencies {
   readonly recipe: RecipeFeature;
   /** Rating (#83), Celebration (#84) and Collection (#85): all offline-first reads of the local copy. */
   readonly progress: ProgressDependencies;
+  /** "News" dot on the Kitchen tab after an approval (§1.1 rule 4); memory only. */
+  readonly kitchenNews: KitchenNews;
   /** Best-effort background refresh of the offline copy; never throws (offline is normal). */
   readonly syncInBackground: () => Promise<void>;
 }
@@ -169,7 +172,8 @@ export async function createMobileDependencies(
     now,
   });
 
-  const suggestions = createSuggestionRound({
+  const kitchenNews = createKitchenNews();
+  const suggestionRound = createSuggestionRound({
     gateway: createSuggestionsGateway({ http, sessions }),
     store: createSuggestionsLocalStore(localDatabase),
     photos: {
@@ -187,8 +191,30 @@ export async function createMobileDependencies(
     },
     newIdempotencyKey: newUuidV7,
   });
+  // Feature-to-feature ports live here (A1): suggestions never imports recipe or profile.
+  const suggestions: SuggestionRound = {
+    ...suggestionRound,
+    approveSuggestion: async (suggestionId) => {
+      const outcome = await suggestionRound.approveSuggestion(suggestionId);
+      if (outcome === 'done') kitchenNews.mark();
+      return outcome;
+    },
+  };
+  // A restriction or preference change makes the round stale (RN08, RN10): the Discover tab
+  // fetches again the next time it gains focus. Invalidating after any attempt is harmless.
+  const afterProfileChange = async <T>(change: Promise<T>): Promise<T> => {
+    try {
+      return await change;
+    } finally {
+      suggestionRound.invalidate();
+    }
+  };
 
   const preferences = createPreferencesRepository({ http, localDatabase });
+  const registerRestrictions = createRegisterRestrictions({ enqueuer: operationEnqueuer, now });
+  const revokeRestriction = createRevokeRestriction({ enqueuer: operationEnqueuer });
+  // Device-only "em preparo" state, shared by the recipe feature and the rating's completion port.
+  const cookingState = createCookingStateRepository(localDatabase);
   const profileRepository = createProfileRepository(localDatabase);
   const progressRepository = createProgressRepository(localDatabase);
 
@@ -215,17 +241,17 @@ export async function createMobileDependencies(
         }
         return 'ready';
       },
-      registerRestrictions: createRegisterRestrictions({ enqueuer: operationEnqueuer, now }),
+      registerRestrictions: (input) => afterProfileChange(registerRestrictions(input)),
       listCuisines: () => preferences.listCuisines(),
       saveCulinaryPreferences: createSaveCulinaryPreferences(preferences),
       readProfile: () => profileRepository.read(),
-      revokeRestriction: createRevokeRestriction({ enqueuer: operationEnqueuer }),
-      savePreferences: (cuisineIds) => preferences.save(cuisineIds),
+      revokeRestriction: (input) => afterProfileChange(revokeRestriction(input)),
+      savePreferences: (cuisineIds) => afterProfileChange(preferences.save(cuisineIds)),
     },
     suggestions,
     recipe: createRecipeFeature({
       recipes: createRecipeRepository({ http, localDatabase, photos }),
-      cooking: createCookingStateRepository(localDatabase),
+      cooking: cookingState,
       candidates: createCandidatesReader(localDatabase),
       now,
     }),
@@ -233,13 +259,14 @@ export async function createMobileDependencies(
       registerRating: createRegisterRating({
         enqueuer: operationEnqueuer,
         progress: progressRepository,
-        // Clearing the "em preparo" mark after a rating lands in #86 (cooking-state `finish`).
-        completionListener: { onDishCompleted: async () => undefined },
+        // A saved rating ends "em preparo" (#86); progress never imports recipe (A1).
+        completionListener: { onDishCompleted: (dishId) => cookingState.finish(dishId) },
       }),
       loadRatingContext: (dishId) => loadRatingContext(progressRepository, dishId),
       snapshots: progressRepository,
       collection: progressRepository,
     },
+    kitchenNews,
     syncInBackground: async () => {
       try {
         await sessions.ensureSession();

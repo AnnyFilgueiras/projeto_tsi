@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { act, fireEvent, renderRouter, screen } from 'expo-router/testing-library';
 import { BackHandler } from 'react-native';
 import type { MobileDependencies } from '../src/app/composition';
+import { createKitchenNews } from '../src/app/composition/kitchen-news';
 import { LOCAL_MIGRATIONS } from '../src/core/local-db/migrations';
 import { runMigrations } from '../src/core/local-db/migrator';
 import { createOnboardingRepository } from '../src/features/profile/data/onboarding-repository';
@@ -41,6 +42,8 @@ async function fakeDependencies(db: FakeLocalDatabase): Promise<MobileDependenci
       discardSuggestion: async () => 'done',
       snapshot: () => ({ cards: [], position: 1, total: 0, hasRestrictions: false }),
       photoUri: async () => null,
+      invalidate: () => undefined,
+      version: () => 0,
     },
     recipe: {
       loadRecipe: async () => ({ status: 'not-found' }),
@@ -55,6 +58,7 @@ async function fakeDependencies(db: FakeLocalDatabase): Promise<MobileDependenci
       snapshots: createProgressRepository(db),
       collection: createProgressRepository(db),
     },
+    kitchenNews: createKitchenNews(),
     syncInBackground: async () => undefined,
   } as Partial<MobileDependencies> as MobileDependencies;
 }

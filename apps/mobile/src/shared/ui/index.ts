@@ -29,7 +29,6 @@ export { MOTION_DURATION_MS, useReducedMotion } from './motion';
 export { Notice, type NoticeProps, type NoticeType } from './Notice';
 export { OfflineBar, type OfflineBarProps } from './OfflineBar';
 export { Pill, type PillProps, type PillType } from './Pill';
-export { PlaceholderScreen, type PlaceholderScreenProps } from './PlaceholderScreen';
 export { ProgressBar, type ProgressBarProps } from './ProgressBar';
 export { RemovableChip, type RemovableChipProps } from './RemovableChip';
 export { SearchField, type SearchFieldProps } from './SearchField';
