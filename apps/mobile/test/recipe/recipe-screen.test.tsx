@@ -83,6 +83,18 @@ describe('RecipeScreen (UX-01D, §7)', () => {
     expect(screen.getByText('Offline')).toBeTruthy();
   });
 
+  it('lists declared allergens by plain name', async () => {
+    setup([
+      downloaded({
+        data: recipe({ allergens: ['trigo_centeio_cevada_aveia', 'leite', 'lactose'] }),
+      }),
+    ]);
+
+    expect(
+      await screen.findByText('Contém: trigo, centeio, cevada e aveia, leite, lactose'),
+    ).toBeTruthy();
+  });
+
   it('opens the seal meaning sheet', async () => {
     setup([downloaded()]);
 

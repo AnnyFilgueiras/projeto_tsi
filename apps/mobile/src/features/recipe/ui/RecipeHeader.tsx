@@ -36,7 +36,8 @@ export interface RecipeHeaderProps {
 function allergenSummary(recipe: Recipe): string | null {
   if (recipe.allergens.length > 0) {
     const names = recipe.allergens.map((code: AllergenCode) => {
-      const label = allergenLabel(code);
+      // Plain name only (D7): "Leite (proteína do leite)" reads as "leite" in this summary.
+      const label = allergenLabel(code).replace(/\s*\(.*\)$/, '');
       return label.charAt(0).toLowerCase() + label.slice(1);
     });
     return `Contém: ${names.join(', ')}`;
