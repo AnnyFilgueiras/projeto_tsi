@@ -23,6 +23,7 @@ import {
   createOnboardingRepository,
   type OnboardingRepository,
 } from '../../features/profile/data/onboarding-repository';
+import { projectRatingRegistered } from '../../features/progress/data/rating-repository';
 import { readMobileConfig, type MobileConfig } from './config';
 
 /**
@@ -82,7 +83,7 @@ export async function createMobileDependencies(
     http,
     localDatabase,
     // Feature projectors are registered here as features land (MVP-04E/F).
-    projectors: {},
+    projectors: { 'rating.register': projectRatingRegistered },
     newOperationId: createUuidV7Generator({ randomBytes: getRandomBytes, now: Date.now }),
     now,
   });
