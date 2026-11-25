@@ -29,6 +29,11 @@ async function fakeDependencies(db: FakeLocalDatabase): Promise<MobileDependenci
       snapshot: () => ({ cards: [], position: 1, total: 0, hasRestrictions: false }),
       photoUri: async () => null,
     },
+    recipe: {
+      loadRecipe: async () => ({ status: 'not-found' }),
+      startCooking: async () => ({ status: 'not-found' }),
+      saveStep: async () => undefined,
+    },
     checkApi: async () => true,
     syncInBackground: async () => undefined,
   } as Partial<MobileDependencies> as MobileDependencies;

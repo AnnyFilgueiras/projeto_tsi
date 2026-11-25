@@ -12,6 +12,7 @@ export {
   type AllergenGroup,
 } from './allergen/labels';
 export { BadgeIcon, type BadgeIconProps } from './BadgeIcon';
+export { BottomSheet, type BottomSheetProps } from './BottomSheet';
 export { Button, type ButtonProps, type ButtonVariant } from './Button';
 export { Chip, type ChipProps } from './Chip';
 export { DishThumb, type DishThumbProps } from './DishThumb';

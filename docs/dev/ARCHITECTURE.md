@@ -136,6 +136,8 @@ apps/mobile/src/
 | `progress` | `ratings_local`, `unlocks_local` | Desbloqueios só acumulam (`RN04`). |
 | `core/sync` | `catalog_index_local`, `meta_sync` | `catalog_index_local` é linha única (`id = 1`) com o JSON do `catalogIndex` e o `generatedAt` do download-set; base do `UnlockCalculator` (Coleção, cadeias de evolução, badges). |
 
+- **Feature `recipe` (`MVP-04E6`, #80):** a composição expõe `recipe: RecipeFeature` (`loadRecipe`, `startCooking`, `saveStep`). `domain/` não pode importar `core/network` nem `core/photos`, então a `data/` devolve falha de rede como valor (`offline`/`not-found`), recebe a foto pela porta estrutural `RecipePhotoStore` (o `PhotoManager` a satisfaz) e grava receita + "em preparo" numa transação só, depois dos downloads. A Cozinha (#81) reusa `startCooking` e `cooking-state-repository.listActive`.
+
 ---
 
 ## 4. Portas Plugáveis e Ambiente Containerizado

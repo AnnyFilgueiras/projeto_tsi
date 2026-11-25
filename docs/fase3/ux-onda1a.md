@@ -169,7 +169,9 @@ export const touchTarget = { min: 48, comfortable: 56 } as const; // dp — §1.
 Padrão **único** reutilizado em Onboarding, Descobrir, Receita, Coleção e Perfil (componente sugerido: `shared/ui/allergen/`):
 
 **(a) Banner discreto `RN16`** — aparece **somente quando o usuário tem ≥ 1 restrição**:
-> ℹ️ *Verificamos apenas os 19 alérgenos do vocabulário controlado (ANVISA + lactose). Confira sempre o rótulo dos ingredientes.*
+> ℹ️ *Checamos os principais alérgenos. Confira sempre o rótulo.*
+
+O texto não cita a contagem nem a ANVISA: o `RN16` pede só que o limite da verificação fique visível, e o usuário médio não precisa do detalhe técnico. A lista completa dos 19 códigos aparece onde ele escolhe as restrições (Onboarding/Perfil). Mesmo texto no tamanho cheio e no compacto (24/11/2026, #80).
 
 Fundo `allergenWarningSoft`, texto `allergenWarning`, ícone ℹ️, 1–2 linhas, não fechável na Receita e no Perfil (fixo); em Descobrir fica no topo da lista, sem ocupar o card.
 
