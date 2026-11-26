@@ -1,4 +1,4 @@
-node_modules
+**/node_modules
 .git
 .plans
 .worktrees
@@ -7,6 +7,7 @@ docs
 dist
 build
 coverage
+**/.data
 *.log
 .env
 .env.*
