@@ -115,6 +115,59 @@ runPhotoStorageContractSuite('SupabasePhotoStorage', async () => {
   };
 });
 
+describe('SupabasePhotoStorage edge cases (MVP-04G, Cloud 4C)', () => {
+  const HASH = 'a'.repeat(64);
+
+  function storageWith(fetchImpl: typeof fetch, timeoutMs?: number) {
+    return new SupabasePhotoStorage({
+      supabaseUrl: 'https://demo.supabase.co',
+      serviceRoleKey: 'test-service-role-key',
+      bucket: 'dish-photos',
+      fetchImpl,
+      ...(timeoutMs === undefined ? {} : { timeoutMs }),
+    });
+  }
+
+  it('treats the legacy HTTP 400 "not_found" body as a missing object', async () => {
+    const fetchImpl = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({ statusCode: '404', error: 'not_found', message: 'Object not found' }),
+          { status: 400, headers: { 'content-type': 'application/json' } },
+        ),
+    );
+
+    expect(await storageWith(fetchImpl as unknown as typeof fetch).get(HASH)).toBeNull();
+  });
+
+  it('keeps any other HTTP 400 as an error', async () => {
+    const fetchImpl = vi.fn(
+      async () =>
+        new Response(JSON.stringify({ statusCode: '400', error: 'InvalidRequest' }), {
+          status: 400,
+        }),
+    );
+
+    await expect(storageWith(fetchImpl as unknown as typeof fetch).get(HASH)).rejects.toThrow(
+      /HTTP 400/,
+    );
+  });
+
+  it('aborts save and get when Supabase does not answer within the timeout', async () => {
+    const hangingFetch = vi.fn(
+      (_input: string | URL | Request, init?: RequestInit) =>
+        new Promise<Response>((_resolve, reject) => {
+          init?.signal?.addEventListener('abort', () => reject(init.signal?.reason));
+        }),
+    );
+    const storage = storageWith(hangingFetch as unknown as typeof fetch, 20);
+
+    await expect(storage.get(HASH)).rejects.toThrow();
+    await expect(storage.save(HASH, Buffer.from('webp'))).rejects.toThrow();
+    expect(hangingFetch).toHaveBeenCalledTimes(2);
+  });
+});
+
 describe('PhotoProcessor (ADR-012)', () => {
   it('converts JPEG fixtures (including Bruno dish-example.jpg) into WebP with SHA-256 hash', async () => {
     const fixturePath = path.resolve(
