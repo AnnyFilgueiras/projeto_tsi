@@ -9,6 +9,8 @@
 3. Coloque uma imagem JPEG em `fixtures/dish-example.jpg` (antes: `prato-exemplo.jpg`).
 4. Execute as pastas na ordem numérica: sessão, catálogo base, fluxo manual, fluxo assistido, negativos e consulta.
 
+**Nuvem (Cloud 4C):** escolha o ambiente **Cloud** e defina também `PANELADA_CLOUD_API_URL` (ex.: `https://panelada-api.onrender.com`). As credenciais são as da curadora criada pelo seed da nuvem. Passo a passo em [`docs/dev/DEPLOY.md`](../../../../dev/DEPLOY.md).
+
 ## Variáveis criadas pela própria coleção
 
 `accessToken`, `refreshToken`, `idemKey`, `fixedKey`, `ingMilkId`, `ingLactoseFreeMilkId`, `ingWheatId`, `ingEggId`, `ingOatId`, `utFryingPanId`, `cuiFrenchId`, `manualProposalId`, `assistedProposalId`, `noPhotoProposalId`, `userToken`, `idemIngredientId`.
