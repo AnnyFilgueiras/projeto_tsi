@@ -5,6 +5,7 @@ import path from 'node:path';
 import sharp from 'sharp';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
+  createPhotoStorageFromEnv,
   InMemoryPhotoStorage,
   LocalDiskPhotoStorage,
   SupabasePhotoStorage,
@@ -153,6 +154,19 @@ describe('SupabasePhotoStorage edge cases (MVP-04G, Cloud 4C)', () => {
     );
   });
 
+  it('includes a short excerpt of the Supabase error body to make misconfiguration diagnosable', async () => {
+    const fetchImpl = vi.fn(
+      async () =>
+        new Response(JSON.stringify({ statusCode: '404', error: 'Bucket not found' }), {
+          status: 404,
+        }),
+    );
+
+    await expect(
+      storageWith(fetchImpl as unknown as typeof fetch).save(HASH, Buffer.from('webp')),
+    ).rejects.toThrow(/HTTP 404: .*Bucket not found/);
+  });
+
   it('aborts save and get when Supabase does not answer within the timeout', async () => {
     const hangingFetch = vi.fn(
       (_input: string | URL | Request, init?: RequestInit) =>
@@ -165,6 +179,60 @@ describe('SupabasePhotoStorage edge cases (MVP-04G, Cloud 4C)', () => {
     await expect(storage.get(HASH)).rejects.toThrow();
     await expect(storage.save(HASH, Buffer.from('webp'))).rejects.toThrow();
     expect(hangingFetch).toHaveBeenCalledTimes(2);
+  });
+});
+
+function fakeJwt(payload: Record<string, unknown>): string {
+  const part = (value: unknown) => Buffer.from(JSON.stringify(value)).toString('base64url');
+  return `${part({ alg: 'HS256', typ: 'JWT' })}.${part(payload)}.signature`;
+}
+
+describe('createPhotoStorageFromEnv supabase config checks (MVP-04G, Cloud 4C)', () => {
+  const base = {
+    PHOTO_STORAGE_DRIVER: 'supabase',
+    SUPABASE_URL: 'https://demo.supabase.co',
+    SUPABASE_SERVICE_ROLE_KEY: fakeJwt({ role: 'service_role', ref: 'demo' }),
+  };
+
+  it('accepts the project URL (with or without a trailing slash) and a service_role key', () => {
+    expect(createPhotoStorageFromEnv(base)).toBeInstanceOf(SupabasePhotoStorage);
+    expect(
+      createPhotoStorageFromEnv({ ...base, SUPABASE_URL: 'https://demo.supabase.co/' }),
+    ).toBeInstanceOf(SupabasePhotoStorage);
+  });
+
+  it('accepts the new secret key format, which is not a JWT', () => {
+    expect(
+      createPhotoStorageFromEnv({ ...base, SUPABASE_SERVICE_ROLE_KEY: 'sb_secret_abc123' }),
+    ).toBeInstanceOf(SupabasePhotoStorage);
+  });
+
+  it('rejects a SUPABASE_URL with a path, which would turn every upload into HTTP 404', () => {
+    expect(() =>
+      createPhotoStorageFromEnv({ ...base, SUPABASE_URL: 'https://demo.supabase.co/rest/v1' }),
+    ).toThrow(/SUPABASE_URL must be the project URL/);
+  });
+
+  it('rejects the public anon key, which cannot reach a private bucket', () => {
+    expect(() =>
+      createPhotoStorageFromEnv({
+        ...base,
+        SUPABASE_SERVICE_ROLE_KEY: fakeJwt({ role: 'anon', ref: 'demo' }),
+      }),
+    ).toThrow(/role "anon"/);
+  });
+
+  it('rejects a publishable key', () => {
+    expect(() =>
+      createPhotoStorageFromEnv({ ...base, SUPABASE_SERVICE_ROLE_KEY: 'sb_publishable_abc123' }),
+    ).toThrow(/publishable/);
+  });
+
+  it('never echoes the key itself in the error', () => {
+    const anon = fakeJwt({ role: 'anon', ref: 'demo' });
+    expect(() => createPhotoStorageFromEnv({ ...base, SUPABASE_SERVICE_ROLE_KEY: anon })).toThrow(
+      expect.objectContaining({ message: expect.not.stringContaining(anon) }),
+    );
   });
 });
 

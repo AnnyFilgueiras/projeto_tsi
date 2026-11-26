@@ -68,6 +68,14 @@ export interface SupabasePhotoStorageConfig {
   readonly timeoutMs?: number;
 }
 
+// Supabase error bodies carry the cause ("Bucket not found", RLS denial) and never echo our
+// headers, so a short excerpt makes a misconfigured deploy diagnosable from the log alone.
+async function describeFailure(response: Response): Promise<string> {
+  const body = await response.text().catch(() => '');
+  const excerpt = body.replace(/\s+/g, ' ').trim().slice(0, 200);
+  return excerpt ? `HTTP ${response.status}: ${excerpt}` : `HTTP ${response.status}`;
+}
+
 async function isLegacyNotFound(response: Response): Promise<boolean> {
   // Supabase Storage historically answers a missing object with HTTP 400 and a body whose
   // `statusCode` is "404"; only that shape means "absent", any other 400 is a real error.
@@ -118,7 +126,7 @@ export class SupabasePhotoStorage implements PhotoStorage {
     });
 
     if (!response.ok) {
-      throw new Error(`Supabase photo upload failed with HTTP ${response.status}.`);
+      throw new Error(`Supabase photo upload failed with ${await describeFailure(response)}.`);
     }
   }
 
@@ -141,7 +149,7 @@ export class SupabasePhotoStorage implements PhotoStorage {
     }
 
     if (!response.ok) {
-      throw new Error(`Supabase photo fetch failed with HTTP ${response.status}.`);
+      throw new Error(`Supabase photo fetch failed with ${await describeFailure(response)}.`);
     }
 
     const arrayBuffer = await response.arrayBuffer();
@@ -176,6 +184,46 @@ export class InMemoryPhotoStorage implements PhotoStorage {
   }
 }
 
+/**
+ * Fails fast on the two Cloud 4C misconfigurations that otherwise surface only as opaque
+ * Storage errors at first upload: a URL with a path (every object URL 404s) and a public key
+ * (RLS hides the private bucket). Only the key's public `role` claim is read, never logged.
+ */
+function assertSupabaseConfig(supabaseUrl: string, key: string): void {
+  let url: URL;
+  try {
+    url = new URL(supabaseUrl);
+  } catch {
+    throw new Error('SUPABASE_URL must be a valid URL, e.g. https://<project-ref>.supabase.co.');
+  }
+  if (url.pathname.replace(/\/+$/, '') !== '' || url.search || url.hash) {
+    throw new Error(
+      'SUPABASE_URL must be the project URL without a path, e.g. https://<project-ref>.supabase.co.',
+    );
+  }
+
+  if (key.startsWith('sb_publishable_')) {
+    throw new Error(
+      'SUPABASE_SERVICE_ROLE_KEY holds a publishable key; use the secret (sb_secret_) or service_role key.',
+    );
+  }
+  if (key.startsWith('eyJ')) {
+    let role: unknown;
+    try {
+      const payload = key.split('.')[1] ?? '';
+      role = (JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')) as { role?: unknown })
+        .role;
+    } catch {
+      role = undefined;
+    }
+    if (role !== 'service_role') {
+      throw new Error(
+        `SUPABASE_SERVICE_ROLE_KEY has role "${String(role)}"; the private photo bucket needs the service_role key.`,
+      );
+    }
+  }
+}
+
 export function createPhotoStorageFromEnv(env: NodeJS.ProcessEnv = process.env): PhotoStorage {
   const driver = (env.PHOTO_STORAGE_DRIVER ?? 'local').trim().toLowerCase();
 
@@ -193,6 +241,7 @@ export function createPhotoStorageFromEnv(env: NodeJS.ProcessEnv = process.env):
         'SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required when PHOTO_STORAGE_DRIVER=supabase.',
       );
     }
+    assertSupabaseConfig(supabaseUrl, serviceRoleKey);
     return new SupabasePhotoStorage({ supabaseUrl, serviceRoleKey, bucket, timeoutMs });
   }
 
