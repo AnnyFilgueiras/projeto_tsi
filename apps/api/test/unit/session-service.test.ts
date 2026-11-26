@@ -190,6 +190,50 @@ describe('AccountService, SessionService and TokenIssuer (A02, ADR-007, ADR-008,
     });
   });
 
+  it('MVP-04A D2: caps the grace cache and evicts the oldest rotation first so memory stays bounded', async () => {
+    let now = new Date('2026-11-21T12:00:00.000Z');
+    const store = new InMemoryIdentityStore();
+    const profileLifecycle: ProfileLifecyclePort = {
+      async createProfile() {},
+      async deleteData() {},
+    };
+    const tokenIssuer = new Hs256TokenIssuer({ secret: JWT_SECRET, clock: () => now });
+    const sessionService = new SessionService({
+      store,
+      tokenIssuer,
+      clock: () => now,
+      graceCacheMaxEntries: 2,
+    });
+    const accountService = new AccountService({
+      store,
+      profileLifecycle,
+      sessionService,
+      clock: () => now,
+    });
+
+    const accounts = [
+      await accountService.createAnonymousAccount(),
+      await accountService.createAnonymousAccount(),
+      await accountService.createAnonymousAccount(),
+    ];
+
+    now = new Date('2026-11-21T12:00:10.000Z');
+    const rotated = [];
+    for (const account of accounts) {
+      rotated.push(await sessionService.refresh(account.tokens.refreshToken));
+    }
+
+    // Retries inside the 60 s window: the two newest rotations are still cached...
+    now = new Date('2026-11-21T12:00:20.000Z');
+    expect(await sessionService.refresh(accounts[1]!.tokens.refreshToken)).toEqual(rotated[1]);
+    expect(await sessionService.refresh(accounts[2]!.tokens.refreshToken)).toEqual(rotated[2]);
+
+    // ...while the oldest was evicted, so its retry falls back to the fail-closed replay path.
+    await expect(sessionService.refresh(accounts[0]!.tokens.refreshToken)).rejects.toMatchObject({
+      problem: { type: 'invalid-refresh', status: 401 },
+    });
+  });
+
   it('ADR-007 / ADR-008: signIn verifies curator Argon2id password, revokes prior sessions (single active device), and signOut revokes current sessions', async () => {
     let now = new Date('2026-11-21T12:00:00.000Z');
     const store = new InMemoryIdentityStore();
