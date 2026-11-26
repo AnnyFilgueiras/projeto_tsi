@@ -142,30 +142,34 @@ curl -sf http://localhost:3000/v1/health
 
 ## 11. Evidências `(H)` — Estágio 1
 
-> Preenchido na Fase C da issue #45. Não registre segredos, tokens ou códigos de restrição reais aqui.
+> Registradas na Fase C da issue #45. Não registre segredos, tokens ou códigos de restrição reais aqui.
 
-**Ambiente:** API `<url>` (commit `<hash>`), Supabase `us-east-1`, emulador `<AVD / RAM>`, data `<AAAA-MM-DD>`.
+**Ambiente:** API `https://panelada-api.onrender.com` (Render Free, `virginia`, branch `feat/issue-45-deploy-cloud-4c`, código até `cb9e30a`), Supabase `us-east-1`, emulador Android 14 x86_64 (`Medium_Phone`, 2 GB de RAM) com build de desenvolvimento, data 2026-11-26.
+
+**Verificação da nuvem:** `GET /v1/health` → `200`. Os 20 pratos do seed (`download-set` → `GET /v1/recipes/{id}` → `photo.hash`) → `GET /v1/photos/{hash}` = **20× `200 image/webp`** (assinatura `WEBP` conferida).
 
 ### H1 — `A05` servidor: 0 restrições em texto claro no Supabase
 
-- **Como:** no SQL Editor do Supabase, `select encrypted_type, key_version from profile_restrictions limit 5;` (esperado: base64 opaco) e `select count(*) from profile_restrictions where encrypted_type ilike any (array[<19 códigos de profile_restriction_types com %>]);` (esperado: 0).
-- **Resultado:** _pendente_
+- **Como:** SQL Editor do Supabase. Procura os 19 códigos em toda a linha de `profile_restrictions` (`r::text like any (...)`) e lista amostras de `encrypted_type`.
+- **Resultado:** ✅ `total_restricoes = 2` (a conta da jornada), `com_codigo_em_claro = 0`, `key_version = 1`. As amostras são base64 opaco.
+- **Ressalva:** o `FieldCipher` (AES-GCM sem padding) preserva o **tamanho** do código. As 2 linhas têm 3 e 5 bytes, o que reduz as opções a `ovo`/`noz` e `leite`/`peixe`/`latex`/`avela`. A correção, com padding de 32 bytes, está na issue #116.
 
 ### H2 — `A05` aparelho: 0 restrições em texto claro no SQLite
 
-- **Como:** `adb exec-out run-as br.edu.panelada.app cat databases/panelada.db > panelada.db`; `strings panelada.db | grep -ciE '<19 códigos>'` (esperado: 0); `sqlite3 panelada.db '.tables'` sem chave falha com `file is not a database`.
-- **Resultado:** _pendente_
+- **Como:** `adb exec-out run-as br.edu.panelada.app cat files/SQLite/panelada.db`, depois busca dos 19 códigos nos bytes (`strings` e `grep -a`) e tentativa de abrir o banco sem a chave.
+- **Resultado:** ✅ arquivo de 73 728 bytes **sem** o cabeçalho `SQLite format 3`, **0 ocorrências** dos 19 códigos, e abrir sem a chave falha com `file is not a database` (SQLCipher).
 
 ### H3 — `A04` desempenho offline: receita com foto ≤ 2 s
 
-- **Como:** baixar a receita, ligar o modo avião, abrir a receita 3 vezes e anotar o tempo até a foto WebP renderizar (mediana).
-- **Resultado:** _pendente_ (medições: `_ / _ / _` ms, mediana `_` ms, WebP sem erro: _)
+- **Como:** modo avião ligado → Coleção → Histórico → Homus de Grão-de-Bico → "Ver receita". A tela foi gravada (`adb screenrecord`) e o tempo medido da 1ª à última mudança de quadro (`ffmpeg select=gt(scene,0.002)`), até a receita completa com a foto WebP e o selo "Offline".
+- **Resultado:** ✅ medições de **408 / 375 / 365 ms**, mediana de **375 ms**. A foto WebP abriu sem erro nas 3. Build de desenvolvimento, portanto um limite superior conservador para a versão de produção.
 
 ### H4 — `A09` contrato/curadoria: Bruno contra a nuvem
 
-- **Como:** a coleção sem `03-assisted-flow` (importação assistida, `MVP-05`), com o comando do §6. Cada execução publica um "Crepe simples" na nuvem.
-- **Resultado:** _pendente_ (`<n>` requisições, `<n>` asserts aprovados)
+- **Como:** a coleção `panelada-curadoria` sem `03-assisted-flow` (importação assistida, `MVP-05`, ainda sem rota), com o comando do §6 e o ambiente **Cloud**.
+- **Resultado:** ✅ **27/27 requisições, 9/9 testes, 30/30 asserts** (19,9 s).
+- A 1ª execução falhou (15/27) porque a coleção criava nomes que o seed do `MVP-04B` já tem. Corrigido: nomes com sufixo por execução e receitas com IDs do seed.
 
 ### Jornada E2E da Onda 1A no emulador
 
-Onboarding → Restrição cifrada → Sugestões → "Cozinhar agora" → Modo avião na receita → Avaliação → Coleção/Evoluções/Badges: _pendente_
+✅ Onboarding → restrições Leite e Ovos (cifradas) → Sugestões com fotos → "Cozinhar agora" → avaliação (3★) → Coleção (1 prato, culinária Árabe) / Histórico. A receita abre em modo avião com o selo "Offline". Tudo contra a API no Render.
