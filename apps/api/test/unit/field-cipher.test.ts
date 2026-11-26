@@ -1,7 +1,8 @@
-import { randomBytes } from 'node:crypto';
+import { createCipheriv, randomBytes } from 'node:crypto';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { ALLERGEN_CODES } from '@panelada/allergen-rules/rules';
 import { describe, expect, it } from 'vitest';
 import {
   AesGcmFieldCipher,
@@ -168,5 +169,83 @@ describe('FieldCipher AES-256-GCM and KeyProvider (A05, ADR-006, P02c)', () => {
     } finally {
       rmSync(tempDir, { recursive: true, force: true });
     }
+  });
+});
+
+describe('FieldCipher length-hiding padding (A05, ADR-006 item 3, #116)', () => {
+  const accountId = '77777777-7777-4777-8777-777777777777';
+
+  function makeCipher(key: Buffer = randomBytes(32)): AesGcmFieldCipher {
+    return new AesGcmFieldCipher(new InMemoryKeyProvider({ currentVersion: 1, keys: { 1: key } }));
+  }
+
+  it('A05: shortest, typical and longest restriction codes all produce a 32-byte ciphertext', async () => {
+    const cipher = makeCipher();
+
+    for (const code of ['ovo', 'leite', 'trigo_centeio_cevada_aveia']) {
+      const encrypted = await cipher.encrypt(code, accountId);
+      expect(Buffer.from(encrypted.ciphertext, 'base64')).toHaveLength(32);
+      expect(encrypted.ciphertext).toHaveLength(44);
+    }
+  });
+
+  it('A05: every ALLERGEN_CODES entry encrypts to 32 bytes and round-trips', async () => {
+    const cipher = makeCipher();
+    expect(ALLERGEN_CODES).toHaveLength(19);
+
+    for (const code of ALLERGEN_CODES) {
+      const encrypted = await cipher.encrypt(code, accountId);
+      expect(Buffer.from(encrypted.ciphertext, 'base64')).toHaveLength(32);
+      expect(await cipher.decrypt(encrypted, accountId)).toBe(code);
+    }
+  });
+
+  it('pads at the 32-byte block boundary: 32 bytes stay 32, 33 bytes become 64', async () => {
+    const cipher = makeCipher();
+    const exactBlock = 'a'.repeat(32);
+    const overBlock = 'a'.repeat(33);
+
+    const exact = await cipher.encrypt(exactBlock, accountId);
+    const over = await cipher.encrypt(overBlock, accountId);
+
+    expect(Buffer.from(exact.ciphertext, 'base64')).toHaveLength(32);
+    expect(Buffer.from(over.ciphertext, 'base64')).toHaveLength(64);
+    expect(await cipher.decrypt(exact, accountId)).toBe(exactBlock);
+    expect(await cipher.decrypt(over, accountId)).toBe(overBlock);
+  });
+
+  it('decrypts legacy payloads written without padding (no migration needed)', async () => {
+    const key = randomBytes(32);
+    const cipher = makeCipher(key);
+
+    // Reproduces the pre-#116 cipher: AES-256-GCM over the raw UTF-8 code, no padding.
+    const iv = randomBytes(12);
+    const legacy = createCipheriv('aes-256-gcm', key, iv, { authTagLength: 16 });
+    legacy.setAAD(Buffer.from(accountId, 'utf8'));
+    const ciphertext = Buffer.concat([legacy.update('leite', 'utf8'), legacy.final()]);
+    expect(ciphertext).toHaveLength(5);
+
+    const decrypted = await cipher.decrypt(
+      {
+        ciphertext: ciphertext.toString('base64'),
+        iv: iv.toString('base64'),
+        authTag: legacy.getAuthTag().toString('base64'),
+        keyVersion: 1,
+      },
+      accountId,
+    );
+    expect(decrypted).toBe('leite');
+  });
+
+  it('A13: fails closed on empty or NUL-containing plaintext without echoing it', async () => {
+    const cipher = makeCipher();
+
+    await expect(cipher.encrypt('', accountId)).rejects.toThrow(Error);
+
+    const withNul = 'amendoim\u0000secreto';
+    const error: unknown = await cipher.encrypt(withNul, accountId).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(Error);
+    expect((error as Error).message).not.toContain('amendoim');
+    expect((error as Error).message).not.toContain('secreto');
   });
 });

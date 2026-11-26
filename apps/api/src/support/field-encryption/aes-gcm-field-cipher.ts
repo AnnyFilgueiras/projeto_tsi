@@ -6,6 +6,27 @@ const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH_BYTES = 12;
 const AUTH_TAG_LENGTH_BYTES = 16;
 const STRICT_BASE64_REGEX = /^[A-Za-z0-9+/]*={0,2}$/;
+// GCM ciphertext is as long as its plaintext, so unpadded restriction codes leak which restriction
+// was stored (3 bytes → ovo/noz, 6 bytes → pinoli). Every catalog code fits in one 32-byte block (#116).
+const PADDING_BLOCK_BYTES = 32;
+const PADDING_BYTE = 0x00;
+
+// Zero padding is only unambiguous because encrypt() rejects plaintext containing NUL; legacy
+// unpadded rows never end in NUL either, so they decrypt unchanged without a migration.
+function padPlaintext(plaintext: Buffer): Buffer {
+  const paddedLength = Math.ceil(plaintext.length / PADDING_BLOCK_BYTES) * PADDING_BLOCK_BYTES;
+  const padded = Buffer.alloc(paddedLength, PADDING_BYTE);
+  plaintext.copy(padded);
+  return padded;
+}
+
+function unpadPlaintext(padded: Buffer): Buffer {
+  let end = padded.length;
+  while (end > 0 && padded[end - 1] === PADDING_BYTE) {
+    end -= 1;
+  }
+  return padded.subarray(0, end);
+}
 
 /**
  * Thrown whenever AES-256-GCM decryption or authentication fails (A05, A13).
@@ -36,7 +57,8 @@ function decodeStrictBase64(value: unknown): Buffer {
  *
  * Uses a fresh random 12-byte IV per write, a 16-byte authentication tag,
  * `associatedData` (accountId) as GCM AAD to prevent cross-account row swapping,
- * and `keyVersion` from KeyProvider to support seamless key rotation.
+ * `keyVersion` from KeyProvider to support seamless key rotation, and zero padding to
+ * 32-byte blocks so ciphertext length does not reveal which restriction was stored.
  */
 export class AesGcmFieldCipher implements FieldCipher {
   constructor(private readonly keyProvider: KeyProvider) {}
@@ -44,6 +66,10 @@ export class AesGcmFieldCipher implements FieldCipher {
   async encrypt(plaintext: string, associatedData: string): Promise<EncryptedFieldPayload> {
     if (associatedData.length === 0) {
       throw new Error('Associated data (accountId) must be a non-empty string.');
+    }
+    // Fail closed so padding removal can never be ambiguous; the message never echoes the plaintext (A13).
+    if (plaintext.length === 0 || plaintext.includes('\u0000')) {
+      throw new Error('Plaintext must be a non-empty string without NUL characters.');
     }
 
     const { version, key } = await this.keyProvider.getCurrentKey();
@@ -54,7 +80,8 @@ export class AesGcmFieldCipher implements FieldCipher {
     });
     cipher.setAAD(Buffer.from(associatedData, 'utf8'));
 
-    const ciphertext = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()]);
+    const padded = padPlaintext(Buffer.from(plaintext, 'utf8'));
+    const ciphertext = Buffer.concat([cipher.update(padded), cipher.final()]);
     const authTag = cipher.getAuthTag();
 
     return {
@@ -94,7 +121,7 @@ export class AesGcmFieldCipher implements FieldCipher {
       decipher.setAuthTag(authTag);
 
       const plaintext = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
-      return plaintext.toString('utf8');
+      return unpadPlaintext(plaintext).toString('utf8');
     } catch (error: unknown) {
       if (error instanceof FieldDecryptionError) {
         throw error;
