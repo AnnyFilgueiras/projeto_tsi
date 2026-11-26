@@ -113,6 +113,46 @@ describe('Suggestion round (UX-01B: LoadSuggestions, ApproveSuggestion, DiscardS
     expect(calls[0]?.options).toMatchObject({ query: { limit: 5 } });
   });
 
+  it('fetches a fresh round after invalidate, e.g. once the Profile changed (#86)', async () => {
+    const { round: subject, calls } = round({});
+
+    await subject.loadSuggestions();
+    expect(subject.version()).toBe(0);
+    subject.invalidate();
+    const again = await subject.loadSuggestions();
+
+    expect(subject.version()).toBe(1);
+    expect(again).toMatchObject({ status: 'ready', total: 3, position: 1 });
+    expect(calls.filter((call) => call.operationId === 'getSuggestions')).toHaveLength(2);
+  });
+
+  it('does not keep a round whose request started before an invalidate', async () => {
+    let release: () => void = () => undefined;
+    const gate = new Promise<void>((resolve) => (release = resolve));
+    let requested: () => void = () => undefined;
+    const firstRequest = new Promise<void>((resolve) => (requested = resolve));
+    let first = true;
+    const { round: subject, calls } = round({
+      getSuggestions: async () => {
+        if (first) {
+          first = false;
+          requested();
+          await gate;
+        }
+        return { suggestions: [item(1)], noResult: false, minPackageVersion: '1.0.0' };
+      },
+    });
+
+    const stale = subject.loadSuggestions();
+    await firstRequest;
+    subject.invalidate();
+    release();
+    await stale;
+    await subject.loadSuggestions();
+
+    expect(calls.filter((call) => call.operationId === 'getSuggestions')).toHaveLength(2);
+  });
+
   it('keeps the server order untouched (RN08: the app never filters or reorders)', async () => {
     const { round: subject } = round({
       getSuggestions: () => ({

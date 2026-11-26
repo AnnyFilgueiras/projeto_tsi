@@ -14,15 +14,19 @@ export interface CuriosityHintPillProps {
  */
 export function CuriosityHintPill({ hint }: CuriosityHintPillProps) {
   const evolution = hint.kind === 'evolution';
-  const prefix = evolution ? DISCOVER_COPY.hintEvolution : DISCOVER_COPY.hintFirstCuisine;
-  const name = evolution ? hint.dishName : hint.cuisineName;
 
   return (
     <View style={styles.pill} testID="curiosity-hint">
       <Icon name={evolution ? 'unlock' : 'sparkle'} size={16} color={colors.successUnlock} />
       <Text style={styles.text} numberOfLines={1}>
-        {prefix}
-        <Text style={styles.name}>{name}</Text>
+        {evolution ? (
+          DISCOVER_COPY.hintEvolution
+        ) : (
+          <>
+            {DISCOVER_COPY.hintFirstCuisine}
+            <Text style={styles.name}>{hint.cuisineName}</Text>
+          </>
+        )}
       </Text>
     </View>
   );

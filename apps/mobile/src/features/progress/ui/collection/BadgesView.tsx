@@ -9,7 +9,7 @@ export interface BadgesViewProps {
 }
 
 /**
- * US16 / RN03–RN04: earned badges with their date, then the next milestones with a goal-gradient
+ * US16 / RN03–RN04: earned badges with what earned them (no date: it cluttered the card), then the next milestones with a goal-gradient
  * bar. The "Conquistados" section disappears while empty; the milestones always show (RN04:
  * criteria stay visible), which is also this sub-view's empty state.
  */
@@ -29,9 +29,7 @@ export function BadgesView({ badges }: BadgesViewProps) {
               />
               <View style={styles.text}>
                 <Text style={styles.name}>{badge.name}</Text>
-                {badge.unlockedAt ? (
-                  <Text style={styles.meta}>{COLLECTION_COPY.earnedAt(badge.unlockedAt)}</Text>
-                ) : null}
+                <Text style={styles.meta}>{badge.description}</Text>
               </View>
             </View>
           ))}

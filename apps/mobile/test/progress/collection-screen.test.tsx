@@ -107,19 +107,52 @@ describe('CollectionScreen (§10, #85)', () => {
     ).toBeNull();
   });
 
-  it('US15: a locked node names its base dish and opens it; an unlocked one opens itself', async () => {
+  it('US15 / #86: a locked node is a mystery that names its base and opens it', async () => {
     const { onOpenRecipe } = setup({ initialView: 'evolutions' });
 
     expect(await screen.findByText('Concluído')).toBeTruthy();
     expect(screen.getByText('Pronto para cozinhar')).toBeTruthy();
+    expect(screen.queryByText('Feijoada vegana')).toBeNull();
+    expect(screen.getByText('Prato misterioso')).toBeTruthy();
     const locked = screen.getByRole('button', {
-      name: 'Feijoada vegana. Bloqueado. Conclua Feijoada leve para abrir',
+      name: 'Prato misterioso. Conclua Feijoada leve para revelar',
     });
 
     fireEvent.press(locked);
     expect(onOpenRecipe).toHaveBeenLastCalledWith(DISH.feijoadaLight);
     fireEvent.press(screen.getByRole('button', { name: 'Feijoada leve. Pronto para cozinhar' }));
     expect(onOpenRecipe).toHaveBeenLastCalledWith(DISH.feijoadaLight);
+  });
+
+  // Only a dish outside the chain was cooked: the empty state stays away, the chain is untouched.
+  const MOQUECA_ONLY: StoredRating[] = [
+    { id: 'r9', dishId: DISH.moqueca, score: 8, date: '2026-11-18T15:00:00.000Z' },
+  ];
+
+  it('#86: a mystery under another mystery shows every level but no name and no action', async () => {
+    setup({
+      initialView: 'evolutions',
+      load: async () => buildProgressModel(snapshot(MOQUECA_ONLY, [])),
+    });
+
+    expect(await screen.findByText(/Conclua/)).toBeTruthy();
+    expect(screen.getAllByText('Prato misterioso')).toHaveLength(2);
+    expect(screen.getByText('Revele o prato acima primeiro')).toBeTruthy();
+    expect(screen.queryByText(/Feijoada leve|Feijoada vegana/)).toBeNull();
+    expect(screen.getAllByRole('button', { name: /Prato misterioso/ })).toHaveLength(1);
+  });
+
+  it('#86: the cuisine grid hides a mystery dish but keeps it in the count', async () => {
+    setup({ load: async () => buildProgressModel(snapshot(MOQUECA_ONLY, [])) });
+
+    const brasileira = await screen.findByRole('button', {
+      name: 'Brasileira: 1 de 4 pratos, faltam 3',
+    });
+    fireEvent.press(brasileira);
+
+    expect(screen.getAllByLabelText('Prato misterioso, ainda não revelado')).toHaveLength(2);
+    expect(screen.queryByText('Feijoada leve')).toBeNull();
+    expect(screen.getByLabelText('Feijoada, ainda não preparado')).toBeTruthy();
   });
 
   it('US15: after the base dish is rated, the node shows unlocked when the tab regains focus', async () => {
@@ -147,12 +180,15 @@ describe('CollectionScreen (§10, #85)', () => {
     expect(screen.queryByText(/Conclua/)).toBeNull();
   });
 
-  it('US16: earned badges with their date, next milestones with criterion and bar', async () => {
+  it('US16: earned badges without a date, next milestones with criterion and bar', async () => {
     setup({ initialView: 'badges' });
 
     expect(await screen.findByText('Conquistados')).toBeTruthy();
-    expect(screen.getByText('Primeiro prato')).toBeTruthy();
-    expect(screen.getByText('Conquistado em 18/11/2026')).toBeTruthy();
+    const earned = screen.getByTestId(`earned-${BADGE.firstDish}`);
+    expect(within(earned).getByText('Primeiro prato')).toBeTruthy();
+    // #86: an earned badge keeps saying what earned it (RN04: criteria stay visible).
+    expect(within(earned).getByText('Conclua um prato.')).toBeTruthy();
+    expect(within(earned).queryByText(/Conquistado em/)).toBeNull();
     expect(screen.getByText('Próximos marcos')).toBeTruthy();
     expect(screen.getByText('Conclua pratos de 2 culinárias.')).toBeTruthy();
     expect(screen.getByLabelText('Dupla cozinha: 1 de 2')).toBeTruthy();

@@ -40,6 +40,55 @@ describe('buildProgressModel for the Collection tab (US12, US14)', () => {
     ]);
   });
 
+  it('#86 format C: an evolution whose base dish was not cooked is a nameless mystery tile', () => {
+    const model = buildProgressModel(snapshotWith([]));
+
+    const brasileira = model.cuisines.find((cuisine) => cuisine.cuisineId === CUISINE.brasileira);
+
+    // Mysteries go last; the RN07 counts still include them, so nothing shrinks on reveal.
+    expect(brasileira?.dishes).toEqual([
+      { dishId: DISH.feijoada, name: 'Feijoada', completed: false, stars: null },
+      { dishId: DISH.moqueca, name: 'Moqueca', completed: false, stars: null },
+      { dishId: DISH.feijoadaLight, name: null, completed: false, stars: null },
+      { dishId: DISH.feijoadaVegana, name: null, completed: false, stars: null },
+    ]);
+    expect(brasileira).toMatchObject({ totalDishes: 4, missingDishes: 4 });
+  });
+
+  it('#86 format C: every level shows; a mystery names its base only when the base is revealed', () => {
+    const [chain] = buildProgressModel(snapshotWith([])).evolutionChains;
+
+    expect(
+      chain?.nodes.map((node) => [node.dishId, node.name, node.status, node.baseDish]),
+    ).toEqual([
+      [DISH.feijoada, 'Feijoada', 'unlocked', null],
+      [DISH.feijoadaLight, null, 'locked', { dishId: DISH.feijoada, name: 'Feijoada' }],
+      [DISH.feijoadaVegana, null, 'locked', { dishId: DISH.feijoadaLight, name: null }],
+    ]);
+  });
+
+  it('#86 format C: cooking the base reveals the next level even before its unlock syncs', () => {
+    const model = buildProgressModel(
+      snapshotWith([
+        { id: 'r1', dishId: DISH.feijoada, score: 8, date: '2026-11-10T12:00:00.000Z' },
+      ]),
+    );
+
+    const [chain] = model.evolutionChains;
+    expect(chain?.nodes.map((node) => [node.name, node.status])).toEqual([
+      ['Feijoada', 'completed'],
+      ['Feijoada leve', 'unlocked'],
+      [null, 'locked'],
+    ]);
+    const brasileira = model.cuisines.find((cuisine) => cuisine.cuisineId === CUISINE.brasileira);
+    expect(brasileira?.dishes.map((dish) => dish.name)).toEqual([
+      'Feijoada',
+      'Feijoada leve',
+      'Moqueca',
+      null,
+    ]);
+  });
+
   it('US12: keeps the full comment and changes for the history sheet, trimmed', () => {
     const comment = `${'Muito saborosa, '.repeat(10)}fim.`;
     const model = buildProgressModel(

@@ -58,6 +58,8 @@ function fakeRound(
     discardSuggestion: async (id) => act(options.discard?.() ?? 'done', id),
     snapshot,
     photoUri: async () => null,
+    invalidate: () => undefined,
+    version: () => 0,
   };
 }
 
@@ -95,11 +97,20 @@ describe('DiscoverScreen (UX-01B)', () => {
     expect(await screen.findByTestId('allergen-seal-source_declared')).toBeTruthy();
   });
 
-  it('shows the curiosity hint with the bold name', async () => {
-    renderScreen(fakeRound([card(1, { hint: { kind: 'evolution', dishName: 'Tian provençal' } })]));
+  it('shows the cuisine hint with the bold name', async () => {
+    renderScreen(
+      fakeRound([card(1, { hint: { kind: 'first-cuisine', cuisineName: 'Tailandesa' } })]),
+    );
 
     const hint = await screen.findByTestId('curiosity-hint');
-    expect(within(hint).getByText('Tian provençal')).toBeTruthy();
+    expect(within(hint).getByText('Tailandesa')).toBeTruthy();
+  });
+
+  it('keeps the evolution a mystery in the hint (#86)', async () => {
+    renderScreen(fakeRound([card(1, { hint: { kind: 'evolution' } })]));
+
+    const hint = await screen.findByTestId('curiosity-hint');
+    expect(within(hint).getByText('Abre uma evolução misteriosa')).toBeTruthy();
   });
 
   it('shows the RN16 banner only when the user has restrictions', async () => {

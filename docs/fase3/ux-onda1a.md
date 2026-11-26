@@ -59,7 +59,8 @@ Regras:
 1. **Barra de abas fixa** com 4 itens (ícone + rótulo sempre visível, nunca só ícone): `Descobrir`, `Cozinha`, `Coleção`, `Perfil`. Fica oculta no Onboarding e nas telas de pilha (Receita, Avaliação e Celebração — fluxos focados; na Receita isso libera espaço para o modo bancada). Essas telas sempre têm Voltar/Fechar.
 2. **Sem becos sem saída:** toda tela tem saída explícita — botão Voltar no cabeçalho das telas de pilha, botão **Fechar/Cancelar** nos modais e CTAs de continuidade nos estados vazios (ver tabela de saídas em cada seção).
 3. **Rotas canônicas de ida e volta:** `Descobrir → (aprovar) → Cozinha → Receita → Avaliação → Celebração → Coleção | Cozinha | Descobrir`. A `Coleção` abre `Receita` de evoluções (somente leitura quando bloqueada) e retorna para si mesma.
-4. **Indicador de novidade, não de cobrança:** a aba `Cozinha` recebe um ponto discreto (`primary`) quando uma candidata nova chega; o ponto some ao abrir a aba. **Nunca** usar contadores de pendência vermelhos.
+4. **Indicador de novidade, não de cobrança:** a aba `Cozinha` recebe um ponto discreto (`primary`) quando uma candidata nova chega; o ponto some ao abrir a aba. **Nunca** usar contadores de pendência vermelhos. O ponto vive só na memória do app e não volta ao reabri-lo (`MVP-04H` #86).
+5. **Pratos misteriosos (`MVP-04H` #86, formato C):** uma evolução cujo prato base ainda não foi concluído fica **sem nome** ("Prato misterioso", ícone de interrogação) na Coleção e **não é sugerida** na Descobrir. Todos os níveis da cadeia aparecem e o total da culinária não muda, para nunca encolher uma meta nem tirar uma "Completa" (`RN07`, `CD8` proibido). O nó misterioso aponta o caminho (`RN02`): cita o prato base quando ele está visível ("Conclua **Aglio e Olio** para revelar") ou pede "Revele o prato acima primeiro" quando o base também é misterioso. A Celebração continua revelando o nome no desbloqueio (N15).
 
 ### 1.2 Design tokens semânticos (alimentam `apps/mobile/src/shared/theme/`)
 
@@ -292,7 +293,7 @@ flowchart LR
 | N02 | Onboarding | Atalho "Não tenho restrições — continuar" em destaque | CD2 (baixo atrito) | Onboarding | Sem pressão para cadastrar dado sensível |
 | N03 | Onboarding | "Pular" nas preferências: "Pode ajustar quando quiser no Perfil." | — (remoção de atrito) | Onboarding | Etapa opcional sem culpa |
 | N04 | Descobrir | Pista no card: "✨ Primeira receita **tailandesa** da sua coleção" | CD7 + CD4 | Discovery/Scaffolding | 1 pista por card, no máximo |
-| N05 | Descobrir | Pista no card: "🔓 Abre a evolução **Tian provençal**" (prato base de cadeia) | CD6 positivo + CD2 | Scaffolding | Sem temporizador |
+| N05 | Descobrir | Pista no card: "🔓 Abre uma evolução misteriosa" (prato base de cadeia; sem o nome, regra 5 da §1.1) | CD7 + CD6 positivo | Scaffolding | Sem temporizador |
 | N06 | Descobrir | Toast ao aprovar: "Foi para Cozinha → Candidatas" + ponto na aba | CD2 (feedback) | Scaffolding | Ponto some ao abrir a aba |
 | N07 | Descobrir (vazio) | "Você viu todas as sugestões desta rodada. Que tal cozinhar uma candidata?" | CD2 | Scaffolding | CTA construtivo, nunca "acabou" seco |
 | N08 | Cozinha | "Escolha uma e a receita fica salva no aparelho — funciona até sem internet." | CD2 + CD3 | Scaffolding | Convite, não cobrança (`RN12`) |
@@ -306,9 +307,9 @@ flowchart LR
 | N16 | Celebração | Badge: ícone + nome + motivo ("Concluiu seu primeiro prato") | CD2 + CD4 | Onboarding→Endgame | Só se `newBadgeAwards ≠ ∅` |
 | N17 | Celebração (repetição) | "Mais um registro no seu caderno!" | CD4 | Endgame | Calor proporcional, sem tela vazia |
 | N18 | Coleção · Culinárias | "Francesa · 2 de 10 · faltam 8" | CD2 + CD4 | Scaffolding | `RN07` |
-| N19 | Coleção · Evoluções | Nó bloqueado: "Conclua **Tian provençal** para abrir" (toque leva ao prato base) | CD6 positivo | Scaffolding | `RN02` |
+| N19 | Coleção · Evoluções | Nó misterioso: "Conclua **Ratatouille** para revelar" (toque leva ao prato base); sob outro mistério, "Revele o prato acima primeiro" | CD7 + CD6 positivo | Scaffolding | `RN02`; nunca revela o nome antes da hora |
 | N20 | Coleção · Badges | Próximos marcos: "Chef de Rotina · 2 de 5 pratos" | CD2 (*goal-gradient*) | Scaffolding | Critério verificável (`RN04`) |
-| N21 | Coleção · Badges | Conquistados: "Conquistado em 23/11/2026 · é seu para sempre" | CD4 | Endgame | `RN04` (nunca revogado) |
+| N21 | Coleção · Badges | Conquistados: ícone, nome e o critério que levou à conquista (sem data, decisão de 25/11 para não poluir o card) | CD4 | Endgame | `RN04` (nunca revogado) |
 | N22 | Coleção · Histórico | Selo "Toque pessoal" em registros com `changes` | CD3 + CD4 | Endgame | — |
 | N23 | Coleção (vazio) | "Sua coleção começa no primeiro prato avaliado." | CD4 | Onboarding | — |
 | N24 | Celebração / Coleção | Badge de continente: "Você já cozinhou em 2 dos 5 continentes 🌍" | CD1 | Endgame | — |
@@ -532,9 +533,9 @@ Não há estado de rede: a tela só é exibida após salvamento confirmado.
 
 | Sub-visão | Conteúdo | *Nudges* |
 |---|---|---|
-| **Culinárias** (`US14`, `RN07`) | Cards por culinária: bandeira, nome, barra %, "2 de 10 · faltam 8". Toque expande a grade de pratos: concluídos coloridos com ✓ e nota; pendentes em silhueta `surfaceAlt` com nome. Ordenação: com progresso primeiro, depois alfabética | N18 |
-| **Evoluções** (`US15`, `RN02`, `RN18`) | Uma cadeia por cartão: `Nível 1 → Nível 2 → Nível 3` (vertical). Nó **concluído** (✓ colorido), **desbloqueado** ("Pronto para cozinhar" → abre Receita), **bloqueado** (🔒 + "Conclua *Tian provençal* para abrir", link para o prato base) | N19 |
-| **Badges** (`US16`, `RN03`, `RN04`) | Seção **Conquistados** (ícone, nome, data "Conquistado em DD/MM/AAAA", "é seu para sempre") e **Próximos marcos** (ícone em cinza, critério legível e barra *goal-gradient* "2 de 5 pratos") | N20, N21 |
+| **Culinárias** (`US14`, `RN07`) | Cards por culinária: bandeira, nome, barra %, "2 de 10 · faltam 8". Toque expande a grade de pratos: concluídos coloridos com ✓ e nota; pendentes em silhueta `surfaceAlt` com nome; evoluções ainda não reveladas como "Prato misterioso" (interrogação), por último e contadas no total. Ordenação: com progresso primeiro, depois alfabética | N18 |
+| **Evoluções** (`US15`, `RN02`, `RN18`) | Uma cadeia por cartão: `Nível 1 → Nível 2 → Nível 3` (vertical). Nó **concluído** (✓ colorido), **desbloqueado** ("Pronto para cozinhar" → abre Receita), **misterioso** (interrogação, sem nome + "Conclua *Ratatouille* para revelar", link para o prato base; sob outro mistério, "Revele o prato acima primeiro", sem link) | N19 |
+| **Badges** (`US16`, `RN03`, `RN04`) | Seção **Conquistados** (ícone, nome, critério que levou à conquista; sem data) e **Próximos marcos** (ícone em cinza, critério legível e barra *goal-gradient* "2 de 5 pratos") | N20, N21 |
 | **Histórico** (`US12`, `RN06`) | Linha do tempo decrescente: data, prato, estrelas, trecho do relato e chip "Toque pessoal" se houver `changes`. Repetições aparecem como entradas separadas. Toque abre folha com o registro completo | N22 |
 
 ### Estados

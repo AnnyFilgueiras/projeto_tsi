@@ -120,7 +120,24 @@ const SAMPLE_DISHES: readonly CatalogDishSummaryDto[] = [
   },
 ];
 
+// Evolution of Ratatouille (RN02): stays a mystery until Ratatouille is completed (#86).
+const DISH_EVOLUTION_FR = '33333333-3333-4333-8333-333333333308';
+const EVOLUTION_FR: CatalogDishSummaryDto = {
+  dishId: DISH_EVOLUTION_FR,
+  name: 'Tian Provençal',
+  cuisineId: CUISINE_FR,
+  baseDishId: DISH_SAFE_FR,
+  prepTimeMinutes: 50,
+  difficulty: 'medium',
+  allergens: [],
+  allergenState: 'verified',
+  confirmedAllergenFree: true,
+  photoHash: 'f'.repeat(64),
+  updatedAt: '2026-11-22T00:00:00.000Z',
+};
+
 function createDeps(overrides?: {
+  dishes?: readonly CatalogDishSummaryDto[];
   restrictions?: readonly AllergenCode[];
   preferences?: readonly string[];
   completedDishIds?: readonly string[];
@@ -132,7 +149,7 @@ function createDeps(overrides?: {
 
   const catalogRead: CatalogReadPort = {
     getApprovedRecipe: async () => null,
-    listApprovedDishes: async () => SAMPLE_DISHES,
+    listApprovedDishes: async () => overrides?.dishes ?? SAMPLE_DISHES,
     getCuisineById: async () => null,
     getIngredientsByIds: async () => new Map(),
     getUtensilsByIds: async () => new Map(),
@@ -245,6 +262,23 @@ describe('SuggestionService (UC01, RN08, RN10, RN11, A06, A13)', () => {
       incompatible: 1,
       unconfirmed: 1,
     });
+  });
+
+  it('RN02 / #86: holds back an evolution until its base dish is completed', async () => {
+    const dishes = [...SAMPLE_DISHES, EVOLUTION_FR];
+    const input = { accountId: ACCOUNT_ID, sessionKey: 'session-1', limit: 10, usePantry: false };
+
+    const before = await createDeps({ dishes }).service.getSuggestions(input);
+    const after = await createDeps({
+      dishes,
+      completedDishIds: [DISH_COMPLETED, DISH_SAFE_FR],
+    }).service.getSuggestions(input);
+
+    expect(before.suggestions.map((item) => item.dish.dishId)).not.toContain(DISH_EVOLUTION_FR);
+    expect(after.suggestions.map((item) => item.dish.dishId)).toEqual([
+      DISH_EVOLUTION_FR,
+      DISH_SAFE_JP,
+    ]);
   });
 
   it('RN08 / UC01: returns noResult=true when all compatible dishes are already exhausted', async () => {

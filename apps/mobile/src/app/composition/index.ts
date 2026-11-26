@@ -67,6 +67,12 @@ import { createCookingStateRepository } from '../../features/recipe/data/cooking
 import { createRecipeRepository } from '../../features/recipe/data/recipe-repository';
 import { createRecipeFeature, type RecipeFeature } from '../../features/recipe/domain';
 import { readMobileConfig, type MobileConfig } from './config';
+import {
+  approvalMarksKitchenNews,
+  completionFinishesCooking,
+  profileChangesInvalidate,
+} from './feature-ports';
+import { createKitchenNews, type KitchenNews } from './kitchen-news';
 
 /**
  * Single composition root for the mobile app (A8): the only place that instantiates concrete
@@ -90,6 +96,8 @@ export interface MobileDependencies {
   readonly recipe: RecipeFeature;
   /** Rating (#83), Celebration (#84) and Collection (#85): all offline-first reads of the local copy. */
   readonly progress: ProgressDependencies;
+  /** "News" dot on the Kitchen tab after an approval (§1.1 rule 4); memory only. */
+  readonly kitchenNews: KitchenNews;
   /** Best-effort background refresh of the offline copy; never throws (offline is normal). */
   readonly syncInBackground: () => Promise<void>;
 }
@@ -169,7 +177,8 @@ export async function createMobileDependencies(
     now,
   });
 
-  const suggestions = createSuggestionRound({
+  const kitchenNews = createKitchenNews();
+  const suggestionRound = createSuggestionRound({
     gateway: createSuggestionsGateway({ http, sessions }),
     store: createSuggestionsLocalStore(localDatabase),
     photos: {
@@ -187,8 +196,11 @@ export async function createMobileDependencies(
     },
     newIdempotencyKey: newUuidV7,
   });
+  const suggestions = approvalMarksKitchenNews(suggestionRound, kitchenNews);
 
   const preferences = createPreferencesRepository({ http, localDatabase });
+  // Device-only "em preparo" state, shared by the recipe feature and the rating's completion port.
+  const cookingState = createCookingStateRepository(localDatabase);
   const profileRepository = createProfileRepository(localDatabase);
   const progressRepository = createProgressRepository(localDatabase);
 
@@ -200,32 +212,35 @@ export async function createMobileDependencies(
     downloadSet,
     photos,
     onboarding: createOnboardingRepository(localDatabase),
-    profile: {
-      prepareAccount: async () => {
-        try {
-          await sessions.ensureSession();
-        } catch (error) {
-          if (isUnreachable(error)) return 'offline';
-          throw error;
-        }
-        try {
-          await downloadSet.pull();
-        } catch (error) {
-          if (__DEV__) console.warn('First download set skipped:', (error as Error).name);
-        }
-        return 'ready';
+    profile: profileChangesInvalidate(
+      {
+        prepareAccount: async () => {
+          try {
+            await sessions.ensureSession();
+          } catch (error) {
+            if (isUnreachable(error)) return 'offline';
+            throw error;
+          }
+          try {
+            await downloadSet.pull();
+          } catch (error) {
+            if (__DEV__) console.warn('First download set skipped:', (error as Error).name);
+          }
+          return 'ready';
+        },
+        registerRestrictions: createRegisterRestrictions({ enqueuer: operationEnqueuer, now }),
+        listCuisines: () => preferences.listCuisines(),
+        saveCulinaryPreferences: createSaveCulinaryPreferences(preferences),
+        readProfile: () => profileRepository.read(),
+        revokeRestriction: createRevokeRestriction({ enqueuer: operationEnqueuer }),
+        savePreferences: (cuisineIds) => preferences.save(cuisineIds),
       },
-      registerRestrictions: createRegisterRestrictions({ enqueuer: operationEnqueuer, now }),
-      listCuisines: () => preferences.listCuisines(),
-      saveCulinaryPreferences: createSaveCulinaryPreferences(preferences),
-      readProfile: () => profileRepository.read(),
-      revokeRestriction: createRevokeRestriction({ enqueuer: operationEnqueuer }),
-      savePreferences: (cuisineIds) => preferences.save(cuisineIds),
-    },
+      suggestionRound,
+    ),
     suggestions,
     recipe: createRecipeFeature({
       recipes: createRecipeRepository({ http, localDatabase, photos }),
-      cooking: createCookingStateRepository(localDatabase),
+      cooking: cookingState,
       candidates: createCandidatesReader(localDatabase),
       now,
     }),
@@ -233,13 +248,13 @@ export async function createMobileDependencies(
       registerRating: createRegisterRating({
         enqueuer: operationEnqueuer,
         progress: progressRepository,
-        // Clearing the "em preparo" mark after a rating lands in #86 (cooking-state `finish`).
-        completionListener: { onDishCompleted: async () => undefined },
+        completionListener: completionFinishesCooking(cookingState),
       }),
       loadRatingContext: (dishId) => loadRatingContext(progressRepository, dishId),
       snapshots: progressRepository,
       collection: progressRepository,
     },
+    kitchenNews,
     syncInBackground: async () => {
       try {
         await sessions.ensureSession();

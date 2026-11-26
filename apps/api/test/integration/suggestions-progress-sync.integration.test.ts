@@ -279,6 +279,9 @@ describe('MVP-04C integration: suggestions, recipes, rating.register gamificatio
       ).suggestions.map((item) => item.dish.dishId);
       expect(nextSessionDishIds).toContain(toDiscard.dish.dishId);
       expect(nextSessionDishIds).not.toContain(toApprove.dish.dishId);
+      // RN02 / #86: evolutions stay out of suggestions until their base dish is completed.
+      expect(nextSessionDishIds).not.toContain(DISH_IDS.carbonara);
+      expect(nextSessionDishIds).not.toContain(DISH_IDS.raguBolognese);
 
       // 4. GET /v1/recipes/:dishId delivers global substitutions compatible with `isSubstituteAllowed` (RN15, RN22).
       const recipeRes = await app.inject({
@@ -367,6 +370,12 @@ describe('MVP-04C integration: suggestions, recipes, rating.register gamificatio
           (item) => item.dish.dishId,
         ),
       ).not.toContain(DISH_IDS.aglioEOlio);
+      // RN02 / #86: rating Aglio e Olio reveals Carbonara; Ragù Bolognese still waits for it.
+      const afterRatingDishIds = (
+        afterRatingSuggestionsRes.json() as SuggestionResponseBody
+      ).suggestions.map((item) => item.dish.dishId);
+      expect(afterRatingDishIds).toContain(DISH_IDS.carbonara);
+      expect(afterRatingDishIds).not.toContain(DISH_IDS.raguBolognese);
 
       // Re-sending the exact same opId returns repeated=true without duplicating DB rows.
       const replayRatingRes = await app.inject({

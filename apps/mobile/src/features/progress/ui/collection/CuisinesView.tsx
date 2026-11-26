@@ -92,20 +92,23 @@ function CuisineCard({
 // Tiles do not navigate: opening a recipe that was never downloaded belongs to the Kitchen flow.
 function DishTile({ dish }: { dish: CuisineDish }) {
   const done = dish.completed && dish.stars !== null;
+  const name = dish.name ?? COLLECTION_COPY.mysteryDish;
   return (
     <View
       style={styles.tile}
       accessible
       accessibilityLabel={
-        done
-          ? COLLECTION_COPY.dishDoneA11y(dish.name, dish.stars ?? 0)
-          : COLLECTION_COPY.dishPendingA11y(dish.name)
+        dish.name === null
+          ? COLLECTION_COPY.mysteryDishA11y
+          : done
+            ? COLLECTION_COPY.dishDoneA11y(dish.name, dish.stars ?? 0)
+            : COLLECTION_COPY.dishPendingA11y(dish.name)
       }
       testID={`dish-tile-${dish.dishId}`}
     >
       <View style={[styles.art, done ? styles.artDone : styles.artPending]}>
         <Icon
-          name="dish-placeholder"
+          name={dish.name === null ? 'question' : 'dish-placeholder'}
           size={28}
           color={done ? colors.primary : colors.textSecondary}
         />
@@ -116,7 +119,7 @@ function DishTile({ dish }: { dish: CuisineDish }) {
         ) : null}
       </View>
       <Text style={[styles.dishName, !done && styles.pendingName]} numberOfLines={2}>
-        {dish.name}
+        {name}
       </Text>
       {done ? (
         <View style={styles.score}>

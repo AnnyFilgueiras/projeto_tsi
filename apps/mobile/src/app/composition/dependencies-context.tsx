@@ -7,7 +7,8 @@ export interface DependenciesProviderProps {
   /** Builds the dependency graph once (the real composition root, or fakes in tests). */
   readonly create: () => Promise<MobileDependencies>;
   readonly loading: ReactNode;
-  readonly renderError: (error: Error) => ReactNode;
+  /** `retry` builds the graph again (e.g. the encrypted database could not be opened). */
+  readonly renderError: (error: Error, retry: () => void) => ReactNode;
   readonly children: ReactNode;
 }
 
@@ -27,11 +28,12 @@ export function DependenciesProvider({
     | { kind: 'error'; error: Error }
   >({ kind: 'loading' });
   // StrictMode runs effects twice in development; opening the database twice would race.
-  const started = useRef(false);
+  const started = useRef(-1);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
-    if (started.current) return;
-    started.current = true;
+    if (started.current === attempt) return;
+    started.current = attempt;
     create()
       .then((deps) => {
         setState({ kind: 'ready', deps });
@@ -43,10 +45,15 @@ export function DependenciesProvider({
           error: error instanceof Error ? error : new Error(String(error)),
         }),
       );
-  }, [create]);
+  }, [create, attempt]);
+
+  const retry = () => {
+    setState({ kind: 'loading' });
+    setAttempt((current) => current + 1);
+  };
 
   if (state.kind === 'loading') return <>{loading}</>;
-  if (state.kind === 'error') return <>{renderError(state.error)}</>;
+  if (state.kind === 'error') return <>{renderError(state.error, retry)}</>;
   return <DependenciesContext.Provider value={state.deps}>{children}</DependenciesContext.Provider>;
 }
 

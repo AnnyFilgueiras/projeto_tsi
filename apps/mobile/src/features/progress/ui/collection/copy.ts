@@ -24,16 +24,20 @@ export const COLLECTION_COPY = {
   dishDoneA11y: (name: string, stars: number) =>
     `${name}, concluído, nota ${formatStars(stars)} de 5`,
   dishPendingA11y: (name: string) => `${name}, ainda não preparado`,
+  // #86 format C: an evolution stays nameless until its base dish is cooked.
+  mysteryDish: 'Prato misterioso',
+  mysteryDishA11y: 'Prato misterioso, ainda não revelado',
 
   completed: 'Concluído',
   readyToCook: 'Pronto para cozinhar',
   lockedPrefix: 'Conclua ',
-  lockedSuffix: ' para abrir',
-  lockedA11y: (base: string) => `Bloqueado. Conclua ${base} para abrir`,
+  lockedSuffix: ' para revelar',
+  revealAboveFirst: 'Revele o prato acima primeiro',
+  lockedA11y: (base: string) => `Prato misterioso. Conclua ${base} para revelar`,
+  lockedDeepA11y: 'Prato misterioso. Revele o prato acima primeiro',
 
   earned: 'Conquistados',
   next: 'Próximos marcos',
-  earnedAt: (iso: string) => `Conquistado em ${formatDate(new Date(iso))}`,
   badgeEarnedA11y: (name: string) => `${name}, conquistado`,
   badgeLockedA11y: (name: string) => `${name}, ainda não conquistado`,
   milestone: (current: number, target: number) => `${current} de ${target}`,
