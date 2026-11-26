@@ -135,3 +135,27 @@ mas careciam de:
 |---|---|
 | `US13` (Pontuação, `RN19`) ou `US17` (Indicação a amigo) entrarem em versão pós-MVP | Estender o módulo `progress` (para `RN19`) usando o passo D6 do `framework-gamificacao.md`, mantendo a fronteira pública `ProgressPublic`. |
 | Surgimento de mais de 10 tipos de marco com lógica complexa | Reavaliar a decisão `R03` (`padroes-de-projeto.md`), podendo substituir o `switch` exaustivo por uma tabela de estratégias por tipo de marco. |
+
+## Detalhamento (Pratos misteriosos e ícones de badge — 25/11/2026)
+
+Registro de duas decisões tomadas pela dupla durante `MVP-04H` (#86). A decisão original continua valendo; isto só detalha como ela aparece na tela.
+
+### 1. Evoluções ainda não alcançadas são "pratos misteriosos" (formato C)
+
+- **Regra:** uma evolução (`baseDishId != null`) cujo prato base ainda não foi concluído aparece **sem nome** ("Prato misterioso", ícone de interrogação) na Coleção e **não é sugerida** na Descobrir. Concluir o prato base revela o nome na hora (`RN02`).
+- **Todos os níveis da cadeia aparecem:** o total da culinária (`totalDishes`, `RN07`) continua contando os pratos ocultos.
+- **A dica cita o prato base só quando ele está visível:** "Conclua *Aglio e Olio* para revelar". Sob outro mistério, a dica é "Revele o prato acima primeiro", que aponta o base pela posição e ainda cumpre a `RN02`.
+- **Por que não esconder os níveis seguintes:** o "falta X" já revela que eles existem. Reduzir o total para escondê-los faria uma culinária "Completa" voltar a ficar incompleta quando o prato surgisse, uma perda que este ADR proíbe (`CD8`, `RN04`, `RNF09`).
+- **Perfis atendidos** (personas de `framework-gamificacao.md` §4):
+  - O *Explorer* ganha a silhueta que convida à descoberta (`CD7`).
+  - O *Achiever* mantém uma meta estável e um próximo passo claro (`CD2`).
+  - Socializador e predador não são afetados: a Onda 1A não tem recursos sociais nem competição.
+- **Risco aceito:** uma restrição alimentar que exclui o prato base (ex.: ovo na Carbonara) impede revelar as evoluções acima dele. Isso já decorria de `RN02` + `RN07` e fica para a revisão de UX (`UX-02`, #69).
+
+### 2. Ícone próprio por badge: `Should`, cosmético e persuasivo
+
+- **Decisão:** cada badge pode declarar um `iconKey` opcional na própria definição, que vem do seed (`RN03`): o mesmo lugar do nome, da descrição e do marco. O app liga a chave a um SVG do seu catálogo de ícones e usa o ícone genérico quando ela falta ou é desconhecida.
+- **Alternativa descartada:** uma tabela `badgeId → ícone` só no app. Ela dividiria a definição do badge em dois lugares e prenderia o app aos UUIDs do seed.
+- **Prioridade `Should`:** nenhuma regra de progresso depende do ícone. Mesmo assim, ele tem papel persuasivo: transforma o badge em objeto de coleção reconhecível (`CD4` posse, `CD2` conquista), como os avatares e emblemas do Duolingo.
+- **Rastreio:** `GAM-03` (#100, campo `iconKey` da API ao app) e `GAM-04` (#101, um desenho por badge do seed, sub-issues #102–#112), na Onda 1B (#46).
+
