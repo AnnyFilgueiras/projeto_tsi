@@ -89,7 +89,8 @@ curl -s -o /dev/null -w '%{http_code} %{content_type}\n' -H "Authorization: Bear
 - **Bruno:** ambiente **Cloud** da coleção `docs/fase2/04-contratos/bruno/panelada-curadoria/`:
   ```bash
   export PANELADA_CLOUD_API_URL=$API CURATOR_EMAIL=... CURATOR_PASSWORD=...
-  cd docs/fase2/04-contratos/bruno/panelada-curadoria && npx @usebruno/cli run --env Cloud
+  cd docs/fase2/04-contratos/bruno/panelada-curadoria
+  npx @usebruno/cli run 00-session 01-base-catalog 02-manual-flow 04-negatives 05-query --env Cloud
   ```
 
 ## 7. Cold start (apresentação)
@@ -162,7 +163,7 @@ curl -sf http://localhost:3000/v1/health
 
 ### H4 — `A09` contrato/curadoria: Bruno contra a nuvem
 
-- **Como:** `npx @usebruno/cli run --env Cloud` (§6).
+- **Como:** a coleção sem `03-assisted-flow` (importação assistida, `MVP-05`), com o comando do §6. Cada execução publica um "Crepe simples" na nuvem.
 - **Resultado:** _pendente_ (`<n>` requisições, `<n>` asserts aprovados)
 
 ### Jornada E2E da Onda 1A no emulador
