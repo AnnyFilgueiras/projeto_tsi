@@ -1,0 +1,42 @@
+# Render Blueprint for Cloud 4C (MVP-04G, ADR-012): API on Render Free + Supabase Postgres/Storage.
+# Step-by-step setup, secret rotation and fallback: docs/dev/DEPLOY.md.
+# Entries with `sync: false` are secrets: Render asks for them on the first Blueprint sync and
+# never reads them from this file.
+services:
+  - type: web
+    name: panelada-api
+    runtime: docker
+    plan: free
+    # Same AWS region as Supabase us-east-1, so each request pays a single Brazil-US round trip.
+    region: virginia
+    dockerContext: .
+    dockerfilePath: ./apps/api/Dockerfile
+    healthCheckPath: /v1/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TZ
+        value: UTC
+      - key: LOG_LEVEL
+        value: info
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_SSL_CA
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: FIELD_ENCRYPTION_KEY
+        sync: false
+      - key: FIELD_ENCRYPTION_KEY_VERSION
+        value: '1'
+      - key: PHOTO_STORAGE_DRIVER
+        value: supabase
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_PHOTOS_BUCKET
+        value: dish-photos
+      - key: PHOTO_STORAGE_TIMEOUT_MS
+        value: '10000'

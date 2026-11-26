@@ -207,6 +207,7 @@ Para evitar divergência de implementação entre o App e a API sobre pratos que
 1. **No App (`Sugestões`, `Busca`, `Coleção` e `Receita e Preparo`):**
    - Enquanto `dish.baseDishId != null` e o `dish.id` não constar em `EvolutionUnlock` (isto é, o prato base `baseDishId` ainda não foi concluído), a evolução é exibida como **bloqueada** (`UC04-FA3`, *Core Drive 6: Scarcity positiva*), informando o nome do prato base necessário e mantendo os botões de *"Iniciar passo a passo"* e *"Avaliar prato"* desabilitados na interface.
    - Nas sugestões automáticas (`UC01` / `SuggestionSearch`), evoluções cujo `baseDishId` ainda não foi concluído pelo usuário não são apresentadas como sugestão do dia.
+   - *Detalhamento de 25/11/2026 ([ADR-016](../02-adr/adr-016-framework-conceitual-gamificacao.md)):* na Coleção, a evolução bloqueada aparece como **"Prato misterioso"**, sem nome, e cita o prato base só quando ele já está visível (formato C, `MVP-04H` #86).
 2. **No Servidor (`RatingApplier` na Sincronização — Resiliência `A08`):**
    - Caso a fila offline (`SyncService`) receba as avaliações do prato base e da evolução fora de ordem ou em lotes distintos, o `RatingApplier` **não rejeita** a avaliação de um prato válido por causa da ordem de desbloqueio: ele persiste a avaliação normalmente (respeitando `A08` — *"0 avaliações perdidas"*) e recalcula `UnlockRules` de forma aditiva (`RN04`).
 3. **Invariante Anti-Ciclo no Catálogo (`PublicationGate`):**
@@ -229,6 +230,8 @@ Para garantir que nenhuma conquista do perfil seja impossível de obter no lanç
 | **9** | **Mestre da Evolução** | Concluiu o topo de uma cadeia de evolução de 3 níveis (`minLevel: 3`). | `(g)` | `evolution_level` | `{ "type": "evolution_level", "minLevel": 3 }` | *Endgame* (CD2) |
 | **10** | **Passaporte Carimbado** | Concluiu pratos de 10 culinárias distintas. | `(c)` | `n_cuisines` | `{ "type": "n_cuisines", "quantity": 10 }` | *Endgame* (CD2, CD4) |
 | **11** | **Rei do Mundo** | Concluiu ao menos um prato de cada um dos 5 continentes. | `(d)` | `all_continents` | `{ "type": "all_continents" }` | *Endgame* (CD1, CD4) |
+
+> **Ícone por badge (`Should`, Onda 1B):** cada badge pode declarar um `iconKey` opcional no seed para ter ícone próprio (`CD4`/`CD2`, como os avatares do Duolingo); sem chave, o app usa o ícone genérico. Ver o detalhamento de 25/11/2026 no [ADR-016](../02-adr/adr-016-framework-conceitual-gamificacao.md), `GAM-03` (#100) e `GAM-04` (#101).
 
 ---
 

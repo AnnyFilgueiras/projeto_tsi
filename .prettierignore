@@ -1,0 +1,14 @@
+node_modules/
+dist/
+build/
+coverage/
+.expo/
+.plans/
+.worktrees/
+pnpm-lock.yaml
+docs/
+.agents/
+.github/ISSUE_TEMPLATE/
+*.md
+apps/api/drizzle/
+scripts/setup-agent-skills.mjs

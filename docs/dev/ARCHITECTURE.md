@@ -82,7 +82,7 @@ apps/mobile/src/
 │       ├── domain/               # Casos de uso e funções puras (ex.: UnlockCalculator, ReminderScheduler)
 │       └── data/                 # Repositórios da feature (único ponto que importa LocalDatabase)
 ├── core/                         # local-db (SqlCipher), network, sync, photos
-├── shared/                       # Componentes UI genéricos e tipos puros
+├── shared/                       # theme (tokens), format (PT-BR), ui (componentes de apresentação), assets
 └── app/composition/              # Raiz de composição única (regra A8 — sem Singletons)
 ```
 
@@ -94,6 +94,63 @@ apps/mobile/src/
 - `A6`: `UnlockCalculator` e `ReminderScheduler` são 100% puros (zero imports de React Native ou `core/`).
 - `A7`: O app importa apenas o entrypoint `rules` de `packages/allergen-rules` (nunca `invariants`).
 - `A8`: `src/app/composition/` é o único ponto que instancia adaptadores concretos e os injeta nas features (sem construtor com `?? new ConcreteAdapter()` dentro de features).
+- **Contrato gerado (`mobile-api-contract`):** `core/network/openapi.generated.ts` (tipos do `openapi.yaml`) pode ser importado — só como tipo — por `core/network`, `core/sync`, pelos adaptadores, pela composição e por `features/<f>/{domain,data}`; nunca por `ui/`.
+
+### Núcleo do app (`src/core/` — `MVP-04D`)
+
+| Área | Porta (o que features/composição enxergam) | Adaptador concreto (só a composição cria) |
+|---|---|---|
+| `local-db` | `LocalDatabase` (`execute`/`query`/`transaction`) | `openSqlCipherDatabase` (`expo-sqlite` + SQLCipher, chave de 256 bits do `DatabaseKeyStore` no `expo-secure-store`) |
+| `local-db` | `runMigrations` + `LOCAL_MIGRATIONS` (versão em `PRAGMA user_version`, uma transação por migration, idempotente, *append-only*; v2 `stage-1-onda-1a` — `MVP-04E2`) | — |
+| `network` | `HttpClient.call(operationId, …)` tipado pelo `openapi.yaml`; sempre envia `X-Allergen-Package-Version`; cabeçalhos do contrato (ex.: `Idempotency-Key`) vão em `header`, tipado pelo `openapi.yaml`; renova o token (refresh rotativo, uma renovação compartilhada entre chamadas concorrentes) | `createFetchHttpClient`, `createSecureStoreTokenStore`, `createSessionGate` (conta anônima na primeira abertura) |
+| `sync` | `OperationEnqueuer.enqueue(request)` → `confirmed` \| `rejected` \| `unavailable` (reenviar a `operation` devolvida, mesmo `opId` UUID v7) \| `queued` (Estágio 2) | `createDirectOnlineOperationEnqueuer` (Estágio 1), `createDownloadSetSync` |
+| `photos` | `PhotoManager` (WebP por SHA-256 em `documentDirectory/photos/`, verificação de integridade, `prune`) | `createFileSystemPhotoManager` (`expo-file-system`) |
+
+- **Transações locais serializadas:** `LocalDatabase` usa uma única conexão com fila FIFO (`serialized-database.ts`); uma instrução fora da transação espera a transação aberta terminar. Não use `withExclusiveTransactionAsync` do `expo-sqlite`: ele abre outra conexão sem `PRAGMA key`.
+- **Estágio 1 (`ADR-008`):** o `DirectOnlineOperationEnqueuer` só grava a cópia local **depois** da confirmação do servidor, via *projetores* por tipo de operação (`LocalOperationProjectors`), registrados pela camada `data/` da feature dona na composição. Offline, `5xx` ou rejeição não tocam o banco local. Registrados hoje: `restriction.register`/`restriction.revoke` (`features/profile/data/restriction-repository.ts`, `MVP-04E3`). Ajustes de perfil que não são operações de sync (ex.: `PUT /v1/profile/preferences`) seguem a mesma regra no repositório da feature: a cópia local só muda depois do `2xx`.
+- **Rotas do `HttpClient`:** `API_ROUTES` (`core/network/http-client.ts`) lista só as operações já usadas pelo app; ao consumir uma rota nova do `openapi.yaml`, registre-a ali (o Jest não faz typecheck e falha em tempo de execução com `route` indefinida).
+- **Troca para o Estágio 2:** substituir a criação do enqueuer em `src/app/composition/index.ts` pelo `OutboxOperationEnqueuer` + `Synchronizer`. Features e telas não mudam (o tipo de resultado já prevê `queued`).
+- **Navegação (`MVP-01`):** `app/_layout.tsx` monta o `DependenciesProvider` (grafo criado uma vez, sem singletons); `app/(tabs)/_layout.tsx` redireciona para `/onboarding` até `profile_local.onboarded_at` existir; as rotas só montam telas de `src/features/<f>/ui/` e repassam portas por props.
+- **Rotas de pilha da Receita (`MVP-04E1`):** `app/recipe/[dishId]/` é uma `Stack` (`index`, `rate`, `celebrate`); `rate` e `celebrate` abrem como `fullScreenModal`. Por ficarem fora de `(tabs)`, a barra de abas some sozinha. Cada issue de tela preenche só o próprio arquivo de rota.
+
+### Biblioteca visual (`src/shared/{theme,format,ui}` — `MVP-04E1`)
+
+- **Só apresentação:** `shared/ui` recebe dados e callbacks por props; não importa `features/`, `core/`, `expo-router` nem o contrato gerado (o ESLint já barra). Adaptadores de navegação ficam em `app/` (ex.: `RouterTabBar` em `app/(tabs)/_layout.tsx` converte as props do react-navigation para o `TabBar`).
+- **Tokens obrigatórios:** cor, espaçamento, raio, tipografia, sombra e alvo de toque vêm de `shared/theme` (cópia literal da §1.2 de `docs/fase3/ux-onda1a.md`). Nada de hex, `fontSize`, sombra ou raio literal em componente ou tela. As cores `allergen*` só significam segurança alimentar; erro técnico usa `danger`.
+- **Textos de segurança fixos (`A06`):** banner `RN16`, título e motivos do alerta *fail-closed*, rótulos do selo e "Contém alérgeno do seu perfil" vivem em `shared/ui/allergen/copy.ts`; rótulos dos 19 códigos em `allergen/labels.ts`. As telas não reescrevem esses textos.
+- **Ícones e imagens, nunca emoji:** ícones são SVG 24×24 com `currentColor` em `shared/assets/icons/`, carregados pelo `react-native-svg-transformer` (ver `metro.config.js`; no Jest viram um `View` inerte). Use `<Icon name="…" />`; o nome é tipado por `icons/registry.ts`. Imagens entram como `ImageSourcePropType` (`DishThumb`, `BadgeIcon`, `EmptyState`), com *placeholder* vetorial quando não houver foto.
+- **Acessibilidade (§1.6):** alvo ≥ `touchTarget.min`, sem `allowFontScaling={false}`, estado por ícone + texto, `accessibilityLabel` obrigatório em botão só de ícone; animações (`ProgressBar`, `Skeleton`) duram ≤ 300 ms e param com "reduzir movimento" (`useReducedMotion`).
+- **Novo componente = arquivo novo** em `shared/ui/` + export em `shared/ui/index.ts` (+ entrada em `icons/registry.ts` se trouxer ícone). Alterar a API de um componente existente vai em PR próprio, para não conflitar com telas em paralelo. Para conferir tudo visualmente, abra `/dev/ui-catalog` no dev build (em produção redireciona para `/`).
+- **Datas e números:** `shared/format` (`formatDate`, `formatTime`, `formatLastSync`, `formatStars`) monta PT-BR à mão, na hora local do aparelho, sem depender de `Intl` no Hermes.
+
+### Dono das tabelas locais (`A1`, `A3`, `A8` — `MVP-04E2`)
+
+- **Escreve** numa tabela local só a camada `data/` da feature dona e o `DownloadSetSync` (que substitui a cópia da camada 1 numa única transação).
+- **Lê** qualquer `features/<f>/data/` (`A3`); telas e `domain/` nunca leem SQL direto.
+- Uma feature que precise **escrever** na tabela de outra recebe uma porta injetada pela raiz de composição (`A1`, `A8`) — nunca importa o repositório da outra feature.
+
+| Dono | Tabelas | Observação |
+|---|---|---|
+| `profile` | `profile_local`, `restrictions_local` | `onboarded_at` é só do aparelho; o download-set não o sobrescreve. |
+| `suggestions` | `candidates_local` | |
+| `recipe` | `recipes_local`, `local_cooking_state` | `local_cooking_state` é **por prato** (`dish_id`, `started_at`, `current_step`), existe só no aparelho e o `DownloadSetSync` nunca a toca (GLOSSARY). |
+| `progress` | `ratings_local`, `unlocks_local` | Desbloqueios só acumulam (`RN04`). |
+| `core/sync` | `catalog_index_local`, `meta_sync` | `catalog_index_local` é linha única (`id = 1`) com o JSON do `catalogIndex` e o `generatedAt` do download-set; base do `UnlockCalculator` (Coleção, cadeias de evolução, badges). |
+
+- **Feature `recipe` (`MVP-04E6`, #80):** a composição expõe `recipe: RecipeFeature` (`loadRecipe`, `startCooking`, `saveStep`). `domain/` não pode importar `core/network` nem `core/photos`, então a `data/` devolve falha de rede como valor (`offline`/`not-found`), recebe a foto pela porta estrutural `RecipePhotoStore` (o `PhotoManager` a satisfaz) e grava receita + "em preparo" numa transação só, depois dos downloads. A Cozinha (#81) reusa `startCooking` e `cooking-state-repository.listActive`.
+
+### Fatia de referência e portas entre features (`MVP-04E`/`MVP-04H` — #86)
+
+- **Fatia de referência:** `features/profile` é o exemplo a copiar ao abrir uma feature. `ui/` só recebe funções por props (nunca importa `data/`); `domain/` tem os casos de uso (`register-restrictions`, `revoke-restriction`) que falam só com a porta `OperationEnqueuer` (`A4`); `data/` lê e grava as tabelas da feature e exporta os **projetores** (`restrictionProjectors`) que o enqueuer roda só depois da confirmação do servidor (Estágio 1, `ADR-008`). A composição junta as três camadas e registra os projetores.
+- **Portas entre features (`A1`, `A8`):** ficam em `src/app/composition/feature-ports.ts`, únicas ligações em que uma feature reage à outra:
+
+| Porta | Origem → efeito |
+|---|---|
+| `completionFinishesCooking` | `progress` salva a avaliação → `recipe` tira o prato de "em preparo" (`DishCompletionListener` → `cooking-state-repository.finish`). |
+| `approvalMarksKitchenNews` | `suggestions` aprova → ponto de novidade na aba Cozinha (`kitchen-news.ts`, só em memória; a aba limpa ao ganhar foco). |
+| `profileChangesInvalidate` | `profile` muda restrição ou preferência → `suggestions.invalidate()`; a Descobrir busca de novo ao ganhar foco (`version()`). |
+
+- O teste `apps/mobile/test/navigation.test.tsx` liga as features reais sobre uma API falsa usando essas mesmas portas e cobre a jornada feliz da Onda 1A.
 
 ---
 
@@ -101,12 +158,21 @@ apps/mobile/src/
 
 | Porta | Adaptador Local / Teste | Adaptador Produção (Cloud 4C) |
 |---|---|---|
-| `PhotoStorage` (`P02f`) | `LocalDiskPhotoStorage` (volume Docker) / fake | `SupabasePhotoStorage` (Object Storage, sem SDK BaaS no cliente) |
+| `PhotoStorage` (`P02f`) | `LocalDiskPhotoStorage` (volume Docker) / fake | `SupabasePhotoStorage` (Object Storage via REST HTTP, sem SDK BaaS no cliente) |
 | `AiProvider` (`P02b`) | `RecordedProvider` (zero custo em dev/testes) | `KimiProvider` (teto R$ 20, aprovação humana obrigatória) |
 | `KeyProvider` (`P02c`) | `FileKey` (dev) / fake | `SecretManagerKey` (variável/segredo fora do banco) |
 | `OperationEnqueuer` (`P04`) | `DirectOnlineOperationEnqueuer` (**Estágio 1**) | `OutboxOperationEnqueuer` + `Synchronizer` (**Estágio 2**) |
 
-### Estratégia de Containers (a configurar em `MVP-02`)
-- **No Docker (`docker-compose.yml`):** PostgreSQL (`TZ=UTC`, com bancos separados `panelada_dev` e `panelada_test`) + API Fastify escutando em `0.0.0.0:3000` + volume de fotos. Ninguém instala Postgres no host.
+### Padronização de Fotos do Catálogo (`ADR-012`, `MVP-04B`)
+- **Tipos de entrada aceitos na curadoria (`PUT /v1/curation/proposals/{id}/photo`):** `image/webp`, `image/jpeg` e `image/png` (validados por *magic bytes*; outros formatos retornam `415`).
+- **Teto de upload:** `5 MiB` (acima retorna `413`).
+- **Normalização de saída:** sempre **`image/webp`** (qualidade `82`, rotação EXIF aplicada e metadados EXIF removidos), dimensão máxima **`1024 × 1024` px** (`fit: 'inside'`, `withoutEnlargement: true`, preservando a proporção original sem cortes — proporção recomendada na curadoria: `4:3` ou `16:9` para cards mobile), nomeada por **SHA-256** do conteúdo e servida com `Cache-Control: public, max-age=31536000, immutable`.
+
+### Estratégia de Containers (`docker-compose.yml`)
+- **No Docker (`docker-compose.yml`):** PostgreSQL (`postgres:16-alpine`, `TZ=UTC`, com bancos separados `panelada_dev` e `panelada_test` inicializado em `infra/postgres/init/01-create-test-db.sql`) + API Fastify escutando em `0.0.0.0:3000` (`GET /v1/health`) + volume `panelada_photos`. Ninguém instala Postgres no host. Detalhes operacionais em [`DATABASE.md`](./DATABASE.md).
 - **No host:** apenas Emulador Android + Expo/React Native (`apps/mobile`), que acessa a API no Docker via `10.0.2.2:3000` (Android emulator) ou `localhost:3000`.
-- **Nota:** Quando `MVP-02` subir a primeira fatia real, atualizar este documento com o caminho da menor fatia completa de referência na API e no Mobile ("leia essa fatia primeiro antes de criar outra").
+- **Fatia vertical de referência (API — `MVP-04A`):** leia `apps/api/src/modules/profile/` (`public/{index,profile-lifecycle,profile-query,restrictions-for-filter}.ts` + `internal/{schema,repository,service,applier,routes}.ts`) e a composição em `apps/api/src/app.ts` antes de criar o próximo módulo. No Mobile, leia `apps/mobile/src/features/suggestions/` (`MVP-04E5`, #79):
+  - `domain/` define as portas que a feature precisa (`SuggestionsGateway`, `SuggestionsLocalStore`, `DishPhotos`) e os casos de uso (`createSuggestionRound`), sem importar `core/network`: o lint barra, então `data/` traduz erros de transporte em `ok | offline | failed`.
+  - `data/` implementa as portas (`HttpClient` e `LocalDatabase`); `ui/` recebe o caso de uso por props e nunca vê o contrato gerado.
+  - A composição cria o objeto da feature uma vez (estado de sessão sem singleton, `A8`) e a rota em `app/` só liga `useDependencies()` e `router` às props da tela.
+  - Mutação online fora do contrato `Operation` (aprovar/descartar sugestão) chama o `HttpClient` direto com uma `Idempotency-Key` UUID v7 por (ação, item), reaproveitada na nova tentativa.

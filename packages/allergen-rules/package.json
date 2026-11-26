@@ -1,0 +1,23 @@
+{
+  "name": "@panelada/allergen-rules",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./rules": {
+      "types": "./src/rules.ts",
+      "default": "./src/rules.ts"
+    },
+    "./invariants": {
+      "types": "./src/invariants.ts",
+      "default": "./src/invariants.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "vitest": "^3.1.1"
+  }
+}

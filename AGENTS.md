@@ -8,13 +8,22 @@ Aplicativo mobile de culinária internacional gamificada. Sugere pratos conforme
 
 ## Setup e Comandos
 
+> **Bootstrap local sem instalar `pnpm` globalmente:** rode `npx --yes pnpm install` uma vez no clone e use `./node_modules/.bin/pnpm <comando>` (ou apenas `pnpm <comando>` se já estiver no `PATH`). PostgreSQL (`TZ=UTC`, bancos `panelada_dev` e `panelada_test`) e API Fastify (`0.0.0.0:3000`) rodam **100% em Docker (`docker-compose.yml`)** — nunca instale Postgres no host. Apenas o Emulador Android + Expo rodam no host.
+
 | Comando | O que faz |
 |---|---|
+| `npx --yes pnpm install` | Instala dependências do monorepo (inclui `pnpm` local em `node_modules/.bin/pnpm`). |
+| `docker compose up -d --build` | Sobe PostgreSQL (`panelada_dev` + `panelada_test`, `TZ=UTC`) e API (`http://localhost:3000/v1/health`). |
+| `pnpm lint` | Executa ESLint 9 + `eslint-plugin-boundaries` (`S1`–`S8`, `A1`–`A8`) + `import-x/no-cycle`. |
+| `pnpm format:check` | Verifica formatação Prettier (`pnpm format` corrige). |
+| `pnpm typecheck` | Executa `tsc --noEmit` em todos os workspaces (`packages/allergen-rules`, `apps/api`, `apps/mobile`). |
+| `TZ=UTC pnpm test` | Roda testes unitários (`allergen-rules`, `api`) e testes de componente (`mobile`). |
+| `TZ=UTC pnpm test:integration` | Roda testes de integração da API contra `panelada_test` no Docker (recusa bancos sem sufixo `_test`). |
+| `pnpm db:migrate` / `pnpm db:seed` / `pnpm db:reset` | Aplica migrations Drizzle, roda seed idempotente ou recria schema + migrations + seed (somente `*_dev`/`*_test`). |
+| `pnpm contracts:lint` | Valida `docs/fase2/04-contratos/openapi.yaml` via `@redocly/cli` (meta: 0 erros). |
+| `pnpm contracts:generate` / `pnpm contracts:check` | Gera ou verifica sincronia de `apps/api/src/shared/openapi.generated.ts` com `openapi.yaml`. |
 | `node scripts/setup-agent-skills.mjs` | Espelha `.agents/skills` em `.claude/skills` (symlink no Linux/macOS; *junction* sem admin no Windows). Rodar 1x por clone para o Claude Code. |
 | `python3 .agents/skills/github-issue-craft/scripts/audit_issues.py` | Auditoria heurística do backlog de GitHub Issues (requer `gh` autenticado). |
-| `npx @redocly/cli lint docs/fase2/04-contratos/openapi.yaml` | Valida o contrato OpenAPI 3.1 (meta: 0 erros). |
-
-> **Containers e ambiente (a ativar em `MVP-02`):** PostgreSQL (`TZ=UTC`, bancos `panelada_dev` e `panelada_test`) e API Fastify (`0.0.0.0:3000`) rodam **100% em Docker (`docker-compose.yml`)** — ninguém instala Postgres no host. Apenas o Emulador Android + Expo rodam no host. Comandos de `lint`, `format:check`, `typecheck`, `test`, `test:integration` e `db:reset` entram nesta tabela assim que `MVP-02` criar o monorepo.
 
 ---
 
@@ -35,7 +44,7 @@ Detalhes completos de fronteiras (`S1`–`S8`, `A1`–`A8`), portas (`P02a`–`P
 - **Fronteiras de banco e `tx: Tx` (`S8`, `T01`):** tabelas usam prefixo do módulo dono (`catalog_*`, `profile_*`, `routine_*`, `progress_*`). O `eslint-plugin-boundaries` não inspeciona SQL em texto — nunca faça `JOIN` em tabela de outro módulo. Escritas cross-módulo exigem `tx: Tx` obrigatório.
 - **Privacidade (`A05`) e Alérgenos (`A06`):** restrição alimentar é cifrada em repouso no aparelho (SQLCipher) e na API (`FieldCipher` AES-256-GCM + `accountId` como AAD) antes de tocar o Postgres (inclusive no Supabase — proibido SDK BaaS no cliente). Zero restrições em logs (`A13`) e zero dados de usuário enviados ao `AiProvider` (`RNF06`). Alérgeno `unverified` é sempre *fail-closed* (`RN08`).
 - **Política de IA vs. Disciplina:** **zero** atribuição de IA em código, comentários, commits ou PRs (nunca `Co-Authored-By` nem rodapés de "Generated with..."). O registro obrigatório do uso de IA para avaliação da disciplina vive **exclusivamente** no `STATE.md` e no `diario_de_bordo` (atualizados por marco/etapa ou promoção semanal, nunca em micro-PRs para evitar conflitos).
-- **Planos visíveis em `.plans/`:** salve planos de trabalho e arquivos temporários de `gh --body-file` em `.plans/` (ignorado pelo `.gitignore`, portátil entre Windows e Linux — nunca em `~/.claude/plans/` nem `$TMPDIR`).
+- **Planos visíveis em `.plans/` e worktrees em `.worktrees/`:** salve planos de trabalho e arquivos temporários de `gh --body-file` em `.plans/` e worktrees isolados em `.worktrees/` (ambos ignorados pelo `.gitignore`, portáteis entre Windows e Linux — nunca em `~/.claude/plans/` nem `$TMPDIR`).
 - **Mantenha o contexto enxuto:** busque código direto em `apps/` e `packages/` (`rg ... apps/ packages/`) para não varrer `docs/fase1/` e `docs/fase2/` à toa. Leia arquivos inteiros apenas quando for editá-los. Em testes, exiba resumo curto quando passar e saída completa com traceback quando falhar.
 - **Docs vivos evoluem no mesmo PR:** `docs/dev/` segue "1 pergunta por página" (≤ 400 linhas) e nunca duplica tabelas da Fase 2. Se uma feature aparece em tela (a partir de `MVP-02`), estenda o seed de desenvolvimento (`db:reset`) no mesmo PR.
 - **Imutabilidade de ADRs:** nunca apague nem reescreva uma decisão histórica em `docs/fase2/02-adr/`. Evoluções entram como `## Detalhamento (<Contexto> — DD/MM/AAAA)` ao final; revogações criam um novo `ADR-NNN`.
@@ -45,7 +54,7 @@ Detalhes completos de fronteiras (`S1`–`S8`, `A1`–`A8`), portas (`P02a`–`P
 ## Skills do Projeto (`.agents/skills/`)
 
 Fonte única para Antigravity, Codex, Kimi e Claude Code (via `setup-agent-skills.mjs`):
-`grilling` · `github-issue-craft` · `solve-issue` · `code-review` · `tdd` · `codebase-design` · `code-comments`.
+`grilling` · `github-issue-craft` · `solve-issue` · `using-git-worktree` · `code-review` · `tdd` · `codebase-design` · `code-comments`.
 
 ---
 
@@ -56,6 +65,9 @@ Fonte única para Antigravity, Codex, Kimi e Claude Code (via `setup-agent-skill
 | [STATE.md](./STATE.md) | Iniciar qualquer sessão (estado atual, pendências e último handoff). |
 | [docs/dev/GLOSSARY.md](./docs/dev/GLOSSARY.md) | Um termo de domínio parecer ambíguo (`Dish` vs `Recipe`, `unverified` vs `unconfirmed`, `"em preparo"` local). |
 | [docs/dev/ARCHITECTURE.md](./docs/dev/ARCHITECTURE.md) | Criar módulo/feature, rota, porta, raiz de composição ou checar `S1`–`S8` e `A1`–`A8`. |
+| [docs/dev/DATABASE.md](./docs/dev/DATABASE.md) | Subir Docker Compose, rodar migrations/seed/`db:reset`, criar tabelas (`S8`) ou usar `tx: Tx`. |
+| [docs/dev/TESTING.md](./docs/dev/TESTING.md) | Rodar lint/testes/contratos, usar `pnpm` local sem instalação global ou depurar a CI. |
+| [docs/dev/DEPLOY.md](./docs/dev/DEPLOY.md) | Publicar/atualizar a API na nuvem (Render + Supabase), rotacionar segredos, aquecer o *cold start* ou registrar as medições `(H)`. |
 | [docs/dev/PRIVACY.md](./docs/dev/PRIVACY.md) | Tocar em restrições alimentares, `FieldCipher`, SQLCipher, logs, `allergen-rules`, IA ou Supabase. |
 | [docs/playbooks/01-sessao-issues-e-diario.md](./docs/playbooks/01-sessao-issues-e-diario.md) | Criar/revisar GitHub Issues, Labels, Milestones, fechar marco no `STATE.md` ou escrever no Diário de Bordo. |
 | [docs/playbooks/02-arquitetura-adrs-e-retroalimentacao.md](./docs/playbooks/02-arquitetura-adrs-e-retroalimentacao.md) | Evoluir/substituir um ADR ou retroalimentar artefatos da Fase 1/Fase 2. |

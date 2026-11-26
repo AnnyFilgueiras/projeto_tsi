@@ -1,0 +1,14 @@
+**/node_modules
+.git
+.plans
+.worktrees
+.expo
+docs
+dist
+build
+coverage
+**/.data
+*.log
+.env
+.env.*
+!.env.example

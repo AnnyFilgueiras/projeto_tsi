@@ -1,7 +1,11 @@
 # Local agent working state (visible in the workspace, never committed)
 .plans/
+.worktrees/
 .pending-issues/
 .claude/skills
+
+# Local runtime data (e.g. host-side photo storage fallback)
+.data/
 
 # Node / Monorepo
 node_modules/
@@ -28,6 +32,7 @@ ios/
 .env.local
 .env.test
 .env.*.local
+.env.cloud
 
 # OS & editor junk
 .DS_Store

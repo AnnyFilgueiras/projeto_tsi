@@ -1,0 +1,149 @@
+name: CI
+
+on:
+  push:
+    branches: [development, main]
+  pull_request:
+    branches: [development, main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      root: ${{ steps.filter.outputs.root }}
+      docs: ${{ steps.filter.outputs.docs }}
+      allergen_rules: ${{ steps.filter.outputs.allergen_rules }}
+      api: ${{ steps.filter.outputs.api }}
+      mobile: ${{ steps.filter.outputs.mobile }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            root:
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - '.npmrc'
+              - 'tsconfig.base.json'
+              - 'eslint.config.mjs'
+              - '.prettierrc.json'
+              - '.prettierignore'
+              - '.github/workflows/ci.yml'
+              - 'scripts/**'
+            docs:
+              - 'docs/fase2/04-contratos/openapi.yaml'
+            allergen_rules:
+              - 'packages/allergen-rules/**'
+            api:
+              - 'apps/api/**'
+              - 'docs/fase2/04-contratos/openapi.yaml'
+            mobile:
+              - 'apps/mobile/**'
+
+  contracts:
+    needs: changes
+    # mobile: apps/mobile/src/core/network/openapi.generated.ts must not drift from openapi.yaml either.
+    if: needs.changes.outputs.root == 'true' || needs.changes.outputs.docs == 'true' || needs.changes.outputs.api == 'true' || needs.changes.outputs.mobile == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm contracts:lint
+      - run: pnpm contracts:check
+
+  quality:
+    needs: changes
+    if: needs.changes.outputs.root == 'true' || needs.changes.outputs.allergen_rules == 'true' || needs.changes.outputs.api == 'true' || needs.changes.outputs.mobile == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm format:check
+      - run: pnpm typecheck
+
+  allergen-rules:
+    needs: changes
+    if: needs.changes.outputs.root == 'true' || needs.changes.outputs.allergen_rules == 'true'
+    runs-on: ubuntu-latest
+    env:
+      TZ: UTC
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @panelada/allergen-rules test
+
+  api:
+    needs: changes
+    if: needs.changes.outputs.root == 'true' || needs.changes.outputs.allergen_rules == 'true' || needs.changes.outputs.api == 'true'
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          TZ: UTC
+          PGTZ: UTC
+          POSTGRES_USER: panelada
+          POSTGRES_PASSWORD: panelada
+          POSTGRES_DB: panelada_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U panelada -d panelada_test"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+    env:
+      TZ: UTC
+      DATABASE_URL: postgresql://panelada:panelada@localhost:5432/panelada_test
+      TEST_DATABASE_URL: postgresql://panelada:panelada@localhost:5432/panelada_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @panelada/api test
+      - run: pnpm db:migrate
+      - run: pnpm db:seed
+      - run: pnpm db:reset
+      - run: pnpm --filter @panelada/api test:integration
+
+  mobile:
+    needs: changes
+    if: needs.changes.outputs.root == 'true' || needs.changes.outputs.allergen_rules == 'true' || needs.changes.outputs.mobile == 'true'
+    runs-on: ubuntu-latest
+    env:
+      TZ: UTC
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @panelada/mobile test
