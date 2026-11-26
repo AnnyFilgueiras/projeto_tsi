@@ -12,6 +12,9 @@ import type { TokenIssuer } from './token-issuer.js';
 
 export const REFRESH_TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 export const CONCURRENT_REUSE_TOLERANCE_MS = 60 * 1000;
+// Upper bound for the in-memory grace cache (MVP-04A D2): a burst of rotations on a single
+// free-tier instance must not grow the heap without limit before the 60 s entries expire.
+export const DEFAULT_GRACE_CACHE_MAX_ENTRIES = 1000;
 const REFRESH_TOKEN_BYTES = 32;
 
 export interface TokenPair {
@@ -30,6 +33,7 @@ export interface SessionServiceDeps {
   readonly store: IdentityStore;
   readonly tokenIssuer: TokenIssuer;
   readonly clock?: () => Date;
+  readonly graceCacheMaxEntries?: number;
 }
 
 interface GraceCacheEntry {
@@ -58,11 +62,13 @@ export class SessionService {
   // Ephemeral in-memory 60 s cache keyed by rotated session ID so concurrent retries
   // receive the exact same TokenPair without ever storing plaintext refresh tokens in PostgreSQL.
   private readonly graceCache = new Map<string, GraceCacheEntry>();
+  private readonly graceCacheMaxEntries: number;
 
   constructor(deps: SessionServiceDeps) {
     this.store = deps.store;
     this.tokenIssuer = deps.tokenIssuer;
     this.clock = deps.clock ?? (() => new Date());
+    this.graceCacheMaxEntries = deps.graceCacheMaxEntries ?? DEFAULT_GRACE_CACHE_MAX_ENTRIES;
   }
 
   async issueSessionForAccount(
@@ -218,7 +224,7 @@ export class SessionService {
         // Populate the 60 s grace cache before COMMIT releases the FOR UPDATE lock so a waiting
         // concurrent retry immediately finds the issued pair; cleared in catch if COMMIT fails.
         provisionallyCachedSessionId = session.id;
-        this.graceCache.set(session.id, {
+        this.addGraceEntry(session.id, {
           pair: issued.tokens,
           familyId: session.familyId,
           expiresAtMs: nowMs + CONCURRENT_REUSE_TOLERANCE_MS,
@@ -252,6 +258,17 @@ export class SessionService {
     for (const familyId of revokedFamilies) {
       this.evictFamilyFromGraceCache(familyId);
     }
+  }
+
+  private addGraceEntry(sessionId: string, entry: GraceCacheEntry): void {
+    // Map preserves insertion order, so evicting from the front drops the oldest rotation (FIFO).
+    // An evicted entry only degrades a late concurrent retry into the fail-closed replay path.
+    while (this.graceCache.size >= this.graceCacheMaxEntries) {
+      const oldest = this.graceCache.keys().next();
+      if (oldest.done) break;
+      this.graceCache.delete(oldest.value);
+    }
+    this.graceCache.set(sessionId, entry);
   }
 
   private evictFamilyFromGraceCache(familyId: string): void {

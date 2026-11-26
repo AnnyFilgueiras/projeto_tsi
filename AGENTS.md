@@ -67,6 +67,7 @@ Fonte única para Antigravity, Codex, Kimi e Claude Code (via `setup-agent-skill
 | [docs/dev/ARCHITECTURE.md](./docs/dev/ARCHITECTURE.md) | Criar módulo/feature, rota, porta, raiz de composição ou checar `S1`–`S8` e `A1`–`A8`. |
 | [docs/dev/DATABASE.md](./docs/dev/DATABASE.md) | Subir Docker Compose, rodar migrations/seed/`db:reset`, criar tabelas (`S8`) ou usar `tx: Tx`. |
 | [docs/dev/TESTING.md](./docs/dev/TESTING.md) | Rodar lint/testes/contratos, usar `pnpm` local sem instalação global ou depurar a CI. |
+| [docs/dev/DEPLOY.md](./docs/dev/DEPLOY.md) | Publicar/atualizar a API na nuvem (Render + Supabase), rotacionar segredos, aquecer o *cold start* ou registrar as medições `(H)`. |
 | [docs/dev/PRIVACY.md](./docs/dev/PRIVACY.md) | Tocar em restrições alimentares, `FieldCipher`, SQLCipher, logs, `allergen-rules`, IA ou Supabase. |
 | [docs/playbooks/01-sessao-issues-e-diario.md](./docs/playbooks/01-sessao-issues-e-diario.md) | Criar/revisar GitHub Issues, Labels, Milestones, fechar marco no `STATE.md` ou escrever no Diário de Bordo. |
 | [docs/playbooks/02-arquitetura-adrs-e-retroalimentacao.md](./docs/playbooks/02-arquitetura-adrs-e-retroalimentacao.md) | Evoluir/substituir um ADR ou retroalimentar artefatos da Fase 1/Fase 2. |

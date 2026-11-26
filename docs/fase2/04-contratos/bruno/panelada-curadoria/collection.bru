@@ -18,9 +18,15 @@ script:pre-request {
     });
   }
   bru.setVar('idemKey', uuid());
+  // Catalog names are unique (422 on duplicates) and the seed already owns the plain ones,
+  // so everything this collection creates carries a per-run tag and the run can be repeated.
+  if (!bru.getVar('runTag')) {
+    bru.setVar('runTag', 'bru-' + Date.now().toString(36));
+  }
 }
 
 docs {
   Coleção de curadoria do Panelada, derivada de openapi.yaml (contrato 1.2.0-2.8; identificadores em inglês, ADR-015).
   O Bruno usa UUID v4 como Idempotency-Key; o app usa UUID v7. O contrato aceita qualquer UUID.
+  Roda sobre o banco com seed: o que a coleção cria leva o sufixo `· {{runTag}}`, e as receitas usam ingredientes, culinária e utensílio do seed (IDs fixos de `apps/api/src/db/seed-catalog-data.ts`).
 }

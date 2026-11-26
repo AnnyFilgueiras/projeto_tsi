@@ -1,11 +1,9 @@
 import { createHash } from 'node:crypto';
 import { mkdir, rename, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 import { hashPassword } from '../shared/password-hash.js';
-import { createTechnicalLogger } from '../support/technical-log/logger.js';
-import { createDatabaseClient, DEFAULT_DEV_DATABASE_URL } from './client.js';
+import { createDatabaseClient } from './client.js';
 import {
   SEED_BADGES,
   SEED_CUISINES,
@@ -62,6 +60,11 @@ const RESTRICTION_TYPE_SEEDS: readonly RestrictionTypeSeedRow[] = [
 
 export interface RunSeedOptions {
   readonly photoStorageDir?: string;
+  /**
+   * Publishes each generated WebP. `api-db` cannot import the catalog `PhotoStorage` (S8),
+   * so the composition root (`seed-main.ts`) injects it; without it photos go to local disk.
+   */
+  readonly savePhoto?: (hash: string, webpBytes: Buffer) => Promise<void>;
 }
 
 async function generateSeedWebpPhoto(
@@ -213,7 +216,9 @@ export async function runSeed(
       const confirmedAllergenFree = allergenState === 'verified' && allergenUnion.length === 0;
       const photo = await generateSeedWebpPhoto(dish.photoColor);
 
-      if (photoDir) {
+      if (options.savePhoto) {
+        await options.savePhoto(photo.hash, photo.bytes);
+      } else if (photoDir) {
         await writeSeedPhotoFile(photoDir, photo.hash, photo.bytes);
       }
 
@@ -287,20 +292,4 @@ export async function runSeed(
   } finally {
     await client.close();
   }
-}
-
-const isMainModule =
-  process.argv[1] !== undefined && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
-
-if (isMainModule) {
-  const logger = createTechnicalLogger();
-  const connectionString = process.env.DATABASE_URL ?? DEFAULT_DEV_DATABASE_URL;
-  runSeed(connectionString)
-    .then(() => {
-      logger.info('Database seed completed (idempotent MVP-04B catalog, badges, and fixtures)');
-    })
-    .catch((err: unknown) => {
-      logger.error({ err }, 'Database seed failed');
-      process.exit(1);
-    });
 }

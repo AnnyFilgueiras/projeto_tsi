@@ -538,6 +538,29 @@ describe('MVP-04B integration: catalog, manual curation, PublicationGate, WebP p
     }
   });
 
+  it('MVP-04G: runSeed publishes every dish photo through the injected savePhoto port (Supabase Storage in Cloud 4C) instead of local disk', async () => {
+    const storage = new InMemoryPhotoStorage();
+    const saved: string[] = [];
+
+    await runSeed(databaseUrl, {
+      savePhoto: async (hash, bytes) => {
+        saved.push(hash);
+        await storage.save(hash, bytes);
+      },
+    });
+
+    const photosRes = await dbClient.pool.query<{ file_hash: string }>(
+      `SELECT file_hash FROM catalog_dish_photos WHERE dish_id = ANY($1::uuid[])`,
+      [Object.values(DISH_IDS)],
+    );
+    expect(saved).toHaveLength(20);
+    expect(new Set(saved)).toEqual(new Set(photosRes.rows.map((row) => row.file_hash)));
+    for (const hash of saved) {
+      const photo = await storage.get(hash);
+      expect(photo && isWebpBuffer(photo.bytes)).toBe(true);
+    }
+  });
+
   it('MVP-04B seed idempotency: running runSeed twice produces zero duplicates, covers 5 continents, 20 dishes in every AllergenState (18/1/1), 3-level evolution chain, safe/unsafe substitutions, 11 badges (RN03 a-h), and valid WebP photos', async () => {
     // Run seed a second time on the already-seeded test database to confirm idempotency.
     await runSeed(databaseUrl, { photoStorageDir: seedPhotoDir });

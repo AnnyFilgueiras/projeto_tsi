@@ -115,7 +115,7 @@ const BOUNDARY_ELEMENTS = [
   },
   {
     type: 'api-composition',
-    pattern: 'apps/api/src/{app,main}.ts',
+    pattern: 'apps/api/src/{app,main,seed-main}.ts',
     mode: 'full',
   },
 

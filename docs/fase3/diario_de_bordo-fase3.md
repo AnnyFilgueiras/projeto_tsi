@@ -525,3 +525,52 @@
 - Restrição que exclui um prato base trava a revelação das evoluções acima dele (efeito de `RN02` + `RN07`), levado para `UX-02` (#69).
 - 2 testes de integração da API (contagem de `allergenState` no seed) falham também na `development` limpa; fora do escopo da #86.
 
+
+---
+
+## [26/11/2026] — MVP-04G (#45): Primeiro Deploy em Cloud 4C (Render + Supabase), Bruno e Medições (H)
+
+- **Papel da IA:** Engenheiro de DevOps/Deploy e Revisor (Claude Code), aplicando as skills `.agents/skills/solve-issue` (`--use-worktree`, com cortes de contexto), `using-git-worktree`, `tdd`, `code-review` e `github-issue-craft`.
+- **Técnicas aplicadas:**
+  - Plano em 3 fases: A (código, sem contas), B (contas e deploy feitos pela dupla, guiados pela IA) e C (medições e jornada).
+  - TDD estrito no `graceCache`, no `SupabasePhotoStorage` e no TLS do `pg`.
+  - Imagem Docker multi-stage com `pnpm deploy --prod`, executada como não root.
+  - Diagnóstico sem expor segredos: só o campo `role` da chave e só a forma da URL.
+  - Inspeção binária do banco do aparelho (`strings`/`grep -a`).
+  - Medição de tempo por gravação de tela (`adb screenrecord` + `ffmpeg`, detecção de mudança de quadro).
+  - Reprodução local isolada (banco descartável e projeto `docker compose -p` próprio) para separar defeito da nuvem de defeito da coleção.
+- **Prompts-chave / Contexto da sessão:**
+  1. `/solve-issue #45` com worktree; a dupla executou a criação das contas (Supabase, Render) seguindo o passo a passo, sem colar segredos no chat.
+  2. Ao ver o resultado da H1, a dupla decidiu corrigir o vazamento de tamanho do `FieldCipher` em PR separado e escolheu padding com zeros em blocos de 32 bytes, com o legado legível.
+  3. Na H4, a dupla escolheu manter os testes de criação com nomes únicos por execução e fazer a receita usar o catálogo do seed (o "Crepe simples" aparece numa culinária real na apresentação).
+- **Insumos usados:** Issue #45 (e #38), `AGENTS.md`, `STATE.md`, `ADR-004`, `ADR-006`, `ADR-012`, `docs/dev/ARCHITECTURE.md`, `docs/dev/PRIVACY.md`, `docs/dev/DATABASE.md`, `eslint.config.mjs`, `apps/api` (identity, catalog, db, field-encryption), coleção Bruno `panelada-curadoria` e o app no emulador.
+- **Artefatos produzidos:** `apps/api/Dockerfile`, `render.yaml`, `.env.cloud.example`, `apps/api/src/seed-main.ts`, `apps/api/src/db/client.ts` (`DATABASE_SSL_CA`), `photo-storage.ts` (timeout, 400 legado, validação de URL/chave e corpo do erro), `session-service.ts` (teto do cache), `docs/dev/DEPLOY.md` (guia + evidências `(H)`), ambiente `Cloud.bru`, issue #116 e PR #115.
+
+### Decisões tomadas
+1. **Render `virginia` + Supabase `us-east-1`:** não há Render na América do Sul. Com API e banco na mesma região, o usuário paga um único trajeto Brasil↔EUA por request, e não um por query.
+2. **Migrations no `CMD` do container:** o plano Free não tem *pre-deploy*, e o migrate do Drizzle é idempotente numa instância única. O seed é manual, da máquina local, porque gera as fotos com `sharp`.
+3. **TLS verificado com CA fixada (`DATABASE_SSL_CA`)**, nunca `rejectUnauthorized: false`. O `pg` deixa `sslmode` da URL sobrescrever a opção `ssl`, então esses parâmetros são removidos quando há CA.
+4. **Seed → Storage por callback injetado (`seed-main.ts`)**, porque `api-db` não pode importar `catalog` (`S8`).
+5. **Coleção Bruno sem `03-assisted-flow`:** as rotas de importação assistida são do `MVP-05`; a #45 pede as requisições manuais.
+6. **Vazamento de tamanho do `FieldCipher` em PR separado (#116):** o defeito é de `ADR-006`/`MVP-04A`, não do deploy.
+
+### Artefatos alterados (retroalimentação)
+- `docs/dev/DEPLOY.md` (novo) e `AGENTS.md` ("Leia Quando"): como publicar, rotacionar segredos, aquecer o *cold start* e registrar `(H)`.
+- `docs/dev/DATABASE.md`: o `db:seed` passa pelo `seed-main.ts` e publica no `PhotoStorage` escolhido.
+- Coleção Bruno `panelada-curadoria`: `runTag` por execução e IDs do seed nas receitas; README com o comando da CLI.
+
+### Iterações relevantes (erros e retrabalho da IA)
+1. **`code-review` encontrou um erro da própria implementação:** o `seed-main.ts` lançava a falha de configuração fora do `.catch`, sem passar pelo log técnico. Corrigido antes do PR.
+2. **Configuração do Supabase em três tentativas:** `SUPABASE_URL` com caminho (404), chave `anon` no lugar da `service_role` (lista de buckets vazia) e nome do bucket diferente (`NoSuchBucket`). As mensagens genéricas atrasaram o diagnóstico; a API passou a validar URL e chave na inicialização e a mostrar o motivo do erro do Storage.
+3. **Bruno combinado antes de conferir as rotas:** a IA recomendou rodar a coleção inteira sem verificar que a importação assistida ainda não existia, e a coleção (anterior ao seed do `MVP-04B`) falhou 15/27 na nuvem. A reprodução local mostrou a mesma falha (conflito de nomes com o seed). Corrigida, passou 27/27 na nuvem.
+4. **Instrução ambígua:** o prefixo `!` (prompt do Claude Code) foi passado sem explicar onde digitar, e a dupla rodou no terminal comum sem saída.
+5. **Comando amplo demais:** um `pkill -f` para parar a API temporária também mirou o processo do container compartilhado (sem efeito, por falta de permissão). A partir daí, só por PID.
+
+### Riscos aceitos
+- Render Free hiberna após ~15 min: o primeiro request leva 30–60 s (mitigado por aquecer com `curl` antes da apresentação, `DEPLOY.md` §7).
+- Até a #116, o tamanho do texto cifrado revela a restrição a quem tiver acesso ao banco do Supabase (sem usuários reais no Estágio 1).
+- A 1ª rodada do Bruno deixou ingredientes de teste na nuvem ("Leite", "Aveia", "Frigideira"), fora de qualquer receita publicada.
+
+### Pendências para a próxima sessão
+- Revisar e integrar o PR #115; trocar a branch do Blueprint no Render; promover `development` → `main` com a tag `mvp-stage1--v1.0`.
+- `/solve-issue #116` e limpeza das contas de teste da nuvem após o deploy da correção.
