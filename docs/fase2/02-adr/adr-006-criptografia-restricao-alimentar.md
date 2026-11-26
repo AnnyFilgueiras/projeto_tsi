@@ -30,6 +30,10 @@ localmente, sem TLS (limitação declarada).
      rotação.
    - O identificador do usuário entra como dado adicional autenticado, para
      que um texto cifrado não possa ser movido para outra linha.
+   - O texto claro é completado com bytes `0x00` até o próximo múltiplo de
+     32 bytes (mínimo 32) antes de cifrar, para o tamanho do texto cifrado
+     não revelar qual restrição foi gravada (#116). Texto vazio ou com
+     `0x00` é recusado; linhas antigas sem padding continuam decifrando.
    - **A chave fica fora do banco.** Demo: segredo local do Compose, fora do
      repositório. Alvo: Secret Manager (Cloud Run).
    - O servidor decifra em memória para filtrar sugestão e busca, e nunca

@@ -8,7 +8,7 @@
 ## 1. Dados Sensíveis — Restrição Alimentar (`A05`, LGPD)
 
 1. **Cifra em repouso no servidor (`ADR-006`):**
-   - Toda restrição alimentar é cifrada na camada de aplicação pelo `FieldCipher` (**AES-256-GCM**, IV único por gravação, `accountId` como AAD) **antes** de qualquer `INSERT`/`UPDATE` no PostgreSQL.
+   - Toda restrição alimentar é cifrada na camada de aplicação pelo `FieldCipher` (**AES-256-GCM**, IV único por gravação, `accountId` como AAD, texto claro completado com `0x00` em blocos de 32 bytes para não revelar o tamanho da restrição) **antes** de qualquer `INSERT`/`UPDATE` no PostgreSQL.
    - A chave de criptografia vem de `KeyProvider` (fora do banco de dados) e suporta rotação via `keyVersion`.
    - Somente `modules/profile` pode importar `support/field-encryption` (`S5`); somente `cross-cutting/suggestion-search` pode importar `profile/public/restrictions-for-filter` (`S3`).
 2. **Cifra em repouso no aparelho (`ADR-005`):**
