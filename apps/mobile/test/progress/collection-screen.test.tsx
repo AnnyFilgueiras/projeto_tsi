@@ -180,7 +180,7 @@ describe('CollectionScreen (§10, #85)', () => {
     expect(screen.queryByText(/Conclua/)).toBeNull();
   });
 
-  it('US16: earned badges with their date, next milestones with criterion and bar', async () => {
+  it('US16: earned badges without a date, next milestones with criterion and bar', async () => {
     setup({ initialView: 'badges' });
 
     expect(await screen.findByText('Conquistados')).toBeTruthy();
@@ -188,7 +188,7 @@ describe('CollectionScreen (§10, #85)', () => {
     expect(within(earned).getByText('Primeiro prato')).toBeTruthy();
     // #86: an earned badge keeps saying what earned it (RN04: criteria stay visible).
     expect(within(earned).getByText('Conclua um prato.')).toBeTruthy();
-    expect(within(earned).getByText('Conquistado em 18/11/2026')).toBeTruthy();
+    expect(within(earned).queryByText(/Conquistado em/)).toBeNull();
     expect(screen.getByText('Próximos marcos')).toBeTruthy();
     expect(screen.getByText('Conclua pratos de 2 culinárias.')).toBeTruthy();
     expect(screen.getByLabelText('Dupla cozinha: 1 de 2')).toBeTruthy();

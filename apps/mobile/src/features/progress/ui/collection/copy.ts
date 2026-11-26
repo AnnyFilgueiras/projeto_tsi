@@ -38,7 +38,6 @@ export const COLLECTION_COPY = {
 
   earned: 'Conquistados',
   next: 'Próximos marcos',
-  earnedAt: (iso: string) => `Conquistado em ${formatDate(new Date(iso))}`,
   badgeEarnedA11y: (name: string) => `${name}, conquistado`,
   badgeLockedA11y: (name: string) => `${name}, ainda não conquistado`,
   milestone: (current: number, target: number) => `${current} de ${target}`,
