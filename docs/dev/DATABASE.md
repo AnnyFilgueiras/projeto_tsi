@@ -31,7 +31,7 @@ Se `pnpm` não estiver instalado globalmente na máquina, troque `pnpm` por `./n
 | Comando | O que faz |
 |---|---|
 | `pnpm db:migrate` | Aplica as migrations Drizzle em `apps/api/drizzle/` sobre `DATABASE_URL` (padrão: `panelada_dev`). |
-| `pnpm db:seed` | Executa o seed determinístico e idempotente (`apps/api/src/db/seed.ts`). |
+| `pnpm db:seed` | Executa o seed determinístico e idempotente (`apps/api/src/db/seed.ts`, via `apps/api/src/seed-main.ts`, que publica as fotos no `PhotoStorage` escolhido por `PHOTO_STORAGE_DRIVER`). |
 | `pnpm db:reset` | Recria os schemas `drizzle` e `public`, aplica todas as migrations e roda o seed. Pode ser executado várias vezes seguidas sem erro. |
 
 ### Travas de segurança (`apps/api/src/db/test-guard.ts`)
