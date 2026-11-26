@@ -6,10 +6,15 @@ import { createTechnicalLogger } from './support/technical-log/logger.js';
 // Composition root for `pnpm db:seed`: wiring the catalog PhotoStorage here lets the same seed
 // publish photos to local disk (Docker) or Supabase Storage (Cloud 4C) via PHOTO_STORAGE_DRIVER.
 const logger = createTechnicalLogger();
-const connectionString = process.env.DATABASE_URL ?? DEFAULT_DEV_DATABASE_URL;
-const photoStorage = createPhotoStorageFromEnv();
 
-runSeed(connectionString, { savePhoto: (hash, bytes) => photoStorage.save(hash, bytes) })
+async function main(): Promise<void> {
+  const connectionString = process.env.DATABASE_URL ?? DEFAULT_DEV_DATABASE_URL;
+  // Built inside main so a misconfigured driver is reported through the technical log below.
+  const photoStorage = createPhotoStorageFromEnv();
+  await runSeed(connectionString, { savePhoto: (hash, bytes) => photoStorage.save(hash, bytes) });
+}
+
+main()
   .then(() => {
     logger.info('Database seed completed (idempotent MVP-04B catalog, badges, and fixtures)');
   })
